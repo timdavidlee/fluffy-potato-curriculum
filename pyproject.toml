@@ -6,7 +6,7 @@ readme = "README.md"
 authors = [
     { name = "tim.lee", email = "tim.david.lee@gmail.com" }
 ]
-requires-python = ">=3.12"
+requires-python = ">=3.13"
 dependencies = []
 
 [build-system]
@@ -22,7 +22,7 @@ dev = [
 
 [tool.ruff]
 line-length = 100
-target-version = "py312"
+target-version = "py313"
 src = ["src", "tests"]
 
 [tool.ruff.lint]
@@ -49,7 +49,7 @@ indent-style = "space"
 
 [tool.pyright]
 include = ["src", "tests"]
-pythonVersion = "3.12"
+pythonVersion = "3.13"
 typeCheckingMode = "strict"
 reportMissingTypeStubs = false
 venvPath = "."

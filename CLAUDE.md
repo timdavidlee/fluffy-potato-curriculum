@@ -8,7 +8,7 @@ Python curriculum repository: code + materials. Claude Code is the primary drive
 - **Linter/formatter:** [ruff](https://docs.astral.sh/ruff/) (config in `pyproject.toml`).
 - **Type checker:** [pyright](https://microsoft.github.io/pyright/) in `strict` mode.
 - **Tests:** [pytest](https://docs.pytest.org/).
-- **Python:** 3.12 (pinned in `.python-version`).
+- **Python:** 3.13 (pinned in `.python-version`).
 
 ## Layout
 
