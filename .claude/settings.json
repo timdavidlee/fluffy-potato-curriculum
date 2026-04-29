@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "permissions": {
+    "allow": [
+      "Bash(uv sync)",
+      "Bash(uv sync:*)",
+      "Bash(uv lock)",
+      "Bash(uv lock:*)",
+      "Bash(uv add:*)",
+      "Bash(uv remove:*)",
+      "Bash(uv run:*)",
+      "Bash(uv tree:*)",
+      "Bash(uv pip:*)",
+      "Bash(uv python:*)",
+      "Bash(uvx:*)",
+      "Bash(ruff:*)",
+      "Bash(pytest:*)",
+      "Bash(pyright:*)",
+      "Bash(python:*)",
+      "Bash(python3:*)"
+    ]
+  }
+}

@@ -1,0 +1,63 @@
+#!/usr/bin/env bash
+# Drafts a commit message via the `claude` CLI when none was supplied.
+# - Skips when -m / -F / -t / merge / squash / amend already supplied a source
+# - Skips when nothing is staged or `claude` isn't installed
+# - On failure, leaves the commit message untouched (silent fallback)
+
+set -euo pipefail
+
+COMMIT_MSG_FILE="$1"
+COMMIT_SOURCE="${2:-}"
+
+# Only auto-draft for "blank" commits where git would otherwise open the editor
+# with just the comment template. Sources we want to skip: message, template,
+# merge, squash, commit (amend).
+if [ -n "$COMMIT_SOURCE" ]; then
+    exit 0
+fi
+
+if ! command -v claude >/dev/null 2>&1; then
+    exit 0
+fi
+
+if git diff --cached --quiet; then
+    exit 0
+fi
+
+# Cap the diff so we don't blow past prompt limits on huge commits.
+MAX_BYTES=200000
+DIFF=$(git diff --cached --no-color)
+if [ "${#DIFF}" -gt "$MAX_BYTES" ]; then
+    DIFF="${DIFF:0:$MAX_BYTES}
+
+[diff truncated at ${MAX_BYTES} bytes]"
+fi
+
+STATUS=$(git diff --cached --name-status)
+
+read -r -d '' PROMPT <<EOF || true
+Write a git commit message for the staged changes below.
+
+Rules:
+- Subject line: imperative mood, <=72 chars, no trailing period, no type prefix unless the repo already uses one.
+- Then a blank line, then an optional short body explaining the *why* if it's non-obvious from the diff. Skip the body for trivial changes.
+- Output ONLY the commit message. No markdown fences, no preamble, no trailing commentary.
+
+Files changed:
+$STATUS
+
+Diff:
+$DIFF
+EOF
+
+# Run claude headlessly. Bound the runtime so a hung call can't block commits.
+if SUMMARY=$(printf '%s' "$PROMPT" | claude -p 2>/dev/null); then
+    SUMMARY=$(printf '%s' "$SUMMARY" | sed -e 's/[[:space:]]*$//')
+    if [ -n "$SUMMARY" ]; then
+        EXISTING=$(cat "$COMMIT_MSG_FILE")
+        {
+            printf '%s\n\n' "$SUMMARY"
+            printf '%s' "$EXISTING"
+        } > "$COMMIT_MSG_FILE"
+    fi
+fi
