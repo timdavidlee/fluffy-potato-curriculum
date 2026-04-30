@@ -111,7 +111,7 @@ The teacher should have, before the first demo starts:
 
 - Sycophancy is the failure mode to remember. Name it explicitly. If framing (1) catches the error this run, do framing (1) again with a slightly different problem and let the audience watch sycophancy happen live. (This is one of the few demos worth running twice.)
 - A critic that has *no new information* is a weak critic. Adversarial framing, different model, retrieved evidence — these are all ways of injecting new information.
-- Foreshadow that L08 (model power) revisits the "use a small cheap model as critic" pattern more rigorously.
+- Foreshadow that L09 (model power) revisits the "use a small cheap model as critic" pattern more rigorously.
 
 **If the demo misbehaves:**
 
@@ -139,7 +139,7 @@ The teacher should have, before the first demo starts:
 
 - The decision to use CoT/scratchpad/self-critique is a *trade-off*, not a default. By the end of L03, students should be making this trade-off consciously.
 - Latency-sensitive flows (chat UIs, real-time agents) often can't afford CoT on every call even when accuracy would benefit.
-- Bridge to L08: choosing the right *model* for a step is a sibling decision to choosing the right *reasoning depth* for a step.
+- Bridge to L09: choosing the right *model* for a step is a sibling decision to choosing the right *reasoning depth* for a step.
 
 **If the demo misbehaves:**
 
@@ -161,6 +161,6 @@ If time allows, run one final demo that previews L04: ask the model the same Tas
 
 - <need input: which model class(es) anchor the demos — see Demo 1 pre-flight. This decision propagates to every demo.>
 - <need input: are the demos run in a Jupyter notebook the teacher projects, or in a slide-embedded REPL, or via a custom demo runner script? Affects how prompts are pre-loaded.>
-- <need input: should Demo 3 introduce different-model critique here, or defer to L08 (model power)? Mirrors the same open question in [objectives.md](objectives.md).>
+- <need input: should Demo 3 introduce different-model critique here, or defer to L09 (model power)? Mirrors the same open question in [objectives.md](objectives.md).>
 - <need input: should this lesson use Anthropic's extended-thinking API anywhere, or stay strictly prompt-only? Mirrored from [objectives.md](objectives.md).>
 - <need input: a pointer/link to where the demo prompts live as code (a `demos/` subdir? inline in a notebook?) — not yet decided in non-draft docs.>

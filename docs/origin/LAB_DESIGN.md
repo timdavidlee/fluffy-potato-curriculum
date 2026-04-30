@@ -14,8 +14,6 @@ labs, interleaved with lectures and (optionally) an intro.
 
 ```
 src/fluffy_potato_curriculum/lessons/L01/
-    objectives.md             # roadmap (see docs/origin/CLAUDE.md)
-    demos_or_activities.md    # roadmap (see docs/origin/CLAUDE.md)
     L0101_intro.md            # see LECTURES.md
     L0102_lecture.ipynb       # see LECTURES.md
     L0103_lab_empty.ipynb

@@ -48,7 +48,7 @@ By the end of L03, a student should be able to:
 - **The shape of the reasoning matters.** A free-form "think step by step" instruction is the cheapest CoT to write but the least controllable. Numbered scaffolds, named sub-tasks, and worked-example few-shots give the model a template — useful when you need consistent structure, more brittle to off-distribution inputs.
 - **Scratchpads are an interface contract, not a capability.** The model can already reason inline; wrapping reasoning in `<thinking>` tags is purely about giving downstream code (parsers, evals, UIs) a clean boundary to ignore or surface. Treat it the same way as JSON-mode output: a contract about *shape*, not *substance*.
 - **Self-critique is a sampling technique, not a correctness oracle.** It works best when the critic has information the original generator didn't — a different model, a different prompt, retrieved context, ground-truth examples. Without that, the critic is prone to sycophantic agreement: "yes, that answer looks right" regardless of whether it is.
-- **Reasoning is not free.** Every CoT or scratchpad token is paid for, latency-incurring, and competing with other content for the context window. L03 is the first lesson where the student must consciously weigh reasoning quality against cost — a theme that returns in L08 (model power) and L12 (context management).
+- **Reasoning is not free.** Every CoT or scratchpad token is paid for, latency-incurring, and competing with other content for the context window. L03 is the first lesson where the student must consciously weigh reasoning quality against cost — a theme that returns in L09 (model power) and L14 (context management).
 
 ## Common student confusions to watch for
 
@@ -65,6 +65,6 @@ L04 introduces tool calling, which adds an outer loop: the model decides whether
 
 - <need input: estimated lecture duration — best guess 60–90 minutes as one lecture, or split into two (CoT + scratchpad, then self-critique + when-to-use)?>
 - <need input: which model(s) the L03 labs should target — pinning to a specific Claude class affects which CoT examples land cleanly. Sonnet 4.6 vs. Haiku 4.5 will show different-shaped wins from CoT.>
-- <need input: should self-critique introduce the idea of using a *different* model as the critic, or defer that to L08 (model power)?>
+- <need input: should self-critique introduce the idea of using a *different* model as the critic, or defer that to L09 (model power)?>
 - <need input: any specific L01/L02 labs that must be completed before this lesson is taught, beyond the prerequisite skills above?>
 - <need input: is "extended thinking" / Anthropic's thinking-mode API in scope here, or is L03 deliberately scoped to prompt-only reasoning with deeper API features deferred?>
