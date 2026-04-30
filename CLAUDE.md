@@ -13,11 +13,17 @@ Python curriculum repository: code + materials. Claude Code is the primary drive
 ## Layout
 
 ```
-src/fluffy_potato_curriculum/   # library code
-tests/                          # pytest tests
+src/fluffy_potato_curriculum/lessons    # library code + outlines
+src/fluffy_potato_curriculum/projects   # project code and briefs
+tests/                                  # pytest tests
 ```
 
-Curriculum modules go under `src/fluffy_potato_curriculum/`. Companion materials (notebooks, datasets, slides) belong in a top-level `materials/` directory once introduced — keep them out of `src/`.
+Curriculum modules go under `src/fluffy_potato_curriculum/lessons/L<NN>/` where `<NN>` is the
+zero-padded lesson number (e.g. `L01`, `L10`). Companion materials (notebooks, datasets, slides)
+live in that lesson's directory alongside the lesson code.
+
+End of the week - Project briefs, any starter code or dataset retrieval or transformations
+will be in the `projects/` directory
 
 ## Common commands
 

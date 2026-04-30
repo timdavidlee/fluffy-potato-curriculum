@@ -18,25 +18,38 @@ LAB_DESIGN.md # general guidelines for designing labs
 
 ```
 
-## UNITS 
+## LESSON ROADMAPS 
 
-Should be monotomically increasing, and earlier number means the lesson chronologically should be taught before larger numbers
+**lesson road map**: are essentially highly condensed summaries of what will be taught. A second process will use this content to generate the LESSON and LABS.
+
+1. Should be monotomically increasing, and earlier number means the lesson chronologically should be taught before larger numbers
 
 ```
-(repo) ./docs/origin/lessons/L01  # taught first
+(repo) ./docs/origin/lesson_roadmaps/L01  # taught first
 ...
-(repo) ./docs/origin/lessons/L10 # taught later
+(repo) ./docs/origin/lesson_roadmaps/L10 # taught later
 ```
 
-Units should have at minimum have 2- 3 markdown files as the following:
+2. Will match to a student facing lesson folder for example
+
+```
+(repo) ./src/fluffy_potato_curriculum/lessons/L01  # taught first
+...
+(repo) ./src/fluffy_potato_curriculum/lessons/L10 # taught later
+```
+
+The student facing directories will have **LESSONS** and **LABS**
+
+
+3. **road map directory** folders should have at minimum have 2- 3 markdown files as the following:
 
 ```
 # a summary of learning goals objectives, and main points
-(repo) .docs/origin/lessons/L01/objectives.md
+(repo) .docs/origin/lesson_roadmaps/L01/objectives.md
 
 # any type of teacher lead demonstration of the topic (no student participation)
-(repo) .docs/origin/lessons/L01/demos_or_activities.md
+(repo) .docs/origin/lesson_roadmaps/L01/demos_or_activities.md
 
 # optional - any outside links or videos related to the topic
-(repo) .docs/origin/lessons/L01/external_or_additional_resources.md 
+(repo) .docs/origin/lesson_roadmaps/L01/external_or_additional_resources.md 
 ```

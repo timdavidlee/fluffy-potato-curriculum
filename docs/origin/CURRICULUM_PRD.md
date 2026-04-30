@@ -6,11 +6,19 @@ into the per-lesson `objectives.md` files under `./lessons/L<NN>/`.
 
 ## Course summary
 
-The goal of this course is to teach the fundamentals of agents, starting with LLM token basics, all the way to subagent architecture so that students can experience the full lifecycle of agent and tool design.
+The goal of this course is to teach the fundamentals of AI agents, starting with LLM token basics, all the way to subagent architecture so that students can experience the full lifecycle of agent and tool design.
 
 ## Target audience
 
-The target audience will be semi-techical students that have basic python familiarity
+The target audience will be semi-techical students that have basic python familiarity.
+
+## Lecture Materials
+
+The expectation is that students will not verbally be able to absorb all the taught
+content, so the written lecture materials should be very thorough in explaining concepts
+or back-referencing earlier materials with links and similar wording. When in doubt, include more detail, more clarifications, and more examples.
+
+(Vocabulary: a **lesson** is the high-level unit — one `L<NN>/` directory and one row in the lesson plan below. A **lecture** is one taught artifact within a lesson; a lesson can have multiple lectures.)
 
 ## Prerequisites
 
