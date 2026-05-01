@@ -22,7 +22,7 @@ The teacher should have, before the first demo starts:
 
 - A working REPL or notebook with the project's Claude SDK setup (per the project's `uv` env).
 - The four demo prompts below pre-loaded as variables or cells, so each demo is a *single keystroke* to run. Live-typing prompts during demos eats time and breaks pacing.
-- A second model client configured for Demo 3's "different-model critic" beat. <need input: which model classes — best guess Sonnet 4.6 as the primary and Haiku 4.5 as the cheap critic, but pin this once the course-wide model choice is settled in CURRICULUM_PRD.>
+- A second model client configured for Demo 3's "different-model critic" beat. **Primary model: Claude Sonnet 4.6** (the course's anchor). **Cheap critic: Claude Haiku 4.5** (introduced briefly here as a different-model critic; treated more rigorously in L09).
 - A way to project token counts and latency alongside outputs (a small wrapper that prints `input_tokens`, `output_tokens`, and wall-clock time after every call). This is essential for Demo 4, where the *cost* of reasoning is the punchline.
 
 > Why pre-loaded prompts: L03 lives or dies on contrast — same input, different framing, different output. If the teacher mistypes a prompt mid-demo, the contrast breaks and the lesson lands as "the model is unpredictable" instead of "this technique caused this change."
@@ -159,7 +159,6 @@ If time allows, run one final demo that previews L04: ask the model the same Tas
 
 ## Open authoring questions
 
-- <need input: which model class(es) anchor the demos — see Demo 1 pre-flight. This decision propagates to every demo.>
 - <need input: are the demos run in a Jupyter notebook the teacher projects, or in a slide-embedded REPL, or via a custom demo runner script? Affects how prompts are pre-loaded.>
 - <need input: should Demo 3 introduce different-model critique here, or defer to L09 (model power)? Mirrors the same open question in [objectives.md](objectives.md).>
 - <need input: should this lesson use Anthropic's extended-thinking API anywhere, or stay strictly prompt-only? Mirrored from [objectives.md](objectives.md).>
