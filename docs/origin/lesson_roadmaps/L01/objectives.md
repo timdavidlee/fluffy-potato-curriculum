@@ -19,7 +19,7 @@ Students arriving at L01 should already be able to:
 
 No prior LLM, prompting, or AI-API experience is assumed. This is the entry lesson.
 
-<need input: do students already have an Anthropic API key issued before L01, or is "set up your API key" part of L01's lab? This determines whether the cost-estimation objective uses real spend or simulated counts.>
+<!-- *NEED INPUT*: do students already have an Anthropic API key issued before L01, or is "set up your API key" part of L01's lab? This determines whether the cost-estimation objective uses real spend or simulated counts. -->
 
 ## Learning objectives
 
@@ -78,9 +78,9 @@ The single sentence to leave students with at the end of L01 is something like: 
 
 ## Open authoring questions
 
-- <need input: estimated lecture duration — best guess 60–75 minutes as one lecture covering all four objectives, with the lab handling hands-on tokenization and cost estimation.>
-- <need input: do we use the Anthropic SDK exclusively from L01, or briefly show `tiktoken` / a tokenizer comparison so students see that tokenization is a *family* of choices (BPE, WordPiece, etc.) made differently by different vendors?>
-- <need input: is prompt caching introduced here (as a foreshadow when discussing the "every call re-sends history" cost surprise), or strictly deferred to L14 (context management)?>
-- <need input: should "rate limits" (RPM/TPM, retry/backoff) sit in L01 alongside cost, or be deferred until students are running multi-step agents and actually hit them in L07?>
-- <need input: confirm that L01 teaches Anthropic's Claude API specifically vs. a provider-agnostic framing — affects whether the tokenizer demo uses Anthropic's token-counting endpoint, `tiktoken`, both, or a generic explanation.>
-- <need input: prerequisite-API-key setup — handled in a pre-lesson onboarding doc, in L01 itself, or as the first lab? Determines whether the cost-estimation objective uses real spend.>
+- <!-- *NEED INPUT*: estimated lecture duration — best guess 60–75 minutes as one lecture covering all four objectives, with the lab handling hands-on tokenization and cost estimation. -->
+- <!-- *NEED INPUT*: do we use the Anthropic SDK exclusively from L01, or briefly show `tiktoken` / a tokenizer comparison so students see that tokenization is a *family* of choices (BPE, WordPiece, etc.) made differently by different vendors? -->
+- <!-- *NEED INPUT*: is prompt caching introduced here (as a foreshadow when discussing the "every call re-sends history" cost surprise), or strictly deferred to L14 (context management)? -->
+- <!-- *NEED INPUT*: should "rate limits" (RPM/TPM, retry/backoff) sit in L01 alongside cost, or be deferred until students are running multi-step agents and actually hit them in L07? -->
+- <!-- *NEED INPUT*: confirm that L01 teaches Anthropic's Claude API specifically vs. a provider-agnostic framing — affects whether the tokenizer demo uses Anthropic's token-counting endpoint, `tiktoken`, both, or a generic explanation. -->
+- <!-- *NEED INPUT*: prerequisite-API-key setup — handled in a pre-lesson onboarding doc, in L01 itself, or as the first lab? Determines whether the cost-estimation objective uses real spend. -->

@@ -1,3 +1,6 @@
+# claude related
+.claude/worktrees/
+
 # Python
 __pycache__/
 *.py[cod]

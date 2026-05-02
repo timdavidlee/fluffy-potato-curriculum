@@ -28,7 +28,7 @@ The teacher should have, before the first demo starts:
 
 > Why pre-built variants: L05 lives or dies on contrast — same task, same model, *different tool design*, different model behavior. Editing tool descriptions live during the demo eats time and breaks pacing. Have the variants ready.
 
-<need input: which model class anchors the demos — the "description quality" and "schema design" demos land more sharply on a smaller model where the design errors bite harder. Best guess Sonnet 4.6 as the primary, with one Demo 2 re-run on Haiku 4.5 to show the gap widens. Pin once the course-wide model choice is settled in CURRICULUM_PRD.>
+<!-- *NEED INPUT*: which model class anchors the demos — the "description quality" and "schema design" demos land more sharply on a smaller model where the design errors bite harder. Best guess Sonnet 4.6 as the primary, with one Demo 2 re-run on Haiku 4.5 to show the gap widens. Pin once the course-wide model choice is settled in CURRICULUM_PRD. -->
 
 ## Demo 1 — Tool or no tool? (Objective 1)
 
@@ -165,20 +165,20 @@ The teacher should have, before the first demo starts:
 
 If time allows, run one final demo that previews L06: take one of the well-designed tools from Demos 2–4 and walk through how its name, description, schema, and error shape would translate one-to-one into an MCP server's tool spec. Don't teach the MCP wire format here; just show that the *design* survives the packaging change. The point is to set up L06's framing: MCP is about portability, not about redoing the design work.
 
-<need input: include this bridge demo, or save it as the opener for L06?>
+<!-- *NEED INPUT*: include this bridge demo, or save it as the opener for L06? -->
 
 ## Pacing notes for the teacher
 
-- **Per-demo time:** 10–15 minutes including post-demo discussion. Demo 4 is the longest (5 sub-steps). Four demos plus the optional bridge fits in a 60–80 minute block. <need input: confirm against the lesson-time budget once duration is pinned in [objectives.md](objectives.md)'s open questions.>
+- **Per-demo time:** 10–15 minutes including post-demo discussion. Demo 4 is the longest (5 sub-steps). Four demos plus the optional bridge fits in a 60–80 minute block. <!-- *NEED INPUT*: confirm against the lesson-time budget once duration is pinned in [objectives.md](objectives.md)'s open questions. -->
 - **Variance budget:** model behavior varies run-to-run, especially in Demo 2 where the whole point is *distributional* behavior. Budget at least one re-run per demo, and on Demo 2 explicitly run each variant twice so the audience sees variance, not just a single result.
 - **The audience watches, doesn't participate.** Resist the temptation to ask "what would *you* call this tool?" — that is a lab pattern, not a demo pattern. Hands-on practice is for the L05 labs.
 - **Keep the same task across Demos 2–3 where possible.** Repetition of the same input across changing tool designs is what makes the contrast legible. Don't rotate problems for variety's sake.
 
 ## Open authoring questions
 
-- <need input: which model class(es) anchor the demos — see top-of-file pre-flight. This decision propagates to every demo, especially Demo 2 where the description-quality gap widens on smaller models.>
-- <need input: are the demos run in a Jupyter notebook the teacher projects, or in a slide-embedded REPL, or via a custom demo runner script? Affects how the tool-registry swap (good vs. bad variants) is wired.>
-- <need input: should Demo 4's recoverable-error case introduce *runtime-level* retry logic with backoff, or stay strictly at the model-visible layer? Going deeper foreshadows L07 (hand-rolled agent loop), which may be the better home.>
-- <need input: should the side-effect discussion in Demo 4 introduce typed effects (read vs. write vs. external) or keep it informal? Mirrors the same open question in [objectives.md](objectives.md). Forward link to L12 (approval gates) may be sufficient.>
-- <need input: do the L05 demo tools share an implementation with the L05 lab tools, or are lab tools designed from scratch by students? Affects how much of the demo code is reusable. Mirrors the lab-design question in [objectives.md](objectives.md).>
-- <need input: a pointer/link to where the demo tools live as code (a `demos/` subdir? inline in a notebook?) — not yet decided in non-draft docs.>
+- <!-- *NEED INPUT*: which model class(es) anchor the demos — see top-of-file pre-flight. This decision propagates to every demo, especially Demo 2 where the description-quality gap widens on smaller models. -->
+- <!-- *NEED INPUT*: are the demos run in a Jupyter notebook the teacher projects, or in a slide-embedded REPL, or via a custom demo runner script? Affects how the tool-registry swap (good vs. bad variants) is wired. -->
+- <!-- *NEED INPUT*: should Demo 4's recoverable-error case introduce *runtime-level* retry logic with backoff, or stay strictly at the model-visible layer? Going deeper foreshadows L07 (hand-rolled agent loop), which may be the better home. -->
+- <!-- *NEED INPUT*: should the side-effect discussion in Demo 4 introduce typed effects (read vs. write vs. external) or keep it informal? Mirrors the same open question in [objectives.md](objectives.md). Forward link to L12 (approval gates) may be sufficient. -->
+- <!-- *NEED INPUT*: do the L05 demo tools share an implementation with the L05 lab tools, or are lab tools designed from scratch by students? Affects how much of the demo code is reusable. Mirrors the lab-design question in [objectives.md](objectives.md). -->
+- <!-- *NEED INPUT*: a pointer/link to where the demo tools live as code (a `demos/` subdir? inline in a notebook?) — not yet decided in non-draft docs. -->

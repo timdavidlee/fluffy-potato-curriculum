@@ -50,7 +50,7 @@ Three tightly-related variants of the same task:
 
 A small multi-turn script for the second half of the demo: a 4-turn conversation that builds on variant (1), where each user turn is a follow-up question. The `messages=[...]` list should be displayed after each turn.
 
-<need input: confirm the triage example is appropriate for the audience — it lands the policy-vs-request distinction crisply, but if the cohort prefers a non-medical scenario, swap for a customer-support or code-review framing. The structural point is the same.>
+<!-- *NEED INPUT*: confirm the triage example is appropriate for the audience — it lands the policy-vs-request distinction crisply, but if the cohort prefers a non-medical scenario, swap for a customer-support or code-review framing. The structural point is the same. -->
 
 **Live script:**
 
@@ -64,7 +64,7 @@ A small multi-turn script for the second half of the demo: a 4-turn conversation
 
 - The system message is *strongly weighted* but not *enforced*. Putting policy in `system` is the right starting point, not a security guarantee. (Recall the common-confusion bullet from [objectives.md](objectives.md): the system prompt is not a sandbox.)
 - The `messages=[...]` list is owned by the caller. There is no hidden server state. This is the same point L01 made about cost (history is re-sent every call), now made *visible* by displaying the list.
-- "System carries always-true, user carries per-call" is the rule of thumb that pays off in two future ways: (a) it makes prompts reusable across calls, and (b) it sets up prompt caching to be a natural optimization. <need input: introduce prompt caching as a one-line foreshadow during the per-turn cost beat, or strictly defer to L14 (context management)? Mirrored from [L01 objectives](../L01/objectives.md).>
+- "System carries always-true, user carries per-call" is the rule of thumb that pays off in two future ways: (a) it makes prompts reusable across calls, and (b) it sets up prompt caching to be a natural optimization. <!-- *NEED INPUT*: introduce prompt caching as a one-line foreshadow during the per-turn cost beat, or strictly defer to L14 (context management)? Mirrored from [L01 objectives](../L01/objectives.md). -->
 
 **If the demo misbehaves:**
 
@@ -163,11 +163,11 @@ A small multi-turn script for the second half of the demo: a 4-turn conversation
 
 If time allows, run one final demo that previews L03. Take Demo 2's structured-output prompt and add a `<thinking>...</thinking>` block before the JSON. Don't *teach* chain-of-thought — just show that the same structured-output discipline (Subgoal 2) gracefully accommodates a thinking block, and the parser pulls the JSON out as before. Say out loud: "L03 is about what to put inside that thinking block, and when it's worth the extra tokens."
 
-<need input: include this bridge demo, or save it as the opener for L03? Mirrors the equivalent open question in [L01 demos](../L01/demos_or_activities.md).>
+<!-- *NEED INPUT*: include this bridge demo, or save it as the opener for L03? Mirrors the equivalent open question in [L01 demos](../L01/demos_or_activities.md). -->
 
 ## Pacing notes for the teacher
 
-- **Per-demo time:** 15–20 minutes including the post-demo discussion. Three demos plus the optional bridge fits in a 75–90 minute block, matching the duration estimate in [objectives.md](objectives.md). Demo 2 is the longest of the three because of the five test emails — budget time for it. <need input: confirm against the lesson-time budget once duration is pinned in objectives.md's open questions.>
+- **Per-demo time:** 15–20 minutes including the post-demo discussion. Three demos plus the optional bridge fits in a 75–90 minute block, matching the duration estimate in [objectives.md](objectives.md). Demo 2 is the longest of the three because of the five test emails — budget time for it. <!-- *NEED INPUT*: confirm against the lesson-time budget once duration is pinned in objectives.md's open questions. -->
 - **Variance budget:** model outputs vary run-to-run (recall L01 Demo 3). Budget at least one re-run per demo. If a demo lands cleanly the first time, don't re-run for the sake of it — use the time to extend the discussion.
 - **Resist live-coding tangents.** Students may ask "what about chain-of-thought?", "what about tools?", "what about prompt caching?" — name each as a "we'll get there" callback (CoT → L03, tools → L04, caching → L14) and *do not detour*. L02's job is the prompting toolkit; depth lives in later lessons.
 - **Reinforce L01 vocabulary at every opportunity.** Token counts, cost staircases, temperature. Every demo should casually print these alongside its core point. The compounding builds the cost-aware mindset the rest of the course depends on.
@@ -175,8 +175,8 @@ If time allows, run one final demo that previews L03. Take Demo 2's structured-o
 
 ## Open authoring questions
 
-- <need input: should L02 introduce prompt caching as a one-line foreshadow during Demo 1's per-turn cost beat, or strictly defer to L14 (context management)? Mirrored from [objectives.md](objectives.md) and [L01 objectives](../L01/objectives.md).>
-- <need input: should Demo 1 demo the "model overrides the system message under user pressure" failure mode explicitly, or treat that as a security/safety topic out of scope for this course? Mirrored from [objectives.md](objectives.md).>
-- <need input: confirm the triage example in Demo 1 is appropriate for the audience, or swap for a customer-support / code-review framing. The structural point is the same.>
-- <need input: are the demos run in a Jupyter notebook the teacher projects, or in a slide-embedded REPL, or via a custom demo runner script? Mirrored from [L01 demos](../L01/demos_or_activities.md).>
-- <need input: include the optional L03 bridge demo here, or save it as the opener for L03?>
+- <!-- *NEED INPUT*: should L02 introduce prompt caching as a one-line foreshadow during Demo 1's per-turn cost beat, or strictly defer to L14 (context management)? Mirrored from [objectives.md](objectives.md) and [L01 objectives](../L01/objectives.md). -->
+- <!-- *NEED INPUT*: should Demo 1 demo the "model overrides the system message under user pressure" failure mode explicitly, or treat that as a security/safety topic out of scope for this course? Mirrored from [objectives.md](objectives.md). -->
+- <!-- *NEED INPUT*: confirm the triage example in Demo 1 is appropriate for the audience, or swap for a customer-support / code-review framing. The structural point is the same. -->
+- <!-- *NEED INPUT*: are the demos run in a Jupyter notebook the teacher projects, or in a slide-embedded REPL, or via a custom demo runner script? Mirrored from [L01 demos](../L01/demos_or_activities.md). -->
+- <!-- *NEED INPUT*: include the optional L03 bridge demo here, or save it as the opener for L03? -->

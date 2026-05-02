@@ -63,8 +63,8 @@ L04 introduces tool calling, which adds an outer loop: the model decides whether
 
 ## Open authoring questions
 
-- <need input: estimated lecture duration — best guess 60–90 minutes as one lecture, or split into two (CoT + scratchpad, then self-critique + when-to-use)?>
+- <!-- *NEED INPUT*: estimated lecture duration — best guess 60–90 minutes as one lecture, or split into two (CoT + scratchpad, then self-critique + when-to-use)? -->
 - The L03 labs target the course's anchor model: **Claude Sonnet 4.6**. CoT example difficulty must be tuned for Sonnet 4.6's zero-shot baseline (see Demo 1 in [demos_or_activities.md](demos_or_activities.md) — the chosen problem must produce ≥2 zero-shot failures in 5 dry-runs).
-- <need input: should self-critique introduce the idea of using a *different* model as the critic, or defer that to L09 (model power)?>
-- <need input: any specific L01/L02 labs that must be completed before this lesson is taught, beyond the prerequisite skills above?>
-- <need input: is "extended thinking" / Anthropic's thinking-mode API in scope here, or is L03 deliberately scoped to prompt-only reasoning with deeper API features deferred?>
+- <!-- *NEED INPUT*: should self-critique introduce the idea of using a *different* model as the critic, or defer that to L09 (model power)? -->
+- <!-- *NEED INPUT*: any specific L01/L02 labs that must be completed before this lesson is taught, beyond the prerequisite skills above? -->
+- <!-- *NEED INPUT*: is "extended thinking" / Anthropic's thinking-mode API in scope here, or is L03 deliberately scoped to prompt-only reasoning with deeper API features deferred? -->

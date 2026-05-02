@@ -24,8 +24,8 @@ The teacher should have, before the first demo starts:
 
 - A working REPL or notebook with the project's Anthropic SDK setup (per the project's `uv` env). Both async and sync clients are fine; the demos use sync calls for clarity.
 - An API key with a small spend cap (the cost demo runs real calls; a $5 cap is more than enough for a class delivery).
-- A small wrapper that prints, after every call: `input_tokens`, `output_tokens`, wall-clock time, and the running per-call cost. This wrapper is the through-line for all four demos and **especially** Demo 4. <need input: standardize this wrapper as part of the L01 lab repo so the teacher and students share it — name and location TBD.>
-- A tokenizer available locally for the side-by-side comparison in Demo 1: Anthropic's token-counting endpoint (or `tiktoken` for an OpenAI-family contrast). <need input: do we use Anthropic's count-tokens endpoint exclusively, or include `tiktoken` as a "tokenizers are a *family* of choices" beat? Mirrored from [objectives.md](objectives.md).>
+- A small wrapper that prints, after every call: `input_tokens`, `output_tokens`, wall-clock time, and the running per-call cost. This wrapper is the through-line for all four demos and **especially** Demo 4. <!-- *NEED INPUT*: standardize this wrapper as part of the L01 lab repo so the teacher and students share it — name and location TBD. -->
+- A tokenizer available locally for the side-by-side comparison in Demo 1: Anthropic's token-counting endpoint (or `tiktoken` for an OpenAI-family contrast). <!-- *NEED INPUT*: do we use Anthropic's count-tokens endpoint exclusively, or include `tiktoken` as a "tokenizers are a *family* of choices" beat? Mirrored from [objectives.md](objectives.md). -->
 - A way to project token IDs alongside the source string. Demo 1 hinges on the student *seeing* the boundaries. A simple "decode each token ID separately and join with `|`" output is enough.
 - The four demo prompts and inputs pre-loaded as variables or cells so each demo is a *single keystroke* to run. Live-typing prompts during demos eats time and breaks pacing.
 
@@ -44,7 +44,7 @@ Pick four short strings designed to break human intuition in different direction
 3. **JSON:** `'{"user_id": 12345, "events": ["click", "scroll"]}'` — quotes, braces, colons, commas all consume tokens; numbers tokenize unpredictably.
 4. **Non-Latin script:** a short phrase in Japanese, Arabic, or Hindi (something the teacher can read aloud or romanize). Tokens-per-character ratio explodes for most non-Latin scripts in BPE tokenizers.
 
-Use Anthropic's count-tokens endpoint against **Claude Sonnet 4.6** (the course's anchor model) for the canonical numbers. The teacher should run the four strings through the endpoint once before class and update the on-screen counts to match. <need input: optionally also show `tiktoken`'s differing counts on the same strings as a "tokenizers disagree across vendors" beat — keep or drop?>
+Use Anthropic's count-tokens endpoint against **Claude Sonnet 4.6** (the course's anchor model) for the canonical numbers. The teacher should run the four strings through the endpoint once before class and update the on-screen counts to match. <!-- *NEED INPUT*: optionally also show `tiktoken`'s differing counts on the same strings as a "tokenizers disagree across vendors" beat — keep or drop? -->
 
 **Live script:**
 
@@ -152,7 +152,7 @@ Anchor model is **Claude Sonnet 4.6**. At temperature 0, Sonnet 4.6 is reliably 
 3. Now flip it: short prompt, ask for a 500-word answer. Show input tokens flat, output tokens up *a lot*, cost up *a lot* — typically more than the long-input case, because output tokens cost ~3–5x more.
 4. Run the multi-turn conversation script. Print the cumulative input tokens at each turn. Show the staircase. Compute the total session cost.
 5. Order-of-magnitude: take the per-turn cost, multiply by 10 (a typical agent run length, foreshadowing L07), then by 100 (a typical iteration count during development), then by 1000 (a small production deployment running once a minute for ~16 hours). Read the final number aloud. This is the punchline — students should leave the room with a felt sense for what an agent budget looks like.
-6. Briefly mention prompt caching exists as a way to push back on the staircase cost in step 4. <need input: introduce prompt caching here as a one-line foreshadow, or strictly defer to L14 (context management)? Mirrored from [objectives.md](objectives.md).>
+6. Briefly mention prompt caching exists as a way to push back on the staircase cost in step 4. <!-- *NEED INPUT*: introduce prompt caching here as a one-line foreshadow, or strictly defer to L14 (context management)? Mirrored from [objectives.md](objectives.md). -->
 
 **What to highlight:**
 
@@ -170,20 +170,20 @@ Anchor model is **Claude Sonnet 4.6**. At temperature 0, Sonnet 4.6 is reliably 
 
 If time allows, run one final mini-demo to set up L02. Take Demo 4's multi-turn conversation script and show how the same call would be structured if we used the system/user/assistant role separation that L02 will introduce. Don't *teach* role design — just point at the structure and say: "L02 makes this contract explicit, and shows why pushing instructions into the system message vs. the user message changes results." The point is to seed the role concept while it can ride on the still-warm context-window-and-cost intuition from Demo 4.
 
-<need input: include this bridge demo, or save it as the opener for L02?>
+<!-- *NEED INPUT*: include this bridge demo, or save it as the opener for L02? -->
 
 ## Pacing notes for the teacher
 
-- **Per-demo time:** 10–15 minutes including the post-demo discussion. Four demos plus the optional bridge fits in a 60–75 minute block, matching the duration estimate in [objectives.md](objectives.md). <need input: confirm against the lesson-time budget once duration is pinned in objectives.md's open questions.>
+- **Per-demo time:** 10–15 minutes including the post-demo discussion. Four demos plus the optional bridge fits in a 60–75 minute block, matching the duration estimate in [objectives.md](objectives.md). <!-- *NEED INPUT*: confirm against the lesson-time budget once duration is pinned in objectives.md's open questions. -->
 - **Variance budget:** model outputs vary run-to-run (Demo 3 makes this explicit, but it applies to all four). Budget at least one re-run per demo. If a demo lands cleanly the first time, don't re-run for the sake of it — use the time to extend the discussion.
 - **Resist live-coding tangents.** Students may ask "what about embedding tokens?" or "what about prompt caching?" or "what about images and multimodal tokens?" — name each as a "we'll get there" callback (embeddings → L15, caching → L14, multimodal → out of scope for this course unless the PRD changes) and *do not detour*. L01 is foundational; depth lives in later lessons.
 - **The audience watches, doesn't participate.** Resist the temptation to ask "what do you think will happen?" — that is a lab pattern, not a demo pattern. Hands-on tokenization, temperature sweeps, and cost estimation are for the L01 labs.
 
 ## Open authoring questions
 
-- <need input: do we use the Anthropic SDK exclusively from L01, or briefly show `tiktoken` / a tokenizer comparison so students see that tokenization is a *family* of choices? Mirrored from [objectives.md](objectives.md).>
-- <need input: is prompt caching introduced here (as a one-line foreshadow in Demo 4), or strictly deferred to L14 (context management)? Mirrored from [objectives.md](objectives.md).>
-- <need input: should "rate limits" (RPM/TPM, retry/backoff) be demoed here alongside cost, or deferred until students hit them in L07? Mirrored from [objectives.md](objectives.md).>
-- <need input: are the demos run in a Jupyter notebook the teacher projects, or in a slide-embedded REPL, or via a custom demo runner script? Affects how prompts are pre-loaded.>
-- <need input: a pointer/link to where the demo wrapper (token + cost + latency printer) lives as code — not yet decided.>
-- <need input: include the optional L02 bridge demo here, or save it as the opener for L02?>
+- <!-- *NEED INPUT*: do we use the Anthropic SDK exclusively from L01, or briefly show `tiktoken` / a tokenizer comparison so students see that tokenization is a *family* of choices? Mirrored from [objectives.md](objectives.md). -->
+- <!-- *NEED INPUT*: is prompt caching introduced here (as a one-line foreshadow in Demo 4), or strictly deferred to L14 (context management)? Mirrored from [objectives.md](objectives.md). -->
+- <!-- *NEED INPUT*: should "rate limits" (RPM/TPM, retry/backoff) be demoed here alongside cost, or deferred until students hit them in L07? Mirrored from [objectives.md](objectives.md). -->
+- <!-- *NEED INPUT*: are the demos run in a Jupyter notebook the teacher projects, or in a slide-embedded REPL, or via a custom demo runner script? Affects how prompts are pre-loaded. -->
+- <!-- *NEED INPUT*: a pointer/link to where the demo wrapper (token + cost + latency printer) lives as code — not yet decided. -->
+- <!-- *NEED INPUT*: include the optional L02 bridge demo here, or save it as the opener for L02? -->

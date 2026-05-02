@@ -37,7 +37,7 @@ The teacher should have, before the first demo starts:
 
   > A bag contains 5 red, 7 blue, and 3 green marbles. I draw 3 without replacement. What is the probability all three are different colors? Answer with a single number.
 
-  <need input: confirm this problem is in the right difficulty band for the target model — the teacher should dry-run it 5x before class and see at least 2 zero-shot failures, or pick a different problem. If pinning to a smaller model, use a harder problem; for a larger model, use a multi-step constraint puzzle instead.>
+  <!-- *NEED INPUT*: confirm this problem is in the right difficulty band for the target model — the teacher should dry-run it 5x before class and see at least 2 zero-shot failures, or pick a different problem. If pinning to a smaller model, use a harder problem; for a larger model, use a multi-step constraint puzzle instead. -->
 
 - Have a known-correct answer pre-computed and on a slide (so the teacher can confirm correctness in one glance).
 
@@ -98,7 +98,7 @@ The teacher should have, before the first demo starts:
   2. **Same-model, adversarial framing** — *"You are a skeptical reviewer. Find the flaw in the answer above and produce a corrected version."*
   3. **Different-model critique** — same as (1) but routed to the secondary model client.
 
-  <need input: the lesson-plan row mentions self-critique without specifying single-prompt vs. two-step. The objectives doc keeps both in scope; this demo uses two-step (separate calls). If the course settles on single-prompt as the canonical pattern, swap (1)–(3) for inline-critique variants.>
+  <!-- *NEED INPUT*: the lesson-plan row mentions self-critique without specifying single-prompt vs. two-step. The objectives doc keeps both in scope; this demo uses two-step (separate calls). If the course settles on single-prompt as the canonical pattern, swap (1)–(3) for inline-critique variants. -->
 
 **Live script:**
 
@@ -125,7 +125,7 @@ The teacher should have, before the first demo starts:
 
 - Two contrasting tasks:
   - **Task A — easy zero-shot:** a sentiment classification on a clearly-positive review (*"I love this product, it's amazing — five stars!"* → `positive`). The model nails this in one or two output tokens.
-  - **Task B — talked-into-the-wrong-answer:** a simple factual question with a misleading hint (e.g. *"Most people think the answer to X is Y, but is that actually correct? Reason carefully."*) where free-form CoT often constructs a plausible but wrong justification. <need input: pick a task in this style that fits the target model — needs a dry-run pass to confirm the failure mode reproduces. The point is to show CoT making things worse, so if the model handles it cleanly, find a harder one or use a different model class.>
+  - **Task B — talked-into-the-wrong-answer:** a simple factual question with a misleading hint (e.g. *"Most people think the answer to X is Y, but is that actually correct? Reason carefully."*) where free-form CoT often constructs a plausible but wrong justification. <!-- *NEED INPUT*: pick a task in this style that fits the target model — needs a dry-run pass to confirm the failure mode reproduces. The point is to show CoT making things worse, so if the model handles it cleanly, find a harder one or use a different model class. -->
 - The token-count + latency wrapper from pre-flight is essential here.
 
 **Live script:**
@@ -149,17 +149,17 @@ The teacher should have, before the first demo starts:
 
 If time allows, run one final demo that previews L04: ask the model the same Task B question but give it a single tool (a calculator, or a "lookup" stub). Show that *the decision to call the tool* is itself a reasoning step — and that everything from Demos 1–4 (CoT, scratchpad, self-critique, when-not-to-reason) applies inside the tool-calling loop. Don't teach the tool-calling protocol here; just show the shape.
 
-<need input: include this bridge demo, or save it as the opener for L04?>
+<!-- *NEED INPUT*: include this bridge demo, or save it as the opener for L04? -->
 
 ## Pacing notes for the teacher
 
-- **Per-demo time:** 8–12 minutes including the post-demo discussion. Four demos plus the optional bridge fits in a 50–60 minute block. <need input: confirm against the lesson-time budget once duration is pinned in objectives.md's open questions.>
+- **Per-demo time:** 8–12 minutes including the post-demo discussion. Four demos plus the optional bridge fits in a 50–60 minute block. <!-- *NEED INPUT*: confirm against the lesson-time budget once duration is pinned in objectives.md's open questions. -->
 - **Variance budget:** model outputs vary run-to-run. Budget at least one re-run per demo. If a demo lands cleanly the first time, don't re-run for the sake of it — use the time to extend the discussion.
 - **The audience watches, doesn't participate.** Resist the temptation to ask "what do you think will happen?" — that is a lab pattern, not a demo pattern. Hands-on practice is for the L03 labs.
 
 ## Open authoring questions
 
-- <need input: are the demos run in a Jupyter notebook the teacher projects, or in a slide-embedded REPL, or via a custom demo runner script? Affects how prompts are pre-loaded.>
-- <need input: should Demo 3 introduce different-model critique here, or defer to L09 (model power)? Mirrors the same open question in [objectives.md](objectives.md).>
-- <need input: should this lesson use Anthropic's extended-thinking API anywhere, or stay strictly prompt-only? Mirrored from [objectives.md](objectives.md).>
-- <need input: a pointer/link to where the demo prompts live as code (a `demos/` subdir? inline in a notebook?) — not yet decided in non-draft docs.>
+- <!-- *NEED INPUT*: are the demos run in a Jupyter notebook the teacher projects, or in a slide-embedded REPL, or via a custom demo runner script? Affects how prompts are pre-loaded. -->
+- <!-- *NEED INPUT*: should Demo 3 introduce different-model critique here, or defer to L09 (model power)? Mirrors the same open question in [objectives.md](objectives.md). -->
+- <!-- *NEED INPUT*: should this lesson use Anthropic's extended-thinking API anywhere, or stay strictly prompt-only? Mirrored from [objectives.md](objectives.md). -->
+- <!-- *NEED INPUT*: a pointer/link to where the demo prompts live as code (a `demos/` subdir? inline in a notebook?) — not yet decided in non-draft docs. -->

@@ -69,7 +69,7 @@ A lecture always precedes its companion lab numerically (so a `_lecture` at NN=0
 
 ### `_intro` artifacts
 
-`_intro` is a short, optional opening artifact for a lesson — a one- to two-page framing piece (markdown or notebook) that sets context before any deeper lecture or lab. Treat it as a lightweight lecture: same authoring conventions, same metadata fields, just shorter. <need input: should `_intro` get its own dedicated format guide (e.g. `INTRO_DESIGN.md`), or stay co-spec'd here? Default for now: stay here.>
+`_intro` is a short, optional opening artifact for a lesson — a one- to two-page framing piece (markdown or notebook) that sets context before any deeper lecture or lab. Treat it as a lightweight lecture: same authoring conventions, same metadata fields, just shorter. <!-- *NEED INPUT*: should `_intro` get its own dedicated format guide (e.g. `INTRO_DESIGN.md`), or stay co-spec'd here? Default for now: stay here. -->
 
 ## Runtime
 
