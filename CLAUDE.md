@@ -2,6 +2,14 @@
 
 Python curriculum repository: code + materials. Claude Code is the primary driver for changes here.
 
+## Rules
+
+Detailed, enforced conventions live in [.claude/rules/](.claude/rules/). Read the relevant
+file before writing code:
+
+- [python-style.md](.claude/rules/python-style.md) — formatting, lint rule sets, pyright-strict typing, src layout.
+- [pytest.md](.claude/rules/pytest.md) — test layout, strict markers, fixtures, LLM/network mocking.
+
 ## Toolchain
 
 - **Package/env manager:** [uv](https://github.com/astral-sh/uv) (managed lockfile in `uv.lock`).
