@@ -17,6 +17,8 @@ from openai.types.chat import (
     ChatCompletionUserMessageParam,
 )
 
+from fluffy_potato_curriculum.common.config import require_openai_key
+
 from .base import ChatResponse, Message, Usage
 
 DEFAULT_MODEL = "gpt-4o-mini"
@@ -55,7 +57,9 @@ class OpenAIClient:
     """Talk to an OpenAI model through the `PotatoLLMClient` seam.
 
     Pass `client=` to inject a pre-built (or fake) SDK client; otherwise one is
-    constructed from `api_key` (or the `OPENAI_API_KEY` environment variable).
+    constructed from `api_key`, falling back to the configured `OPENAI_API_KEY`
+    (see `common.config`). Constructing a real client with no key available raises
+    a clear error rather than failing later mid-call.
     """
 
     def __init__(
@@ -66,7 +70,10 @@ class OpenAIClient:
         client: openai.OpenAI | None = None,
     ) -> None:
         self._model = model
-        self._client = client if client is not None else openai.OpenAI(api_key=api_key)
+        if client is not None:
+            self._client = client
+        else:
+            self._client = openai.OpenAI(api_key=api_key or require_openai_key())
 
     @property
     def model(self) -> str:

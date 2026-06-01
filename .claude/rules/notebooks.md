@@ -44,8 +44,9 @@ navigational skeleton.
 
 ## Reproducibility
 
-- **Restart-and-run-all must pass on a fresh kernel, top to bottom, with no errors.** This is
-  non-negotiable — a notebook that only runs out of order is broken.
+- **Restart-and-run-all must pass on a fresh kernel, top to bottom, with no errors** (with any
+  required API keys present — see *Live network / LLM calls*). This is non-negotiable — a
+  notebook that only runs out of order is broken.
 - **Author for linear execution.** No cell may depend on state from a cell below it or from a
   since-deleted cell. Execution counts in a committed notebook should read as a clean
   top-to-bottom run (`1, 2, 3, …`), not a scrambled session.
@@ -64,10 +65,13 @@ navigational skeleton.
 This is a course about calling real models, so notebooks **may** make real API calls — the live
 demo is often the point. But a normal run has to stay safe, cheap, and reproducible:
 
-- **Gate every live call so the notebook still runs clean with no key.** Read the key from the
-  environment (e.g. `ANTHROPIC_API_KEY`); never hard-code it. When the key is absent, live cells
-  must skip with a printed notice instead of erroring — restart-and-run-all must still pass
-  top-to-bottom for a student (or CI) without a key.
+- **Live calls require an API key; read it through the config seam, never hard-code it.** Keys
+  load via `fluffy_potato_curriculum.common.config` (a `pydantic-settings` layer over the
+  environment and a repo-root `.env`) — don't scatter ad-hoc `os.environ` lookups. A notebook
+  whose teaching point genuinely needs a live model **may assume the key is set** and raise a
+  clear error when it isn't (the `require_*_key` helpers do this); a keyless restart-and-run-all
+  is no longer required for those notebooks. Where the concept *doesn't* need a live model,
+  still prefer a canned/offline client (next bullet) so the run stays cheap and deterministic.
 - **Go through the `potato_llm` seam, not a raw SDK**, so a fake/canned client can be dropped in.
   Where the *concept* doesn't actually need a live model (a deterministic illustration, a CI run),
   prefer a canned client or recorded response — the same mocking stance as tests
@@ -111,5 +115,6 @@ The [python-style.md](python-style.md) rules still apply to notebook code:
 
 Notebooks under `src/` are part of the same gate (from CLAUDE.md):
 `uv run ruff format && uv run ruff check && uv run pyright && uv run pytest`. On top of that,
-for each notebook you touched: restart-and-run-all to confirm it runs clean, then clear the
-outputs of any `_empty` student copy (see *Outputs & committing* above) before committing.
+for each notebook you touched: restart-and-run-all to confirm it runs clean (with any required
+API keys present for notebooks that make live calls), then clear the outputs of any `_empty`
+student copy (see *Outputs & committing* above) before committing.

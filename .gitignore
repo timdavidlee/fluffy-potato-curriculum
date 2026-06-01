@@ -16,6 +16,10 @@ dist/
 .venv/
 .python-version-local
 
+# Local secrets — keys live here, never commit (copy .env.example to .env)
+.env
+.env.local
+
 # Test / coverage
 .pytest_cache/
 .coverage

@@ -14,6 +14,8 @@ from anthropic import Omit, omit
 from anthropic.types import Message as AnthropicMessage
 from anthropic.types import MessageParam, TextBlock
 
+from fluffy_potato_curriculum.common.config import require_anthropic_key
+
 from .base import ChatResponse, Message, Usage
 
 DEFAULT_MODEL = "claude-sonnet-4-6"
@@ -52,7 +54,9 @@ class AnthropicClient:
     """Talk to Claude through the `PotatoLLMClient` seam.
 
     Pass `client=` to inject a pre-built (or fake) SDK client; otherwise one is
-    constructed from `api_key` (or the `ANTHROPIC_API_KEY` environment variable).
+    constructed from `api_key`, falling back to the configured `ANTHROPIC_API_KEY`
+    (see `common.config`). Constructing a real client with no key available raises
+    a clear error rather than failing later mid-call.
     """
 
     def __init__(
@@ -63,7 +67,10 @@ class AnthropicClient:
         client: anthropic.Anthropic | None = None,
     ) -> None:
         self._model = model
-        self._client = client if client is not None else anthropic.Anthropic(api_key=api_key)
+        if client is not None:
+            self._client = client
+        else:
+            self._client = anthropic.Anthropic(api_key=api_key or require_anthropic_key())
 
     @property
     def model(self) -> str:
