@@ -10,6 +10,7 @@ requires-python = ">=3.13"
 dependencies = [
     "anthropic>=0.105.2",
     "openai>=2.38.0",
+    "tiktoken>=0.13.0",
 ]
 
 [build-system]
@@ -19,6 +20,9 @@ build-backend = "uv_build"
 [dependency-groups]
 dev = [
     "commitizen>=4.16.3",
+    "ipykernel>=7.2.0",
+    "jupyterlab>=4.5.7",
+    "nbconvert>=7.17.1",
     "pyright>=1.1.409",
     "pytest>=9.0.3",
     "ruff>=0.15.12",
@@ -46,6 +50,10 @@ ignore = [
 
 [tool.ruff.lint.per-file-ignores]
 "tests/**/*.py" = ["B", "SIM"]
+# _empty lab notebooks are intentionally incomplete: imports, loop vars, and locals
+# are left unused where the student fills in the gap. The matching _solutions notebook
+# is held to the full rule set.
+"**/*_lab_empty.ipynb" = ["F401", "F841", "B007"]
 
 [tool.ruff.format]
 quote-style = "double"
