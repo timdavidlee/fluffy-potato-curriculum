@@ -9,8 +9,10 @@ estimated duration: 10
 > **Lesson:** L01 — LLM and token basics.
 > **Roadmap:** see this lesson's [objectives.md](../../../../docs/origin/lesson_roadmaps/L01/objectives.md).
 > This is a short framing piece. Read it before the main lecture
-> ([L0102_lecture.md](L0102_lecture.md)) and the demo notebook
-> ([L0103_lecture.ipynb](L0103_lecture.ipynb)).
+> ([L0102_lecture.md](L0102_lecture.md)) and the four teacher demo notebooks
+> (tokens [L0103_lecture.ipynb](L0103_lecture.ipynb), context window
+> [L0105_lecture.ipynb](L0105_lecture.ipynb), cost [L0106_lecture.ipynb](L0106_lecture.ipynb),
+> temperature [L0108_lecture.ipynb](L0108_lecture.ipynb)).
 
 ## Why this lesson exists
 
@@ -92,5 +94,5 @@ By the end of the lesson the sentence to carry forward is:
 > *From here on, every prompt you write is a budget decision — token count, dollar count, and
 > context-window count, all at once.*
 
-Next: the full lecture in [L0102_lecture.md](L0102_lecture.md), then the live demos in
-[L0103_lecture.ipynb](L0103_lecture.ipynb).
+Next: the full lecture in [L0102_lecture.md](L0102_lecture.md), then the live demos
+(L0103 / L0105 / L0106 / L0108) and the hands-on labs (L0104 / L0107 / L0109).
