@@ -9,6 +9,7 @@ file before writing code:
 
 - [python-style.md](.claude/rules/python-style.md) — formatting, lint rule sets, pyright-strict typing, src layout.
 - [pytest.md](.claude/rules/pytest.md) — test layout, strict markers, fixtures, LLM/network mocking.
+- [notebooks.md](.claude/rules/notebooks.md) — keep notebooks short, reproducible (restart-run-all), gated live calls, output hygiene.
 
 ## Toolchain
 
