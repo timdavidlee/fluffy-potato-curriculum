@@ -8,8 +8,10 @@ estimated duration: 70
 
 > **Lesson:** L01. **Roadmap:** [objectives.md](../../../../docs/origin/lesson_roadmaps/L01/objectives.md).
 > This is the written reference lecture — thorough on purpose, so a student who missed the verbal
-> delivery can rebuild the lesson from the page. The live demos are in
-> [L0103_lecture.ipynb](L0103_lecture.ipynb); hands-on practice is in the L01 labs.
+> delivery can rebuild the lesson from the page. The live demos are split one per primitive
+> ([L0103](L0103_lecture.ipynb) tokens, [L0105](L0105_lecture.ipynb) context window,
+> [L0106](L0106_lecture.ipynb) cost, [L0108](L0108_lecture.ipynb) temperature); hands-on practice
+> is in the L01 labs (L0104 / L0107 / L0109).
 > **Anchor model throughout: Claude Sonnet 4.6 (200k-token context window).**
 
 ## section 1. The four primitives, as a system
