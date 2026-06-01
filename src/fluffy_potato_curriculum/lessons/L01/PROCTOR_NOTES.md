@@ -9,8 +9,8 @@ Times are rough and assume a semi-technical student with basic Python.
 > classroom network before disconnecting.
 >
 > The labs are: **L0104** (tokenization), **L0107** (context windows & cost), **L0109**
-> (temperature). The temperature lab runs offline against a canned client; its optional "try it
-> live" cell needs `ANTHROPIC_API_KEY`.
+> (temperature). The temperature lab now makes **live** Claude calls; it needs
+> `ANTHROPIC_API_KEY` set (copy `.env.example` to `.env`). L0104/L0107 stay offline (pure Python).
 
 ## L0104_lab problem 1 — Count tokens
 
@@ -86,9 +86,9 @@ Times are rough and assume a semi-technical student with basic Python.
 
 ## L0109_lab problem 1 — Sample at temperature 0
 
-- **Environment note:** the lab runs offline against a **canned client**, so no key is required for
-  the graded problems. The canned client commits to one answer at low temperature and varies at
-  high temperature — that is *simulated* behavior to illustrate the pattern, not real model output.
+- **Environment note:** the lab makes **live** Claude calls, so `ANTHROPIC_API_KEY` must be set
+  (copy `.env.example` to `.env`); constructing the client raises a clear error if it's missing.
+  Real output varies run to run — low temperature stays tight, high temperature spreads.
 - **Common gotchas:** forgetting to return the list (building it then not returning); calling
   `client.chat(...)` without reading `.text`.
 - **Unblockers:** the shape is a list comprehension calling
@@ -97,12 +97,12 @@ Times are rough and assume a semi-technical student with basic Python.
 
 ## L0109_lab problem 2 — Sample at temperature 1
 
-- **Common gotchas:** expecting *guaranteed* variety. With the canned client, temperature 1 cycles
-  through a fixed list — point out this is a stand-in for real sampling spread.
+- **Common gotchas:** expecting *guaranteed* variety. Even at temperature 1 a short prompt may
+  repeat a popular name; spread is a tendency, not a guarantee.
 - **Unblockers:** none; it reuses `sample_n`.
 - **Time:** ~3 min.
-- **Optional live:** if `ANTHROPIC_API_KEY` is set, the "try it live" cell shows real spread. Remind
-  students to clear that cell's output before committing.
+- **Outputs:** the sampling cells hit the API — remind students to clear cell outputs before
+  committing.
 
 ## L0109_lab problem 3 — Pick a temperature
 
