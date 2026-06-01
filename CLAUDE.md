@@ -16,6 +16,7 @@ file before writing code:
 - **Linter/formatter:** [ruff](https://docs.astral.sh/ruff/) (config in `pyproject.toml`).
 - **Type checker:** [pyright](https://microsoft.github.io/pyright/) in `strict` mode.
 - **Tests:** [pytest](https://docs.pytest.org/).
+- **Commits:** [commitizen](https://commitizen-tools.github.io/commitizen/) — Conventional Commits + version bumps (config in `pyproject.toml`).
 - **Python:** 3.13 (pinned in `.python-version`).
 
 ## Layout
@@ -48,6 +49,9 @@ Run everything through `uv` so the pinned `.venv` is used:
 | Lint with autofix | `uv run ruff check --fix` |
 | Typecheck | `uv run pyright` |
 | Tests | `uv run pytest` |
+| Guided commit | `uv run cz commit` |
+| Check commit message | `uv run cz check --rev HEAD` |
+| Bump version + changelog | `uv run cz bump` |
 
 Before committing, the bar is: `uv run ruff format && uv run ruff check && uv run pyright && uv run pytest`.
 
