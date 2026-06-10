@@ -12,6 +12,7 @@ dependencies = [
     "claude-agent-sdk>=0.2.94",
     "langchain-anthropic>=1.4.4",
     "langchain-mcp-adapters>=0.2.2",
+    "langfuse>=4.7.1",
     "langgraph>=1.2.4",
     "mcp>=1.27.2",
     "openai>=2.38.0",

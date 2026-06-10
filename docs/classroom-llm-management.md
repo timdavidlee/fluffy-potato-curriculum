@@ -1,7 +1,8 @@
 # Classroom LLM management
 
-> **Status:** decision notes, not yet implemented. Captures options for letting a cohort of
-> students share one LLM budget with per-student usage tracking and spend caps.
+> **Status:** decision notes, partly decided, not yet implemented. Captures options for letting a
+> cohort of students share one LLM budget (usage tracking + spend caps) **and** a shared tracing
+> backend. Tracing is **decided** (self-hosted Langfuse); budget/spend is still open.
 > **Scope:** operational/infrastructure only — this is *not* curriculum content and does **not**
 > live under [`docs/origin/`](origin/) (that tree is curriculum-generation prompts).
 
@@ -95,12 +96,50 @@ For *"let a class share one Anthropic budget with per-student visibility and cap
 3. **OpenRouter** only if you separately want its multi-provider routing — and even then, keep it as
    an operational layer behind the seam, never as the taught client.
 
+## Tracing / observability — DECIDED: self-hosted Langfuse
+
+Separate from the *budget/spend* concern above: from **L08 (Tracing)** onward, students view agent
+runs in a real observability dashboard. **Decision: self-hosted [Langfuse](https://langfuse.com)**
+(open-source, MIT) is the course's tracing tool.
+
+**Why Langfuse, and why self-hosted:**
+
+- **Open-source, self-hostable with no usage limits** — the instructor runs **one shared instance**
+  and the whole cohort points at it (base URL + per-project keys). No per-student signups, no seat
+  costs. This is the deciding advantage over LangSmith, whose free tier is **1 seat / 5k traces**
+  per account (no shared free workspace).
+- **Free cloud fallback** (Langfuse Cloud *Hobby*: 50k units/mo, 2 seats, 30-day retention, no card)
+  for solo/self-paced learners who don't want to run Docker.
+- **Ingests OpenTelemetry (OTLP)** — the L08 hand-rolled `TraceEvent` schema is OTel-shaped on
+  purpose, so exporting to Langfuse is a natural step, not a rewrite.
+- **Same instance serves L11** — the LangGraph agent's traces route to the *same* Langfuse via the
+  LangChain/LangGraph Langfuse callback handler, so framework traces land next to hand-rolled ones.
+
+**How it plugs in:** Langfuse keys/URL load through [`common/config.py`](../src/fluffy_potato_curriculum/common/config.py)
+(same seam as the model key), never hard-coded. The `langfuse` SDK is a project dependency (added
+via `uv add`). Tracing export is **additive** — a student without the instance configured still
+completes the L08 objectives on the in-memory/`.to_jsonl()` trace.
+
+**Infra to stand up (one shared instance):** Langfuse server + **PostgreSQL** + **ClickHouse**
+(via the official Docker Compose). The instructor hosts it; students get a URL and project keys.
+
+> **Vendor note:** ClickHouse acquired Langfuse (Jan 2026); the core stays MIT-licensed with no new
+> pricing gates. Self-hosting only lacks enterprise extras (SCIM, audit logs, retention policies),
+> none of which a classroom needs. Worth re-checking the license terms before a cohort starts.
+
+The trade-off accepted: **LangSmith** integrates with LangGraph (L11) zero-config, but its free tier
+can't be a shared cohort instance. We chose Langfuse's open-source/self-host model over that
+convenience.
+
 ## Open questions
 
 - <!-- *NEED INPUT*: cohort size and per-student budget target — drives whether soft (Workspaces) or hard (proxy) caps are needed. -->
 - <!-- *NEED INPUT*: who administers key provisioning/rotation per cohort, and is a manual Console workflow acceptable or is automation (Admin API) wanted? -->
 - <!-- *NEED INPUT*: does any lesson actually need OpenAI-format/multi-provider routing, or is the course Anthropic-only in practice? If Anthropic-only, OpenRouter's main advantage doesn't apply. -->
 - <!-- *NEED INPUT*: verify current OpenRouter BYOK surcharge % and Anthropic per-key spend-limit controls before committing to a number in planning. -->
+- <!-- *NEED INPUT*: who hosts the shared Langfuse instance and where (a small always-on VM with Docker Compose: Langfuse + Postgres + ClickHouse), and how per-student project keys are issued. -->
+- <!-- *NEED INPUT*: one shared instructor Langfuse instance vs. each student running a local Docker instance — recommendation is one shared instance for zero per-student setup, with local Docker as the solo/self-paced fallback. -->
+- <!-- *NEED INPUT*: re-check Langfuse license/terms after the ClickHouse acquisition (Jan 2026) before a cohort relies on self-hosting. -->
 
 ## Related
 

@@ -20,8 +20,12 @@ Resolve items here or migrate them into the roadmap docs as decisions land.
 - **LangGraph + native client** — framework lessons (L11, L18, L19) use native `ChatAnthropic`
   inside graph nodes, NOT `PotatoLLMClient`; the departure is taught explicitly. Deps added:
   `langgraph>=1.2.4`, `langchain-anthropic>=1.4.4` (via `uv add`).
-- **Trace schema** — approximate LangSmith shape; `RunResult.trace: list[TraceEvent]` +
+- **Trace schema** — approximate OpenTelemetry/Langfuse shape; `RunResult.trace: list[TraceEvent]` +
   `.to_jsonl()`; entry called a **span** (class `TraceEvent`, field `run_type: llm|tool|chain`).
+- **Tracing tool = self-hosted Langfuse** (open-source, MIT). One shared instructor instance the
+  cohort points at (no per-student seats). L08 adds a hands-on "export your trace → read it in
+  Langfuse" step (objective 5); L11's LangGraph traces route to the SAME instance via the Langfuse
+  callback handler. `langfuse` dep added via `uv add`. Infra → `docs/classroom-llm-management.md`.
 - **Eval schema** — approximate LangSmith shape; `EvalCase` (Example: `inputs` +
   `reference_outputs`), `Scorer` (Evaluator → `EvalResult{key, score, comment}`),
   `evaluate(cases, scorers, samples=K)` → per-case pass rates.
@@ -42,10 +46,10 @@ Resolve items here or migrate them into the roadmap docs as decisions land.
 ## 🟢 Teaching-depth — all have an in-doc recommendation (safe to batch-accept)
 
 ### L08 (Tracing)
-- [ ] Hosted-tracer hands-on? → **rec: no**, name-drop forward pointer only.
+- [x] Hosted-tracer hands-on? → **DECIDED: yes — self-hosted Langfuse** (objective 5), concept-first then tooled. Additive/gated; objectives 1–4 stand alone.
 - [ ] Two-trace comparison: by eye vs. diff helper → **rec: by eye first, then ~10-line diff helper**.
 - [ ] Trace minimalism vs. completeness → **rec: small defensible field set; name what to leave out**.
-- [ ] Industry standards depth → **rec: name-drop + at most one annotated screenshot**.
+- [x] Industry standards depth → **DECIDED: real hands-on Langfuse** (supersedes "name-drop + screenshot"); schema is OTel/Langfuse-shaped.
 - [ ] Who authors the `common/` reference modules → **rec: the L08 stage-2 pass**.
 - [ ] L07 bridge-demo overlap → **rec: reinforce/extend, don't re-teach the loop**.
 
@@ -60,8 +64,8 @@ Resolve items here or migrate them into the roadmap docs as decisions land.
 ### L11 (Shallow LangGraph agent)
 - [ ] Prebuilt vs. hand-assembled `StateGraph` → **rec: hand-assemble first, then reveal prebuilt as "same thing packaged"**.
 - [ ] State beyond messages → **rec: messages + one counter (for reducers/typing); richer state → L12+/L15**.
-- [ ] Single-model anchor → **rec: yes, defer model-power to L10 (full course)**.
-- [ ] How much graph viz / streamed trace to show → **rec: render the graph once + one trace mapped to L08 shape**.
+- [x] Single-model anchor → **DECIDED: Sonnet 4.6**, defer model-power to L10 (full course).
+- [x] How much graph viz / streamed trace to show → **DECIDED: route graph traces to L08's same self-hosted Langfuse** (callback handler) + render the graph diagram once.
 - [ ] Persistence / checkpointing → **rec: out of scope; forward-pointer to L14/L15**.
 - [ ] L07 Demo-4 overlap → **rec: deliver the framework rebuild in full; L07 was the teaser**.
 
@@ -77,6 +81,11 @@ Resolve items here or migrate them into the roadmap docs as decisions land.
 
 ## ⚪ Classroom infra (separate track — `docs/classroom-llm-management.md`, not curriculum)
 
+- [ ] **Stand up the shared Langfuse instance** — Docker Compose (Langfuse + Postgres + ClickHouse)
+      on an always-on VM; decide host/owner; issue per-student project keys; wire URL+keys through
+      `common/config.py`. *(DECIDED tool; deployment is the open work.)*
+- [ ] Re-check Langfuse license/terms post-ClickHouse-acquisition (Jan 2026) before a cohort relies on it.
+- [ ] One shared instance vs. per-student local Docker → **rec: shared instance, local as solo fallback**.
 - [ ] Verify current **OpenRouter BYOK surcharge %**.
 - [ ] **Cohort size + per-student budget** → drives soft (Workspaces) vs. hard (proxy) caps.
 - [ ] **Key provisioning/rotation owner** — manual Console vs. Admin API automation.
