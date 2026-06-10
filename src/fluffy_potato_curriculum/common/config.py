@@ -13,8 +13,16 @@ holds secrets. Copy `.env.example` to `.env` and fill in your own keys.
 from __future__ import annotations
 
 from functools import lru_cache
+from pathlib import Path
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+# Anchor the `.env` lookup to the repo root, not the current working directory.
+# Notebooks run with the kernel's cwd set to the notebook's own directory
+# (e.g. lessons/L01/), so a bare relative ".env" would never resolve the
+# repo-root file. config.py lives at <root>/src/fluffy_potato_curriculum/common/,
+# so the root is four parents up.
+_REPO_ROOT = Path(__file__).resolve().parents[3]
 
 
 class Settings(BaseSettings):
@@ -25,7 +33,7 @@ class Settings(BaseSettings):
     """
 
     model_config = SettingsConfigDict(
-        env_file=".env",
+        env_file=_REPO_ROOT / ".env",
         env_file_encoding="utf-8",
         extra="ignore",
     )
