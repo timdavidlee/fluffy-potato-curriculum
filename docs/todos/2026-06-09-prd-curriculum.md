@@ -30,10 +30,11 @@ Resolve items here or migrate them into the roadmap docs as decisions land.
 
 ## 🟡 Cross-cutting — decide once, applies to L08/L09/L11
 
-- [ ] **Anchor model.** Effectively decided by precedent (`project_anchor_model` memory:
-      Sonnet 4.6 anchor L01–L07; Haiku 4.5 cheap-contrast for L03/L09). Implied default:
-      **L08 & L11 → Sonnet 4.6; L09 → Sonnet 4.6 + Haiku 4.5 for the A/B regression demo.**
-      → Just needs "yes, inherit precedent." (L08/L09/L11 open Qs)
+- [x] **Anchor model — DECIDED: Sonnet 4.6** for L08/L09/L11 (inherits L01–L07 precedent).
+      **L09 uses Haiku 4.5 as a confirmed contrast** in the A/B demo: same eval set on both models,
+      cheaper model's pass rate visibly drops → concrete, quantified "what a lower-powered model
+      can/cannot do" (also grounds L09 objective-4 cost/capability reasoning; foreshadows L10).
+      Sonnet-vs-Sonnet still covers the pure regression framing. Markers resolved in all three docs.
 - [ ] **Lecture durations** — L08 ~75–100m · L09 ~75–100m · L11 ~90–120m. Confirm or split each.
 
 ---

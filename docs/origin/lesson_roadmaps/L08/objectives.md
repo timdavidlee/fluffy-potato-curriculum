@@ -108,7 +108,7 @@ The concrete handoff: at the end of L08, students have (1) a hand-rolled loop th
 ## Open authoring questions
 
 - <!-- *NEED INPUT*: estimated lecture duration — best guess 75–100 minutes including a code-along that instruments the L07 loop and a two-trace comparison. Likely one lecture; split into "read a trace / locate a failure" and "instrument / compare" if it runs long. -->
-- <!-- *NEED INPUT*: which Claude model anchors the demos/labs — mirrors the L07 open question. The *trace shape* is model-agnostic, but the trace *contents* (chaining depth, runaway behavior) differ visibly between Sonnet 4.6 and Haiku 4.5. A model contrast could double as the objective-4 two-trace comparison. -->
+- **Decided (anchor model):** Claude **Sonnet 4.6**, inheriting the L01–L07 precedent so the traced loop behaves identically to the one students built in L07. The trace *shape* is model-agnostic regardless.
 - **Decided (trace representation):** in-memory `RunResult.trace: list[TraceEvent]`, plus a `.to_jsonl()` helper for the compare-two-runs lab. Approximate LangSmith-shaped schema (see *Decided trace schema* in "What a trace is"). L09 reuses this.
 - **Decided (terminology):** call a single trace entry a **span** in prose (class `TraceEvent`, field `run_type`); note that LangSmith calls them "runs" / OpenTelemetry "spans" so the structure is recognizable later.
 - <!-- *NEED INPUT*: how far to go toward industry tracing standards — name-drop OpenTelemetry / LangSmith as a forward pointer only, or show one screenshot of a hosted trace for motivation? Recommendation: name-drop plus at most one annotated screenshot; no hands-on hosted tracer in L08. -->
