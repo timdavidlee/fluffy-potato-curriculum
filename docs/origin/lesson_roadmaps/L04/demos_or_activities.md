@@ -111,7 +111,7 @@ The teacher should have, before the first demo starts:
 
 - The conversation alternates assistant ↔ user even though one of those "users" is the application speaking for itself. The role labels are about *protocol position*, not about who is human.
 - The model is **stateless across calls** — Message 4's request had to include Messages 1–3 *and* the tool definition again. The model did not "remember" the tool from Message 2; the schema rode along in the prompt every time. This is the single most common student misconception; name it here.
-- Tools cost tokens **twice over**: the tool *definition* is re-sent on every request, and the tool *result* lives in the history for every subsequent turn. A 500-token tool definition across a 10-turn chat is ~5,000 input tokens before the tool is even called. Forward-link to [L09](../L09/objectives.md) (model power) and L14 (context management), which return to this cost.
+- Tools cost tokens **twice over**: the tool *definition* is re-sent on every request, and the tool *result* lives in the history for every subsequent turn. A 500-token tool definition across a 10-turn chat is ~5,000 input tokens before the tool is even called. Forward-link to [L09](../L09/objectives.md) (model power) and L17 (context management), which return to this cost.
 
 **If the demo misbehaves:**
 

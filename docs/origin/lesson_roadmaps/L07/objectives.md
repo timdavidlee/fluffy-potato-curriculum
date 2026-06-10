@@ -50,7 +50,7 @@ By the end of L07, a student should be able to:
 4. **Decide when a hand-rolled loop is the right tool.** Concretely:
    - Name at least three reasons to write your own loop instead of reaching for a framework: small surface area, full control over termination/failure semantics, easier to debug, no framework lock-in for a 50-line problem.
    - Name at least three reasons to *not* write your own loop: graph-shaped control flow (parallel branches, conditional routing), built-in tracing/observability, persistent state across runs, team familiarity with a specific framework.
-   - Recognize that L10 (LangGraph shallow agents) and L13 (deep agents) both build on this same model→tool→model skeleton — the framework changes, the loop does not.
+   - Recognize that L12 (LangGraph shallow agents) and L16 (deep agents) both build on this same model→tool→model skeleton — the framework changes, the loop does not.
 
 ## Main points the lecture should land
 
@@ -84,5 +84,5 @@ A small concrete handoff: at the end of L07, students should have at least one `
 - <!-- *NEED INPUT*: are *parallel tool calls within a single model response* in scope here, or deferred? Modern Claude responses can include multiple `tool_use` blocks in one assistant message; the loop has to execute them all before replying. Recommendation: in scope at the "execute all of them" level (objective 1), but parallel *execution* (asyncio / threading) deferred to a later lesson. -->
 - <!-- *NEED INPUT*: is *streaming* in scope? Recommendation: explicitly out of scope for L07; the loop is non-streaming. Mention streaming exists, defer the mechanics. -->
 - <!-- *NEED INPUT*: should the lab use one of the MCP servers from L06 as the tool source, or define inline Python tools, or both? Using L06's MCP server is a strong reinforcement of the "same loop runs both" framing but adds setup overhead. -->
-- <!-- *NEED INPUT*: where does *cost/latency observability* land — a print of input/output tokens per iteration in L07, or wait for L08's structured traces? L09 (model power) needs this signal too. -->
+- <!-- *NEED INPUT*: where does *cost/latency observability* land — a print of input/output tokens per iteration in L07, or wait for L08's structured traces? L10 (model power) needs this signal too. -->
 - <!-- *NEED INPUT*: any fixed naming for the loop function/module so labs and later lessons (L08, L10) can reference it consistently? Suggest `agent_loop.run(...)` returning a `RunResult` with `final_message`, `iterations`, `termination_cause`, and `tool_calls`. -->
