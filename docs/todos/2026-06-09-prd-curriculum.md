@@ -127,8 +127,12 @@ docs as decisions land.
 
 ## Not-yet-written roadmap artifacts (stage 1 remaining)
 
+- [x] **L20 (Skills) — STAGE 1 COMPLETE** (objectives + demos, this session). Mini-cut capstone (final
+      lesson); concept-first (hand-roll a JIT skill loader on the L12 agent) then real Anthropic Agent
+      Skills `SKILL.md`. Taxonomy: tool = *called*, skill = *read on demand*, system prompt = *always seen*.
+      Markers open in both docs (tooling, exact SKILL.md format, depth/duration target).
 - [ ] `demos_or_activities.md` for **L08**, **L09**, **L11**, **L12** (objectives done; demos not started).
-- [ ] Stage 2 (`generate-materials-from-roadmap`) for L08/L09/L11/L12 — also authors the `common/`
+- [ ] Stage 2 (`generate-materials-from-roadmap`) for L08/L09/L11/L12/L20 — also authors the `common/`
       reference modules per the decided schemas.
 - [x] **Pre-existing cross-ref drift in L01–L07 roadmaps** — DONE: reconciled semantically against
       the current PRD (43 refs across 11 files); whole-tree topic↔number audit clean.
