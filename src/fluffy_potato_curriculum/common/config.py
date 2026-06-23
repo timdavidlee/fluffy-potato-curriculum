@@ -41,11 +41,32 @@ class Settings(BaseSettings):
     anthropic_api_key: str | None = None
     openai_api_key: str | None = None
 
+    # Self-hosted Langfuse tracing (introduced in L08, reused by the LangGraph
+    # lessons L11+). All optional: when unset, tracing is simply skipped and the
+    # code runs unchanged — see `langfuse_configured()` and the L08/L11 notebooks.
+    langfuse_public_key: str | None = None
+    langfuse_secret_key: str | None = None
+    langfuse_host: str | None = None
+
 
 @lru_cache
 def get_settings() -> Settings:
     """Return the cached, process-wide settings (read once from env / `.env`)."""
     return Settings()
+
+
+def langfuse_configured() -> bool:
+    """Return True only when all three Langfuse settings are present.
+
+    Tracing is an opt-in extra: notebooks call this to decide whether to attach a
+    Langfuse callback. With any of the three values missing it returns False and
+    the workflow runs without tracing — the run is identical, only the spans are
+    absent — so a keyless restart-and-run-all still passes.
+    """
+    settings = get_settings()
+    return bool(
+        settings.langfuse_public_key and settings.langfuse_secret_key and settings.langfuse_host
+    )
 
 
 def require_anthropic_key() -> str:
