@@ -127,7 +127,7 @@ The teacher should have, before the first demo starts:
 
 ## Demo 4 — Hand-rolled vs. framework: a one-screen contrast (Objective 4)
 
-**Goal:** show the same task running on the hand-rolled loop and on a minimal framework loop side by side. Land that *every framework students will see (L10, L13) is a fancier version of this loop.*
+**Goal:** show the same task running on the hand-rolled loop and on a minimal framework loop side by side. Land that *every framework students will see (L12, L16) is a fancier version of this loop.*
 
 **Pre-flight:**
 

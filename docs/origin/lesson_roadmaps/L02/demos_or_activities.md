@@ -64,7 +64,7 @@ A small multi-turn script for the second half of the demo: a 4-turn conversation
 
 - The system message is *strongly weighted* but not *enforced*. Putting policy in `system` is the right starting point, not a security guarantee. (Recall the common-confusion bullet from [objectives.md](objectives.md): the system prompt is not a sandbox.)
 - The `messages=[...]` list is owned by the caller. There is no hidden server state. This is the same point L01 made about cost (history is re-sent every call), now made *visible* by displaying the list.
-- "System carries always-true, user carries per-call" is the rule of thumb that pays off in two future ways: (a) it makes prompts reusable across calls, and (b) it sets up prompt caching to be a natural optimization. <!-- *NEED INPUT*: introduce prompt caching as a one-line foreshadow during the per-turn cost beat, or strictly defer to L14 (context management)? Mirrored from [L01 objectives](../L01/objectives.md). -->
+- "System carries always-true, user carries per-call" is the rule of thumb that pays off in two future ways: (a) it makes prompts reusable across calls, and (b) it sets up prompt caching to be a natural optimization. <!-- *NEED INPUT*: introduce prompt caching as a one-line foreshadow during the per-turn cost beat, or strictly defer to L17 (context management)? Mirrored from [L01 objectives](../L01/objectives.md). -->
 
 **If the demo misbehaves:**
 
@@ -143,7 +143,7 @@ A small multi-turn script for the second half of the demo: a 4-turn conversation
 3. Run all five through variant (3) — diverse few-shot, with examples placed as alternating turns. Show the improvement. Highlight that the model now correctly uses the team's exact label wording.
 4. Re-run variant (3) with examples as a single block in the user message. Compare — typically similar quality, slightly different cost profile (more verbose framing). Discuss the trade-off out loud.
 5. Show the input token count for variants (1), (2), and (3) side by side. Variant (3) is markedly more expensive *every call*. This is the cost-of-few-shot beat (L01 callback).
-6. Final beat: take the off-distribution ticket and add a sixth few-shot example that resembles it. Re-run. Show the model now handling it. Then make the philosophical point: few-shot is *editable* — every time you find a failure, you can add an example. That is its power *and* its trap (the example list grows, the cost grows, and at some point you should reach for a different tool — fine-tuning, retrieval (L15), or a different model class (L09)).
+6. Final beat: take the off-distribution ticket and add a sixth few-shot example that resembles it. Re-run. Show the model now handling it. Then make the philosophical point: few-shot is *editable* — every time you find a failure, you can add an example. That is its power *and* its trap (the example list grows, the cost grows, and at some point you should reach for a different tool — fine-tuning, retrieval (L19), or a different model class (L10)).
 
 **What to highlight:**
 
@@ -169,13 +169,13 @@ If time allows, run one final demo that previews L03. Take Demo 2's structured-o
 
 - **Per-demo time:** 15–20 minutes including the post-demo discussion. Three demos plus the optional bridge fits in a 75–90 minute block, matching the duration estimate in [objectives.md](objectives.md). Demo 2 is the longest of the three because of the five test emails — budget time for it. <!-- *NEED INPUT*: confirm against the lesson-time budget once duration is pinned in objectives.md's open questions. -->
 - **Variance budget:** model outputs vary run-to-run (recall L01 Demo 3). Budget at least one re-run per demo. If a demo lands cleanly the first time, don't re-run for the sake of it — use the time to extend the discussion.
-- **Resist live-coding tangents.** Students may ask "what about chain-of-thought?", "what about tools?", "what about prompt caching?" — name each as a "we'll get there" callback (CoT → L03, tools → L04, caching → L14) and *do not detour*. L02's job is the prompting toolkit; depth lives in later lessons.
+- **Resist live-coding tangents.** Students may ask "what about chain-of-thought?", "what about tools?", "what about prompt caching?" — name each as a "we'll get there" callback (CoT → L03, tools → L04, caching → L17) and *do not detour*. L02's job is the prompting toolkit; depth lives in later lessons.
 - **Reinforce L01 vocabulary at every opportunity.** Token counts, cost staircases, temperature. Every demo should casually print these alongside its core point. The compounding builds the cost-aware mindset the rest of the course depends on.
 - **The audience watches, doesn't participate.** Resist the temptation to ask "what do you think will happen?" — that is a lab pattern, not a demo pattern. Hands-on practice is for the L02 labs.
 
 ## Open authoring questions
 
-- <!-- *NEED INPUT*: should L02 introduce prompt caching as a one-line foreshadow during Demo 1's per-turn cost beat, or strictly defer to L14 (context management)? Mirrored from [objectives.md](objectives.md) and [L01 objectives](../L01/objectives.md). -->
+- <!-- *NEED INPUT*: should L02 introduce prompt caching as a one-line foreshadow during Demo 1's per-turn cost beat, or strictly defer to L17 (context management)? Mirrored from [objectives.md](objectives.md) and [L01 objectives](../L01/objectives.md). -->
 - <!-- *NEED INPUT*: should Demo 1 demo the "model overrides the system message under user pressure" failure mode explicitly, or treat that as a security/safety topic out of scope for this course? Mirrored from [objectives.md](objectives.md). -->
 - <!-- *NEED INPUT*: confirm the triage example in Demo 1 is appropriate for the audience, or swap for a customer-support / code-review framing. The structural point is the same. -->
 - <!-- *NEED INPUT*: are the demos run in a Jupyter notebook the teacher projects, or in a slide-embedded REPL, or via a custom demo runner script? Mirrored from [L01 demos](../L01/demos_or_activities.md). -->

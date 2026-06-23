@@ -34,7 +34,7 @@ By the end of L01, a student should be able to:
    - State the context-window size (in tokens) of the course's anchor model: **Claude Sonnet 4.6, 200k tokens** standard. (Sonnet 4.6 also has a 1M-token long-context offering; use the 200k number as the default for L01 and only mention the 1M variant if asked.)
    - Given a prompt, a system message, prior conversation turns, and a target output length, estimate whether the call will fit in the window and how much headroom remains.
    - Recognize the three failure modes of running out of window: hard rejection at request time, silent truncation of conversation history, and degraded quality as the model "forgets" earlier context. Name which one applies in which API.
-   - Foreshadow why this matters later: every multi-turn agent (L07+) is fighting the context window, and the techniques in L14 (context management) and L15 (RAG) exist to push back against that pressure.
+   - Foreshadow why this matters later: every multi-turn agent (L07+) is fighting the context window, and the techniques in L17 (context management) and L19 (RAG) exist to push back against that pressure.
 
 3. **Explain temperature and sampling.** Concretely:
    - Describe what the model is doing on a single forward pass (producing a probability distribution over the next token) and how a sampler turns that distribution into a chosen token.
@@ -54,7 +54,7 @@ By the end of L01, a student should be able to:
 - **The context window is a hard ceiling on everything the model considers at once — input *and* output combined.** Students often think of "the prompt" as the only thing that consumes window. In reality the system message, prior turns, tool definitions (relevant from L04 onward), and the model's own response all share the same budget. This single fact drives the design of half the techniques in this course.
 - **The model produces a probability distribution; the sampler picks one token from it.** This is the right level of abstraction for the audience — too high and "temperature" becomes mystical, too low and we're teaching transformer internals. Everything about reproducibility, creativity, and "why did it answer differently this time" follows from this one diagram.
 - **Temperature 0 is *low* variance, not *zero* variance.** Floating-point non-determinism, server-side batching, and tie-breaking between equally-likely tokens all leak through. Promising students "deterministic output" sets them up to be confused later when an eval flakes.
-- **You pay per token, both directions, every call.** Input and output prices differ. Multi-turn conversations re-bill the entire history. There is no free server-side memory. This is the foundation that makes prompt caching (a topic the SDK exposes), context management (L14), and retrieval (L15) make sense as cost-and-quality moves rather than abstract "best practices."
+- **You pay per token, both directions, every call.** Input and output prices differ. Multi-turn conversations re-bill the entire history. There is no free server-side memory. This is the foundation that makes prompt caching (a topic the SDK exposes), context management (L17), and retrieval (L19) make sense as cost-and-quality moves rather than abstract "best practices."
 - **The four primitives are connected, not independent.** Tokens feed into context-window math; context-window math feeds into cost; sampling temperature affects how many output tokens you tend to generate. A change to one cascades. The lesson should land them as a *system*, not as four bullet points.
 
 ## Common student confusions to watch for
@@ -80,7 +80,7 @@ The single sentence to leave students with at the end of L01 is something like: 
 
 - <!-- *NEED INPUT*: estimated lecture duration — best guess 60–75 minutes as one lecture covering all four objectives, with the lab handling hands-on tokenization and cost estimation. -->
 - <!-- *NEED INPUT*: do we use the Anthropic SDK exclusively from L01, or briefly show `tiktoken` / a tokenizer comparison so students see that tokenization is a *family* of choices (BPE, WordPiece, etc.) made differently by different vendors? -->
-- <!-- *NEED INPUT*: is prompt caching introduced here (as a foreshadow when discussing the "every call re-sends history" cost surprise), or strictly deferred to L14 (context management)? -->
+- <!-- *NEED INPUT*: is prompt caching introduced here (as a foreshadow when discussing the "every call re-sends history" cost surprise), or strictly deferred to L17 (context management)? -->
 - <!-- *NEED INPUT*: should "rate limits" (RPM/TPM, retry/backoff) sit in L01 alongside cost, or be deferred until students are running multi-step agents and actually hit them in L07? -->
 - <!-- *NEED INPUT*: confirm that L01 teaches Anthropic's Claude API specifically vs. a provider-agnostic framing — affects whether the tokenizer demo uses Anthropic's token-counting endpoint, `tiktoken`, both, or a generic explanation. -->
 - <!-- *NEED INPUT*: prerequisite-API-key setup — handled in a pre-lesson onboarding doc, in L01 itself, or as the first lab? Determines whether the cost-estimation objective uses real spend. -->

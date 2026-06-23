@@ -154,7 +154,7 @@ The teacher should have, before the first demo starts:
 - The three error classes are *interfaces*, not just edge cases. The model's recovery behavior is determined by the shape of the error.
 - A side effect that isn't named in the description is a side effect the model can't reason about — and therefore can't avoid. Naming it isn't paranoia; it's part of the contract.
 - Idempotency is a *system* concern, not just a tool-author concern. Even a perfectly described tool can be called twice by a confused model. The mitigation lives at the runtime/design layer.
-- Bridge forward: L12 (human-in-the-loop and approval gates) revisits this exact tension for high-stakes side effects. L05 plants the seed; L12 builds the structure.
+- Bridge forward: L15 (human-in-the-loop and approval gates) revisits this exact tension for high-stakes side effects. L05 plants the seed; L15 builds the structure.
 
 **If the demo misbehaves:**
 
@@ -179,6 +179,6 @@ If time allows, run one final demo that previews L06: take one of the well-desig
 - <!-- *NEED INPUT*: which model class(es) anchor the demos — see top-of-file pre-flight. This decision propagates to every demo, especially Demo 2 where the description-quality gap widens on smaller models. -->
 - <!-- *NEED INPUT*: are the demos run in a Jupyter notebook the teacher projects, or in a slide-embedded REPL, or via a custom demo runner script? Affects how the tool-registry swap (good vs. bad variants) is wired. -->
 - <!-- *NEED INPUT*: should Demo 4's recoverable-error case introduce *runtime-level* retry logic with backoff, or stay strictly at the model-visible layer? Going deeper foreshadows L07 (hand-rolled agent loop), which may be the better home. -->
-- <!-- *NEED INPUT*: should the side-effect discussion in Demo 4 introduce typed effects (read vs. write vs. external) or keep it informal? Mirrors the same open question in [objectives.md](objectives.md). Forward link to L12 (approval gates) may be sufficient. -->
+- <!-- *NEED INPUT*: should the side-effect discussion in Demo 4 introduce typed effects (read vs. write vs. external) or keep it informal? Mirrors the same open question in [objectives.md](objectives.md). Forward link to L15 (approval gates) may be sufficient. -->
 - <!-- *NEED INPUT*: do the L05 demo tools share an implementation with the L05 lab tools, or are lab tools designed from scratch by students? Affects how much of the demo code is reusable. Mirrors the lab-design question in [objectives.md](objectives.md). -->
 - <!-- *NEED INPUT*: a pointer/link to where the demo tools live as code (a `demos/` subdir? inline in a notebook?) — not yet decided in non-draft docs. -->

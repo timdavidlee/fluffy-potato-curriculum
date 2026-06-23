@@ -24,7 +24,7 @@ If a student is shaky on any of these, redirect to the corresponding L01–L03 l
 
 ## Vocabulary the lesson introduces
 
-These terms recur across L05–L18, so the lesson must land them clearly:
+These terms recur across L05 and the later tool/agent lessons, so the lesson must land them clearly:
 
 - **Tool** — a callable in the application (typically a Python function) that the model can request via the tool-call protocol.
 - **Tool definition / schema** — a structured description (name, natural-language description, JSON-Schema input shape) passed to the model alongside the prompt. Tells the model what tools exist and how to invoke them.
@@ -55,7 +55,7 @@ By the end of L04, a student should be able to:
 3. **Describe the tool-call protocol.** Concretely:
    - Explain in one or two sentences that *tool calling is a protocol the model has been trained to participate in*, not a runtime capability of the model. The model emits structured tokens; the application interprets them. The model does not "execute" anything.
    - Name the three actors in a single round-trip — model, application, tool — and which one performs each step (decide to call → emit tool-call block → validate arguments → run the function → format the result → continue the conversation).
-   - Explain why tool definitions are passed on *every* request (the model is stateless across calls; the schema is part of the prompt) and what that implies for token cost (foreshadow L09 on model power and L14 on context management — every tool definition is paid for, every request).
+   - Explain why tool definitions are passed on *every* request (the model is stateless across calls; the schema is part of the prompt) and what that implies for token cost (foreshadow L10 on model power and L17 on context management — every tool definition is paid for, every request).
    - Recognize that the *decision to call a tool* is a reasoning step, and that L03's CoT/scratchpad/when-not-to-reason guidance applies inside that decision (reinforce, do not re-teach).
 
 ## Main points the lecture should land
@@ -66,9 +66,9 @@ By the end of L04, a student should be able to:
 
 - **The round-trip is conversational.** A single tool-using exchange is *at minimum* four messages in the history: the user's question, the assistant's tool-call request, the application's tool-result message, and the assistant's final answer. Students must build the intuition that *every* tool call grows the message history — not as a side effect, but as the protocol itself.
 
-- **The model is stateless across calls.** Every request must include the full tool definition list and the full conversation history (or a compaction of it — but that is L14's territory). Students often assume "I told the model about the tool last turn, so it remembers." It does not. The schema is in the prompt every time.
+- **The model is stateless across calls.** Every request must include the full tool definition list and the full conversation history (or a compaction of it — but that is L17's territory). Students often assume "I told the model about the tool last turn, so it remembers." It does not. The schema is in the prompt every time.
 
-- **Tools cost tokens, twice over.** The tool *definition* is in every prompt; the tool *result* is in the message history forever after. A 500-token tool definition added to a 10-turn conversation costs roughly 5,000 input tokens before any tool is even called. This is why L09 (model power) and L14 (context management) come back to tool-cost reasoning.
+- **Tools cost tokens, twice over.** The tool *definition* is in every prompt; the tool *result* is in the message history forever after. A 500-token tool definition added to a 10-turn conversation costs roughly 5,000 input tokens before any tool is even called. This is why L10 (model power) and L17 (context management) come back to tool-cost reasoning.
 
 - **The model can hallucinate tool calls.** Wrong tool name, wrong argument types, made-up tools, missing required args, extra unspecified args. The application is responsible for catching these. Showing one hallucination in the lecture is more educational than ten clean runs — the same way L03 used a tag-violation moment to teach that scratchpad contracts are best-effort.
 
@@ -80,7 +80,7 @@ By the end of L04, a student should be able to:
 - *"If I define a tool, the model will use it."* Not necessarily. Tool selection is a sampling decision, conditioned on the prompt, the conversation, and the tool description. A vague description of a tool is a tool the model will skip. (This is the bridge to L05's schema-design lesson.)
 - *"Tool calls are deterministic."* They are not. Same prompt, same schema, the model may call or skip the tool, and may pass slightly different arguments across runs.
 - *"Tool results are part of the assistant message."* They are not. By convention, the application puts the tool result in a *user-role* message (or a dedicated tool-role message, depending on the SDK). The conversation alternates assistant↔user even when one of those "users" is the application speaking on the user's behalf.
-- *"More tools = better agent."* More tools means more schema text in every prompt, more chances to mis-pick, and more edge cases to validate. Foreshadow L05 ("Designing good tools") and L17 (multi-agent / subagent), where the answer to "too many tools" is sometimes "split the agent."
+- *"More tools = better agent."* More tools means more schema text in every prompt, more chances to mis-pick, and more edge cases to validate. Foreshadow L05 ("Designing good tools") and L21 (multi-agent / subagent), where the answer to "too many tools" is sometimes "split the agent."
 - *"I can force the model to always call this tool."* Most APIs offer `tool_choice` controls (auto / any / none / specific) that bias the decision, but even forced choice does not guarantee well-formed arguments — only that *some* tool call will be attempted. <!-- *NEED INPUT*: include `tool_choice` mechanics here, or defer to L05? Currently leaning *brief mention here, deeper in L05.* -->
 
 ## Bridge to L05
