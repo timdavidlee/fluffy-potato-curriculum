@@ -1,5 +1,6 @@
 ---
 description: Run the full pre-commit gate (format, lint, typecheck, tests)
+model: sonnet
 ---
 
 Run the complete pre-commit gate for this repo, in order, and report results.
