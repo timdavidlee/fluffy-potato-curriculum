@@ -131,6 +131,14 @@ docs as decisions land.
       lesson); concept-first (hand-roll a JIT skill loader on the L12 agent) then real Anthropic Agent
       Skills `SKILL.md`. Taxonomy: tool = *called*, skill = *read on demand*, system prompt = *always seen*.
       Markers open in both docs (tooling, exact SKILL.md format, depth/duration target).
+      ⚠️ L20's "final lesson / capstone" self-framing is now **stale** — L21 follows it in the mini cut;
+      reconcile when L20 is regenerated (see L21 item 1).
+- [x] **L21 (Skill patterns & composition) — STAGE 1 COMPLETE** (objectives + demos, 2026-07-01).
+      Composition capstone of the skills thread; classify 3 archetypes → author each → compose (sequential
+      handoff + shared sub-skill) → reason about the dependency graph & JIT loading → 3 anti-patterns.
+      Runtime = L11/L12 LangGraph agent + `list_skills`/`load_skill` LangChain tools. Open items tracked
+      in **[2026-07-01-l21-skill-composition.md](2026-07-01-l21-skill-composition.md)** (~15 items; 3 need a
+      human call, rest confirm-the-default).
 - [ ] `demos_or_activities.md` for **L08**, **L09**, **L11**, **L12** (objectives done; demos not started).
 - [ ] Stage 2 (`generate-materials-from-roadmap`) for L08/L09/L11/L12/L20 — also authors the `common/`
       reference modules per the decided schemas.

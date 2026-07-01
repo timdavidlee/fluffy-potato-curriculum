@@ -42,3 +42,11 @@ and `tracks.toml` in sync when lessons change.
 | L23 | Evaluation revisited                                          |      |  ✅  |
 
 Mini teaching order: L01 → L02 → L04 → L05 → L07 → L08 → L09 → L11 → L12 → L20 → L21.
+
+## Course wrap-ups
+
+Each track closes with a wrap-up doc (what was covered · takeaways · where to go next) — these,
+not any lesson, own the "end of the course" framing:
+
+- [MINI_WRAPUP.md](MINI_WRAPUP.md) — closes the mini cut (read after L21).
+- [FULL_WRAPUP.md](FULL_WRAPUP.md) — closes the full course (read after L23).
