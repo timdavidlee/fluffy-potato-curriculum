@@ -21,7 +21,7 @@ transfer: LangSmith calls a case an *Example* (``inputs`` / ``reference_outputs`
 a scorer an *Evaluator* returning ``{key, score}``, and the runner ``evaluate()``;
 Langfuse calls a case a *dataset item* with an expected output and a *score*.
 Exact field-name fidelity to any one vendor is **not** the goal — recognizable
-structure is. This is a *first pass*; L22 scales the same discipline to multi-step
+structure is. This is a *first pass*; L23 scales the same discipline to multi-step
 graphs, retrieval quality, LLM-as-judge done properly, and multi-agent systems.
 
 Promoted to ``common/`` (alongside ``agent_loop.py`` and ``tracing.py``) so the

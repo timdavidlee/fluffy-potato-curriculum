@@ -2,7 +2,7 @@
 
 > Parent design doc: [CURRICULUM_PRD.md](../../CURRICULUM_PRD.md) (lesson-plan row L20).
 > Folder conventions: [docs/origin/CLAUDE.md](../../CLAUDE.md).
-> Neighbors: in the full plan, L19 (RAG pipeline) precedes and L21 (Multi-agent / subagent architecture) follows (neither roadmap is written yet). **In the mini cut, L20 is the final lesson** — the previous taught lesson is [L12 Shallow agents in LangGraph](../L12/objectives.md), and L06 (MCP) is **not** in the mini cut.
+> Neighbors: in the full plan, L19 (RAG pipeline) precedes and L22 (Multi-agent / subagent architecture) follows (neither roadmap is written yet). **In the mini cut, L20 is the final lesson** — the previous taught lesson is [L12 Shallow agents in LangGraph](../L12/objectives.md), and L06 (MCP) is **not** in the mini cut.
 
 ## Where this lesson sits
 
@@ -12,7 +12,7 @@ By L20, students have built and reasoned about the full agent stack: prompting a
 
 This lesson is **concept-first, then tooled**, matching the rest of the course (L08 hand-builds a trace before Langfuse; L12 hand-builds the loop before LangGraph). Students first build a **minimal just-in-time skill loader** on the agent they already own (the L07 loop or the L12 graph): the agent sees a list of skill *names + descriptions*, and only when it picks one does the full instruction file get read into context. Once they've felt the mechanism, they meet the real thing — **Anthropic Agent Skills** (the same `SKILL.md`-style format this very curriculum is authored with, under `.claude/skills/`) — and recognize it as the production version of what they just built. <!-- *NEED INPUT*: confirm the concept-first approach — hand-roll a tiny JIT skill loader on the L07/L12 agent, then show Anthropic Agent Skills / Claude Code skills as the real version. Recommendation: yes — it matches the course's hand-roll-then-tool spine (L08 trace→Langfuse, L12 loop→LangGraph) and demystifies "skills" instead of presenting them as framework magic. -->
 
-In the mini cut this is the **capstone**: it ties together tools (L04/L05), prompting (L02), and the agent loop (L07/L12) into the question "*where should a capability live?*" In the full plan it also sets up L21 (multi-agent), where a subagent is itself a kind of loadable capability.
+In the mini cut this is the **capstone**: it ties together tools (L04/L05), prompting (L02), and the agent loop (L07/L12) into the question "*where should a capability live?*" In the full plan it also sets up L22 (multi-agent), where a subagent is itself a kind of loadable capability.
 
 ## Prerequisites
 
@@ -92,7 +92,7 @@ Define these explicitly and reuse them verbatim through the labs:
 
 **In the mini cut, L20 is the final lesson and serves as a capstone:** it reframes everything students built — tools (L04/L05), prompts (L02), the agent loop (L07) and its LangGraph form (L11/L12) — around the single question *"where should a capability live, and when should it be in context?"* A good closing exercise has students take a capability they added to their L12 agent and decide (and justify) whether it belongs as a tool, a skill, or system-prompt content.
 
-**In the full plan, L20 bridges to L21 (Multi-agent / subagent architecture):** a subagent is itself a loadable, specialized capability, and the skill-vs-tool-vs-prompt "where does capability live" framing extends naturally to "when is a whole *subagent* the right container." It also leans on L06 (MCP) for the fuller capability-packaging taxonomy and L17 (context management) for the broader JIT-loading picture. <!-- *NEED INPUT*: confirm the dual framing — capstone in the mini cut (last lesson), bridge-to-L21 in the full course. When L21's roadmap is authored, frame a subagent as "capability as a whole agent," reusing L20's where-should-capability-live lens rather than re-introducing it. -->
+**In the full plan, L20 bridges to L22 (Multi-agent / subagent architecture):** a subagent is itself a loadable, specialized capability, and the skill-vs-tool-vs-prompt "where does capability live" framing extends naturally to "when is a whole *subagent* the right container." It also leans on L06 (MCP) for the fuller capability-packaging taxonomy and L17 (context management) for the broader JIT-loading picture. <!-- *NEED INPUT*: confirm the dual framing — capstone in the mini cut (last lesson), bridge-to-L22 in the full course. When L22's roadmap is authored, frame a subagent as "capability as a whole agent," reusing L20's where-should-capability-live lens rather than re-introducing it. -->
 
 ## Open authoring questions
 

@@ -3,6 +3,16 @@
 Student-facing lesson materials. Each `L<NN>/` directory holds the generated teaching
 artifacts for one lesson (zero-padded, monotonically increasing — `L01` is taught first).
 
+## Mini vs full tracks
+
+Lesson directories stay **flat** (`L01/` … `L23/`) — there is no `mini/` or `full/`
+subfolder. Track membership is data, not directory structure: [tracks.toml](tracks.toml)
+is the single source of truth for which lessons belong to the mini vs full course
+(`mini` is always a subset of `full`), and [SYLLABUS.md](SYLLABUS.md) is the readable
+view. Both mirror the master + "Condensed Mini Lesson Plan" tables in
+`docs/origin/CURRICULUM_PRD.md` — keep the PRD and `tracks.toml` in sync when lessons
+change.
+
 ## Where the source material lives
 
 These directories are **generated from roadmaps**, not authored by hand. The source of truth
