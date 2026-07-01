@@ -2,7 +2,7 @@
 
 ```yaml
 title: "L09 lecture: Carry the eval set forward"
-keywords: evaluation, practice, ratchet, carry forward, langgraph, L11, L12, L22, llm-as-judge, langfuse datasets
+keywords: evaluation, practice, ratchet, carry forward, langgraph, L11, L12, L23, llm-as-judge, langfuse datasets
 estimated duration: 8
 ```
 
@@ -44,9 +44,9 @@ estimated duration: 8
 ### slide 3.1 L09 is a first pass, on purpose
 
 - text: a tiny readable harness over the hand-rolled loop is *enough* to establish the habit. Naming the boundary keeps the lesson honest and the scope small.
-- table: what L09 deliberately leaves to L22.
+- table: what L09 deliberately leaves to L23.
 
-| L09 (first pass) | L22 (evaluation revisited) |
+| L09 (first pass) | L23 (evaluation revisited) |
 | --- | --- |
 | one hand-rolled loop | multi-step LangGraph graphs: per-node vs. end-to-end metrics |
 | outcome + trajectory checks | retrieval quality for RAG (precision@k / recall@k) |
@@ -56,7 +56,7 @@ estimated duration: 8
 
 ### slide 3.2 The tooling forward pointer
 
-- text: the same self-hosted **Langfuse** you met in L08 has a *datasets / experiments* feature that stores eval runs and scores — the platform version of the `evaluate()` you hand-built. L09 name-drops it; L22 uses it.
+- text: the same self-hosted **Langfuse** you met in L08 has a *datasets / experiments* feature that stores eval runs and scores — the platform version of the `evaluate()` you hand-built. L09 name-drops it; L23 uses it.
 - text: the payoff of building the harness by hand first is the same as L08's: when you open the platform, the dataset items, scores, and experiments are the exact `EvalCase` / `EvalResult` / run structure you already wrote.
 - text: closing line: *"you built the minimal version by hand, so the real eval platform is just your harness, hosted — and every agent you build from here comes with an eval set."*
 

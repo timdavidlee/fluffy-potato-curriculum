@@ -64,8 +64,9 @@ lesson's `objectives.md` once it exists.
 | L18 | Embeddings and vector similarity                      | explain embeddings as a vector representation of text; compute and reason about cosine similarity / nearest-neighbor lookup; intuit *why* semantically related text scores closer; run a similarity-only lab without a vector DB |
 | L19 | RAG pipeline                                          | build a minimal RAG pipeline (chunk, embed, store, retrieve, augment) on top of L18's similarity primitives; introduce a vector store as the operational layer; contrast in-context memory (message history, scratchpad) with external memory (vector store, database); decide when retrieval is needed vs. fitting content directly in the context window |
 | L20 | Skills: just-in-time capabilities for agents          | describe what a skill is and how it differs from a tool or prompt; author a markdown skill with instructions and supporting scripts; reason about just-in-time loading vs. always-on context; decide when a capability belongs as a skill vs. a tool vs. system-prompt content |
-| L21 | Multi-agent / subagent architecture (stretch)         | design a supervisor + workers pattern; explain when subagents help vs. hurt                               |
-| L22 | Evaluation revisited                                  | extend the L09 eval discipline to complex systems: evaluate a multi-step LangGraph agent (per-node vs. end-to-end metrics); evaluate retrieval quality for RAG (precision@k / recall@k); reason about LLM-as-judge — what it can and can't reliably score; evaluate a multi-agent system (subagent quality vs. orchestration quality); scale eval cost (sampling strategies, CI gating) |
+| L21 | Skill patterns & composition                          | classify a skill by archetype (API/integration recipe with a bundled script, review/rubric of rules or principles, operating-model runbook); author each archetype in the `SKILL.md` format; compose skills — sequential handoff and a shared lower-level skill invoked by multiple operating skills; reason about the skill dependency graph and just-in-time loading across it; recognize composition anti-patterns (over-chaining, a shared "skill" that's really a tool, description collisions) |
+| L22 | Multi-agent / subagent architecture (stretch)         | design a supervisor + workers pattern; explain when subagents help vs. hurt                               |
+| L23 | Evaluation revisited                                  | extend the L09 eval discipline to complex systems: evaluate a multi-step LangGraph agent (per-node vs. end-to-end metrics); evaluate retrieval quality for RAG (precision@k / recall@k); reason about LLM-as-judge — what it can and can't reliably score; evaluate a multi-agent system (subagent quality vs. orchestration quality); scale eval cost (sampling strategies, CI gating) |
 
 ## Condensed Mini Lesson Plan
 
@@ -77,10 +78,11 @@ anchored on the five course objectives (tool design, when-to-use-a-tool,
 shallow LangGraph agent, eval, tracing) and drops everything that doesn't
 directly serve them. The multi-agent stretch is the first thing out.
 
-**Kept (10 lessons, ~24 hrs at the full-course per-lesson rate):**
+**Kept (11 lessons, ~26 hrs at the full-course per-lesson rate):**
 
-Skills (L20) is included by explicit request on top of the five-objective core — it is the one
-kept lesson not anchored to a course objective; it pushes the cut slightly past the ~20 hr floor.
+Skills (L20) and skill patterns & composition (L21) are included by explicit request on top of the
+five-objective core — the two kept lessons not anchored to a course objective; they push the cut
+past the ~20 hr floor. Together they make "compose skills into a system" the mini-cut capstone.
 
 | #   | Lesson title                       | Why it stays                                                                 |
 | --- | ---------------------------------- | ---------------------------------------------------------------------------- |
@@ -94,6 +96,7 @@ kept lesson not anchored to a course objective; it pushes the cut slightly past 
 | L11 | Explicit graphs & workflows (DAGs) | Workflows-before-agents: deterministic graph before the model-driven loop   |
 | L12 | Shallow agents in LangGraph        | Covers the *design a shallow agent in LangGraph* objective                   |
 | L20 | Skills: just-in-time capabilities  | Added by request; depends on tools + prompting, which the mini course keeps  |
+| L21 | Skill patterns & composition      | Added by request; the composition capstone — compose skills into a system  |
 
 **Cut, in rough order of "first to add back if the budget grows":**
 
@@ -106,8 +109,8 @@ kept lesson not anchored to a course objective; it pushes the cut slightly past 
 7. **L14 Agent middleware and conditional tools** — advanced agent-control mechanism; defer until students have a working shallow agent and know the patterns
 8. **L16 Deep vs. shallow** — framing only; collapses into L17 cleanly
 9. **L17 Context management** — secondary in a short course; the mini course doesn't build long enough sessions to feel the problem
-10. **L21 Multi-agent (stretch)** — already stretch in the full course
-11. **L22 Evaluation revisited** — depends on multi-step / RAG / multi-agent systems the mini course doesn't build
+10. **L22 Multi-agent (stretch)** — already stretch in the full course
+11. **L23 Evaluation revisited** — depends on multi-step / RAG / multi-agent systems the mini course doesn't build
 
 
 

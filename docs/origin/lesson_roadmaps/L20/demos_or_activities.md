@@ -141,9 +141,9 @@ Don't teach the SDK's mechanics — just land that the hand-rolled concept and t
 
 <!-- *NEED INPUT*: include this capstone demo as the mini-cut closer, or hold the real-Agent-Skills reveal for a lab? Recommendation: include it — it's the satisfying "you built the real thing" capstone moment for the final mini-cut lesson. -->
 
-## Optional bridge demo — toward multi-agent (L21, full course only)
+## Optional bridge demo — toward multi-agent (L22, full course only)
 
-For the full-course track only (L21 follows): one line and a sketch — a *subagent* is capability-as-a-whole-agent, the same "where should capability live" lens scaled up from a skill to an entire agent. Skip entirely in the mini cut, where L20 is the final lesson.
+For the full-course track only (L22 follows): one line and a sketch — a *subagent* is capability-as-a-whole-agent, the same "where should capability live" lens scaled up from a skill to an entire agent. Skip entirely in the mini cut, where L20 is the final lesson.
 
 ## Pacing notes for the teacher
 

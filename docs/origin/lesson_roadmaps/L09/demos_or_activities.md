@@ -123,7 +123,7 @@ The teacher should have, before the first demo starts:
 **Pre-flight:**
 
 - The token/cost readout from pre-flight (trace `usage` fields, or the run open in Langfuse).
-- A tiny LLM-as-judge scorer prepared: a small judge prompt that scores a `final_text` for a quality a cheap check can't express (e.g. "did the answer acknowledge the failures gracefully?"). Keep it minimal and clearly flagged as "the L22 version is more rigorous." <!-- *NEED INPUT*: confirm the one judged quality and the judge prompt. Recommendation: judge the flaky_fetch task's "gave up gracefully" answer — a genuinely fuzzy quality no substring check captures — so the judge earns its place rather than duplicating a cheap check. -->
+- A tiny LLM-as-judge scorer prepared: a small judge prompt that scores a `final_text` for a quality a cheap check can't express (e.g. "did the answer acknowledge the failures gracefully?"). Keep it minimal and clearly flagged as "the L23 version is more rigorous." <!-- *NEED INPUT*: confirm the one judged quality and the judge prompt. Recommendation: judge the flaky_fetch task's "gave up gracefully" answer — a genuinely fuzzy quality no substring check captures — so the judge earns its place rather than duplicating a cheap check. -->
 
 **Live script:**
 
@@ -136,7 +136,7 @@ The teacher should have, before the first demo starts:
 **What to highlight:**
 
 - **An eval run is not free** — it's N cases × K samples × several model calls each. "More cases / more samples" is a deliberate cost/confidence trade, not "max it out."
-- **Every scorer trades cost for judgment.** Exact assertions are cheap and dumb; humans are expensive and wise; the LLM-as-judge sits in between with its *own* error modes. The L09 judge is a one-screen illustration; L22 unpacks what an LLM-judge can and can't reliably score.
+- **Every scorer trades cost for judgment.** Exact assertions are cheap and dumb; humans are expensive and wise; the LLM-as-judge sits in between with its *own* error modes. The L09 judge is a one-screen illustration; L23 unpacks what an LLM-judge can and can't reliably score.
 - The token numbers you're reading are the *same* fields L08 told you to trace and L01 taught you to cost. The eval cost model is those two lessons cashing out.
 
 **If the demo misbehaves:**
@@ -150,9 +150,9 @@ If time allows, close on the practice the PRD asks L09 to *establish*. Don't bui
 
 1. State the rule on a slide and say it out loud: **when you build or change an agent, you add or run an eval set.** The L09 harness in `common/evals.py` is the seed every later agent plugs into.
 2. Preview L12: the *same* `EvalCase`s built today will run against the **LangGraph shallow agent** students build in L12 — *same cases, different implementation, did anything regress?* That is the cleanest possible demonstration of the ratchet, and it's already settled by the shared-`common/` decision (L12's lab imports `common/evals.py`). (In the mini cut the very next lesson is [L11 (workflows/DAGs)](../L11/objectives.md), whose deterministic flow is itself trivially evaluable — a natural place to reinforce the habit even earlier.)
-3. Signpost L22 as "where this scales" — multi-step graphs, retrieval quality (precision@k / recall@k), LLM-as-judge done properly, multi-agent systems. L09 is a *first pass* on purpose; naming the boundary keeps the lesson honest and the scope small.
+3. Signpost L23 as "where this scales" — multi-step graphs, retrieval quality (precision@k / recall@k), LLM-as-judge done properly, multi-agent systems. L09 is a *first pass* on purpose; naming the boundary keeps the lesson honest and the scope small.
 
-Don't teach LangGraph or the L22 machinery here — just land that the tiny harness students just built is the thing they'll carry forward, the same way L08's hand-rolled trace mapped onto Langfuse.
+Don't teach LangGraph or the L23 machinery here — just land that the tiny harness students just built is the thing they'll carry forward, the same way L08's hand-rolled trace mapped onto Langfuse.
 
 <!-- *NEED INPUT*: include this bridge demo as the L09 closer, or fold its "carry it forward" message into Demo 3's ratchet beat? Recommendation: keep it as a short explicit closer — objective 5 is a *practice* objective, and a named handoff lands it better than a buried aside. -->
 

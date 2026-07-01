@@ -1,0 +1,53 @@
+# Curriculum track membership — the single source of truth for which lessons
+# belong to the "mini" vs "full" course.
+#
+# The lesson directories under this folder stay FLAT (L01, L02, ... L23); a
+# lesson belongs to a track by membership here, not by its location on disk.
+# This mirrors docs/origin/CURRICULUM_PRD.md — `full` is the master lesson
+# plan, and `mini` is the "Condensed Mini Lesson Plan" cut. `mini` must always
+# be a subset of `full` (every mini lesson is also a full lesson), and both
+# lists are in teaching order.
+#
+# When you add, remove, or renumber a lesson: update the PRD table AND this
+# file together so they don't drift.
+
+[full]
+# Master lesson plan — all 23 lessons, taught in numeric order.
+order = [
+  "L01", "L02", "L03", "L04", "L05", "L06", "L07", "L08", "L09", "L10",
+  "L11", "L12", "L13", "L14", "L15", "L16", "L17", "L18", "L19", "L20",
+  "L21", "L22", "L23",
+]
+
+[mini]
+# Condensed ~24 hr cut: the five-objective core (tool design, when-to-use-a-tool,
+# shallow LangGraph agent, eval, tracing) plus Skills (L20) and skill patterns &
+# composition (L21) by explicit request.
+order = [
+  "L01", "L02", "L04", "L05", "L07", "L08", "L09", "L11", "L12", "L20", "L21",
+]
+
+[titles]
+L01 = "LLM and token basics"
+L02 = "Prompting fundamentals"
+L03 = "Teaching an LLM to think via prompting"
+L04 = "Tool calling: how it works"
+L05 = "Designing good tools"
+L06 = "MCP: packaging tools as a portable contract"
+L07 = "Hand-rolled agent loop"
+L08 = "Tracing: reading what your agent did"
+L09 = "Evaluation: first pass"
+L10 = "Choosing model power for the task"
+L11 = "Explicit graphs & workflows in LangGraph (deterministic DAGs)"
+L12 = "Shallow agents in LangGraph"
+L13 = "LangGraph design patterns"
+L14 = "Agent middleware and conditional tools"
+L15 = "Human-in-the-loop and approval gates"
+L16 = "Deep agents vs. shallow agents"
+L17 = "Static system prompt vs. context management"
+L18 = "Embeddings and vector similarity"
+L19 = "RAG pipeline"
+L20 = "Skills: just-in-time capabilities for agents"
+L21 = "Skill patterns & composition"
+L22 = "Multi-agent / subagent architecture (stretch)"
+L23 = "Evaluation revisited"
