@@ -14,8 +14,9 @@ Everything in this directory should be treated as markdowns used for other ai-ag
 ```
 CLAUDE.md # (this file)
 CURRICULUM_PRD.md # the primary design file
+LECTURES.md # general guidelines for designing lectures
 LAB_DESIGN.md # general guidelines for designing labs
-
+PROJECT_BRIEF_DESIGN.md # how to write an end-of-week project brief
 ```
 
 ## LESSON ROADMAPS 

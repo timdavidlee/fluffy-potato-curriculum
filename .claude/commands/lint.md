@@ -1,5 +1,6 @@
 ---
 description: Lint (and format-check) the codebase with ruff
+model: haiku
 ---
 
 Run the ruff lint gate for this repo and report results.

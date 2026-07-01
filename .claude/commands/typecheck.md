@@ -1,5 +1,6 @@
 ---
 description: Type-check the codebase with pyright (strict)
+model: haiku
 ---
 
 Run the pyright type gate for this repo and report results.
