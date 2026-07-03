@@ -1,137 +1,193 @@
 # L04 Proctor Notes
 
-Notes for whoever runs the L04 labs. One section per problem, keyed by lab id and problem number.
-Times are rough and assume a semi-technical student with basic Python who completed L01–L03.
+Covers both L04 labs: **L0404** (prompt chaining) and **L0406** (routing + user-input branching +
+optional eval). Both run **fully offline** — a deterministic `StubChat` stands in for
+`ChatAnthropic`, so no API key is needed and every run is reproducible. The focus is **graph wiring**
+(state, nodes, edges, conditional routing), not model output. The lecture demos
+([L0403](L1103_lecture.ipynb), [L0405](L1105_lecture.ipynb)) use the real `ChatAnthropic` client; the
+labs deliberately don't, so the wiring is the only variable.
 
-> Cross-cutting note: the four teacher demos (L0403 a tool call is tokens / L0404 one wired
-> round-trip / L0406 trace the round-trip / L0408 three outcomes) plus the **L0405** lab make
-> **live** Claude calls and need `ANTHROPIC_API_KEY` set (copy `.env.example` to `.env`). The other
-> two labs stay **offline** (pure Python): **L0407** (trace a round-trip) and **L0409** (validate
-> tool calls). L0406 is also offline — it dissects a crafted transcript.
->
-> **Why the raw Anthropic SDK and not `potato_llm` in L04?** The course's `potato_llm` seam is
-> text-only — its `Message` cannot carry `tool_use`/`tool_result` blocks, which are exactly what L04
-> teaches. So the L04 notebooks call the raw Anthropic SDK directly; the API key still loads through
-> `common.config` (`require_anthropic_key`), never hard-coded. This is the one lesson that reaches
-> under the seam. (Open design question for the course: extend `potato_llm` to model tool blocks, or
-> keep L04+ on the raw SDK — flagged for the curriculum author.)
->
-> Because the model varies run to run, a live run may not reproduce every effect the prose calls
-> out — especially Demo 4 / L0409's hallucinated call. Dry-run the demos before class and clear any
-> cell outputs that hit the API before committing. The labs map to the L04 subgoals: **L0405** →
-> wire a single tool; **L0407** → trace one round-trip; **L0409** → describe the protocol by writing
-> the validation the application owns.
+> Keep repeating the lesson's spine: **in a workflow you wire the flow; the model lives inside the
+> nodes.** Every branch in these labs is decided by *code the student wrote* reading *state*, never
+> by the model deciding to call a tool. That's L14.
 
-## L0405_lab problem 1 — Send the first turn and find the tool call
+---
 
-- **Common gotchas:** forgetting `tools=[CALCULATOR_TOOL]` (so the model just answers in text and
-  there is no `tool_use` block to find); using `[0]` to grab the block instead of searching by type
-  (a response can lead with a `text` block before the `tool_use`); treating `tool_use.input` as a
-  JSON string (it is already a parsed dict).
-- **Unblockers:** "Call `client.messages.create(model=MODEL, max_tokens=400, tools=[CALCULATOR_TOOL],
-  messages=messages)`, then `next(b for b in resp.content if b.type == 'tool_use')`." If no
-  `tool_use` appears, the prompt may be too easy — `PROMPT` is large multiplication on purpose.
-- **Time:** ~7 min.
-- **Note:** needs `ANTHROPIC_API_KEY`.
+## L1104_lab problem 1 — The typed state
 
-## L0405_lab problem 2 — Dispatch: run the real function
+COMMON GOTCHAS:
+- Forgetting the `add` reducer on `steps` — writing `steps: list[str]` instead of
+  `steps: Annotated[list[str], add]`. Without it, each node *overwrites* `steps` and the final
+  state shows only the last node's name. The symptom: `result["steps"] == ["policy_check"]` instead
+  of all three. Have them re-read the reducer line in the setup of the lecture.
+- Importing `add` — it's `from operator import add` (already in the given setup cell). If they
+  retype the import, watch for `from operator import add` vs. trying `+`.
 
-- **Common gotchas:** passing the whole `tool_use.input` dict to `calculator` instead of
-  `input["expression"]`; skipping the name check (fine for one tool, but the habit matters once there
-  are several).
-- **Unblockers:** "`assert tool_use.name == 'calculator'`, then `calculator(tool_use.input['expression'])`."
-  The result is a string — that's what the tool_result wants.
-- **Time:** ~5 min.
-- **Key point:** *this* number is computed by the application; the number in the model's proposed
-  args was just generated tokens.
+UNBLOCKERS: Point at the docstring example in the solution-shaped prompt — five fields, only `steps`
+is annotated. A `TypedDict` is just a class with typed attributes and no body logic.
 
-## L0405_lab problem 3 — Continue: hand the result back
+TIME: 3–5 min. STRETCH: ask what reducer message history would need (append) — that's the L14 link.
 
-- **Common gotchas:** putting the `tool_result` in an `assistant` message instead of a **user**
-  message; forgetting to first append the assistant's `tool_use` turn (the API needs the call before
-  its result); omitting `tool_use_id`, or using a different id than the one the model emitted;
-  dropping `tools=` on the second call.
-- **Unblockers:** "Append `{'role':'assistant','content': first.content}`, then a `user` message whose
-  content is `[{'type':'tool_result','tool_use_id': tool_use.id,'content': result}]`. Call
-  `messages.create` again *with tools* and join the `text` blocks." Final answer should be
-  **43,123,800** (6,150 × 7,012).
-- **Time:** ~10 min.
+## L1104_lab problem 2 — The three nodes
 
-## L0405_lab problem 4 — Why re-send the tool definition? (written)
+COMMON GOTCHAS:
+- Returning the **whole state** instead of a partial update. A node returns only the fields it
+  changed (`{"parsed": ..., "steps": ["parse"]}`), and LangGraph merges it. Returning everything
+  usually still works but teaches the wrong model — correct it.
+- Reading `reply` instead of `reply.content`. The stub (like `ChatAnthropic`) returns an object;
+  the text is on `.content`. Wrap in `str(...)` to satisfy the typed return.
+- Forgetting to append to `steps` in each node — then problem 4's path looks wrong.
 
-- **Common gotchas:** "so the model remembers it" — backwards; the model is stateless and remembers
-  nothing between calls.
-- **Unblockers:** expected: the model is **stateless across calls**, so the tool definition (and the
-  whole history) is part of the prompt on *every* request; drop it and the model no longer knows the
-  tool exists. Tie to the L0406 demo's "tools cost tokens twice over."
-- **Time:** ~3 min.
+UNBLOCKERS: Remind them which stub each node uses — `parse` → `haiku`, `draft`/`policy_check` →
+`sonnet` — and that `policy_check`'s prompt must contain "compliance"/"policy" for the stub to
+return an `OK:` verdict (it's keyword-driven on purpose).
 
-## L0407_lab problem 1 — Summarize each message's blocks
+TIME: 8–12 min. STRETCH: have them make `policy_check` a *plain Python* check (no model) — a node
+need not call a model at all.
 
-- **Common gotchas:** assuming every `content` is a list (message 1's is a plain string); indexing
-  into a string character by character.
-- **Unblockers:** "If `content` is a `str`, return `'text'`; otherwise join `b['type']` for each block."
-  Expected: `text`, `tool_use`, `tool_result`, `text` down the four messages.
-- **Time:** ~6 min.
+## L1104_lab problem 3 — Wire, compile, render
 
-## L0407_lab problem 2 — Match the result to the request by id
+COMMON GOTCHAS:
+- Mixing up `add_node("name", fn)` (string name + function) and `add_edge("a", "b")` (two string
+  names). A frequent error is `add_edge(parse, draft)` passing the functions — pass the **names**.
+- Forgetting `set_entry_point("parse")` → compile error or a graph that never starts.
+- Forgetting the final `add_edge("policy_check", END)` → the run won't terminate cleanly.
+- `END` is imported in setup (`from langgraph.graph import END`); don't quote it like a node name.
 
-- **Common gotchas:** comparing the wrong fields (`id` vs `tool_use_id` live on different blocks);
-  reaching into the wrong message index.
-- **Unblockers:** "Message 2's content[0] is the `tool_use` (its `id`); message 3's content[0] is the
-  `tool_result` (its `tool_use_id`). Return whether they're equal." Expect `True`.
-- **Time:** ~5 min.
-- **Key point:** with one call in flight the id seems redundant; it becomes essential the moment two
-  calls are outstanding (L07).
+UNBLOCKERS: If compile fails, have them print the node/edge list mentally against the five-line recipe
+in the lecture (section 2.1). The `draw_mermaid()` output is the fastest check that the shape is right.
 
-## L0407_lab problem 3 — Tell the three outcomes apart
+TIME: 6–10 min. STRETCH: render `draw_mermaid_png()` if a renderer is available, else the Mermaid
+text is fine.
 
-- **Common gotchas:** classifying by the *number* of blocks rather than their types; treating a
-  `tool_use` with empty `input` as `answered` (it's `malformed` — the call was attempted).
-- **Unblockers:** "No `tool_use` block → `answered`. A `tool_use` whose `input` lacks `expression` →
-  `malformed`. Otherwise → `called`." Expected: A=called, B=answered, C=malformed.
-- **Time:** ~7 min.
+## L1104_lab problem 4 — Run the workflow
 
-## L0407_lab problem 4 — Why four messages? (written)
+COMMON GOTCHAS:
+- Forgetting `steps: []` in the initial state. With the `add` reducer, omitting the starting list
+  can raise or behave oddly — always seed it (`{"ticket": ..., "steps": []}`).
+- Expecting the *draft text* to be stable. It's a stub, so here it is; with a real model the wording
+  varies. The point is the **path** (`['parse','draft','policy_check']`) is stable — that's
+  determinism.
 
-- **Common gotchas:** counting three (forgetting the application's `tool_result` user turn) or
-  conflating the assistant's two turns.
-- **Unblockers:** expected: `user(question)` → `assistant(tool_use)` → `user(tool_result, produced by
-  the application)` → `assistant(final)`. Four is the minimum, not a fixed number.
-- **Time:** ~4 min.
+UNBLOCKERS: If the path isn't all three names, send them back to problem 1 (reducer) or problem 2
+(missing `steps` append).
 
-## L0409_lab problem 1 — Write the validator
+TIME: 3–5 min. STRETCH: invoke on a different ticket and confirm the path is unchanged.
 
-- **Common gotchas:** letting `calculator`'s `ValueError` propagate instead of catching it and
-  returning a `REJECTED` string; checking `expression` truthiness instead of membership (an empty
-  dict has no key); only handling one of the three failure classes.
-- **Unblockers:** "Three guards in order: unknown name → reject; `'expression' not in call.input` →
-  reject; else `try: calculator(...) except ValueError: reject`." The good call returns
-  `415668857`.
-- **Time:** ~8 min.
-- **Key point:** this *is* the protocol's safety layer — the application validates, the model only
-  proposes.
+## L1104_lab problem 5 — From stub to real model (written)
 
-## L0409_lab problem 2 — Run it over every crafted call
+EXPECTED ANSWER: Change only the **client construction** — `haiku = StubChat(HAIKU)` →
+`haiku = ChatAnthropic(model=HAIKU, api_key=require_anthropic_key())` (same for `sonnet`). The
+**node code never changes** because `StubChat` and `ChatAnthropic` share the same interface the nodes
+rely on: `.invoke(prompt).content`. That shared shape is exactly why a seam/stub is swappable.
 
-- **Common gotchas:** none beyond a stray crash if Problem 1's `validate_call` re-raises; if the loop
-  dies, the validator is letting an exception escape.
-- **Unblockers:** "Just `for call in CALLS: print(validate_call(call))`." Expect 1 OK and 3 REJECTED.
-- **Time:** ~3 min.
+COMMON GOTCHAS: Students say "rewrite the nodes." Redirect: the nodes only call `.invoke(...).content`
+— that contract is identical, so the node bodies are untouched.
 
-## L0409_lab problem 3 — The three outcomes (written)
+TIME: 3–5 min.
 
-- **Unblockers:** expected: (1) the model calls the tool with valid args; (2) it answers without the
-  tool; (3) it calls the tool with malformed/hallucinated args. Same three as L0407 problem 3, stated
-  in prose.
-- **Time:** ~3 min.
+---
 
-## L0409_lab problem 4 — Why doesn't the schema stop a bad call? (written)
+## L1106_lab problem 1 — Routing state + classify node
 
-- **Common gotchas:** "the schema validates the input" — it describes the input to the model but is
-  not enforced at *generation* time.
-- **Unblockers:** expected: the schema is part of the *prompt* — it tells the model what shape exists,
-  but the model still *samples* tokens and can emit malformed or invented arguments; nothing checks
-  them until the application does. The schema is a contract about shape, not a guarantee about
-  behavior.
-- **Time:** ~4 min.
+COMMON GOTCHAS:
+- `RouteState` needs **both** `category` (set by the model) and `user_choice` (set by the user in
+  problem 5). Students often add only one; the lab reuses one state type for both deciders.
+- The classifier must keep **only** a known label. If the stub/model returns extra words, the
+  `next((c for c in (...) if c in label), "general")` guard defaults to `general`. Skipping the
+  guard means an unknown label reaches the conditional edge and **raises at routing time**.
+
+UNBLOCKERS: Remind them the stub keys on **ticket content** words (charge/refund/twice → billing;
+error/500/crash → technical; else general). It deliberately ignores the instruction's listed
+category words.
+
+TIME: 6–10 min. STRETCH: ask why `classify` is on the *cheap* model — it only needs a one-word label.
+
+## L1106_lab problem 2 — The branch nodes
+
+COMMON GOTCHAS:
+- Three near-identical functions invite copy-paste bugs (e.g. the `technical` node returning
+  `"steps": ["billing"]`). Then problem 4's path prints the wrong branch name — a good catch.
+- Same `.content` / partial-update reminders as L0404 problem 2.
+
+UNBLOCKERS: A factory (`make_branch`) is fine if they prefer it (the demo uses one) — but three
+explicit functions are clearer and equally correct.
+
+TIME: 6–8 min. STRETCH: give one branch its own distinct prompt and confirm the trace still shows one
+branch span.
+
+## L1106_lab problem 3 — The conditional edge
+
+COMMON GOTCHAS:
+- The biggest conceptual miss: thinking `route` "asks the model." It does **not** — it returns
+  `state["category"]`, a label already in state. Say it out loud with them.
+- `add_conditional_edges("classify", route, {...})` — the **mapping** keys must match what `route`
+  returns and the values must be real node names. A mismatch (`{"bill": "billing"}` while `route`
+  returns `"billing"`) raises at runtime.
+- Forgetting to wire each branch to `END`.
+
+UNBLOCKERS: Have them print `draw_mermaid()` — the dashed conditional edges from `classify` should fan
+to all three branches, all converging on `END`.
+
+TIME: 8–12 min. STRETCH: what happens if `route` returns a key not in the mapping? (It raises — a
+nudge toward validating model output, an L02/L12 theme.)
+
+## L1106_lab problem 4 — Run and prove determinism
+
+COMMON GOTCHAS:
+- Same `steps: []` seeding gotcha as L0404 problem 4.
+- Expecting the *reply text* to prove determinism — it's the **path** (`out["steps"]`) that's the
+  invariant. The two-invocation equality check is the proof.
+
+UNBLOCKERS: If two runs differ, a node is mutating shared module state — check the nodes return fresh
+dicts and don't append to a global list.
+
+TIME: 4–6 min. STRETCH: ask how they'd *measure* path stability over many tickets — leads into
+problem 6.
+
+## L1106_lab problem 5 — Same graph, user-input branch
+
+COMMON GOTCHAS:
+- Confusing this with "the agent asks the user." Re-draw it: `user_choice` is **already in the
+  initial state** before the run; nothing is asked mid-run. The asking-mid-run (`interrupt`) version
+  is **L17**.
+- `route_by_user` must read `state["user_choice"]`, **not** call any model. Some students reflexively
+  add a model call — that defeats the whole point (no model in the routing decision).
+- The `intake` node is a plain pass-through returning `{"steps": ["intake"]}` — it exists only to
+  give the conditional edge a source node.
+
+UNBLOCKERS: The tell-tale check: feed a **technical** ticket with `user_choice="billing"` → the path
+must be `['intake', 'billing']`. If it routes to `technical`, they wired the edge to the classifier
+or read the wrong field.
+
+TIME: 8–12 min. STRETCH: combine — route on the user's choice, then read state inside the branch — to
+feel "user owns the edge, model works inside the node."
+
+## L1106_lab problem 6 (optional) — Evaluate the classifier
+
+COMMON GOTCHAS:
+- Calling `classify` with a bare string instead of a state dict — it takes `{"ticket": ..., "steps":
+  []}` and returns a dict; the label is `["category"]`.
+- Being surprised the pass rate isn't 4/4. **That's the lesson.** The last case ("crashing … want a
+  refund") mentions a refund (billing) *and* a crash (technical); the classifier checks billing
+  keywords first, so it labels it `billing` while the eval expects `technical`. Don't let them "fix"
+  the data to force 4/4 — the eval is doing its job by surfacing a real ambiguity.
+
+UNBLOCKERS: This is the L12 discipline inlined ("when you build something, you evaluate it"). One line:
+a deterministic workflow is the *easiest* thing to evaluate — same input → same path. This same eval
+set rides forward onto the L14 agent.
+
+TIME: 5–8 min. STRETCH: add two more cases; or change the classifier to check technical keywords
+first and watch which cases flip — eval as a feedback loop.
+
+## L1106_lab problem 7 — Workflow vs. agent (written)
+
+EXPECTED ANSWER: Add a **conditional edge that loops back to the model** (a back-edge / cycle) so the
+**model** decides whether to keep going (call a tool) or stop. That single back-edge converts the
+acyclic workflow into a cyclic, model-driven **agent** — and hands control of the path from the
+developer to the model. (It's the L10 loop, now as a graph edge; built for real in L14.)
+
+COMMON GOTCHAS: Answers that say "use a bigger model" or "add more nodes" miss it — the change is
+*structural* (a cycle) and *about control* (the model decides), not about capability or size.
+
+TIME: 3–5 min.

@@ -1,193 +1,139 @@
-# L11 Proctor Notes
+# L11 Proctor Notes — Tracing
 
-Covers both L11 labs: **L1104** (prompt chaining) and **L1106** (routing + user-input branching +
-optional eval). Both run **fully offline** — a deterministic `StubChat` stands in for
-`ChatAnthropic`, so no API key is needed and every run is reproducible. The focus is **graph wiring**
-(state, nodes, edges, conditional routing), not model output. The lecture demos
-([L1103](L1103_lecture.ipynb), [L1105](L1105_lecture.ipynb)) use the real `ChatAnthropic` client; the
-labs deliberately don't, so the wiring is the only variable.
+Covers both labs in this lesson: **L1103** (read traces, locate failures) and **L1105**
+(instrument and compare traces). Both labs are **pure Python, offline — no API key needed**;
+they drive the shared `agent_loop.run` with a scripted `FakeModel`, so every trace is
+deterministic. If a student's trace looks different from the solution, suspect an edited setup
+cell, not "the model did something else" — there is no live model here.
 
-> Keep repeating the lesson's spine: **in a workflow you wire the flow; the model lives inside the
-> nodes.** Every branch in these labs is decided by *code the student wrote* reading *state*, never
-> by the model deciding to call a tool. That's L12.
+General unblockers that apply across the lesson:
 
----
-
-## L1104_lab problem 1 — The typed state
-
-COMMON GOTCHAS:
-- Forgetting the `add` reducer on `steps` — writing `steps: list[str]` instead of
-  `steps: Annotated[list[str], add]`. Without it, each node *overwrites* `steps` and the final
-  state shows only the last node's name. The symptom: `result["steps"] == ["policy_check"]` instead
-  of all three. Have them re-read the reducer line in the setup of the lecture.
-- Importing `add` — it's `from operator import add` (already in the given setup cell). If they
-  retype the import, watch for `from operator import add` vs. trying `+`.
-
-UNBLOCKERS: Point at the docstring example in the solution-shaped prompt — five fields, only `steps`
-is annotated. A `TypedDict` is just a class with typed attributes and no body logic.
-
-TIME: 3–5 min. STRETCH: ask what reducer message history would need (append) — that's the L12 link.
-
-## L1104_lab problem 2 — The three nodes
-
-COMMON GOTCHAS:
-- Returning the **whole state** instead of a partial update. A node returns only the fields it
-  changed (`{"parsed": ..., "steps": ["parse"]}`), and LangGraph merges it. Returning everything
-  usually still works but teaches the wrong model — correct it.
-- Reading `reply` instead of `reply.content`. The stub (like `ChatAnthropic`) returns an object;
-  the text is on `.content`. Wrap in `str(...)` to satisfy the typed return.
-- Forgetting to append to `steps` in each node — then problem 4's path looks wrong.
-
-UNBLOCKERS: Remind them which stub each node uses — `parse` → `haiku`, `draft`/`policy_check` →
-`sonnet` — and that `policy_check`'s prompt must contain "compliance"/"policy" for the stub to
-return an `OK:` verdict (it's keyword-driven on purpose).
-
-TIME: 8–12 min. STRETCH: have them make `policy_check` a *plain Python* check (no model) — a node
-need not call a model at all.
-
-## L1104_lab problem 3 — Wire, compile, render
-
-COMMON GOTCHAS:
-- Mixing up `add_node("name", fn)` (string name + function) and `add_edge("a", "b")` (two string
-  names). A frequent error is `add_edge(parse, draft)` passing the functions — pass the **names**.
-- Forgetting `set_entry_point("parse")` → compile error or a graph that never starts.
-- Forgetting the final `add_edge("policy_check", END)` → the run won't terminate cleanly.
-- `END` is imported in setup (`from langgraph.graph import END`); don't quote it like a node name.
-
-UNBLOCKERS: If compile fails, have them print the node/edge list mentally against the five-line recipe
-in the lecture (section 2.1). The `draw_mermaid()` output is the fastest check that the shape is right.
-
-TIME: 6–10 min. STRETCH: render `draw_mermaid_png()` if a renderer is available, else the Mermaid
-text is fine.
-
-## L1104_lab problem 4 — Run the workflow
-
-COMMON GOTCHAS:
-- Forgetting `steps: []` in the initial state. With the `add` reducer, omitting the starting list
-  can raise or behave oddly — always seed it (`{"ticket": ..., "steps": []}`).
-- Expecting the *draft text* to be stable. It's a stub, so here it is; with a real model the wording
-  varies. The point is the **path** (`['parse','draft','policy_check']`) is stable — that's
-  determinism.
-
-UNBLOCKERS: If the path isn't all three names, send them back to problem 1 (reducer) or problem 2
-(missing `steps` append).
-
-TIME: 3–5 min. STRETCH: invoke on a different ticket and confirm the path is unchanged.
-
-## L1104_lab problem 5 — From stub to real model (written)
-
-EXPECTED ANSWER: Change only the **client construction** — `haiku = StubChat(HAIKU)` →
-`haiku = ChatAnthropic(model=HAIKU, api_key=require_anthropic_key())` (same for `sonnet`). The
-**node code never changes** because `StubChat` and `ChatAnthropic` share the same interface the nodes
-rely on: `.invoke(prompt).content`. That shared shape is exactly why a seam/stub is swappable.
-
-COMMON GOTCHAS: Students say "rewrite the nodes." Redirect: the nodes only call `.invoke(...).content`
-— that contract is identical, so the node bodies are untouched.
-
-TIME: 3–5 min.
+- The shared code lives in `fluffy_potato_curriculum.common` (`agent_loop`, `tools`, `tracing`,
+  `fake_model`). If imports fail, the student is likely running a stale kernel or the wrong venv —
+  `Restart Kernel` and confirm they launched with `uv run jupyter lab`.
+- Remind students of the span vocabulary: `trace[0]` is the `chain` (run summary) span; each model
+  call is an `llm` span; each tool dispatch is a `tool` span. `.one_line()` is the quickest way to
+  eyeball any span.
+- The through-line of the whole lesson: **read the arguments** (`span.inputs`), not just the call
+  names. Most "I can't find the bug" moments end the second a student actually reads `inputs`.
 
 ---
 
-## L1106_lab problem 1 — Routing state + classify node
+## L0803_lab problem 1
 
-COMMON GOTCHAS:
-- `RouteState` needs **both** `category` (set by the model) and `user_choice` (set by the user in
-  problem 5). Students often add only one; the lab reuses one state type for both deciders.
-- The classifier must keep **only** a known label. If the stub/model returns extra words, the
-  `next((c for c in (...) if c in label), "general")` guard defaults to `general`. Skipping the
-  guard means an unknown label reaches the conditional edge and **raises at routing time**.
+**Narrate the good run** — loop over the trace printing `span.one_line()`, then answer which span
+is the natural-termination point.
 
-UNBLOCKERS: Remind them the stub keys on **ticket content** words (charge/refund/twice → billing;
-error/500/crash → technical; else general). It deliberately ignores the instruction's listed
-category words.
+- COMMON GOTCHAS: Students point at the `chain` summary span (`trace[0]`) as "where it stopped."
+  The termination *decision* is the last **`llm`** span — the one whose `outputs["tool_calls"]` is
+  empty (the model emitted text, no tool). The `chain` span only *records* the outcome.
+- UNBLOCKERS: Have them print `run_type` next to each `one_line()` and find the last `llm` span.
+  Ask: "which span shows the model choosing *not* to call a tool?"
+- APPROX TIME: 5 minutes.
+- STRETCH: Reconstruct the `RunResult` summary (`final_text`, `iterations`, `termination`) from the
+  trace alone, then assert it matches the real `RunResult` — proving the summary is derivable.
 
-TIME: 6–10 min. STRETCH: ask why `classify` is on the *cheap* model — it only needs a one-word label.
+## L0803_lab problem 2
 
-## L1106_lab problem 2 — The branch nodes
+**Find the runaway** — detect the repeated tool call and assert `termination == "max_steps"`.
 
-COMMON GOTCHAS:
-- Three near-identical functions invite copy-paste bugs (e.g. the `technical` node returning
-  `"steps": ["billing"]`). Then problem 4's path prints the wrong branch name — a good catch.
-- Same `.content` / partial-update reminders as L1104 problem 2.
+- COMMON GOTCHAS: `span.inputs` is a `dict` and therefore unhashable — counting it directly raises
+  `TypeError`. They must key on `tuple(sorted(span.inputs.items()))`. Second gotcha: forgetting to
+  filter to `run_type == "tool"` first, so `llm`/`chain` spans pollute the count.
+- UNBLOCKERS: Suggest `collections.Counter` over the normalized `(name, tuple(sorted(items)))` key,
+  built only from tool spans. The repeated key with count 4 is the runaway.
+- APPROX TIME: 8–10 minutes (the unhashable-dict snag is the time sink).
+- STRETCH: Generalize to "flag any tool call that repeats with identical args ≥ 3 times" — the seed
+  of a loop-detection check, and a natural L12 eval case.
 
-UNBLOCKERS: A factory (`make_branch`) is fine if they prefer it (the demo uses one) — but three
-explicit functions are clearer and equally correct.
+## L0803_lab problem 3
 
-TIME: 6–8 min. STRETCH: give one branch its own distinct prompt and confirm the trace still shows one
-branch span.
+**Spot the wrong argument** — read the `lookup` span's `inputs["city"]` and assert the looked-up
+city was not `"Tokyo"`; explain why a success flag wouldn't catch it.
 
-## L1106_lab problem 3 — The conditional edge
+- COMMON GOTCHAS: Students look for an `error` or `is_error` and find none — the run is `natural`,
+  `error=None`, and *looks green*. The whole point: the call **succeeded** at answering the **wrong
+  question** (`{"city": "Paris"}`). The bug is visible only in the arguments.
+- UNBLOCKERS: "The tool returned successfully — so why is the answer wrong? Read what we asked it to
+  look up." Point them at the single `tool` span's `inputs`.
+- APPROX TIME: 5–7 minutes.
+- STRETCH: Write the assertion as a reusable check ("the answer about city X must have looked up
+  city X") and note it's an outcome-vs-trajectory check — foreshadowing L12.
 
-COMMON GOTCHAS:
-- The biggest conceptual miss: thinking `route` "asks the model." It does **not** — it returns
-  `state["category"]`, a label already in state. Say it out loud with them.
-- `add_conditional_edges("classify", route, {...})` — the **mapping** keys must match what `route`
-  returns and the values must be real node names. A mismatch (`{"bill": "billing"}` while `route`
-  returns `"billing"`) raises at runtime.
-- Forgetting to wire each branch to `END`.
+## L0803_lab problem 4
 
-UNBLOCKERS: Have them print `draw_mermaid()` — the dashed conditional edges from `classify` should fan
-to all three branches, all converging on `END`.
+**Classify the signatures** — fill a markdown table mapping each failure trace to its signature name
+and the field that reveals it.
 
-TIME: 8–12 min. STRETCH: what happens if `route` returns a key not in the mapping? (It raises — a
-nudge toward validating model output, an L02/L09 theme.)
+- COMMON GOTCHAS: `tool_error` and `runaway` both surface an `[is_error]` tool span, so students
+  conflate them. The distinguisher is `termination` (`natural` vs `max_steps`) plus the repetition,
+  not the error flag alone. `premature` has **zero** tool spans — students expect a tool error and
+  don't find one.
+- UNBLOCKERS: Build a tiny table together for one trace (signature, the field that proves it), then
+  let them fill the rest. The four tells: error field set (tool_error), wrong `inputs` on a green
+  run (wrong_args), repeated call + `max_steps` (runaway), `natural` with no tool span (premature).
+- APPROX TIME: 8 minutes.
+- STRETCH: For each signature, name the L12 eval case it would become ("a check that fails when the
+  bug is present") — these are literally next lesson's first cases.
 
-## L1106_lab problem 4 — Run and prove determinism
+---
 
-COMMON GOTCHAS:
-- Same `steps: []` seeding gotcha as L1104 problem 4.
-- Expecting the *reply text* to prove determinism — it's the **path** (`out["steps"]`) that's the
-  invariant. The two-invocation equality check is the proof.
+## L0805_lab problem 1
 
-UNBLOCKERS: If two runs differ, a node is mutating shared module state — check the nodes return fresh
-dicts and don't append to a global list.
+**Trajectory from a trace** — write `tool_trajectory(trace) -> list[tuple[str, dict]]` returning
+each tool span's `(name, inputs)`; assert it equals the expected sequence for the good run.
 
-TIME: 4–6 min. STRETCH: ask how they'd *measure* path stability over many tickets — leads into
-problem 6.
+- COMMON GOTCHAS: Forgetting to filter to `run_type == "tool"` — including the `chain` and `llm`
+  spans makes the trajectory wrong and the assert fail. Type-hint drift (`list[tuple[str, dict]]`)
+  if they model it strictly.
+- UNBLOCKERS: "What's the *path* through the tools — just the tool spans, in order?" One list
+  comprehension filtered on `run_type == "tool"`.
+- APPROX TIME: 5 minutes.
+- STRETCH: Return inputs as a hashable, comparable form so two trajectories can be `==`-compared
+  directly (sets/tuples) — useful for Problem 2's diff.
 
-## L1106_lab problem 5 — Same graph, user-input branch
+## L0805_lab problem 2
 
-COMMON GOTCHAS:
-- Confusing this with "the agent asks the user." Re-draw it: `user_choice` is **already in the
-  initial state** before the run; nothing is asked mid-run. The asking-mid-run (`interrupt`) version
-  is **L15**.
-- `route_by_user` must read `state["user_choice"]`, **not** call any model. Some students reflexively
-  add a model call — that defeats the whole point (no model in the routing decision).
-- The `intake` node is a plain pass-through returning `{"steps": ["intake"]}` — it exists only to
-  give the conditional edge a source node.
+**Write `diff_traces(a, b)`** — compare two traces' tool trajectory, termination, and total tokens,
+and report the differences.
 
-UNBLOCKERS: The tell-tale check: feed a **technical** ticket with `user_choice="billing"` → the path
-must be `['intake', 'billing']`. If it routes to `technical`, they wired the edge to the classifier
-or read the wrong field.
+- COMMON GOTCHAS: Reading `termination` off the wrong span — it lives on the **`chain`** span's
+  `outputs["termination"]`, not the last `llm` span. Summing tokens without guarding `usage is None`
+  — `tool` and `chain` spans carry no `usage`, so `span.usage.total_tokens` raises `AttributeError`
+  on them; only sum over `llm` spans (or `if span.usage is not None`).
+- UNBLOCKERS: Give the three things to compare as a checklist: trajectory (Problem 1), termination
+  (chain span), total tokens (sum over llm spans). Build the return dict field by field.
+- APPROX TIME: 12–15 minutes (this is the core problem).
+- STRETCH: Add a per-span latency delta (`end_time - start_time`) and discuss why it's almost always
+  noise on this offline model — real latency only shows up against a live model.
 
-TIME: 8–12 min. STRETCH: combine — route on the user's choice, then read state inside the branch — to
-feel "user owns the edge, model works inside the node."
+## L0805_lab problem 3
 
-## L1106_lab problem 6 (optional) — Evaluate the classifier
+**Signal vs noise (written)** — apply `diff_traces` to the A/B pair and explain which difference is
+signal and which would be noise, and why one run can't prove a fix.
 
-COMMON GOTCHAS:
-- Calling `classify` with a bare string instead of a state dict — it takes `{"ticket": ..., "steps":
-  []}` and returns a dict; the label is `["category"]`.
-- Being surprised the pass rate isn't 4/4. **That's the lesson.** The last case ("crashing … want a
-  refund") mentions a refund (billing) *and* a crash (technical); the classifier checks billing
-  keywords first, so it labels it `billing` while the eval expects `technical`. Don't let them "fix"
-  the data to force 4/4 — the eval is doing its job by surfacing a real ambiguity.
+- COMMON GOTCHAS: Students label the **token delta** as "signal." On its own it's noise — the
+  meaningful change is `termination: max_steps → natural` (the runaway was fixed). The deeper point
+  they often miss: because the loop is non-deterministic, a *single* A-vs-B pair can't prove the
+  prompt edit caused the fix — you'd need several runs (the seed of L12's eval set).
+- UNBLOCKERS: Ask two questions: "Which difference would a user actually feel?" (the runaway) and
+  "If you re-ran B five times, are you sure it always terminates naturally?" (you're not — hence
+  eval).
+- APPROX TIME: 6–8 minutes.
+- STRETCH: Have them sketch how they'd turn this one comparison into a repeatable check run many
+  times — they're describing L12's eval harness before it's taught.
 
-UNBLOCKERS: This is the L09 discipline inlined ("when you build something, you evaluate it"). One line:
-a deterministic workflow is the *easiest* thing to evaluate — same input → same path. This same eval
-set rides forward onto the L12 agent.
+## L0805_lab problem 4
 
-TIME: 5–8 min. STRETCH: add two more cases; or change the classifier to check technical keywords
-first and watch which cases flip — eval as a feedback loop.
+**A trace is data** — round-trip the good trace through `to_jsonl`/`from_jsonl` (or
+`write_jsonl`/`read_jsonl` to a `tmp` path) and assert equality.
 
-## L1106_lab problem 7 — Workflow vs. agent (written)
-
-EXPECTED ANSWER: Add a **conditional edge that loops back to the model** (a back-edge / cycle) so the
-**model** decides whether to keep going (call a tool) or stop. That single back-edge converts the
-acyclic workflow into a cyclic, model-driven **agent** — and hands control of the path from the
-developer to the model. (It's the L07 loop, now as a graph edge; built for real in L12.)
-
-COMMON GOTCHAS: Answers that say "use a bigger model" or "add more nodes" miss it — the change is
-*structural* (a cycle) and *about control* (the model decides), not about capability or size.
-
-TIME: 3–5 min.
+- COMMON GOTCHAS: Comparing object identity instead of value, or forgetting to actually pass through
+  the string/file. `TraceEvent` is a Pydantic model, so `from_jsonl(to_jsonl(trace)) == trace` is
+  value-equal — but only if they round-trip, not just `trace == trace`. Path handling: use the
+  provided `tmp` path / `pathlib.Path`, not a hard-coded filename.
+- UNBLOCKERS: "Serialize to text, parse it back, compare the two lists." Point at `to_jsonl` →
+  `from_jsonl`. If using files, remind them `write_jsonl`/`read_jsonl` take a `Path`.
+- APPROX TIME: 5 minutes.
+- STRETCH: Open the `.jsonl` and read one line — it's one span as JSON. Connect to L1106: this is
+  exactly the shape Langfuse ingests (one observation per span).

@@ -1,104 +1,97 @@
-# MCP: same tool, new packaging
+# Teaching an LLM to think: reasoning is tokens on the page
 
 ```yaml
-title: "MCP: same tool, new packaging"
-keywords: mcp, model context protocol, portable tool contract, tool spec, discovery, transport, stdio, client, server, inline tool, packaging
+title: Teaching an LLM to think: reasoning is tokens on the page
+keywords: chain-of-thought, cot, scratchpad, thinking tags, self-critique, sycophancy, reasoning cost, anthropic, claude
 estimated duration: 10
 ```
 
-> **Lesson:** L06 — MCP: packaging tools as a portable contract.
+> **Lesson:** L06 — Teaching an LLM to think via prompting.
 > **Roadmap:** see this lesson's [objectives.md](../../../../docs/origin/lesson_roadmaps/L06/objectives.md).
 > This is a short framing piece. Read it before the written reference lecture
-> ([L0602_lecture.md](L0602_lecture.md)), the offline spec-translation demo
-> ([L0603_lecture.ipynb](L0603_lecture.ipynb)), the connect-to-a-server slide outline
-> ([L0605_lecture.md](L0605_lecture.md)), and the build-a-server walkthrough
-> ([L0606_lecture.ipynb](L0606_lecture.ipynb)).
-> **Anchor model throughout: Claude Sonnet 4.6** (same anchor as [L04](../L04/L0401_intro.md) / [L05](../L05/L0501_intro.md)).
+> ([L0302_lecture.md](L0302_lecture.md)) and the four teacher demo notebooks
+> (CoT [L0303_lecture.ipynb](L0303_lecture.ipynb), scratchpad [L0305_lecture.ipynb](L0305_lecture.ipynb),
+> self-critique [L0307_lecture.ipynb](L0307_lecture.ipynb), when-reasoning-hurts
+> [L0309_lecture.ipynb](L0309_lecture.ipynb)).
+> **Anchor model throughout: Claude Sonnet 4.6.**
 
 ## Where this lesson sits
 
-[L04](../L04/objectives.md) taught the **mechanics** of a tool call — the `tool_use` / `tool_result`
-round-trip, who runs what, and why the application validates. [L05](../L05/objectives.md) taught the
-**design** of a good tool — naming, descriptions written for the model's eyes, tight schemas,
-informative errors, named side effects. In both lessons the tool was a Python function living inside
-**one process**: your code registered it, your code ran it when the model asked.
+L02 was about the *shape* of a prompt — roles, structured output, few-shot. It taught you to ask
+the model for what you want, in the form you want. L06 is about a different lever: the *content* of
+the prompt, specifically prompting techniques that make the model produce **visibly better answers
+on harder problems** by surfacing intermediate reasoning before it commits to a final answer.
 
-L06 changes exactly **one thing**: the *packaging*. The tool's implementation is still a Python
-function with the same name, description, schema, and error shape. But now it sits behind a standard
-wire protocol — the **Model Context Protocol (MCP)** — so the *same* tool can be discovered and called
-by *any* MCP-compatible client without rewiring. A custom Python agent, an IDE plugin, and Claude
-Desktop can all talk to one MCP server.
+The whole lesson rests on one claim, which the demos make concrete:
 
-This is the first lesson where you cross a process boundary on purpose. That move is a feature (the
-tool can crash, upgrade, or run with different permissions independently of the agent) and a tax (an
-extra process to run, a transport to keep healthy, failures that can now happen on either side).
+> *Reasoning is a tokens-on-the-page phenomenon, not a separate model mode. The model isn't
+> "thinking harder" — it is generating intermediate tokens that condition the tokens that come
+> after.*
 
-## The one idea, said five ways
+That single framing explains both why these techniques **help** (more intermediate steps draw the
+final answer from a better distribution) *and* why they sometimes **hurt** (more tokens means more
+chances to drift, more latency, more cost).
 
-If you remember nothing else from L06, remember this: **MCP changes where the tool lives and how it is
-reached — not how it should be designed.** Said five ways, because students keep expecting MCP to do
-more (or less) than it does:
+## The four techniques, in one breath
 
-1. MCP is a **protocol, not a framework**. It specifies how a client and server *talk* about tools.
-   It does not prescribe an SDK, a language, or a hosting model. Any process that speaks the protocol
-   on a supported transport is a valid MCP server.
-2. **The L05 design lessons carry over wholesale.** A bad name, weak description, or loose schema is
-   just as bad over MCP as inline. MCP makes a *well-designed* tool portable; it does not rescue a
-   badly designed one.
-3. **Discovery is the new capability.** With an inline tool, the agent author knows what tools exist
-   at code-write time. With MCP, the client *asks* the server at connect time: "what tools do you
-   expose?" The server's published tool list becomes an external API the server author owns.
-4. **The model can't tell the difference.** From the model's seat, an MCP tool call is the same
-   `tool_use` / `tool_result` round-trip as [L04](../L04/objectives.md). MCP is invisible to the
-   model — it shows up only in the *client's* implementation and the *operator's* config.
-5. **MCP earns its overhead when a second consumer appears.** One agent, one tool, one place — inline
-   wins. The moment a different agent, team, or app wants the same tool, MCP's portability starts
-   paying for its tax.
+L06 hands you four tools for shaping reasoning. They are the bridge between "prompting" (L02) and
+"the model decides whether to call a tool" (L07 — that decision is itself a reasoning step).
 
-## Vocabulary this lesson lands
+- **Chain-of-thought (CoT)** — ask for step-by-step reasoning before the answer. The trigger can be
+  a plain *"let's think step by step,"* an explicit numbered scaffold, or a worked-example few-shot
+  (reusing L02's few-shot lever). Helps most on multi-step arithmetic, logical deduction, ambiguous
+  classification, and multi-constraint generation.
+- **Scratchpad / `<thinking>` block** — wrap the reasoning in tags so the final answer is cleanly
+  separable. The tags add **zero capability** — they are an interface contract for downstream code,
+  exactly like the structured-output contract from L02.
+- **Self-critique** — a second pass where the model reviews its own first answer and revises it. A
+  *sampling technique, not a correctness oracle*: it works only when the critic has information the
+  first pass lacked (a different framing, a different model, retrieved context, ground truth).
+- **Knowing when *not* to reason** — CoT on a two-token classification is pure overhead; on some
+  tasks the model "talks itself into" a wrong answer. The skill L06 builds is making this trade-off
+  *consciously*.
 
-These terms recur whenever tools are packaged for reuse:
+## Three mental models to carry out of L06
 
-- **MCP (Model Context Protocol)** — an open protocol for a *client* and a *server* to talk about
-  tools (and, beyond this lesson's scope, resources and prompts).
-- **MCP server** — a process that *exposes* one or more tools over the protocol. Can be a 50-line
-  Python script, not necessarily a microservice.
-- **MCP client** — the agent or app that *connects* to a server, discovers its tools, and routes the
-  model's tool calls to it.
-- **Tool spec** — the on-the-wire description of a tool a server publishes: `name`, `description`,
-  `inputSchema`. This is the [L05](../L05/objectives.md) design surface, serialized.
-- **Discovery** — the handshake where a client asks a server for its tool list at connect time.
-- **Transport** — *how* the bytes move between client and server. **stdio** (server is a child
-  process the client launches and pipes to) and **HTTP/SSE** (server is a separate networked process)
-  are the two you'll meet.
+Each demo lands one sentence. If you remember nothing else, remember these:
 
-## A note on the code you'll see (read this carefully)
+1. **Reasoning is just more tokens.** CoT works because predicting *"the answer is X"* after
+   *"step 1, step 2, step 3"* draws from a different distribution than predicting it cold. Nothing
+   mystical changed — the page got longer.
+2. **Scratchpad tags are a contract about *shape*, not *substance*.** The model could already reason
+   inline; `<thinking>` just gives your parser a clean boundary to ignore or surface. Same move as
+   JSON-mode output in L02.
+3. **Self-critique without new information is sycophancy.** A critic that is the same model, same
+   prompt, looking at its own answer will tend to agree with it — right or wrong. Inject new
+   information or expect a rubber stamp.
 
-The official Python **`mcp` package is not installed in this course environment**, and we do not add
-it. That has a deliberate consequence for how L06 is built:
+## How L01 and L02 carry forward
 
-- The **offline** material — the spec-translation demo ([L0603](L0603_lecture.ipynb)) and all three
-  labs ([L0604](L0604_lab_empty.ipynb), [L0607](L0607_lab_empty.ipynb), and the validator lab) — uses
-  **only the Python standard library** (`json`, `dataclasses`). It runs here, deterministically, with
-  no API key and no `mcp` package. These labs work directly with the *tool spec* — the JSON shape that
-  crosses the wire — which is the part of MCP you most need to understand.
-- The material that genuinely needs a live MCP connection — **connecting to an existing server**
-  ([L0605](L0605_lecture.md), a slide outline) and **building your own server**
-  ([L0606](L0606_lecture.ipynb), a code walkthrough) — shows the real code but is **marked
-  NOT-RUNNABLE without the `mcp` package**. You read it to see the wire shape and the server skeleton;
-  you do not execute it in this environment. (If your local environment installs `mcp`, the code is
-  written to run — but that is outside the course's pinned env.)
+Every L06 technique has an L01 cost shadow, and we keep printing the numbers:
 
-This split is intentional. The conceptual core of MCP — *a well-designed tool, serialized to a
-portable spec, discovered and called across a process boundary* — is fully teachable offline. The live
-connection is a demonstration of a thing you already understand on paper.
+- **Reasoning is not free.** Every CoT or scratchpad token is paid for (L01's per-token cost), adds
+  latency, and competes for the context window. L06 is the first lesson where you must consciously
+  weigh reasoning *quality* against *cost*.
+- **The scratchpad contract is L02's structured-output discipline reused.** You ask for
+  `<thinking>…</thinking><answer>…</answer>`, and you **parse defensively** — the model agreed to the
+  shape, it did not guarantee it.
+- **Self-critique can reuse L02's roles.** A two-step critique is just another `user`/`assistant`
+  turn in the messages list you already know how to build.
+
+## What L06 deliberately does *not* teach
+
+This lesson is scoped to **prompt-only** reasoning:
+
+- **Not extended-thinking / thinking-mode APIs.** Some providers expose a dedicated reasoning mode.
+  L06 stays prompt-only on purpose — the point is to see that reasoning *is* tokens, which a
+  built-in mode would hide. <!-- *NEED INPUT*: confirm extended-thinking stays out of scope, per the open question in objectives.md. -->
+- **Not tool calling.** Deciding *whether* to call a tool is a reasoning step, but the tool-calling
+  protocol itself is **L07**. L06 hands L07 a model that already reasons before it answers.
 
 The one sentence to leave L06 with:
 
-> *MCP takes a tool you already know how to design and serializes it to a portable spec, so any client
-> that speaks the protocol can discover and call it — the design is unchanged; only the packaging and
-> the boundary are new.*
+> *You can now make the model think before it answers — and, just as importantly, decide when it
+> shouldn't bother.*
 
-Next: the written reference lecture in [L0602_lecture.md](L0602_lecture.md), then the offline
-spec-translation demo ([L0603](L0603_lecture.ipynb)) and the connect/build walkthroughs
-([L0605](L0605_lecture.md) / [L0606](L0606_lecture.ipynb)).
+Next: the written reference lecture in [L0302_lecture.md](L0302_lecture.md), then the live demos
+(L0603 / L0605 / L0607 / L0609) and the hands-on labs (L0604 / L0606 / L0608 / L0610).

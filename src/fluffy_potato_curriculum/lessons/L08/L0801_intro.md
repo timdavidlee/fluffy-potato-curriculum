@@ -1,58 +1,122 @@
-# L08 intro: Tracing — reading what your agent did
+# Designing good tools: an API for an LLM to consume
 
 ```yaml
-title: "L08 intro: Tracing — reading what your agent did"
-keywords: tracing, trace, span, observability, agent loop, langfuse, debugging
+title: Designing good tools: an API for an LLM to consume
+keywords: tool design, tool description, json schema, validation errors, idempotency, side effects, tool-or-no-tool, anthropic, claude
 estimated duration: 10
 ```
 
-> **Lesson:** L08 — Tracing: reading what your agent did.
-> **Roadmap:** [objectives.md](../../../../docs/origin/lesson_roadmaps/L08/objectives.md) · [demos_or_activities.md](../../../../docs/origin/lesson_roadmaps/L08/demos_or_activities.md)
-> **Read in order:** this intro → `L0802_lecture` (read a trace, locate a failure) → `L0803_lab` → `L0804_lecture` (instrument the loop, compare two runs) → `L0805_lab` → `L0806_lecture` (see it in Langfuse).
-> **Anchor model for the live demo: Claude Sonnet 4.6.** The reading demos and both labs run **offline with no API key** (a scripted `FakeModel`); only the live instrument/export steps call a real model.
+> **Lesson:** L08 — Designing good tools.
+> **Roadmap:** see this lesson's [objectives.md](../../../../docs/origin/lesson_roadmaps/L08/objectives.md).
+> This is a short framing piece. Read it before the written reference lecture
+> ([L0502_lecture.md](L0502_lecture.md)) and the four teacher demo notebooks
+> (tool-or-no-tool [L0503_lecture.ipynb](L0503_lecture.ipynb), the description-is-the-tool
+> [L0505_lecture.ipynb](L0505_lecture.ipynb), schemas-as-a-teaching-tool
+> [L0507_lecture.ipynb](L0507_lecture.ipynb), errors-and-side-effects
+> [L0509_lecture.ipynb](L0509_lecture.ipynb)).
+> **Anchor model throughout: Claude Sonnet 4.6**, with one Haiku 4.5 contrast in
+> [L0805](L0505_lecture.ipynb) to show the design gap widens on a smaller model.
 
 ## Where this lesson sits
 
-In [L07](../L07/L0701_intro.md) you built an agent from nothing: a **model → tool → model loop** in plain Python that calls the model, runs any tool the model asks for, hands the result back, and repeats until the model stops — `run(...)` returning a `RunResult` with the `final_text`, the number of `iterations`, and *why* it stopped (`termination`: `"natural"` or `"max_steps"`). That loop already *did* something on every run. But unless you were watching the console live, that "something" vanished the moment the run ended.
+L07 covered the *mechanics* of tool calling: how a single tool is wired to a model call, what the
+tool-call round-trip looks like on the wire, and the protocol the model and runtime use to negotiate
+a call. By the end of L07 a student can make a tool *work*.
 
-L08 is the turning point where the agent stops being only something you *build* and becomes something you *observe*. The whole lesson rests on one sentence:
+L08 takes the next step: making a tool *good*. The protocol is settled — the open question now is
+*what to expose, how to name and shape it, and how to fail gracefully* when the world disagrees with
+the model. This is the first lesson in the course where you design **an interface for an LLM to
+consume** rather than for a human to consume, and the design pressures are genuinely different.
 
-> **A trace is the durable, structured record of what happened, so you can read the run after the fact instead of guessing.**
+The whole lesson rests on one claim, which the demos make concrete:
 
-L07 already showed you the seed of this: its loop *printed* one line per iteration, and we called that print-wrapper a **"minimum-viable trace."** L08 takes that idea seriously — it replaces the ephemeral `print()` with a structured record you can filter, diff, and feed to the next lesson.
+> *A tool is an API for an LLM consumer, not a human consumer. The model has no IDE, no
+> autocomplete, no Stack Overflow, no co-worker to ask. Its entire understanding of the tool is the
+> name, the description, the parameter schema, and the shape of what comes back.*
 
-## The one idea, said three ways
+Every design choice in L08 follows from that one sentence.
 
-- **You debug agents by reading, not by re-running.** A normal program is deterministic: re-run it and the bug reproduces. An agent is **not** — re-running can hide the bug or produce a *different* one. The trace of the failing run *is* the reproduction. Reading it is the first move when an agent misbehaves.
-- **A trace is the durable memory of an ephemeral run.** The loop runs and exits; without a record, all you keep is the final answer and whatever scrolled past. The trace is what lets you answer *"what did it actually do?"* an hour, a day, or a hundred runs later.
-- **Arguments are where the truth is.** Call counts tell you *how much*; the **arguments** the model chose tell you *what it was thinking*. "Called `lookup` three times" is ambiguous; "called `lookup('288')`, `lookup('289')`, `lookup('290')`" is obviously a fumbling search. Trace the arguments, and read them first.
+## The four judgment calls L08 builds
 
-## What you'll be able to do
+L07 gave you the wiring. L08 gives you four design decisions you make *every time* you add a tool.
+Each maps to one learning objective and one demo + lab pair.
 
-By the end of L08 you can:
+- **Tool, or no tool?** ([Demo 1](L0503_lecture.ipynb) / [L0804 lab](L0504_lab_empty.ipynb)) — adding
+  a tool is an architectural decision, not a convenience. A tool is warranted when the answer depends
+  on data the model can't have memorized, requires precise computation it's bad at, has a side effect
+  outside the conversation, or must be verified against ground truth. When the model already knows the
+  answer cold, a tool is pure overhead — and a wrong-tool option to pick by mistake.
+- **The description is the tool.** ([Demo 2](L0505_lecture.ipynb) / [L0806 lab](L0506_lab_empty.ipynb))
+  — same name, same schema, *different description* → dramatically different model behavior. The
+  description is the model's only training signal at inference time for *when* to reach for the tool
+  and *when not to*. It is the single most important field, and the most common cause of an unused or
+  misused tool.
+- **Schemas are a contract, not a suggestion.** ([Demo 3](L0507_lecture.ipynb) /
+  [L0808 lab](L0508_lab_empty.ipynb)) — the model is a *fuzzy* producer of structured output
+  (back-reference [L02](../L02/L0201_intro.md)). A tight schema — required fields, enums, narrow types,
+  per-field descriptions — converts ambiguity into validation errors the model can correct on the next
+  turn. A loose schema pushes that ambiguity into the tool implementation, which then fails in ad-hoc
+  ways the model can't anticipate.
+- **Errors are part of the interface.** ([Demo 4](L0509_lecture.ipynb) /
+  [L0810 lab](L0510_lab_empty.ipynb)) — the model treats a tool error as *new context*, not as an
+  exception. A well-shaped error (`{"error": "validation", "field": "user_id", "message": "must be a
+  UUID"}`) teaches the model to fix its call; a bare stack trace teaches it nothing and it guesses.
+  This is also where idempotency and side effects live: the model *will* retry on its own when a
+  result looks ambiguous, regardless of whether retry is safe.
 
-1. **Read a trace** of a multi-step run and narrate what the agent did, event by event.
-2. **Locate a failure** from the trace alone — and name its signature: a **tool error**, **wrong arguments**, a **runaway loop**, or **premature termination**.
-3. **Instrument** the L07 loop to emit a structured trace (`RunResult.trace`) — a wrapper around the loop, never a rewrite of it.
-4. **Compare two traces** of the same task and separate a real change (**signal**) from run-to-run variance (**noise**).
-5. **Export the same run to a real observability tool** — the cohort's self-hosted **Langfuse** — and recognize your hand-built spans rendered in a dashboard.
+## Three mental models to carry out of L08
 
-## The vocabulary this lesson fixes
+Each demo lands one sentence. If you remember nothing else, remember these:
 
-- **Trace** — the complete, ordered record of one run: every model call, tool call, and the loop step, with enough detail to reconstruct the run without re-executing it.
-- **Span** — one entry in a trace (one model call, one tool call, the loop step). We say **span** in prose; OpenTelemetry says "span," Langfuse says "observation," LangSmith says "run" — so you'll recognize the structure when you meet a real tool.
-- **`trace_id`** — the id shared by every span of one run, so multiple runs' traces can be stored together and still be told apart. It's what makes the two-run comparison (and the Langfuse view) possible.
-- **Structured trace vs. `print()`** — machine-readable records you can filter, count, and diff, versus human-readable text that collapses the moment you have more than one run to compare.
-- **`RunResult` vs. trace** — `RunResult` (from L07) is the *summary*; the trace is the *full record* the summary was derived from. You should be able to point at where each `RunResult` field came from in the trace.
+1. **Write the description for the model, not the human reader.** Code comments are for the human
+   reading the source; the tool description is for the model's selection step at inference time. They
+   are different audiences and want different things.
+2. **A tight schema is a teaching tool, not just a type-checker.** The shape and per-field
+   descriptions tell the model what's expected — often more reliably than the top-level description
+   alone — and turn bad calls into recoverable validation errors.
+3. **An error message is a prompt for the model's next turn.** Write it as if it were a system
+   message, not a Python traceback. Informative errors close the loop; opaque errors send the model
+   into a blind retry loop with the same wrong arguments.
 
-## How we teach it: concept first, then tooled
+## How L01–L07 carry forward
 
-You build the trace **by hand first** — instrument the L07 loop, read the spans, diff two runs — and only *then* meet the real tool (Langfuse), where you discover the structure you built by hand is exactly what the industry uses. That ordering is deliberate: when you open the dashboard, the timeline, token counts, and errors are the very `TraceEvent` fields you emitted, so the tool reads as obvious instead of magic.
+- **L01 (context-window cost).** Each additional tool eats system-prompt tokens and dilutes the
+  model's attention across the tool list. A 20-tool agent that could be a 5-tool agent is harder for
+  the model to navigate. *More tools ≠ more capable agent* — usually the opposite.
+- **L02 (structured output).** A tool schema is a special case of the structured-output contract from
+  L02. The model agreed to the shape; it did not guarantee it — so the schema validates *shape*, not
+  *truth*, and you still parse and validate defensively.
+- **L06 (reasoning is tokens).** Choosing *whether* to call a tool is itself a reasoning step. A good
+  description and a clean error are the tokens the model conditions that decision on.
+- **L07 (the protocol).** L08 assumes the wiring works. We do **not** re-teach the round-trip — if you
+  are shaky on the mechanics, redirect to the L07 lab before continuing. L08 is about *design
+  judgment* on top of a protocol you already understand.
 
-## A note on the code you'll see
+## A note on the code seam
 
-The L07 loop and tools now live as a shared, reusable reference in `fluffy_potato_curriculum.common` — `common/agent_loop.py` (`run()` → `RunResult`), `common/tools.py` (`calculator`, `lookup`, `flaky_fetch`), and the new `common/tracing.py` (`TraceEvent`). L08 is the first lesson that *imports* them instead of hand-building them, because this lesson is about *observing* the loop, not re-deriving it. The labs drive that loop with a scripted `FakeModel` so they run deterministically with no API key.
+The `potato_llm` client you have used since L02 is deliberately **text-only** — its `Message` carries
+plain text, not tool-use or tool-result blocks. L08's demos register tools and observe the model
+*choose* and *call* them, so the demo notebooks drop down to the **raw Anthropic SDK**
+(`client.messages.create(..., tools=[...])`), exactly as [L07](../L07/L0401_intro.md) introduced. The
+API key still loads through the same config seam (`require_anthropic_key()`) — we change the *client*,
+not where secrets come from. The **labs** stay pure-Python and offline wherever the concept allows
+(designing a schema, rewriting an error, classifying a task) so you can practice the *design* without
+spending a token.
 
-## The takeaway
+## What L08 deliberately does *not* teach
 
-L08 produces the record; **L09 (evaluation) judges it.** Tracing without evaluation tells you *what happened*; evaluation without tracing tells you *that something is wrong but not where*. They are a pair, and tracing comes first — because you cannot evaluate a run you cannot read. Keep the failures you find in this lesson's traces: they become your first eval cases next lesson.
+- **Not the MCP wire format.** L09 packages these exact design choices — names, descriptions, schemas,
+  error shapes — as a portable contract across clients. Everything L08 teaches applies **unchanged** to
+  an MCP tool; MCP only standardizes the *transport* and *discovery*, not the design. A poorly designed
+  tool exposed via MCP is still a poorly designed tool.
+- **Not the agent loop.** Composing one tool's output into the next call is what L10 (the hand-rolled
+  agent loop) makes first-class. L08 designs the individual tool well so L10's loop has good parts to
+  work with.
+
+The one sentence to leave L08 with:
+
+> *You can now design a tool a model can choose and use correctly on first read — and recognize when
+> the best tool is no tool at all.*
+
+Next: the written reference lecture in [L0502_lecture.md](L0502_lecture.md), then the live demos
+(L0803 / L0805 / L0807 / L0809) and the hands-on labs (L0804 / L0806 / L0808 / L0810).

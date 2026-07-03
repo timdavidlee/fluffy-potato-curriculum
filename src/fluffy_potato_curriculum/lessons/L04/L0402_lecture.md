@@ -1,271 +1,267 @@
-# Tool calling: the protocol, the round-trip, and who runs what
+# Explicit graphs & workflows in LangGraph: you wire the flow
 
 ```yaml
-title: Tool calling: the protocol, the round-trip, and who runs what
-keywords: tool calling, tool_use, tool_result, tool definition, json schema, round-trip, stateless, token cost, hallucinated tool call, validation, anthropic, claude
+title: "Explicit graphs & workflows in LangGraph: you wire the flow"
+keywords: langgraph, stategraph, workflow, agent, dag, node, edge, conditional edge, state, reducer, prompt chaining, routing, user-input branching, per-node model, mixed models, control flow as data, determinism, chatanthropic, langfuse
 estimated duration: 75
 ```
 
 > **Lesson:** L04. **Roadmap:** [objectives.md](../../../../docs/origin/lesson_roadmaps/L04/objectives.md).
-> This is the written reference lecture — thorough on purpose, so a student who missed the verbal
-> delivery can rebuild the lesson from the page. The live demos are split one per beat
-> ([L0403](L0403_lecture.ipynb) a tool call is tokens, [L0404](L0404_lecture.ipynb) one wired
-> round-trip, [L0406](L0406_lecture.ipynb) trace the round-trip, [L0408](L0408_lecture.ipynb)
-> three outcomes); hands-on practice is in the L04 labs (L0405 / L0407 / L0409).
-> **Anchor model throughout: Claude Sonnet 4.6** (Haiku 4.5 is the smaller-model contrast in Demo 4).
+> This is the written reference lecture — thorough on purpose, so a student who missed the live
+> delivery can rebuild the lesson from the page. The live demos are notebooks
+> ([L0403](L1103_lecture.ipynb) prompt chaining, [L0405](L1105_lecture.ipynb) routing + user-input
+> branching), the workflow-vs-agent wrap-up is [L0407](L1107_lecture.md), and hands-on practice is
+> in the L04 labs (L0404, L0406).
+> **Anchor model: Claude Sonnet 4.6** (heavy nodes), **Claude Haiku 4.5** (light nodes) — L04
+> deliberately mixes models per node.
 
 ## section 1. The lesson in one claim
 
-### slide 1.1 From text-out to acting
+### slide 1.1 First a framework, and deliberately not an agent
 
-- L01–L03 only ever asked the model for **text**. Even L03's reasoning, scratchpads, and
-  self-critique were text the model produced and your code read. Nothing the model said ever *ran*.
-- L04 is the first lesson where the model can **act**: it can request that your application run a
-  function and feed the result back. This is the foundation of every agent later in the course.
-- But it is not magic, and it is not a new model capability. It is a **protocol** the model was
-  trained to participate in.
+- This is the course's **first LangGraph lesson**, and it builds a **workflow**, not an agent.
+- From L01–L10 your control flow was plain Python: a single call, a single tool round-trip, and
+  in [L10](../L10/objectives.md) a hand-rolled **model → tool → model loop** whose path your
+  `while`/`if` decided.
+- L04 turns that control flow into a **graph**: explicit nodes wired by edges *you* lay out. The
+  model lives *inside* the nodes; it never decides what runs next.
+- L14 reuses every primitive from this lesson and adds exactly one thing — a back-edge — to make
+  an agent. Learning the workflow first means L14 is one small step, not a new world.
 
-### slide 1.2 A tool call is just more tokens
+### slide 1.2 Workflow vs. agent — the headline distinction
 
-- The whole lesson rests on one claim, deliberately parallel to L03's: **a tool call is a block of
-  tokens the model emitted in a structured shape — not an action the model took.**
-- The model is not running code, opening a network connection, or reaching into your filesystem. It
-  generates a token sequence that *has the shape of* a tool-call request. Your application reads
-  those tokens and does the work.
-- This is the [L03](../L03/objectives.md) framing reused exactly: there, *reasoning is tokens*;
-  here, *a tool call is tokens*. The parallel is intentional — carry the intuition forward, don't
-  relearn it.
-- diagram: a model response box containing two blocks side by side — a greyed-out `text` block and a
-  highlighted `tool_use` block — with a caption: "both are just tokens; your code decides what to do
-  with each."
+- This is the industry distinction from Anthropic's *Building Effective Agents*, and we reuse it
+  verbatim into L14.
+- table: the one difference that separates a workflow from an agent.
 
-### slide 1.3 Three actors, one round-trip
-
-- Every single tool-using exchange has exactly three actors. Naming them keeps "who runs what"
-  straight for the rest of the course.
-- table: the three actors and the one job each performs.
-
-| Actor | What it does | What it does **not** do |
+| | **Workflow** (L04) | **Agent** (L14) |
 | --- | --- | --- |
-| **Model** | decides to call a tool; emits a `tool_use` block (name + arguments + id) | run the function, validate its own arguments |
-| **Application** (your code) | reads the block, validates arguments, runs the function, formats the result, continues the conversation | decide *whether* a tool is needed (the model proposes that) |
-| **Tool** (the function) | does the real work and returns a value | talk to the model directly — it only ever sees what your application passes it |
+| Who decides the path? | the **developer** (fixed/derived logic) | the **model** |
+| Graph shape | **acyclic** (DAG) — always reaches `END` | **cyclic** — loops model → tools → model |
+| Where the model works | *inside* nodes (classify, draft) | inside nodes **and** chooses the path |
+| Predictability | same input → same path | varies; the model may loop |
 
-- The model **proposes**; the application **disposes**; the tool **computes**. Say it as a chant.
+- The model is involved in **both**. Agency is about who controls the *path*, not whether a model
+  is called somewhere.
 
-[↑ Back to top](#tool-calling-the-protocol-the-round-trip-and-who-runs-what)
+### slide 1.3 The sentence to carry all lesson
 
-## section 2. Wiring a single tool
+- **In a workflow, the model lives inside the nodes; the developer owns the edges.**
+- Say it whenever a branch appears. Every conditional edge in L04 is decided by *code you wrote*,
+  reading *state you set* — never by the model deciding to call a tool. That last case is L14.
 
-### slide 2.1 A tool is a function plus a description of it
+## section 2. The StateGraph primitives (vocabulary)
 
-- Start with a plain Python function that does some side-effect-free work — for this lesson, a
-  `calculator(expression: str) -> str` that evaluates a simple arithmetic expression deterministically.
-- To make it available to the model you wrap it in a **tool definition**: a `name`, a
-  natural-language `description` of what it does and when to use it, and a JSON-Schema `input_schema`
-  describing the arguments.
-- The model never sees your Python function. It sees only the *definition* — the name, the prose, and
-  the argument schema. That is the entire contract.
+### slide 2.1 The five-line build
 
-### slide 2.2 The five mechanical steps
+- Every graph in this lesson is built with the same `StateGraph` recipe. Memorize the shape:
+- diagram: a flow `StateGraph(State) → add_node ×N → set_entry_point → add_edge / add_conditional_edges → compile() → invoke(input)`.
 
-- Wiring a tool is the same five steps every time. This is the whole Objective-1 skill:
-- table: the five steps, who performs each, and what crosses the boundary.
+```python
+from langgraph.graph import StateGraph, END
 
-| # | Step | Who | What crosses the wire |
-| --- | --- | --- | --- |
-| 1 | **name** the function | you | a string id the model will echo back |
-| 2 | **describe** it (prose + JSON-Schema) | you | the tool definition, sent with the prompt |
-| 3 | model **decides + emits** a `tool_use` block | model | name + arguments + a unique call id |
-| 4 | **dispatch**: match the name, validate args, run the function | you | the function's return value |
-| 5 | **continue**: send the result back as a `tool_result` block | you | the result, tagged with the same id |
+builder = StateGraph(TicketState)        # 1. declare the typed state schema
+builder.add_node("parse", parse)         # 2. add nodes (each a typed function)
+builder.add_node("draft", draft)
+builder.set_entry_point("parse")         # 3. where execution starts
+builder.add_edge("parse", "draft")       # 4. wire edges
+builder.add_edge("draft", END)
+app = builder.compile()                  # 5. compile to a runnable
+result = app.invoke({"ticket": "..."})   #    invoke on an input
+```
 
-- diagram: the five steps as a horizontal pipeline, with steps 1–2 and 4–5 shaded as "application"
-  and step 3 shaded as "model".
+### slide 2.2 Node — a typed function that returns an update
 
-### slide 2.3 The tool definition is a contract about shape
+- A **node** is a plain function: it reads the state and returns a **partial update** (a dict of
+  just the fields it changed), *not* the whole state. LangGraph merges the update for you.
+- A node does **one unit of work** and hands back an update — nothing more.
+- A node *may* call the model (`ChatAnthropic`), or it may be plain Python. "Has a model in it"
+  is not what makes something a node.
 
-- A tool definition tells the model "tools of *this shape* exist." Mirroring L03's `<thinking>`
-  tags, it adds **zero capability** and makes **zero guarantees about behavior**.
-- Concretely, the definition does **not**:
-  - force the model to call the tool (it may answer directly instead),
-  - validate the arguments at generation time (the model can pass nonsense),
-  - stop the model from inventing a tool name that doesn't exist.
-- **The application validates; the model proposes.** This is the single sentence to repeat whenever
-  a student expects the schema to *enforce* anything.
+```python
+def parse(state: TicketState) -> dict[str, object]:
+    """Extract structured fields from the raw ticket (a light step → Haiku)."""
+    reply = haiku.invoke(f"Extract the customer's issue from: {state['ticket']}")
+    return {"parsed": reply.content}        # only the field this node changed
+```
 
-### slide 2.4 The model decides whether to call — that's a reasoning step
+### slide 2.3 State and reducer — the data that flows between nodes
 
-- Handing the model a tool is an *offer*, never a *command*. Whether the model reaches for the tool
-  is a sampling decision conditioned on the prompt, the conversation, and the tool's description.
-- That decision is itself a **reasoning step** — exactly the kind [L03](../L03/objectives.md) was
-  about. A vague tool the model can't tell when to use is a tool it will skip. (Reinforce L03; we do
-  not re-teach chain-of-thought here.)
-- *Foreshadow [L05](../L05/objectives.md):* "what makes a tool worth adding, well-named, and
-  well-described?" is L05's whole job. L04 only needs you to see that the description visibly moves
-  behavior.
+- **State** is a typed object (a `TypedDict`) threaded through every node. It carries the data
+  that flows between steps: the raw input, intermediate results, the final answer.
+- A **reducer** is the rule that merges a node's returned update into state, *per field*. The
+  default reducer **overwrites**; an `Annotated[list, add]` field **appends** instead.
+- diagram: a `TicketState` box with fields `ticket: str`, `parsed: str`, `draft: str`,
+  `steps: Annotated[list[str], add]` — the last one tagged "append reducer".
+- This is the **same** state/reducer machinery L14 reuses for an agent's *message history* — you
+  meet it here, on a simpler acyclic graph.
 
-[↑ Back to top](#tool-calling-the-protocol-the-round-trip-and-who-runs-what)
+### slide 2.4 What belongs in state — and what doesn't
 
-## section 3. Tracing one round-trip
+- **In state:** data that flows between nodes — the extracted fields, the classification label,
+  intermediate drafts.
+- **Not in state:** the model client and configuration. Those are **dependencies wired in at
+  build time**, not data that flows. A `ChatAnthropic` client is constructed once and closed over
+  by the node, not threaded through `invoke`.
 
-### slide 3.1 A round-trip is at least four messages
+### slide 2.5 Edge, conditional edge, entry point, END
 
-- The user "asks once," but a single successful tool-using exchange grows the conversation history
-  by **four messages**. This four-message shape *is* the protocol — it is not an implementation
-  detail you can optimize away.
-- diagram: four labeled boxes left to right —
-  `user(question) → assistant(tool_use) → user(tool_result) → assistant(final)` — with the producer
-  written under each.
-- table: the four messages of a successful round-trip.
+- **Edge** — a fixed transition, `A → B`, taken every time: `add_edge("parse", "draft")`.
+- **Conditional edge** — a runtime choice: a routing function reads **state** and returns the
+  *name* of the next node: `add_conditional_edges("classify", route_fn, {...})`.
+- **Entry point** — where execution starts (`set_entry_point`).
+- **END** — the sentinel where execution stops; every path in a workflow reaches it.
+- **DAG (directed acyclic graph)** — a graph with **no back-edges**: every edge moves forward to
+  `END`. The absence of a back-edge is exactly what makes this a *workflow*, not an agent.
 
-| # | Role | Block type | Produced by | Carries |
-| --- | --- | --- | --- | --- |
-| 1 | `user` | `text` | the human | the original question |
-| 2 | `assistant` | `tool_use` | the model | tool name, parsed arguments, a unique call **id** |
-| 3 | `user` | `tool_result` | the **application** (wearing the user role) | the function's output, tagged with the same **id** |
-| 4 | `assistant` | `text` | the model | the final natural-language answer |
+## section 3. Pattern one — prompt chaining
 
-### slide 3.2 The id is the thread tying request to result
+### slide 3.1 Decompose a task into a fixed sequence
 
-- The `tool_use` block in message 2 carries a unique **call id**. The `tool_result` block in message
-  3 names that *same* id — that is how your application says "this result answers *that* request."
-- With a single tool and a single call, the id feels redundant. It stops being redundant the moment
-  more than one call is in flight (a forward-link to [L07](../L07/objectives.md)'s agent loop). Build
-  the habit now.
-- diagram: an arrow drawn from the id in message 3's `tool_result` back to the matching id in message
-  2's `tool_use`.
+- **Prompt chaining**: a fixed chain of nodes where each step's output feeds the next. Our running
+  example is a support-ticket pipeline: **parse → draft → policy-check**.
+- diagram: three boxes `parse → draft → policy_check → END`, two forward arrows, no back-edge.
+- Each node is a **separate model call with a focused prompt**, not one mega-prompt doing
+  everything.
 
-### slide 3.3 The tool result rides in a *user-role* message
+### slide 3.2 Why decompose instead of one big prompt?
 
-- This surprises everyone: the tool result does **not** go in an assistant message. By convention the
-  application puts it in a **user-role** message — your code is speaking on the user's behalf.
-- So the conversation still alternates `assistant ↔ user` even though one of those "users" is your
-  program. The role labels mark **protocol position**, not who is human.
+- **Reliability:** smaller, focused prompts are more dependable than one prompt asked to parse,
+  draft, *and* police a reply at once.
+- **Testability:** you can evaluate each step in isolation — feed the `parse` node a ticket and
+  check just the extraction.
+- table: the honest trade-off.
 
-### slide 3.4 The model is stateless across calls
-
-- To produce message 4, the model was sent messages 1–3 **and** the full tool definition list,
-  *again*. It did not "remember" the tool from message 2.
-- This is the most common student misconception: *"I told the model about the tool last turn, so it
-  remembers."* It does not. **The schema is in the prompt every single time.**
-- Statelessness is why the next section is about cost — re-sending everything on every call is not
-  free.
-
-[↑ Back to top](#tool-calling-the-protocol-the-round-trip-and-who-runs-what)
-
-## section 4. What tools cost
-
-### slide 4.1 Tools cost tokens twice over
-
-- Because the model is stateless, a tool is paid for in **two** places on every turn:
-  - the tool **definition** is re-sent in the prompt of *every* request, and
-  - the tool **result** lives in the message history for *every* subsequent turn.
-- This is L01's per-token cost shadow, now attached to tools. Nothing here is hypothetical — the
-  demos print the token counts.
-
-### slide 4.2 A worked cost example
-
-- table: a 500-token tool definition across a 10-turn conversation, before any tool is even called.
-
-| Quantity | Value |
+| For | Against |
 | --- | --- |
-| Tool definition size | ~500 tokens |
-| Conversation length | 10 turns |
-| Input tokens spent on the definition alone | ~5,000 tokens |
-| Tool calls required for that cost | **zero** — it's the definition, re-sent every turn |
+| each prompt is small and reliable | more model calls = more cost/latency (the [L01](../L01/objectives.md) trade) |
+| each step is individually testable | a strictly linear chain is near break-even vs. a plain function |
+| failures are localized to one node | |
 
-- The lesson: every tool you add is a standing tax on every request, paid whether or not the model
-  uses it. This is why [L05](../L05/objectives.md) asks "should this be a tool at all?" and why
-  L14 (context management) comes back to it.
+- Name it honestly: for a *strictly linear* three-step task the graph is near break-even. Its real
+  payoff shows up with **branching, visualization, shared state, and built-in tracing** (next).
 
-### slide 4.3 Where this cost reasoning returns
+## section 4. Pattern two — routing (and who gets to decide)
 
-- **[L05](../L05/objectives.md)** — "more tools = more schema text in every prompt, more chances to
-  mis-pick." The cost is one reason *not* to add a tool.
-- **[L09](../L09/objectives.md)** (model power) and **L14** (context management) revisit tool cost as
-  a budget you actively manage. Carry the "twice over" framing forward.
+### slide 4.1 Classify, then branch
 
-[↑ Back to top](#tool-calling-the-protocol-the-round-trip-and-who-runs-what)
+- **Routing**: an entry **classifier** node labels the input, and a **conditional edge** sends it
+  down one of several specialized branches that converge to an exit.
+- Example: a ticket is classified **billing / technical / general**; each branch has its own
+  focused prompt; all three converge to `END`.
+- diagram: `classify` fanning out via a dashed conditional edge to `billing` / `technical` /
+  `general`, all three arrows converging into `END`.
 
-## section 5. Three outcomes, and why you validate
+### slide 4.2 A conditional edge is NOT the model deciding
 
-### slide 5.1 Handing the model a tool has three observable outcomes
+- The routing function reads `state["category"]` — a **label the developer's code put in state** —
+  and returns the matching branch name. The classification *result* picks the branch.
+- Re-run the same ticket and it takes the **same path**: deterministic.
+- This is the critical L04-vs-L14 point: in L04 the routing function branches on **state you set**.
+  In L14 it branches on whether the **model asked for a tool**. *Same mechanism, different
+  decider* — say which it is every time.
 
-- Give the model a tool and a prompt, and exactly one of three things happens. Being able to look at
-  a transcript and say *which* happened is Objective 2.
-- table: the three outcomes and what your application sees.
+```python
+def route(state: TicketState) -> str:
+    # branches on a label already in state — not on the model choosing a tool
+    return state["category"]   # "billing" | "technical" | "general"
 
-| Outcome | Response contains | What it means |
-| --- | --- | --- |
-| **Calls the tool** | a `tool_use` block with valid arguments | the model judged the tool useful and proposed a well-formed call |
-| **Answers without it** | only a `text` block, no `tool_use` | the model judged the tool unnecessary — a registered tool is an *option*, never an obligation |
-| **Calls it with bad arguments** | a `tool_use` block with malformed / missing / invented arguments | the model hallucinated; **your application must catch this** |
+builder.add_conditional_edges("classify", route,
+    {"billing": "billing", "technical": "technical", "general": "general"})
+```
 
-### slide 5.2 The model can hallucinate a tool call
+### slide 4.3 A branch can be decided by data, a model label, or the user
 
-- The schema did not stop any of this at generation time: wrong argument *types*, a *missing*
-  required argument, an *extra* invented argument, even a tool *name that doesn't exist*.
-- This is the L04 analogue of [L03](../L03/objectives.md)'s tag-violation moment: **showing one
-  hallucination teaches more than ten clean runs**, because it proves the contract is best-effort.
-- The remedy is not a better schema (that's an L05 conversation) — it is that **the application
-  validates; the model proposes.** Validation is not optional.
+- A conditional edge can route on **derived data**, on a **model classification**, or on **direct
+  user input** — none of which is the model driving a *loop*.
+- **User-input branching** is the purest "you wire the flow": the routing function reads a value
+  the *user* supplied (a menu choice, a form field) — **no model in the routing decision at all**.
 
-### slide 5.3 Tool calls are not deterministic
+```python
+def route_by_user(state: TicketState) -> str:
+    # the USER picked the path; no model call in this decision
+    return state["user_choice"]   # supplied in the initial state
 
-- The same prompt and the same schema can produce a call on one run and a skip on the next, with
-  slightly different arguments each time.
-- This is *why* you validate every call rather than trusting a clean dry-run. A round-trip that
-  worked at your desk can fumble in class — that variance is the point, not a bug.
+builder.add_conditional_edges("start", route_by_user, {...})
+```
 
-### slide 5.4 A brief word on forcing a call
+- **Same graph shape, different decider.** Model-classified routing and user-input routing are
+  *both* workflows, because the developer wired every branch. Most real "AI workflows" mix the two:
+  route on the user's choice first, then run a model-driven *node* inside the chosen branch —
+  **user owns the edge, model works inside the node**.
+- Forward pointer (one line, don't teach it): the *interactive* version — a graph that **pauses to
+  ask** the user and resumes on their answer — needs LangGraph's `interrupt` + a checkpointer and
+  is **L17's** territory. In L04 the user input arrives in the **initial state**, so the graph runs
+  straight through.
 
-- Most APIs offer a `tool_choice` control (auto / any / none / a specific tool) that *biases* the
-  decision toward or away from a tool call.
-- But even *forcing* a call does not guarantee **well-formed arguments** — it only guarantees that
-  *some* tool call is attempted. Forcing changes whether the model calls, not whether it calls
-  *correctly*.
-- We mention it and move on: the deeper `tool_choice` design conversation belongs to
-  [L05](../L05/objectives.md).
+## section 5. Each node can bind its own model
 
-[↑ Back to top](#tool-calling-the-protocol-the-round-trip-and-who-runs-what)
+### slide 5.1 The mechanism: a node is an independent call
 
-## section 6. Common confusions to retire
+- Because each node is its *own* model call, each can construct its own
+  `ChatAnthropic(model=...)`. A graph can **mix models per node**.
+- Use a **cheap, fast model** (Claude **Haiku 4.5**) for light steps — classify, route, extract a
+  field — and a **capable model** (Claude **Sonnet 4.6**) for heavy reasoning — draft, analyze.
+- diagram: the routing graph with each node tagged by model — `classify` = Haiku, `billing` /
+  `technical` / `general` = Sonnet.
 
-### slide 6.1 The misconceptions, named
+### slide 5.2 Mechanism here; the decision framework is L13's
 
-- table: the confusion, and the one-line correction to give every time it surfaces.
+- L04 shows only **that** you can mix and **how** (per-node `ChatAnthropic(model=...)`), with a
+  light cost/latency aside read off the trace: the label step is cheap, the reasoning step is where
+  the spend goes.
+- The full *which-model* decision framework — capability vs. latency vs. cost axes, budgets,
+  "small model for routing, capable for reasoning" — is **L13's** job (Choosing model power). The
+  two reinforce; they do not re-teach each other.
 
-| Confusion | Correction |
-| --- | --- |
-| "The model runs the tool." | It does not. The **application** runs the tool; the model only emits a request shaped like a tool call. |
-| "If I define a tool, the model will use it." | Not necessarily. Tool selection is a sampling decision conditioned on the prompt and the tool's *description*. |
-| "Tool calls are deterministic." | They are not. Same prompt + schema can call, skip, or pass different arguments across runs. |
-| "Tool results are part of the assistant message." | They are not. By convention the result goes in a **user-role** message — your app speaking for itself. |
-| "More tools = better agent." | More tools means more schema in every prompt, more mis-picks, more edge cases. (Forward-link to [L05](../L05/objectives.md).) |
-| "I can force the model to always call this tool." | `tool_choice` biases the decision, but forced choice still does not guarantee well-formed arguments. |
+## section 6. Why a graph: control flow as data, and determinism
 
-[↑ Back to top](#tool-calling-the-protocol-the-round-trip-and-who-runs-what)
+### slide 6.1 A graph turns control flow into inspectable data
 
-## section 7. Bridge to L05
+- Nodes and edges can be **listed, drawn, traced, and reasoned about** — unlike `if`/`while`
+  buried in Python.
+- LangGraph renders the compiled graph for you: `app.get_graph().draw_mermaid()` (text) or
+  `draw_mermaid_png()` (image). The picture *is* the control flow.
+- diagram: side by side — a block of imperative `if/elif` Python vs. the rendered graph diagram —
+  captioned "same logic; the graph is data you can inspect."
 
-### slide 7.1 From "it works" to "is it good?"
+### slide 6.2 Tracing: watch the workflow run
 
-- By the end of L04 you can **build a tool-using exchange that works** — wire one tool, trace one
-  round-trip, and validate a hallucinated call. That is the mechanics.
-- [L05](../L05/objectives.md) ("Designing good tools") takes those mechanics and asks the **design**
-  questions: *should* this be a tool, what should we name it, what should the schema look like, how
-  should it report failure?
-- A useful handoff: by the end of L04 you can make a tool call *work*; by the end of L05 you can argue
-  about whether the tool should exist at all and whether the schema is good.
+- Run the graph with a **Langfuse callback** and the spans land in the *same* self-hosted Langfuse
+  instance you met in [L11](../L11/objectives.md) — "watch the workflow run" reuses an L11 skill.
+- A prompt-chaining run shows a **linear chain** of generation spans; a routing run shows the
+  **one chosen branch**. The trace confirms the path was developer-determined.
+- Each span shows its **own model and cost** — that is where the per-node model mixing becomes
+  tangible.
 
-### slide 7.2 What to carry forward
+### slide 6.3 Determinism is a feature, not a limitation
 
-- **Vocabulary** — `tool`, `tool definition`, `tool call`, `tool result`, `round-trip`. L05 reuses
-  every term; you should not have to relearn one.
-- **The validation reflex** — "the application validates; the model proposes" becomes L05's launchpad
-  for tool-error *design*.
-- One sentence to L05: *you can now wire a tool that works; next you'll decide whether it should
-  exist and how to shape it well.*
+- A workflow takes the **same path** on the same input: predictable, cheaper, lower-latency, and
+  **trivially testable**.
+- That testability is half the reason to prefer workflows: a tiny eval set over the classifier
+  node (the [L12](../L12/objectives.md) discipline, same input → same path) is cheap and honest.
+  The L04 routing lab includes an optional eval beat.
+- Note the model *inside* a node is still non-deterministic — a draft's wording varies. The
+  **path** is what's stable, and the path is the lesson.
 
-[↑ Back to top](#tool-calling-the-protocol-the-round-trip-and-who-runs-what)
+## section 7. Workflow vs. agent — the single back-edge (preview of L0407)
+
+### slide 7.1 The line is one edge
+
+- Everything you built here — `StateGraph`, nodes, edges, typed state, reducers, compile/invoke,
+  the Langfuse hookup — carries into L14 **unchanged**.
+- L14 adds exactly one thing: a **conditional edge that loops back to the model**, handing the
+  model control of the path. That single back-edge converts the acyclic workflow into the cyclic,
+  model-driven agent (the same loop you hand-rolled in L10).
+- diagram: the L04 acyclic chain, then the same graph with one new dashed edge curving from the
+  model node back into the loop — labeled "the only thing L14 adds."
+
+### slide 7.2 When to use which
+
+- Prefer a **workflow** when the task has a **known shape**: predictable, cheaper, lower-latency,
+  far easier to test and trace.
+- Reach for an **agent** only when the steps **can't be known in advance** and the model genuinely
+  needs to decide its own path.
+- Name the common failure mode out loud: **reaching for an agent when a workflow would do** — more
+  cost, less predictability, harder to debug. Choosing the simplest shape that solves the task *is*
+  the engineering skill. The full treatment is in [L1107_lecture.md](L1107_lecture.md).

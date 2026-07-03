@@ -1,10 +1,8 @@
-# L09: Teacher-led demos — Evaluation: first pass
+# L09: Teacher-led demos — MCP: packaging tools as a portable contract
 
 > Sibling docs: [objectives.md](objectives.md) (what the lesson aims for), parent design [CURRICULUM_PRD.md](../../CURRICULUM_PRD.md).
 >
-> **Audience for this file:** the teacher running L09. Every demo below is *teacher-driven, no student participation*. Student-driven exercises live in the L09 labs (separate file, stage 2).
->
-> **Anchor model for the demos: Claude Sonnet 4.6** (inherits the L01–L07 precedent so the traced loop behaves as students saw it). **Contrast model: Claude Haiku 4.5**, used in Demo 3 to make a lower-powered model's pass rate visibly drop on the *same* eval set.
+> **Audience for this file:** the teacher running L09. Every demo below is *teacher-driven, no student participation*. Student-driven exercises live in the L09 labs (separate file).
 
 ## How to read this file
 
@@ -13,164 +11,171 @@ Each demo is a self-contained block with:
 - **Goal** — the single insight the demo should land. Tied to a learning objective from [objectives.md](objectives.md).
 - **Pre-flight** — what the teacher needs loaded before class.
 - **Live script** — the order of operations during the demo. Treat it as a checklist, not a teleprompter.
-- **What to highlight** — the moment(s) where the teacher should slow down and say the takeaway out loud.
-- **If the demo misbehaves** — graceful fallback for when the model surprises you (it will).
+- **What to highlight** — the moment(s) where the teacher should slow down and call out the takeaway out loud.
+- **If the demo misbehaves** — graceful fallback for when the model surprises you (because it will).
 
-The demos are ordered to match the five learning objectives from [objectives.md](objectives.md). Demo 1 builds the harness (case → scorer → runner) and lands outcome-vs-trajectory scoring; Demo 2 turns two real L08 trace failures into regression cases; Demo 3 introduces non-determinism → pass rate, then runs the *same* eval set against Sonnet and Haiku so the cheaper model's pass rate drops on screen; Demo 4 puts a dollar/latency figure on an eval run and walks the scorer cost/judgment spectrum (including one minimal LLM-as-judge). The optional bridge demo carries the eval set forward to L11/L12 (objective 5). They build on each other — every demo reuses Demo 1's harness and the same handful of cases, never a fresh one. Run them in order on first delivery.
-
-> **The spine of L09: reinforce, don't re-teach.** L09 sits directly on top of [L08 (Tracing)](../L08/objectives.md). Students already know how to read a trace and eyeball-diff two runs — L09 does **not** re-derive that skill. It *formalizes* it: the ad-hoc "did this run look right?" of L08 becomes "does my agent pass a fixed set of cases I defined in advance?" When a demo reads a trace, recall the L08 move in one line and move on; the new material is the **harness**, the **regression case**, the **pass rate**, and the **cost model**.
+The demos are ordered to match the four learning objectives from [objectives.md](objectives.md). Demo 4 (trade-offs) is comparative and depends on Demos 2 and 3 having happened, so run the sequence in order on the first delivery of the lesson.
 
 ## Pre-flight (once, at the top of the lesson)
 
 The teacher should have, before the first demo starts:
 
-- **The shared agent loop importable, not rebuilt.** `from fluffy_potato_curriculum.common.agent_loop import run` (the canonical reference copy of L07's hand-rolled loop) and the shared tools from `common/tools.py` (`calculator`, `lookup`, `flaky_fetch` with its four URL behaviors). L09 *evaluates* a loop students already built and traced — re-deriving it would waste the lesson. `agent_loop.run(...)` returns a `RunResult` carrying `final_text`, `iterations`, `termination`, and — from L08 — `trace: list[TraceEvent]`.
-- **A small set of saved L08 traces of *known failures*, captured ahead of class** — the raw material for Demo 2. At minimum: (a) a **runaway loop** that ended in `max_steps` (same `(tool_name, args)` repeating), and (b) a **wrong-arguments** or **unrecovered tool-error** run on the `flaky_fetch` task. These are exactly the failure signatures students hunted for in L08; here they become eval cases. Capture them as `.to_jsonl()` files (the L08 helper) so the demo doesn't depend on reproducing a non-deterministic failure live. <!-- *NEED INPUT*: pick the exact two-or-three saved failures Demo 2 converts into cases. Recommendation: one runaway/`max_steps` case from the lookup-chaining task and one tool-error-handling case from the flaky_fetch task, so the two demos cover both a trajectory bug and an outcome bug. Stage 2 captures and ships these `.jsonl` fixtures. -->
-- **The `common/evals.py` harness — written *live* in Demo 1, kept complete in a sibling file to paste if live-coding falls behind.** Its three pieces match the *Decided eval schema* in [objectives.md](objectives.md): `EvalCase` (`id`, `inputs: dict`, `reference_outputs: dict`), a `Scorer` callable `(*, run: RunResult, example: EvalCase) -> EvalResult` (`key`, `score`, `comment`), and `evaluate(cases, scorers, *, samples=K)` returning a per-case summary including a **pass rate**. Use these names verbatim — they line up with LangSmith (*Example / Evaluator / `evaluate()`*) and Langfuse (dataset item / score), which is the recognition payoff if students adopt a platform later.
-- **~5–10 prepared eval cases over the L07/L08 tasks**, reusing the tools above — e.g. the `calculator`+`lookup` chaining task ("the population of the city whose name is `17**2 - 1`") and the `flaky_fetch` failure task. Mix outcome cases (`reference_outputs={"answer": "..."}`) and trajectory cases (`reference_outputs={"expected_tools": ["calculator", "lookup"]}`). <!-- *NEED INPUT*: confirm the final case list and the exact reference_outputs shape. Recommendation: 6–8 cases — enough to make a pass-rate table legible, few enough to run live in seconds. -->
-- **Two model clients configured: Sonnet 4.6 (anchor) and Haiku 4.5 (contrast)**, both read through `common/config.py`, for Demo 3's A/B. The *same* eval set runs against both.
-- **A token/cost readout for Demo 4** — either the per-call `usage` fields the L08 trace already records, or the same run open in the cohort's shared Langfuse instance. The cost demo reads *real numbers off a trace*, not a hand-wave.
+- A working REPL or notebook with the project's Claude SDK setup (per the project's `uv` env), the same trace-printing wrapper used in [L08's demos](../L08/demos_or_activities.md), and an additional MCP-aware client component. <!-- *NEED INPUT*: which MCP client anchors the demos and labs — the project's existing Python SDK with a small custom MCP-client wrapper, Claude Desktop, claude.ai's MCP support, or a published Python MCP-client library? Affects what "connect to an existing server" looks like in code. Mirrors the same open question in [objectives.md](objectives.md). -->
+- A pre-installed and verified **existing MCP server** for Demo 2. <!-- *NEED INPUT*: which existing MCP server should the "connect to an existing server" subgoal target? Best guess: a small, well-known server with a tool or two the student can hit deterministically (a filesystem server, a fetch server, or a calculator-style toy server). The chosen server propagates into Demos 2 and 4. Mirrors the same open question in [objectives.md](objectives.md). -->
+- A pre-built **minimal MCP server in Python** for Demo 3, exposing exactly one tool — reusing one of the well-designed tools from [L08's demos](../L08/demos_or_activities.md) (e.g. the tight-schema `book_meeting` from L08 Demo 3, or the `lookup_user_by_email` from L08 Demo 4) so students see the L08 design lessons port over unchanged. <!-- *NEED INPUT*: which Python library should the "build your own server" subgoal use? The official Python MCP SDK is the obvious answer; pin the exact package name and version once decided so labs can use `uv add`. Mirrors the same open question in [objectives.md](objectives.md). -->
+- A second MCP client pre-configured and ready, *pointing at the same server from Demo 3*. The second client can be a different process running the project SDK, or the official MCP inspector, or Claude Desktop — whatever produces a visible "second consumer" for Demo 4. The point is to demonstrate portability live, not just describe it.
+- A side-by-side display: the active MCP server's published tool list (rendered the way the discovery handshake would render it) on one panel, the model's tool-use request on another, the server-side log of the call on a third. Without this layout, the demos read as "stuff happened in another window" — the contrast across boundaries is the whole lesson.
 
-> Why reuse L07/L08's loop, tools, and tasks: L09 is about *eval design*, not new agent code or new tools. Evaluating a loop students already traced keeps every minute on the eval concepts — the case, the scorer, the pass rate, the cost — which *are* the lesson. New tools mid-demo would dilute the message exactly as a new loop would.
+> Why two clients pre-staged: the headline value of MCP is "one server, many clients." A demo that uses one client is just a wire-format demo. A demo that uses two clients against the same server is a *portability* demo — and that's what justifies the protocol.
 
-## Demo 1 — Case, scorer, runner: the eval harness made visible (Objective 1)
+<!-- *NEED INPUT*: which model class anchors the demos — likely the same as L08's choice; pin once both are settled. Mirrors the same open question in [objectives.md](objectives.md). -->
 
-**Goal:** build a tiny eval harness from scratch in front of the class and run it on the loop students already know. Land the three-part vocabulary from [objectives.md](objectives.md) — **a case is an input plus what "good" means; a scorer turns one run into a verdict; the runner runs every case and reports a summary** — and the outcome-vs-trajectory distinction.
+## Demo 1 — The pain MCP solves (Objective 1)
 
-**Pre-flight:**
-
-- An empty `common/evals.py` (or notebook cell) the teacher fills in live.
-- Two prepared cases on the slide: one **outcome** case (the calculator+lookup task, `reference_outputs={"answer": "<the city's population>"}`) and one **trajectory** case (same task, `reference_outputs={"expected_tools": ["calculator", "lookup"]}`).
-
-**Live script:**
-
-1. Sketch the shape on the whiteboard before typing: *case in → run the agent → scorer reads the result → pass/fail.* Name each piece with the verbatim term.
-2. Live-code `EvalCase` (`id`, `inputs`, `reference_outputs`) and one **outcome scorer** — `answer_correct`: call `agent_loop.run(case.inputs["task"])`, then check `run.final_text` contains `case.reference_outputs["answer"]`. Return an `EvalResult(key="answer_correct", score=True/False, comment=...)`.
-3. Live-code the **runner** `evaluate(cases, scorers)`: for each case, run the loop once, apply each scorer, collect results, print a pass/fail table. Run it on the two cases. Read the table out loud.
-4. Now add a **trajectory scorer** — `expected_tools`: read `run.trace`, extract the ordered tool-call names, check they match `case.reference_outputs["expected_tools"]`. Re-run. Show that the *same run* is now scored two ways: did it get the right answer, *and* did it take the right path.
-
-**What to highlight:**
-
-- The three terms, said out loud and pointed at in the code: **case**, **scorer**, **runner**. These reappear in every lab and in L12 — fix them now.
-- **An eval set can score the answer, the path, or both.** For agents the path often matters as much as the answer — the trajectory scorer is reading the L08 trace, which is *why* L08 came first. Say that connection explicitly.
-- The scorer is just a function from `(run, example)` to a verdict. Nothing magic — the "framework" is ~30 lines they can read end-to-end.
-
-**If the demo misbehaves:**
-
-- If live-coding falls behind, paste the completed `common/evals.py` and walk it line by line. Don't sacrifice the *run* — the printed pass/fail table is where "eval set" stops being abstract.
-- If the outcome scorer fails on a *correct* run because of exact-string matching (e.g. the model wrote "8.3 million" vs your "8,336,817"), don't fix it silently — flag it as the brittleness Demo 2 tackles, and loosen to a substring or normalized-number check.
-
-## Demo 2 — From a trace to a regression case (Objective 2)
-
-**Goal:** take two *real* failures from L08 traces and turn each into a case whose check **fails when the bug is present and passes when it's fixed**. Land the headline loop from [objectives.md](objectives.md): **trace a failure → write a case that catches it → keep the case forever.** Good eval cases come from observed failures, not imagination.
+**Goal:** show the duplication that MCP eliminates. Land the framing from [objectives.md](objectives.md): *tools designed for one client require N integrations to be reused across N clients.*
 
 **Pre-flight:**
 
-- The two saved L08 failure traces from pre-flight (`.to_jsonl()` fixtures): the runaway/`max_steps` run and the tool-error/wrong-args run.
-- Demo 1's harness, unchanged.
+- A small inline tool — reuse the `current_time(tz)` tool from [L08 Demo 1](../L08/demos_or_activities.md) — wired three different ways:
+  - **Way A:** registered with the project's Claude Python SDK as an inline tool (the L08 way).
+  - **Way B:** registered with a different mock client (a hand-written second SDK wrapper, or a deliberately different framework). The point is for the registration code to *look different* from Way A — different function signature, different schema syntax, different error contract.
+  - **Way C:** a hypothetical third client described on a slide (e.g. "an IDE plugin," "Claude Desktop," "a coworker's agent"). The teacher narrates that this would require *yet another* integration.
+
+  The three Ways do not need to be production code — they need to be visibly different so the duplication is unmistakable.
+
+- A slide showing the same `current_time` tool spec from L08 (name, description, schema, return shape) at the top, with arrows pointing to three boxes labeled Way A, Way B, Way C — each box showing a *different* registration shape for the same underlying tool.
 
 **Live script:**
 
-1. Open the **runaway** trace. Recall the L08 reading in one line — "same `(tool_name, args)` repeating, terminated `max_steps`" — *don't* re-teach trace reading. Then write the case it deserves: a **trajectory** check `no_runaway` that reads `run.trace` and fails if any `(tool_name, args)` pair repeats (or if `run.termination == "max_steps"`). Show it **failing** against the saved bad run.
-2. Open the **tool-error** trace (the `flaky_fetch` task). Write an **outcome** check that fails when the final answer never recovered. Show it failing against the saved bad run, then passing against a good run.
-3. State the ordering rule out loud and put it on a slide: **trace a failure → write a case that catches it → keep it forever.** The trace from L08 is the source of truth for "what actually goes wrong"; L08 produced these traces precisely so L09 has real failure modes to attack.
-4. **The brittleness beat.** Show an exact-string match on `final_text` failing against a *correct* run that just reworded the answer. Loosen it to the *loosest check that still catches the bug* — substring, normalized number, "contains the right tool call." Name when you'd need a more semantic check (an LLM-as-judge) — and defer building one to Demo 4.
+1. Show the Way A registration code on screen. Run a model call that triggers the tool. Observe the call.
+2. Show the Way B registration code side-by-side with Way A. Read aloud what's the same (the tool's purpose, name, description, schema) and what's different (the boilerplate around it). Run the same model call against Way B's client. Observe the call — same result, different glue code.
+3. Pull up the slide for Way C and narrate: "Now imagine doing this every time a new client wants this tool." Quickly count: 3 clients × N tools = 3N integrations.
+4. Pull up a slide showing the MCP shape: one server (the tool), N clients (each speaking the protocol). Same tool, registered once, consumed everywhere.
 
 **What to highlight:**
 
-- **Trajectory case vs. outcome case, felt side by side:** `no_runaway` asserts on the *path* (the trace), the answer check asserts on the *result* (`final_text`). Students should leave able to write one of each.
-- A regression case is defined by its behavior under the bug: it **fails when broken, passes when fixed.** A "case" that passes no matter what tests nothing.
-- The loosest check that still catches the bug. An over-tight check (exact string) trains you to ignore reds when harmless rewording trips it — that's worse than no check.
+- The duplication is *integration boilerplate*, not tool logic. The L08 tool design (name, description, schema, errors) is the same in every Way — only the wrapping changes. MCP makes the wrapping standard.
+- The three things MCP standardizes from [objectives.md](objectives.md) — discovery, invocation, packaging. Name them as you transition from the duplication slide to the MCP shape slide.
+- What MCP does *not* change: the L08 design pressures. This is critical. Repeat it explicitly so students don't think MCP makes design easier.
+- MCP is a protocol, not a framework, not Anthropic-specific. The boxes in the "MCP shape" slide should make this visible — the clients can be from different vendors, different languages.
 
 **If the demo misbehaves:**
 
-- If you can't reproduce a failure live, that's *why* the saved `.jsonl` fixtures exist — score against the saved trace. The whole L08 lesson was "don't chase a non-deterministic failure by re-running; read the captured trace." Model that here.
-- If a student asks "why not just assert the exact answer?" — that's the Demo 2 punchline arriving early. Run the reworded-but-correct example and let the brittle check fail.
+- This demo is mostly narration over slides plus two live runs of the same tool against different clients. The risk is low. If a live run fails, fall back to the slide narrative — the duplication point lands without needing the live runs. Just don't skip showing both Way A and Way B side by side; the visual contrast is the demo.
 
-## Demo 3 — Same eval set, two models: the pass rate drops (Objective 3)
+## Demo 2 — Connecting to an existing MCP server (Objective 2)
 
-**Goal:** the headline demo. First confront **non-determinism** — a single pass can be luck — and move from a pass/fail to a **pass rate** over K samples. Then run the *same* eval set against **Sonnet 4.6 and Haiku 4.5** and watch the cheaper model's pass rate visibly drop. Land that **an eval set is both a regression ratchet and a measurement instrument.**
+**Goal:** show the discovery handshake and the cross-process round-trip end-to-end against a server the student did *not* write. Land the framing from [objectives.md](objectives.md): *discovery is the new capability — the client asks the server what it exposes.*
 
 **Pre-flight:**
 
-- Demo 1's harness extended with `evaluate(cases, scorers, *, samples=K)` — runs each case K times and reports a pass *rate*. <!-- *NEED INPUT*: confirm K for the toy set. Recommendation: K = 3–5 — enough for a rate to read as a rate (e.g. "2/3"), cheap enough to run live. The concrete count is a stage-2 detail; the *concept* (rate, not verdict) is the lesson. -->
-- The full prepared case set, plus a deliberately **flaky** case — one whose trajectory varies run-to-run so it sometimes passes, sometimes fails. <!-- *NEED INPUT*: pick a case that flakes reliably on Sonnet — e.g. a task where the model sometimes makes an extra lookup call. Dry-run before class; a flaky case that never flakes on the day defeats the beat. -->
-- Both model clients (Sonnet 4.6, Haiku 4.5) ready.
+- The chosen existing MCP server installed and verified working with the chosen client. Run a smoke test the day of the lesson — server processes can rot, transports can break.
+- A short, visible piece of client configuration that registers the server (e.g. a `mcp_servers.toml` snippet, a `claude_desktop_config.json` snippet, or a Python `MCPClient(...)` constructor call). Pre-load it; this is *not* the moment to live-edit JSON.
+- A test prompt that the chosen server's tools can actually answer. <!-- *NEED INPUT*: confirm the prompt and the server pairing once the existing server is pinned. Example: if the server is a filesystem MCP, prompt with *"List the markdown files under docs/origin/."* If it is a fetch server, prompt with *"Fetch the title of example.com."* -->
 
 **Live script:**
 
-1. **Single pass/fail first — let the flaky case bite.** Run the eval set once with `samples=1`. The flaky case passes. Re-run. It fails. Pause: *"Which run do we believe?"* Make the confusion land — don't pre-empt it. This *is* the lesson.
-2. Introduce the cheapest honest fix: run each case **K times** and report how often it passes — a **pass rate** (e.g. `no_runaway: 2/3`), not a single verdict. Re-run with `samples=K`. The flaky case now reads as a rate; a flaky case is itself a *finding*, not noise to ignore.
-3. **The A/B.** Run the same eval set against **Sonnet 4.6**, then against **Haiku 4.5**, K samples each. Put the two pass-rate columns side by side. Watch Haiku's rates drop — especially on the multi-step chaining and the failure-recovery cases. This is a *quantified* demonstration of what a lower-powered model can and "cannot" do on the same task.
-4. Reframe the same comparison as a **regression** check: run Sonnet *before* and *after* a small prompt edit and report which cases went pass→fail (a **regression**) or fail→pass (a **fix**). Same machinery, different question: "did my change break anything that used to work?"
+1. Show the client configuration on screen and read it aloud. Note: this is the only client-side change needed to add the server. Compare mentally to Demo 1's per-client integration burden — Way A and Way B both required tool-specific code; this is a config entry.
+2. Start the client. Inspect the discovered tool list — the client's introspection output, or the project's wrapper that prints the discovered tools after handshake. Show that the client now knows about tools it didn't ship with.
+3. Run the test prompt. Observe the trace: model emits a tool-use request → client routes the request to the MCP server over the chosen transport → server runs the tool → result returns through the client → model continues. Highlight each phase as it scrolls past.
+4. Stop the MCP server process mid-conversation. Re-run the prompt. Observe the failure mode: the client surfaces a transport error to the model. Discuss what the model does next (usually reports the failure, sometimes retries — exactly the recoverable-error behavior from [L08](../L08/objectives.md), but at the transport layer this time).
+5. Restart the server. Re-run. Recovery.
 
 **What to highlight:**
 
-- **You measure rates, not verdicts.** One green run on a non-deterministic agent can be luck. The pass rate over a few samples is the cheapest answer you can actually trust. (This is the disciplined version of L08's "a single differing run proves nothing.")
-- **The eval set is a measurement instrument, not just a guard.** Sonnet vs. Haiku on identical cases turns "Haiku is weaker here" from an assertion into a number — and feeds Demo 4's cost/capability trade-off directly.
-- **The ratchet.** Once a case passes, a later change that breaks it is a regression you catch *before* shipping. That is the payoff students carry into every later lesson.
+- The *discovery* step is the new piece. Inline tools are known to the agent at code-write time; MCP tools are known at connect time. This shifts ownership of the tool list to the server author.
+- The cross-process boundary's failure modes from [objectives.md](objectives.md) — server not running, transport disconnect, version mismatch, missing credentials. Demo 2 deliberately triggers the first to make it visible.
+- The model doesn't care that the tool is over MCP. From the model's perspective, it received a tool-use result (or an error) just like in [L07](../L07/objectives.md). MCP is invisible to the model — it shows up only in the *client's* implementation and the *operator's* config.
 
 **If the demo misbehaves:**
 
-- If the flaky case refuses to flake on the day, force variance: raise the task's ambiguity, or lower the iteration cap so a borderline run sometimes hits `max_steps`. The point is to *show* a rate mattering, not to shame a model.
-- If Haiku happens to match Sonnet on your toy cases, add one genuinely multi-step case (deeper chaining, or the full four-URL `flaky_fetch` recovery) where capability separates them. Don't manufacture a gap that isn't there — pick a harder case that honestly exposes one.
-- If both models pass everything, your cases are too easy to be a measurement instrument — that's a teachable point in itself: a green eval set tells you nothing about *headroom*.
+- If the existing server fails its smoke test on the day, fall back to a *local* mock MCP server pre-built by the teacher that exposes one trivial tool (a static "ping" returning "pong"). The point is the handshake and round-trip, not the specific server's output. Have the mock ready in reserve.
+- If the deliberate "stop the server" step takes too long to recover, narrate the failure and skip the restart — Demo 4 will revisit failure modes in the trade-off discussion.
 
-## Demo 4 — What does an eval run cost, and which scorer is worth it? (Objective 4)
+## Demo 3 — Building your own MCP server (Objective 3)
 
-**Goal:** put a real dollar/latency figure on an eval run two ways — a back-of-envelope formula *and* actual token numbers read off a trace — then walk the scorer **cost/judgment spectrum** and show one minimal LLM-as-judge. Land that **every scorer trades cost for judgment; there is no free, perfect, automatic check.**
+**Goal:** show that a tool the student has already seen designed (in L08) can be repackaged as an MCP server with no design changes — and watch a client discover and call it. Land the framing from [objectives.md](objectives.md): *the L08 design lessons carry over wholesale.*
 
 **Pre-flight:**
 
-- The token/cost readout from pre-flight (trace `usage` fields, or the run open in Langfuse).
-- A tiny LLM-as-judge scorer prepared: a small judge prompt that scores a `final_text` for a quality a cheap check can't express (e.g. "did the answer acknowledge the failures gracefully?"). Keep it minimal and clearly flagged as "the L23 version is more rigorous." <!-- *NEED INPUT*: confirm the one judged quality and the judge prompt. Recommendation: judge the flaky_fetch task's "gave up gracefully" answer — a genuinely fuzzy quality no substring check captures — so the judge earns its place rather than duplicating a cheap check. -->
+- A pre-built minimal MCP server in Python (≤100 lines, ideally less) that exposes one of the L08 well-designed tools — recommended: the tight-schema `book_meeting` tool with informative validation errors from [L08 Demo 3](../L08/demos_or_activities.md), since its design surface (typed parameters, per-field constraints, structured errors) showcases what carries across the boundary.
+- The L08 inline version of the same tool open in a side-by-side editor pane. Annotate (in the slide deck or on screen) the parts that are *identical* across the two: the name, the description, the parameter list with descriptions, the constraint set, the error shape. Annotate the parts that are *different*: the registration boilerplate (a function decorator vs. a server-startup call), the transport (in-process call vs. stdio), the entry point (none vs. a `__main__` block).
+- The same client from Demo 2 reconfigured to also point at this new local server (so both the existing server *and* the new server are available — but only the new one is exercised in this demo).
+- The same test prompt from [L08 Demo 3](../L08/demos_or_activities.md): *"Book a 90-minute design review with Priya next Tuesday afternoon."*
 
 **Live script:**
 
-1. **Back-of-envelope first.** Write the formula on the board: `cost ≈ cases × samples × avg model-calls-per-run × per-call cost`. Plug in the toy set's numbers (e.g. 8 cases × 3 samples × ~3 calls/run). Get a rough figure. Note that **each case is a *full* `agent_loop.run(...)`** — multiple model calls, not one.
-2. **Ground it in real data.** Open the trace (or Langfuse) for one run and read the *actual* per-call `usage` token counts. Multiply through. Compare to the estimate — close enough to trust the formula, real enough to not hand-wave. This is the "both ways" the objectives ask for.
-3. **The sample-size trade-off.** More samples → a more trustworthy pass rate, but cost grows *linearly*. State how you'd pick K for a real set vs. the toy set.
-4. **The scorer spectrum.** Put it on a slide, ordered by cost and by how much judgment each exercises: **exact assertion → fuzzy/automated check → LLM-as-judge → human review.** Then run the prepared **LLM-as-judge** on the "gave up gracefully" quality — show it scoring something a substring check can't. Flag its own costs out loud: it's a model call (so it costs tokens), and it can be wrong, biased, or gameable.
-5. Place **human review** at the expensive end: the most *accurate* and most *expensive* scorer, the only one that can judge qualities nothing automated captures cheaply. Choosing a scorer is choosing a point on that curve — a design decision, not a default.
+1. Show the L08 inline tool and the new MCP server side by side. Walk through the diff: highlighted lines for what's identical (design surface), highlighted lines for what's different (packaging). The visual should make the "design unchanged, packaging changed" point obvious.
+2. Start the new MCP server process. Show the server-side log — `Tool 'book_meeting' registered. Listening on stdio.` (or equivalent for the chosen transport).
+3. From the client, trigger the discovery handshake against the new server. Show the discovered tool spec — name, description, schema. It should be visibly the same spec the L08 demo registered inline.
+4. Run the prompt. Observe the same recovery behavior students saw in [L08 Demo 3](../L08/demos_or_activities.md): the model submits a partial call, gets back a structured validation error naming the missing email field, and on the next turn either asks the user or tries again with a synthesized address.
+5. Force a deliberate Python exception inside the tool implementation (e.g. by passing a duration of `999999`). Show that — if the server is well-built — the exception is caught and returned as a structured tool result, not a transport-level crash. If it crashes the server instead, treat that as the teaching moment: this is exactly the cross-process error-shaping discipline from [objectives.md](objectives.md).
 
 **What to highlight:**
 
-- **An eval run is not free** — it's N cases × K samples × several model calls each. "More cases / more samples" is a deliberate cost/confidence trade, not "max it out."
-- **Every scorer trades cost for judgment.** Exact assertions are cheap and dumb; humans are expensive and wise; the LLM-as-judge sits in between with its *own* error modes. The L09 judge is a one-screen illustration; L23 unpacks what an LLM-judge can and can't reliably score.
-- The token numbers you're reading are the *same* fields L08 told you to trace and L01 taught you to cost. The eval cost model is those two lessons cashing out.
+- Same tool, same model, same prompt, same recovery behavior — even though the tool now lives in a separate process and reaches the model through MCP. The L08 design discipline is doing the work; MCP is just moving the bytes.
+- The server author owns the published tool list. Anything in the description is what every connecting model will see in its system prompt at the start of every conversation. (Back-reference [L08](../L08/objectives.md): *"more tools ≠ more capable agent"* — this applies to MCP server authors too. Don't dump 20 tools into one server.)
+- The `__main__` block / startup is small — an MCP server is not a microservice unless you make it one. The whole thing is a script with a wire protocol. Don't let students inflate the implementation in their heads.
 
 **If the demo misbehaves:**
 
-- If the LLM-judge gives an obviously wrong verdict on the day, **keep it** — that's the most honest possible demonstration that a judge is a fallible scorer, not an oracle. Name it and move on.
-- If the live cost numbers are tiny and undramatic on the toy set, extrapolate out loud to a realistic set (hundreds of cases, K=10, on every commit) so the linear cost growth is felt, not dismissed.
+- If the server fails to start (port conflict, transport setup error), fall back to the inline L08 version of the same tool to confirm the model behavior is what students remember from L08, then narrate what the MCP version *would* show. The design-portability point still lands.
+- If the validation-error path in step 4 doesn't trigger (model happens to fill in the email correctly), use the duration-out-of-range path or rerun with a vaguer prompt. The point is the structured error round-trip, not the specific field.
 
-## Optional bridge demo — carry the eval set forward (Objective 5)
+## Demo 4 — When to MCP, when to stay inline (Objective 4)
 
-If time allows, close on the practice the PRD asks L09 to *establish*. Don't build anything new — make the handoff concrete:
+**Goal:** show the trade-off live by exercising the same tool both ways and then connecting a *second* client to the MCP version. Land the framing from [objectives.md](objectives.md): *MCP is most valuable when there is a second consumer.*
 
-1. State the rule on a slide and say it out loud: **when you build or change an agent, you add or run an eval set.** The L09 harness in `common/evals.py` is the seed every later agent plugs into.
-2. Preview L12: the *same* `EvalCase`s built today will run against the **LangGraph shallow agent** students build in L12 — *same cases, different implementation, did anything regress?* That is the cleanest possible demonstration of the ratchet, and it's already settled by the shared-`common/` decision (L12's lab imports `common/evals.py`). (In the mini cut the very next lesson is [L11 (workflows/DAGs)](../L11/objectives.md), whose deterministic flow is itself trivially evaluable — a natural place to reinforce the habit even earlier.)
-3. Signpost L23 as "where this scales" — multi-step graphs, retrieval quality (precision@k / recall@k), LLM-as-judge done properly, multi-agent systems. L09 is a *first pass* on purpose; naming the boundary keeps the lesson honest and the scope small.
+**Pre-flight:**
 
-Don't teach LangGraph or the L23 machinery here — just land that the tiny harness students just built is the thing they'll carry forward, the same way L08's hand-rolled trace mapped onto Langfuse.
+- The L08 inline version and the Demo 3 MCP version of the same `book_meeting` tool, both functional, both wired to the same primary client.
+- A *second* MCP client (the one staged in pre-flight) pointing at the same Demo 3 MCP server.
+- The trace wrapper extended to also print wall-clock time per call, so the inline-vs-MCP latency difference is numerically visible.
+- A whiteboard or slide listing the costs and benefits from [objectives.md](objectives.md) subgoal 4 (costs: extra process, transport, versioning, debugging, deployment; benefits: portability, separation of concerns, discoverability, security boundary). The teacher will tick items off as they appear in the demo.
 
-<!-- *NEED INPUT*: include this bridge demo as the L09 closer, or fold its "carry it forward" message into Demo 3's ratchet beat? Recommendation: keep it as a short explicit closer — objective 5 is a *practice* objective, and a named handoff lands it better than a buried aside. -->
+**Live script:**
+
+1. Run the L08 prompt against the *inline* version. Note wall-clock latency. Mark the costs at "zero" — no extra process, no transport.
+2. Run the same prompt against the *MCP* version through the primary client. Note wall-clock latency. The MCP path is typically slightly slower (transport overhead, especially over stdio cold-start). Tick the cost columns: extra process (yes), transport (yes), debugging surface (yes — failure can now happen on either side).
+3. Now bring up the *second* client. Without writing any tool code, point the second client at the same MCP server. Run a prompt from the second client that triggers the same tool. Observe: it just works.
+4. Tick the benefit columns: portability (yes — the second client added the tool with config alone, not code), separation of concerns (yes — the tool author and the second client author could be different people), discoverability (yes — second client introspected the server's tool list).
+5. Walk through the three example scenarios from [objectives.md](objectives.md):
+   - **One-off in a single script.** Inline wins. The cost columns are non-zero, the benefit columns are zero (no second consumer).
+   - **Multi-client tool (today's demo!).** MCP wins. Costs are paid, benefits are realized.
+   - **Latency-sensitive tight-loop tool.** Show the per-call latency from steps 1–2 and discuss: if a tool is called 50 times per turn, the overhead compounds. Inline often wins here on overhead, but MCP may still win on packaging if the latency budget allows.
+
+**What to highlight:**
+
+- The *gradient* point from [objectives.md](objectives.md): many tools start inline and graduate to MCP when a second consumer appears. The decision is not permanent, and the right answer depends on the *number of consumers* more than any other factor.
+- Costs are real and immediate. Benefits compound with the number of consumers. The break-even point is somewhere between one and many — for a one-off, it's "many"; for a tool that *will* be reused, it's "now."
+- A common student temptation is to reach for MCP early because it sounds more "professional." Push back: complexity that buys nothing is just complexity. Inline is the right default until reuse appears.
+
+**If the demo misbehaves:**
+
+- If the second client fails to connect (config drift, transport mismatch), narrate what *would* happen and use the slide of the cost/benefit matrix to make the point. The portability claim does not require a flawless live demo to be persuasive; the architecture of "one server, two clients" is convincing on its own.
+- If the latency comparison in step 2 doesn't show a meaningful gap (well-warmed stdio, fast machine), don't fake one — say so explicitly and note that the latency cost can be small in practice but compounds at scale.
+
+## Optional bridge demo — toward L10 (hand-rolled agent loop)
+
+If time allows, run one final demo that previews [L10](../L10/objectives.md) (when its roadmap exists): take the existing model→tool→model round-trip from this lesson and gesture at the *loop* version — the same wiring, but with the model continuing to call tools across multiple turns until it decides to stop. Show that whether the tool is inline (L08) or MCP-served (L09) is irrelevant to the loop's structure; both plug in identically. Don't teach the loop here — that's L10. Just show the indifference.
+
+<!-- *NEED INPUT*: include this bridge demo, or save it as the opener for L10? -->
 
 ## Pacing notes for the teacher
 
-- **Per-demo time:** Demo 1 is the long one (15–20 minutes including the live-code build of the harness). Demo 2 is 12–18 (two cases from saved traces + the brittleness beat). Demo 3 is the centerpiece, 15–22 (single→rate, then the Sonnet/Haiku A/B). Demo 4 is 12–18 (cost both ways + the scorer spectrum + the LLM-judge). Bridge is 5–8. Total ~60–85 minutes plus discussion — fits the **~75–100 minute** single lecture pinned in [objectives.md](objectives.md). If it runs long, split at the Demo 2/3 boundary: "build an eval set / score answer vs. trajectory" then "compare runs / reason about cost."
-- **Live-coding budget:** only Demo 1's harness and Demo 2's two scorers need live-coding. Demos 3 and 4 *reuse* that harness with small additions (`samples=K`, the judge scorer); do **not** re-derive the harness in each demo. Keep the completed `common/evals.py` ready to paste.
-- **Variance budget:** the agent loop is non-deterministic — that's the *subject* of Demo 3, not just a nuisance. Budget a re-run wherever a specific tool-call path matters, and **capture the saved failure traces ahead of class** so Demo 2 never depends on reproducing a failure live.
-- **The audience watches, doesn't participate.** Resist "what should this case check?" as a group question — that's a lab pattern. Hands-on case-writing and the run-it-yourself eval are for the L09 labs.
+- **Per-demo time:** Demo 1 is ~10 minutes (mostly narration + two short runs). Demos 2 and 3 are ~15 minutes each (live wiring, multiple steps, cross-process moving parts). Demo 4 is ~15 minutes (comparative — needs setup time but is mostly observational). Total fits a 60–80 minute block, plus the optional bridge. <!-- *NEED INPUT*: confirm against the lesson-time budget once duration is pinned in [objectives.md](objectives.md)'s open questions. -->
+- **Variance budget:** the cross-process boundary adds new failure modes. Budget for one server restart per demo. If a transport flakes, narrate the recovery — students will see this same flake when they do the lab, so seeing the teacher recover gracefully is itself instructive.
+- **The audience watches, doesn't participate.** Resist the temptation to ask "what should this MCP server expose?" — that is a lab pattern, not a demo pattern. Hands-on practice is for the L09 labs.
+- **Keep the same tool across Demos 3 and 4.** Reusing the L08 `book_meeting` tool across demos lets students focus on the *packaging* changing, not the tool. Don't introduce a new tool for variety.
+- **Smoke-test all servers the day of the lesson.** MCP servers are processes, processes rot, and a failed connection mid-demo eats time the lesson does not have.
 
 ## Open authoring questions
 
-Most of L09's big decisions are already pinned in [objectives.md](objectives.md) (anchor + Haiku contrast, the `EvalCase`/`Scorer`/`evaluate()` schema in `common/evals.py`, reuse of `common/tools.py`, single-pass-then-rate, cost-both-ways, one illustrative LLM-judge, reinforce-don't-re-teach L08). The remaining open items are stage-2 mechanics:
-
-- <!-- *NEED INPUT*: the exact two-or-three saved L08 failure traces Demo 2 converts into cases, captured as `.jsonl` fixtures. Recommendation in the pre-flight (one runaway/`max_steps`, one flaky_fetch tool-error). -->
-- <!-- *NEED INPUT*: the final eval-case list and the precise `reference_outputs` shape for outcome vs. trajectory cases (6–8 cases recommended). -->
-- <!-- *NEED INPUT*: the sample count K for the toy set (3–5 recommended) — concept is the pass rate, not the number. -->
-- <!-- *NEED INPUT*: which case is the deliberately flaky one in Demo 3, and that it flakes reliably on Sonnet on a dry-run. -->
-- <!-- *NEED INPUT*: the one quality the Demo 4 LLM-as-judge scores, and its judge prompt (the flaky_fetch "gave up gracefully" answer recommended). -->
-- <!-- *NEED INPUT*: are the demos run in a projected Jupyter notebook, a slide-embedded REPL, or a demo-runner script? Affects how the harness is shown live. Mirrors the same open question in L07's demos. -->
-- <!-- *NEED INPUT*: whether to show the cost readout (Demo 4) off the in-memory trace `usage` fields or the shared Langfuse instance — the latter ties back to L08's hosted-tracer step but adds a dependency on the cohort instance being up. -->
+- <!-- *NEED INPUT*: which MCP client anchors the demos and labs — the project's existing Python SDK with a small custom MCP-client wrapper, Claude Desktop, claude.ai's MCP support, or a published Python MCP-client library? Affects what "connect to an existing server" looks like in code. Mirrors the same open question in [objectives.md](objectives.md). -->
+- <!-- *NEED INPUT*: which existing MCP server should the "connect to an existing server" subgoal target? Best guess: a small, well-known server with a tool or two the student can hit deterministically (a filesystem server, a fetch server, or a calculator-style toy server). The chosen server propagates into Demos 2 and 4. Mirrors the same open question in [objectives.md](objectives.md). -->
+- <!-- *NEED INPUT*: which Python library should the "build your own server" subgoal use? The official Python MCP SDK is the obvious answer; pin the exact package name and version once decided so labs can use `uv add`. Mirrors the same open question in [objectives.md](objectives.md). -->
+- <!-- *NEED INPUT*: should L09 cover MCP **resources** and **prompts** (the other two primitives in the protocol) or scope strictly to **tools**? The PRD subgoals only mention tools, so the safest default is "tools only, with resources and prompts as a one-paragraph mention and a forward link." Mirrors the same open question in [objectives.md](objectives.md). -->
+- <!-- *NEED INPUT*: should L09 introduce authentication / credentials / secrets handling for MCP servers, or defer to a later lesson? Best guess: defer the deep dive but mention it as a real concern in Demo 4's trade-off discussion — security is one of the genuine reasons the cross-process boundary is valuable. Mirrors the same open question in [objectives.md](objectives.md). -->
+- <!-- *NEED INPUT*: which model class anchors the L09 demos — likely the same as L08's choice, but pin once both are settled. Mirrors the same open question in [objectives.md](objectives.md). -->
+- <!-- *NEED INPUT*: do the L09 demo tools share an implementation with the L09 lab tools, or are lab tools designed from scratch by students? Recommend reusing Demo 3's `book_meeting` MCP server as the lab starting point, since the L08 version is already familiar. -->
+- <!-- *NEED INPUT*: a pointer/link to where the demo MCP server code lives (a `demos/` subdir? an `mcp_servers/` subdir?) — not yet decided in non-draft docs. -->

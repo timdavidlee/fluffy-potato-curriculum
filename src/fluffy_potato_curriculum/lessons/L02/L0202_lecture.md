@@ -23,7 +23,7 @@ estimated duration: 80
 - The whole lesson rests on one claim: **the same content, arranged differently, produces a
   different answer.** Structure is a lever, not decoration.
 - L02 hands you exactly three levers — **roles**, **structured output**, **few-shot** — and nothing
-  more. It is narrow on purpose: this is the minimum toolkit L03 (reasoning) and L04 (tools) assume.
+  more. It is narrow on purpose: this is the minimum toolkit L06 (reasoning) and L07 (tools) assume.
 
 ### slide 1.2 The three levers at a glance
 
@@ -37,11 +37,11 @@ estimated duration: 80
 
 ### slide 1.3 What L02 does not teach
 
-- **Not chain-of-thought.** Scratchpad / `<thinking>` reasoning is L03. L02 teaches the
-  structured-*answer* half; L03 teaches the *thinking* half. They compose later.
-- **Not tool calling.** Forcing schema-conformant output via the tool-use protocol is L04. Here we
+- **Not chain-of-thought.** Scratchpad / `<thinking>` reasoning is L06. L02 teaches the
+  structured-*answer* half; L06 teaches the *thinking* half. They compose later.
+- **Not tool calling.** Forcing schema-conformant output via the tool-use protocol is L07. Here we
   ask for JSON *by instruction only* and parse defensively.
-- Resist broadening scope. The job of L02 is to hand L03 a competent multi-turn chat user.
+- Resist broadening scope. The job of L02 is to hand L06 a competent multi-turn chat user.
 
 [↑ Back to top](#prompting-fundamentals-roles-structured-output-few-shot)
 
@@ -63,7 +63,7 @@ estimated duration: 80
   goes in `user`.** The system message is the part that is true on *every* call of this prompt.
 - Why it matters two ways: (a) **reuse** — a lean, durable system message can front many different
   user requests unchanged; (b) **cost** — the system message is re-sent every turn, so bloat there
-  is paid for forever (and it is exactly what *prompt caching*, a later L14 topic, exists to fight).
+  is paid for forever (and it is exactly what *prompt caching*, a later L16 topic, exists to fight).
 - diagram: two boxes — `system: "You are a triage assistant. Answer in two short paragraphs…"`
   (stamped "always true") and `user: "My head has hurt for three days."` (stamped "this call only").
 
@@ -110,7 +110,7 @@ estimated duration: 80
 
 - Structured output makes the model's response **programmatic** rather than **conversational** — a
   dict your code can index, not a paragraph you have to read.
-- It is the precondition for almost everything later: evals (L08), tool calling (L04), and
+- It is the precondition for almost everything later: evals (L11), tool calling (L07), and
   multi-step pipelines all need the model's output to be *machine-readable*.
 - The shapes you'll ask for: a **JSON object**, a **fixed list of fields**, or **XML-ish tags**
   like `<answer>…</answer>`.
@@ -121,7 +121,7 @@ estimated duration: 80
   prompt ("Return a single JSON object with exactly these keys, no prose") and then parse the reply.
 - diagram: prompt with an explicit schema spec → model reply (hopefully JSON) → `parse()` → dict.
 - One-line foreshadow (do not teach here): *in production you'd use Anthropic's **tool-use-as-schema**
-  to force schema-conformant output — that's L04. The parsing discipline below still applies there,
+  to force schema-conformant output — that's L07. The parsing discipline below still applies there,
   because tool-call arguments can also be malformed.*
 
 ### slide 3.3 The model agrees to the contract; it does not enforce it
@@ -140,7 +140,7 @@ estimated duration: 80
   2. On failure, **regex out the first `{...}` block** and retry — salvages JSON wrapped in prose.
   3. On failure again, **raise loudly** with the raw response in the error message.
 - **Fail loudly, never silently.** A silent fallback (e.g. returning `{}` on parse failure) hides a
-  bug that *compounds* downstream in agent loops (L07) and traces (L08). A logged, raised error is a
+  bug that *compounds* downstream in agent loops (L10) and traces (L11). A logged, raised error is a
   diagnosis; a silent empty dict is a time bomb.
 - Validate the *contents*, not just "did it parse": required keys present? enum value in the allowed
   set? You decide whether a missing optional field is `null`-tolerant or an error — and you decide
@@ -205,12 +205,12 @@ estimated duration: 80
 | --- | --- |
 | A single clear instruction already works | just the instruction — skip few-shot |
 | The model needs the team's idiosyncratic format/labels | few-shot (for format) |
-| The task needs *reasoning* steps, not pattern-matching | chain-of-thought — L03 |
-| The example set would dominate the context window | a different approach (retrieval L15, model class L09, fine-tuning — out of scope) |
+| The task needs *reasoning* steps, not pattern-matching | chain-of-thought — L06 |
+| The example set would dominate the context window | a different approach (retrieval L17, model class L12, fine-tuning — out of scope) |
 
 [↑ Back to top](#prompting-fundamentals-roles-structured-output-few-shot)
 
-## section 5. Wrap-up and the bridge to L03
+## section 5. Wrap-up and the bridge to L06
 
 ### slide 5.1 The three levers, reconnected
 
@@ -223,18 +223,18 @@ estimated duration: 80
 - The sentence to leave with: *you now know how to ask the model for what you want, in the shape you
   want.*
 
-### slide 5.2 What L03 does with this
+### slide 5.2 What L06 does with this
 
-- L03 (teaching an LLM to think) sends its chain-of-thought prompts through **the same role
+- L06 (teaching an LLM to think) sends its chain-of-thought prompts through **the same role
   structure** you just learned — a `system` message that licenses reasoning plus a `user` message
   with the problem.
-- L03's `<thinking>…</thinking><answer>{…}</answer>` pattern is **a specific use of structured
+- L06's `<thinking>…</thinking><answer>{…}</answer>` pattern is **a specific use of structured
   output** (section 3): the parser pulls the answer out and optionally logs the thinking. The same
   defensive-parsing discipline carries over — `<answer>` blocks can be malformed too.
-- L03's worked-example chain-of-thought is **a specific use of few-shot** (section 4), where each
+- L06's worked-example chain-of-thought is **a specific use of few-shot** (section 4), where each
   example pair *also* includes the reasoning trace. You saw few-shot as a generic technique here;
-  L03 shows one application.
-- The hand-off sentence: *L03 is about making the model think harder before it answers — built
+  L06 shows one application.
+- The hand-off sentence: *L06 is about making the model think harder before it answers — built
   entirely on the three levers you now own.*
 
 [↑ Back to top](#prompting-fundamentals-roles-structured-output-few-shot)

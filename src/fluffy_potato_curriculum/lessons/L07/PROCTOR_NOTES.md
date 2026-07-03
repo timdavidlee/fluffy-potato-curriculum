@@ -1,136 +1,137 @@
 # L07 Proctor Notes
 
 Notes for whoever runs the L07 labs. One section per problem, keyed by lab id and problem number.
-Times are rough and assume a semi-technical student with basic Python who completed L01–L05.
+Times are rough and assume a semi-technical student with basic Python who completed L01–L06.
 
-> **Both L07 labs are OFFLINE — no API key needed.** They drive a *scripted stub model* (`FakeModel`),
-> so termination, the `max_steps` cap, and tool-failure handling are fully deterministic and run the
-> same way every time. The only **live** notebook in L07 is the [L0706](L0706_lecture.ipynb) demo
-> (raw Anthropic SDK, `ANTHROPIC_API_KEY` required) — that's a teacher demo, not a lab.
+> Cross-cutting note: the four teacher demos (L0703 a tool call is tokens / L0704 one wired
+> round-trip / L0706 trace the round-trip / L0708 three outcomes) plus the **L0705** lab make
+> **live** Claude calls and need `ANTHROPIC_API_KEY` set (copy `.env.example` to `.env`). The other
+> two labs stay **offline** (pure Python): **L0707** (trace a round-trip) and **L0709** (validate
+> tool calls). L0706 is also offline — it dissects a crafted transcript.
 >
-> **Why a stub model?** L07 is about LOOP CONTROL FLOW (iterate model→tool→model until done;
-> termination; the cap; failure handling). Scripting the model is the cleanest way to exercise that
-> offline and reproducibly — the same mocking stance as the project's tests. The stub mimics the
-> SDK's `.content` blocks with `SimpleNamespace`, so the loop code students write is identical to the
-> live version in L0706.
+> **Why the raw Anthropic SDK and not `potato_llm` in L07?** The course's `potato_llm` seam is
+> text-only — its `Message` cannot carry `tool_use`/`tool_result` blocks, which are exactly what L07
+> teaches. So the L07 notebooks call the raw Anthropic SDK directly; the API key still loads through
+> `common.config` (`require_anthropic_key`), never hard-coded. This is the one lesson that reaches
+> under the seam. (Open design question for the course: extend `potato_llm` to model tool blocks, or
+> keep L07+ on the raw SDK — flagged for the curriculum author.)
 >
-> **Why the raw Anthropic SDK in L0706 (not `potato_llm`)?** The course's `potato_llm` seam is
-> text-only — its `Message` cannot carry `tool_use`/`tool_result` blocks, which are exactly what the
-> agent loop is built on. So L0706 calls the raw SDK directly; the key still loads through
-> `common.config` (`require_anthropic_key`), never hard-coded. This is the same seam exception L04
-> made. (Open design question for the course: extend `potato_llm` to model tool blocks, or keep the
-> loop on the raw SDK — flagged for the curriculum author.)
->
-> The labs map to the L07 subgoals: **L0704** → build the model→tool→model loop + reason about
-> termination; **L0705** → handle tool failures at the loop level.
+> Because the model varies run to run, a live run may not reproduce every effect the prose calls
+> out — especially Demo 4 / L0709's hallucinated call. Dry-run the demos before class and clear any
+> cell outputs that hit the API before committing. The labs map to the L07 subgoals: **L0705** →
+> wire a single tool; **L0707** → trace one round-trip; **L0709** → describe the protocol by writing
+> the validation the application owns.
 
-## L0704_lab problem 1 — Detect natural termination
+## L0405_lab problem 1 — Send the first turn and find the tool call
 
-- **Common gotchas:** checking `stop_reason` instead of the blocks (works, but the lesson wants
-  students to see that *no `tool_use` block* is the real signal); using `all(...)` instead of
-  `not any(...)`; assuming a response is either all-text or all-tool_use (it can mix — a `text` block
-  *and* a `tool_use` block coexist, and that still counts as "not done").
-- **Unblockers:** "Return `not any(b.type == 'tool_use' for b in resp.content)`." Natural termination
-  means the model emitted no tool call at all.
+- **Common gotchas:** forgetting `tools=[CALCULATOR_TOOL]` (so the model just answers in text and
+  there is no `tool_use` block to find); using `[0]` to grab the block instead of searching by type
+  (a response can lead with a `text` block before the `tool_use`); treating `tool_use.input` as a
+  JSON string (it is already a parsed dict).
+- **Unblockers:** "Call `client.messages.create(model=MODEL, max_tokens=400, tools=[CALCULATOR_TOOL],
+  messages=messages)`, then `next(b for b in resp.content if b.type == 'tool_use')`." If no
+  `tool_use` appears, the prompt may be too easy — `PROMPT` is large multiplication on purpose.
+- **Time:** ~7 min.
+- **Note:** needs `ANTHROPIC_API_KEY`.
+
+## L0405_lab problem 2 — Dispatch: run the real function
+
+- **Common gotchas:** passing the whole `tool_use.input` dict to `calculator` instead of
+  `input["expression"]`; skipping the name check (fine for one tool, but the habit matters once there
+  are several).
+- **Unblockers:** "`assert tool_use.name == 'calculator'`, then `calculator(tool_use.input['expression'])`."
+  The result is a string — that's what the tool_result wants.
 - **Time:** ~5 min.
-- **Key point:** natural termination is the *only* condition that means "the model thinks it's done."
-  Every other stop is something *you* imposed.
+- **Key point:** *this* number is computed by the application; the number in the model's proposed
+  args was just generated tokens.
 
-## L0704_lab problem 2 — Write run_loop
+## L0405_lab problem 3 — Continue: hand the result back
 
-- **Common gotchas:** **(the big one)** breaking the message-history invariant — appending the
-  `tool_result`s without first appending the assistant's `tool_use` turn, or putting the results in an
-  `assistant` message instead of a `user` message. Stress that the order is always
-  `assistant(tool_use…)` then `user(tool_result…)`. Other gotchas: returning after the *first*
-  `tool_use` instead of running *all* of them; forgetting the `max_steps` fall-through `return`;
-  off-by-one on the cap (`range(1, max_steps + 1)` gives exactly `max_steps` iterations).
-- **Unblockers:** walk the four bullets in the prompt in order. If stuck, point them at the L0703 demo
-  cell — the structure is identical. The loop is ~15 lines; if theirs is much longer they're probably
-  re-deriving `dispatch` (it's given).
-- **Time:** ~15 min. This is the heart of the lab.
-- **Key point:** the loop is the agent. The model is a stateless function call; the loop is the part
-  that makes it iterate.
-
-## L0704_lab problem 3 — Drive it: natural termination
-
-- **Common gotchas:** passing `happy_script` directly to `run_loop` instead of wrapping it in
-  `FakeModel(...)`; expecting a different iteration count (it's exactly 3 — two tool turns + one text
-  turn).
-- **Unblockers:** "`model = FakeModel(happy_script)`, then `run_loop(model, TOOLS, '...', max_steps=10)`."
-  The `assert` at the end pins `termination == 'natural'` and `iterations == 3`.
-- **Time:** ~4 min.
-
-## L0704_lab problem 4 — The max_steps cap catches a runaway
-
-- **Common gotchas:** confusion about *why* the stub loops forever — explain that `FakeModel` reuses
-  its last script line when it runs out, simulating a model that won't stop. Some students expect the
-  cap value and the iteration count to differ; they're equal here (cap fires *after* `max_steps`
-  iterations).
-- **Unblockers:** "One-line script of a single `lookup` `tool_use`; `FakeModel` repeats it; the cap at
-  5 stops the loop." Expect `termination == 'max_steps'`, `iterations == 5`.
-- **Time:** ~4 min.
-- **Key point:** a loop with no cap is broken, not minimal. Hitting the cap is an **alert** worth
-  investigating, not normal operation.
-
-## L0704_lab problem 5 — Two tool calls in one response (written)
-
-- **Common gotchas:** answering "run the first one" — no, run **all** of them; or forgetting that all
-  the `tool_result`s go in **one** user message.
-- **Unblockers:** expected: when a response has multiple `tool_use` blocks, the loop must execute
-  *every* one and return *all* their `tool_result`s in a **single** user-role message before the next
-  model call — otherwise the message-history invariant is violated and the API rejects the request.
-- **Time:** ~3 min.
-
-## L0705_lab problem 1 — Write dispatch: turn a raise into a tool_result
-
-- **Common gotchas:** letting the exception propagate (the whole point is to *catch* it); catching
-  only one exception type — use a broad `except Exception` here on purpose, because the loop must
-  survive *any* tool bug (note the `# noqa: BLE001`); putting a full traceback in `content` instead of
-  `repr(exc)`; forgetting `is_error: True` on the failure branches; checking the tool name with `in`
-  against the dict's *values* instead of `tools.get(name)`.
-- **Unblockers:** "Three branches: `fn is None` → error result; `try: fn(**call.input)` → success
-  result; `except Exception as exc` → error result with `repr(exc)`." The good `lookup('Paris')` call
-  returns content `'11000000'` with no `is_error` key.
+- **Common gotchas:** putting the `tool_result` in an `assistant` message instead of a **user**
+  message; forgetting to first append the assistant's `tool_use` turn (the API needs the call before
+  its result); omitting `tool_use_id`, or using a different id than the one the model emitted;
+  dropping `tools=` on the second call.
+- **Unblockers:** "Append `{'role':'assistant','content': first.content}`, then a `user` message whose
+  content is `[{'type':'tool_result','tool_use_id': tool_use.id,'content': result}]`. Call
+  `messages.create` again *with tools* and join the `text` blocks." Final answer should be
+  **43,123,800** (6,150 × 7,012).
 - **Time:** ~10 min.
-- **Key point:** this is the loop's safety layer. L05 taught the tool author what to *return*; this is
-  what the loop does when the tool can't even return.
 
-## L0705_lab problem 2 — The three failure modes, one by one
+## L0405_lab problem 4 — Why re-send the tool definition? (written)
 
-- **Common gotchas:** the loop crashing here means Problem 1's `dispatch` is letting an exception
-  escape — send them back. Expecting the unknown-tool case to raise (it shouldn't; `tools.get` returns
-  `None` and `dispatch` handles it).
-- **Unblockers:** "Loop over `bad_calls`, print `dispatch(TOOLS, call)`, assert each has
-  `is_error is True`." All three are errors: `KeyError` (missing city), `ValueError` (bad expression),
-  unknown tool name.
-- **Time:** ~5 min.
-
-## L0705_lab problem 3 — Watch the model recover (no crash)
-
-- **Common gotchas:** expecting the run to crash on the first (failing) `lookup` — it doesn't, because
-  `dispatch` converted the `KeyError` into a `tool_result`; the scripted model then "recovers." Some
-  students forget to wrap the script in `FakeModel`.
-- **Unblockers:** "`FakeModel(recover_script)`, then `run_loop(..., max_steps=10)`; assert
-  `termination == 'natural'`." The loop reaches the final text turn because the failure became a
-  message, not a crash.
-- **Time:** ~5 min.
-- **Key point:** the loop *enabled* recovery by handing the error back; the model decided what to do
-  with it.
-
-## L0705_lab problem 4 — Why not dump the traceback? (written)
-
-- **Common gotchas:** "the model needs the full traceback to debug" — backwards; the traceback is
-  noise for the model.
-- **Unblockers:** expected (any two): tracebacks are **token-expensive**; they are **noise** the model
-  can't act on (it can't read your stack frames); they **leak** internal details (file paths, library
-  internals). `repr(exc)` — a class name plus a one-line message — is the right amount of signal.
+- **Common gotchas:** "so the model remembers it" — backwards; the model is stateless and remembers
+  nothing between calls.
+- **Unblockers:** expected: the model is **stateless across calls**, so the tool definition (and the
+  whole history) is part of the prompt on *every* request; drop it and the model no longer knows the
+  tool exists. Tie to the L0706 demo's "tools cost tokens twice over."
 - **Time:** ~3 min.
 
-## L0705_lab problem 5 — Should the loop auto-retry? (written)
+## L0407_lab problem 1 — Summarize each message's blocks
 
-- **Common gotchas:** "always retry, retries are free" — wrong on both counts.
-- **Unblockers:** expected: not all failures are alike — a `404 not found` will never succeed on
-  retry, a `503` might; blind retries waste tokens and can mask bugs; and an idempotency-violating tool
-  (charges a card, sends an email) makes auto-retry actively dangerous. Default: surface the error to
-  the model and let *it* decide; add auto-retry only deliberately, with its own budget.
+- **Common gotchas:** assuming every `content` is a list (message 1's is a plain string); indexing
+  into a string character by character.
+- **Unblockers:** "If `content` is a `str`, return `'text'`; otherwise join `b['type']` for each block."
+  Expected: `text`, `tool_use`, `tool_result`, `text` down the four messages.
+- **Time:** ~6 min.
+
+## L0407_lab problem 2 — Match the result to the request by id
+
+- **Common gotchas:** comparing the wrong fields (`id` vs `tool_use_id` live on different blocks);
+  reaching into the wrong message index.
+- **Unblockers:** "Message 2's content[0] is the `tool_use` (its `id`); message 3's content[0] is the
+  `tool_result` (its `tool_use_id`). Return whether they're equal." Expect `True`.
+- **Time:** ~5 min.
+- **Key point:** with one call in flight the id seems redundant; it becomes essential the moment two
+  calls are outstanding (L10).
+
+## L0407_lab problem 3 — Tell the three outcomes apart
+
+- **Common gotchas:** classifying by the *number* of blocks rather than their types; treating a
+  `tool_use` with empty `input` as `answered` (it's `malformed` — the call was attempted).
+- **Unblockers:** "No `tool_use` block → `answered`. A `tool_use` whose `input` lacks `expression` →
+  `malformed`. Otherwise → `called`." Expected: A=called, B=answered, C=malformed.
+- **Time:** ~7 min.
+
+## L0407_lab problem 4 — Why four messages? (written)
+
+- **Common gotchas:** counting three (forgetting the application's `tool_result` user turn) or
+  conflating the assistant's two turns.
+- **Unblockers:** expected: `user(question)` → `assistant(tool_use)` → `user(tool_result, produced by
+  the application)` → `assistant(final)`. Four is the minimum, not a fixed number.
+- **Time:** ~4 min.
+
+## L0409_lab problem 1 — Write the validator
+
+- **Common gotchas:** letting `calculator`'s `ValueError` propagate instead of catching it and
+  returning a `REJECTED` string; checking `expression` truthiness instead of membership (an empty
+  dict has no key); only handling one of the three failure classes.
+- **Unblockers:** "Three guards in order: unknown name → reject; `'expression' not in call.input` →
+  reject; else `try: calculator(...) except ValueError: reject`." The good call returns
+  `415668857`.
+- **Time:** ~8 min.
+- **Key point:** this *is* the protocol's safety layer — the application validates, the model only
+  proposes.
+
+## L0409_lab problem 2 — Run it over every crafted call
+
+- **Common gotchas:** none beyond a stray crash if Problem 1's `validate_call` re-raises; if the loop
+  dies, the validator is letting an exception escape.
+- **Unblockers:** "Just `for call in CALLS: print(validate_call(call))`." Expect 1 OK and 3 REJECTED.
 - **Time:** ~3 min.
+
+## L0409_lab problem 3 — The three outcomes (written)
+
+- **Unblockers:** expected: (1) the model calls the tool with valid args; (2) it answers without the
+  tool; (3) it calls the tool with malformed/hallucinated args. Same three as L0707 problem 3, stated
+  in prose.
+- **Time:** ~3 min.
+
+## L0409_lab problem 4 — Why doesn't the schema stop a bad call? (written)
+
+- **Common gotchas:** "the schema validates the input" — it describes the input to the model but is
+  not enforced at *generation* time.
+- **Unblockers:** expected: the schema is part of the *prompt* — it tells the model what shape exists,
+  but the model still *samples* tokens and can emit malformed or invented arguments; nothing checks
+  them until the application does. The schema is a contract about shape, not a guarantee about
+  behavior.
+- **Time:** ~4 min.

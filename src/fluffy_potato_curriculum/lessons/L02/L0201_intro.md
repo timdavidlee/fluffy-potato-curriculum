@@ -68,16 +68,16 @@ Every L02 lever has an L01 cost shadow, and we keep printing the numbers:
 
 This lesson is narrow on purpose. It does **not** cover:
 
-- **Chain-of-thought / scratchpad reasoning** — that is L03. L02 teaches the *structured-answer*
-  half of `<thinking>…</thinking><answer>{…}</answer>`; L03 teaches the thinking half.
-- **Tool calling / forcing schema-conformant output via tool-use** — that is L04. Here we ask for
+- **Chain-of-thought / scratchpad reasoning** — that is L06. L02 teaches the *structured-answer*
+  half of `<thinking>…</thinking><answer>{…}</answer>`; L06 teaches the thinking half.
+- **Tool calling / forcing schema-conformant output via tool-use** — that is L07. Here we ask for
   JSON *by instruction only* and parse defensively. In production you would use Anthropic's
-  tool-use mechanism for stricter structure — you will see it in L04, and the parsing discipline
+  tool-use mechanism for stricter structure — you will see it in L07, and the parsing discipline
   you learn here still applies.
 
 The one sentence to leave L02 with:
 
-> *You now know how to ask the model for what you want, in the shape you want — L03 is about making
+> *You now know how to ask the model for what you want, in the shape you want — L06 is about making
 > it think harder before it answers.*
 
 Next: the written reference lecture in [L0202_lecture.md](L0202_lecture.md), then the live demos

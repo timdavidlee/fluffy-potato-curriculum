@@ -4,7 +4,7 @@
 
 # Full course — wrap-up
 
-> The closing recap for the **full course** (23 lessons). Read after the final lesson (L23).
+> The closing recap for the **full course** (23 lessons). Read after the final lesson (L25).
 > Track definition: [SYLLABUS.md](SYLLABUS.md) · [tracks.toml](tracks.toml). Rationale: [CURRICULUM_PRD.md](../../../docs/origin/CURRICULUM_PRD.md).
 
 ## 1. What this course was
@@ -13,7 +13,7 @@
 
 ## 2. What you built (the arc)
 
-*The through-line across all 23 lessons, in teaching order. Group into phases so it reads as a story rather than a list. Suggested phases: Foundations (L01–L03) · Tools & MCP (L04–L06) · The agent spine + observability (L07–L09) · Model choice & LangGraph (L10–L12) · Agent-control patterns (L13–L17) · Retrieval (L18–L19) · Skills & composition (L20–L21) · Multi-agent & eval-at-scale (L22–L23).*
+*The through-line across all 23 lessons, in teaching order. Group into phases so it reads as a story rather than a list. Suggested phases: Foundations (L01–L06) · Tools & MCP (L07–L09) · The agent spine + observability (L10–L12) · Model choice & LangGraph (L13–L14) · Agent-control patterns (L15–L19) · Retrieval (L20–L21) · Skills & composition (L22–L23) · Multi-agent & eval-at-scale (L24–L25).*
 
 <!-- *NEED INPUT*: confirm the phase groupings above (they're a proposal, not from the PRD). Recommendation: keep ~8 phases so each is a coherent chunk; put the lesson numbers in each phase heading. -->
 

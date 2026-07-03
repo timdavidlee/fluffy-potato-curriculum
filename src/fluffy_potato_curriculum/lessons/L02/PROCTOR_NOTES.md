@@ -45,7 +45,7 @@ Times are rough and assume a semi-technical student with basic Python who comple
   `turns` times — `est_tokens(system) * turns`."
 - **Time:** ~5 min.
 - **Key point:** this is the cost half of "keep `system` lean," and the motivation for prompt
-  caching (L14). Don't teach caching here — just name it.
+  caching (L16). Don't teach caching here — just name it.
 
 ## L0204_lab problem 4 — Continue or start fresh? (written)
 
@@ -97,8 +97,8 @@ Times are rough and assume a semi-technical student with basic Python who comple
 
 - **Common gotchas:** answering only "so it's neat"; missing the core idea that it makes the
   response *programmatic* (indexable) rather than *conversational* (prose you must read).
-- **Unblockers:** acceptable points: it's the precondition for evals (L08), tool calling (L04), and
-  multi-step pipelines; L04 adds tool-use-as-schema to *force* conformance, but defensive parsing
+- **Unblockers:** acceptable points: it's the precondition for evals (L11), tool calling (L07), and
+  multi-step pipelines; L07 adds tool-use-as-schema to *force* conformance, but defensive parsing
   still applies because tool-call arguments can be malformed too.
 - **Time:** ~5 min.
 
@@ -136,8 +136,8 @@ Times are rough and assume a semi-technical student with basic Python who comple
 ## L0208_lab problem 4 — When is few-shot the wrong tool? (written)
 
 - **Common gotchas:** answering "few-shot" for everything; missing that a *reasoning* task wants
-  chain-of-thought (L03), not more examples.
+  chain-of-thought (L06), not more examples.
 - **Unblockers:** expected: row 1 → not few-shot (a clear instruction already works); row 2 →
   few-shot (idiosyncratic format the model can't guess); row 3 → not few-shot (needs reasoning →
-  L03's CoT); row 4 → not few-shot (examples would dominate the window → retrieval/other approach).
+  L06's CoT); row 4 → not few-shot (examples would dominate the window → retrieval/other approach).
 - **Time:** ~5 min.

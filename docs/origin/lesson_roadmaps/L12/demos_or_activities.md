@@ -1,10 +1,10 @@
-# L12: Teacher-led demos — Shallow agents in LangGraph
+# L12: Teacher-led demos — Evaluation: first pass
 
 > Sibling docs: [objectives.md](objectives.md) (what the lesson aims for), parent design [CURRICULUM_PRD.md](../../CURRICULUM_PRD.md).
 >
 > **Audience for this file:** the teacher running L12. Every demo below is *teacher-driven, no student participation*. Student-driven exercises live in the L12 labs (separate file, stage 2).
 >
-> **Anchor model: Claude Sonnet 4.6 — a *single* model throughout.** Unlike [L11](../L11/objectives.md) (which mixed Haiku/Sonnet per node to show the mechanism), L12 holds the model fixed so the **graph shape is the only variable** versus the L07 hand-rolled loop. Model-power trade-offs are L10's job (full course; dropped in the mini cut). Nodes call the **native LangChain `ChatAnthropic`** client (continuing the framework-client departure begun in L11, *not* the `potato_llm` seam).
+> **Anchor model for the demos: Claude Sonnet 4.6** (inherits the L01–L10 precedent so the traced loop behaves as students saw it). **Contrast model: Claude Haiku 4.5**, used in Demo 3 to make a lower-powered model's pass rate visibly drop on the *same* eval set.
 
 ## How to read this file
 
@@ -16,162 +16,161 @@ Each demo is a self-contained block with:
 - **What to highlight** — the moment(s) where the teacher should slow down and say the takeaway out loud.
 - **If the demo misbehaves** — graceful fallback for when the model surprises you (it will).
 
-The demos are ordered to match the three learning objectives from [objectives.md](objectives.md). Demo 1 *draws* the shallow agent as a graph and maps each piece to its L07 equivalent (objective 1); Demo 2 *builds* it live on `StateGraph`, runs it to behavioral equivalence with L07, and reveals the prebuilt one-liner (objective 2); Demo 3 dwells on **state and reducers** and breaks the message reducer on purpose (objective 3); Demo 4 carries L09's **eval set** onto the rebuild and lands the trace in L08's **Langfuse** — the "carry it forward" payoff. The optional demo points forward to L13 patterns. They build on each other — every demo reuses Demo 2's compiled graph and the shared `common/tools.py` tools, never a fresh one. Run them in order on first delivery.
+The demos are ordered to match the five learning objectives from [objectives.md](objectives.md). Demo 1 builds the harness (case → scorer → runner) and lands outcome-vs-trajectory scoring; Demo 2 turns two real L11 trace failures into regression cases; Demo 3 introduces non-determinism → pass rate, then runs the *same* eval set against Sonnet and Haiku so the cheaper model's pass rate drops on screen; Demo 4 puts a dollar/latency figure on an eval run and walks the scorer cost/judgment spectrum (including one minimal LLM-as-judge). The optional bridge demo carries the eval set forward to L04/L14 (objective 5). They build on each other — every demo reuses Demo 1's harness and the same handful of cases, never a fresh one. Run them in order on first delivery.
 
-> **The spine of L12: it's the same loop, drawn as a graph.** L12 introduces no new *control flow* — model → tool → model until termination is exactly the L07 loop. What changes is the *shape*: an explicit `while` loop becomes an explicit **graph** of nodes and edges over a shared **state**, and LangGraph drives it. Open with L07's Demo 4 framing students already saw — *"every framework you'll see is a fancier version of the loop you wrote"* — and L11's framing — *"you built the acyclic workflow; here's the **back-edge** that makes it an agent."* Reinforce the primitives from L11; do **not** re-derive the hand-rolled loop from scratch (that's L07, assumed solid here).
+> **The spine of L12: reinforce, don't re-teach.** L12 sits directly on top of [L11 (Tracing)](../L11/objectives.md). Students already know how to read a trace and eyeball-diff two runs — L12 does **not** re-derive that skill. It *formalizes* it: the ad-hoc "did this run look right?" of L11 becomes "does my agent pass a fixed set of cases I defined in advance?" When a demo reads a trace, recall the L11 move in one line and move on; the new material is the **harness**, the **regression case**, the **pass rate**, and the **cost model**.
 
 ## Pre-flight (once, at the top of the lesson)
 
 The teacher should have, before the first demo starts:
 
-- **LangGraph + the native LangChain Claude client ready** — `from langgraph.graph import StateGraph, END` and `from langchain_anthropic import ChatAnthropic`. Both `langgraph` (`>=1.2.4`) and `langchain-anthropic` (`>=1.4.4`) are already project dependencies (added via `uv add`); no install during class. The key loads through `common/config.py` as before — only the *client* is the framework's. <!-- *NEED INPUT*: confirm the exact Sonnet 4.6 model id string passed to ChatAnthropic, read from common/config.py rather than hard-coded in cells. Mirrors the same open item in L11's demos. -->
-- **The shared tools imported, not rebuilt:** `from fluffy_potato_curriculum.common.tools import calculator, lookup, flaky_fetch`. Rebuilding the *same* agent students already know (L07/L08) as a graph is the whole point — new tools would dilute it. (LangChain wraps plain Python tools, so the same `common/tools.py` functions bind straight into the graph's tool node.)
-- **The L07 hand-rolled loop visible in scrollback** (or its `common/agent_loop.py` reference copy) as the side-by-side the whole lesson maps against — `agent_loop.run(...)` → `RunResult(final_text, iterations, termination, trace)`.
-- **The two canonical L07/L08 tasks ready:** the **chaining task** (*"the population of the city whose name is the answer to `17**2 - 1`"* → `calculator` then `lookup`, natural termination) and the **`flaky_fetch` failure task** (walk the four URL behaviors, exercise tool-failure handling).
-- **The shared Langfuse callback handler wired up**, pointing at the *same* self-hosted Langfuse instance from L08 (LangChain/LangGraph callback handler; keys via `common/config.py`), so the graph's auto-emitted spans land in the dashboard students already know, next to their hand-rolled L08 traces.
-- **A graph-diagram renderer ready** (`compiled_graph.get_graph().draw_mermaid_png()` or the Mermaid text) — rendering the compiled agent graph once makes "control flow as data" literal. <!-- *NEED INPUT*: confirm the diagram render path works in the demo environment; Mermaid-text/ASCII fallback is fine. Mirrors L11's demos. -->
-- **The L09 eval harness importable** — `from fluffy_potato_curriculum.common.evals import EvalCase, evaluate` — plus the L09 eval cases, for Demo 4's carry-forward. <!-- *NEED INPUT*: the L09 scorers read `run.final_text` / `run.trace` off the hand-rolled `RunResult`; the LangGraph agent returns a state dict (a `messages` list). Confirm the adapter that maps the compiled graph's output into the shape `common/evals.py` scorers expect (a thin `RunResult`-like wrapper), so the *same* L09 EvalCases run unchanged against the rebuild. This adapter is the concrete mechanism behind objective "bring your eval set across." -->
-- **Completed graph definitions in a sibling file** to paste if live-coding falls behind — the hand-assembled `StateGraph` agent (Demo 2) and the prebuilt-helper version.
+- **The shared agent loop importable, not rebuilt.** `from fluffy_potato_curriculum.common.agent_loop import run` (the canonical reference copy of L10's hand-rolled loop) and the shared tools from `common/tools.py` (`calculator`, `lookup`, `flaky_fetch` with its four URL behaviors). L12 *evaluates* a loop students already built and traced — re-deriving it would waste the lesson. `agent_loop.run(...)` returns a `RunResult` carrying `final_text`, `iterations`, `termination`, and — from L11 — `trace: list[TraceEvent]`.
+- **A small set of saved L11 traces of *known failures*, captured ahead of class** — the raw material for Demo 2. At minimum: (a) a **runaway loop** that ended in `max_steps` (same `(tool_name, args)` repeating), and (b) a **wrong-arguments** or **unrecovered tool-error** run on the `flaky_fetch` task. These are exactly the failure signatures students hunted for in L11; here they become eval cases. Capture them as `.to_jsonl()` files (the L11 helper) so the demo doesn't depend on reproducing a non-deterministic failure live. <!-- *NEED INPUT*: pick the exact two-or-three saved failures Demo 2 converts into cases. Recommendation: one runaway/`max_steps` case from the lookup-chaining task and one tool-error-handling case from the flaky_fetch task, so the two demos cover both a trajectory bug and an outcome bug. Stage 2 captures and ships these `.jsonl` fixtures. -->
+- **The `common/evals.py` harness — written *live* in Demo 1, kept complete in a sibling file to paste if live-coding falls behind.** Its three pieces match the *Decided eval schema* in [objectives.md](objectives.md): `EvalCase` (`id`, `inputs: dict`, `reference_outputs: dict`), a `Scorer` callable `(*, run: RunResult, example: EvalCase) -> EvalResult` (`key`, `score`, `comment`), and `evaluate(cases, scorers, *, samples=K)` returning a per-case summary including a **pass rate**. Use these names verbatim — they line up with LangSmith (*Example / Evaluator / `evaluate()`*) and Langfuse (dataset item / score), which is the recognition payoff if students adopt a platform later.
+- **~5–10 prepared eval cases over the L10/L11 tasks**, reusing the tools above — e.g. the `calculator`+`lookup` chaining task ("the population of the city whose name is `17**2 - 1`") and the `flaky_fetch` failure task. Mix outcome cases (`reference_outputs={"answer": "..."}`) and trajectory cases (`reference_outputs={"expected_tools": ["calculator", "lookup"]}`). <!-- *NEED INPUT*: confirm the final case list and the exact reference_outputs shape. Recommendation: 6–8 cases — enough to make a pass-rate table legible, few enough to run live in seconds. -->
+- **Two model clients configured: Sonnet 4.6 (anchor) and Haiku 4.5 (contrast)**, both read through `common/config.py`, for Demo 3's A/B. The *same* eval set runs against both.
+- **A token/cost readout for Demo 4** — either the per-call `usage` fields the L11 trace already records, or the same run open in the cohort's shared Langfuse instance. The cost demo reads *real numbers off a trace*, not a hand-wave.
 
-> Why rebuild a *known* agent: L12 is about the **graph mental model and single-loop mechanics**, not new capabilities. Reusing L07/L08's tools and tasks means the only new thing on screen is LangGraph itself — so when the rebuild issues the same tool sequence and the L09 eval set passes, the framework reads as *conveniences over a familiar skeleton*, exactly the lesson's pedagogical bet.
+> Why reuse L10/L11's loop, tools, and tasks: L12 is about *eval design*, not new agent code or new tools. Evaluating a loop students already traced keeps every minute on the eval concepts — the case, the scorer, the pass rate, the cost — which *are* the lesson. New tools mid-demo would dilute the message exactly as a new loop would.
 
-## Demo 1 — From loop to graph: draw the shallow agent (Objective 1)
+## Demo 1 — Case, scorer, runner: the eval harness made visible (Objective 1)
 
-**Goal:** before any code, *draw* the shallow-agent graph and map every piece back to its L07 equivalent. Land the headline — **it's the same model→tool→model loop, now expressed as inspectable data (nodes, edges, state)** — and recall L11's framing that the line between a workflow and an agent is a single **back-edge**.
+**Goal:** build a tiny eval harness from scratch in front of the class and run it on the loop students already know. Land the three-part vocabulary from [objectives.md](objectives.md) — **a case is an input plus what "good" means; a scorer turns one run into a verdict; the runner runs every case and reports a summary** — and the outcome-vs-trajectory distinction.
 
 **Pre-flight:**
 
-- A whiteboard / slide with the L07 loop pseudocode on the left, empty graph space on the right.
-- L11's acyclic workflow diagram available for the callback.
+- An empty `common/evals.py` (or notebook cell) the teacher fills in live.
+- Two prepared cases on the slide: one **outcome** case (the calculator+lookup task, `reference_outputs={"answer": "<the city's population>"}`) and one **trajectory** case (same task, `reference_outputs={"expected_tools": ["calculator", "lookup"]}`).
 
 **Live script:**
 
-1. Recall L11 in one line: *"you wired an **acyclic** workflow — the developer owned the path. An agent adds one thing: a **back-edge** that hands the path to the model."* Put L11's DAG up, then draw the cycle.
-2. Draw the shallow-agent graph piece by piece, naming each and its L07 twin:
-   - an **`agent`** (model-call) node — the L07 "call the model" step;
-   - a **`tools`** node — the L07 "execute every `tool_use`, append a matching `tool_result`" step;
-   - a fixed **edge** `tools → agent` — the L07 "loop back after running tools";
-   - a **conditional edge** out of `agent` → `tools` (the model emitted a `tool_use`) or → `END` (natural termination) — the L07 `if there's a tool_use: … else: return` branch, *lifted out of Python into the graph.*
-3. Trace a run on the diagram with your finger: agent → (tool_use?) → tools → agent → (no tool_use) → END. Point at the **back-edge** and say: *that cycle is the agent.*
-4. State **why a graph at all**: a loop encodes control flow implicitly in Python statements; a graph makes control flow **data** — nodes and edges you can inspect, visualize, reroute, and later extend. Be honest: for a *single* loop it's roughly break-even; the payoff shows up when the flow stops being one loop (the motivation for L13).
+1. Sketch the shape on the whiteboard before typing: *case in → run the agent → scorer reads the result → pass/fail.* Name each piece with the verbatim term.
+2. Live-code `EvalCase` (`id`, `inputs`, `reference_outputs`) and one **outcome scorer** — `answer_correct`: call `agent_loop.run(case.inputs["task"])`, then check `run.final_text` contains `case.reference_outputs["answer"]`. Return an `EvalResult(key="answer_correct", score=True/False, comment=...)`.
+3. Live-code the **runner** `evaluate(cases, scorers)`: for each case, run the loop once, apply each scorer, collect results, print a pass/fail table. Run it on the two cases. Read the table out loud.
+4. Now add a **trajectory scorer** — `expected_tools`: read `run.trace`, extract the ordered tool-call names, check they match `case.reference_outputs["expected_tools"]`. Re-run. Show that the *same run* is now scored two ways: did it get the right answer, *and* did it take the right path.
 
 **What to highlight:**
 
-- **Same loop, new shape.** If a student can't map each graph piece back to an L07 line, slow down and do the mapping explicitly — that mapping *is* objective 1.
-- **The conditional edge is the L07 branch.** "Is there a `tool_use`?" used to be an `if` in your Python; now it's a routing function on an edge. The decision is identical; only its location moved.
-- **"Shallow" is a deliberate scope, defined now:** one model, one tool set, one decision point that either calls a tool or finishes. *Not* a deep agent (planning / memory / reflection — L16). Shallow ≠ lesser; most production agents are shallow.
+- The three terms, said out loud and pointed at in the code: **case**, **scorer**, **runner**. These reappear in every lab and in L14 — fix them now.
+- **An eval set can score the answer, the path, or both.** For agents the path often matters as much as the answer — the trajectory scorer is reading the L11 trace, which is *why* L11 came first. Say that connection explicitly.
+- The scorer is just a function from `(run, example)` to a verdict. Nothing magic — the "framework" is ~30 lines they can read end-to-end.
 
 **If the demo misbehaves:**
 
-- Pure diagram + discussion, so little can flake. If students fixate on "where's the loop variable?", point at the `tools → agent` edge: the framework's run-driver *is* the `while`, supplied for you (Demo 2 makes that concrete).
+- If live-coding falls behind, paste the completed `common/evals.py` and walk it line by line. Don't sacrifice the *run* — the printed pass/fail table is where "eval set" stops being abstract.
+- If the outcome scorer fails on a *correct* run because of exact-string matching (e.g. the model wrote "8.3 million" vs your "8,336,817"), don't fix it silently — flag it as the brittleness Demo 2 tackles, and loosen to a substring or normalized-number check.
 
-## Demo 2 — Build the single-loop agent on StateGraph, then reveal the prebuilt one-liner (Objective 2)
+## Demo 2 — From a trace to a regression case (Objective 2)
 
-**Goal:** live-build the shallow agent on `StateGraph`, run it to **behavioral equivalence** with the L07 loop, then reveal the prebuilt helper as *"the same thing, packaged."* Land what the framework gives you **for free** that L07 made you write by hand.
+**Goal:** take two *real* failures from L11 traces and turn each into a case whose check **fails when the bug is present and passes when it's fixed**. Land the headline loop from [objectives.md](objectives.md): **trace a failure → write a case that catches it → keep the case forever.** Good eval cases come from observed failures, not imagination.
 
 **Pre-flight:**
 
-- An empty cell/file for the live build, Demo 1's diagram beside it.
-- The shared tools (`calculator`, `lookup`, `flaky_fetch`) imported.
-- Both canonical tasks ready to run.
+- The two saved L11 failure traces from pre-flight (`.to_jsonl()` fixtures): the runaway/`max_steps` run and the tool-error/wrong-args run.
+- Demo 1's harness, unchanged.
 
 **Live script:**
 
-1. Live-code the **state schema** (a `TypedDict` / annotated state): a `messages` field (with the **add-messages reducer** — flag it now, *unpack it in Demo 3*) and one `step` counter. Keep it minimal — messages plus one counter (a decided scope).
-2. Live-code the two **nodes**:
-   - `agent` — calls `ChatAnthropic` (Sonnet 4.6) bound with the tool schemas on the current `messages`, returns the response to be appended.
-   - `tools` — executes every requested `tool_use` and returns matching `tool_result`s — *the same message-history invariant from L07*, now localized to one node (including the L07 convert-exception-to-`tool_result(is_error=True)` handling).
-3. Wire it with the builder: `add_node("agent", …)`, `add_node("tools", …)`, `set_entry_point("agent")`, `add_conditional_edges("agent", route_fn, {"tools": "tools", END: END})` where `route_fn` returns `"tools"` if the last message has a `tool_use` else `END`, and `add_edge("tools", "agent")` — the **back-edge**. `compile()`.
-4. **Render the compiled graph diagram** and put it next to Demo 1's hand-drawn one — they match.
-5. **Run for equivalence.** `invoke()` on the **chaining task** → watch it issue `calculator` then `lookup` and terminate naturally — the *same sequence* L07 produced. Then `invoke()` on the **`flaky_fetch` failure task** → confirm tool-failure handling still works inside the `tools` node.
-6. **Name the freebies against their L07 twins:** the run-driver loop (L07's `while`), a **recursion/step limit** (L07's `max_steps` cap — show where it lives), the built-in execution trace (L08, see Demo 4), and a prebuilt tool node. Then **reveal the one-liner:** the prebuilt react-agent helper builds *this same graph* in a single call — *"the same thing, packaged."*
+1. Open the **runaway** trace. Recall the L11 reading in one line — "same `(tool_name, args)` repeating, terminated `max_steps`" — *don't* re-teach trace reading. Then write the case it deserves: a **trajectory** check `no_runaway` that reads `run.trace` and fails if any `(tool_name, args)` pair repeats (or if `run.termination == "max_steps"`). Show it **failing** against the saved bad run.
+2. Open the **tool-error** trace (the `flaky_fetch` task). Write an **outcome** check that fails when the final answer never recovered. Show it failing against the saved bad run, then passing against a good run.
+3. State the ordering rule out loud and put it on a slide: **trace a failure → write a case that catches it → keep it forever.** The trace from L11 is the source of truth for "what actually goes wrong"; L11 produced these traces precisely so L12 has real failure modes to attack.
+4. **The brittleness beat.** Show an exact-string match on `final_text` failing against a *correct* run that just reworded the answer. Loosen it to the *loosest check that still catches the bug* — substring, normalized number, "contains the right tool call." Name when you'd need a more semantic check (an LLM-as-judge) — and defer building one to Demo 4.
 
 **What to highlight:**
 
-- **The framework gives you the boring parts for free** — run-driver, step cap, trace, prebuilt tool node. That convenience *is* the value proposition; name each freebie against the L07 hand-rolled twin so the trade is concrete, not magic.
-- **Hand-assemble first, *then* reveal the prebuilt.** Students see the explicit nodes/edges before the one-liner, so `create_react_agent` reads as "the graph I just built, wrapped," not a black box — mirroring L07's hand-rolled-then-framework arc. <!-- *NEED INPUT*: confirm which prebuilt to reveal — `create_react_agent` (whole-agent one-liner) vs a prebuilt `ToolNode` dropped into the hand-wired graph. Recommendation: show the prebuilt `ToolNode` swap first (smallest diff to the hand build), then mention `create_react_agent` as the whole-graph one-liner and the natural L13 lead-in. -->
-- **The step cap didn't go away.** A runaway graph still hits LangGraph's recursion limit — the framework's `max_steps`. Hitting it is still a signal worth investigating (the L07 lesson), not noise.
+- **Trajectory case vs. outcome case, felt side by side:** `no_runaway` asserts on the *path* (the trace), the answer check asserts on the *result* (`final_text`). Students should leave able to write one of each.
+- A regression case is defined by its behavior under the bug: it **fails when broken, passes when fixed.** A "case" that passes no matter what tests nothing.
+- The loosest check that still catches the bug. An over-tight check (exact string) trains you to ignore reds when harmless rewording trips it — that's worse than no check.
 
 **If the demo misbehaves:**
 
-- If live-coding the builder falls behind, paste the completed graph and walk it node by node — but **keep both runs**; behavioral equivalence with L07 is the demo's proof.
-- If the rebuild's tool sequence differs from L07's on the day, that's run-to-run variance (L08's lesson), not a bug — re-run, and note that the *eval set* (Demo 4), not a single run, is how you actually confirm equivalence.
+- If you can't reproduce a failure live, that's *why* the saved `.jsonl` fixtures exist — score against the saved trace. The whole L11 lesson was "don't chase a non-deterministic failure by re-running; read the captured trace." Model that here.
+- If a student asks "why not just assert the exact answer?" — that's the Demo 2 punchline arriving early. Run the reworded-but-correct example and let the brittle check fail.
 
-## Demo 3 — State and reducers: the message history, now typed (Objective 3)
+## Demo 3 — Same eval set, two models: the pass rate drops (Objective 3)
 
-**Goal:** make graph **state** concrete and show *why the reducer matters* by breaking it. Land that **state is the same message history L07 mutated, now typed and framework-managed, and the add-messages reducer *appends* — which is what preserves the `tool_use`/`tool_result` pairing invariant.**
+**Goal:** the headline demo. First confront **non-determinism** — a single pass can be luck — and move from a pass/fail to a **pass rate** over K samples. Then run the *same* eval set against **Sonnet 4.6 and Haiku 4.5** and watch the cheaper model's pass rate visibly drop. Land that **an eval set is both a regression ratchet and a measurement instrument.**
 
 **Pre-flight:**
 
-- Demo 2's compiled agent and its state schema.
-- A deliberately-wrong variant of the `agent`/`tools` node whose returned update **overwrites** `messages` instead of appending.
+- Demo 1's harness extended with `evaluate(cases, scorers, *, samples=K)` — runs each case K times and reports a pass *rate*. <!-- *NEED INPUT*: confirm K for the toy set. Recommendation: K = 3–5 — enough for a rate to read as a rate (e.g. "2/3"), cheap enough to run live. The concrete count is a stage-2 detail; the *concept* (rate, not verdict) is the lesson. -->
+- The full prepared case set, plus a deliberately **flaky** case — one whose trajectory varies run-to-run so it sometimes passes, sometimes fails. <!-- *NEED INPUT*: pick a case that flakes reliably on Sonnet — e.g. a task where the model sometimes makes an extra lookup call. Dry-run before class; a flaky case that never flakes on the day defeats the beat. -->
+- Both model clients (Sonnet 4.6, Haiku 4.5) ready.
 
 **Live script:**
 
-1. Inspect the state mid-run: print `messages` after each node. Show it growing — user, assistant-with-`tool_use`, tool-result, assistant… the *same list* L07 mutated in place, now a typed value LangGraph threads through every node.
-2. Explain **how nodes update state**: a node *returns an update* that LangGraph merges via per-field **reducers**. For `messages`, the **add-messages reducer appends**. Say it plainly: the node doesn't *set* state, it *contributes* to it.
-3. **Break it on purpose.** Swap in the overwrite variant (wrong/absent reducer) and re-run: history gets clobbered, a `tool_use` loses its matching `tool_result`, the run breaks — *the single most common L07 bug, reborn in graph form.* Restore the append reducer; it works again.
-4. Draw the **state boundary**: what belongs in state (the `messages`, the `step` counter — data that *flows between nodes*) vs. what does **not** (the model client, the tool registry — *dependencies* wired in at build time). Conflating them is how a graph gets tangled.
+1. **Single pass/fail first — let the flaky case bite.** Run the eval set once with `samples=1`. The flaky case passes. Re-run. It fails. Pause: *"Which run do we believe?"* Make the confusion land — don't pre-empt it. This *is* the lesson.
+2. Introduce the cheapest honest fix: run each case **K times** and report how often it passes — a **pass rate** (e.g. `no_runaway: 2/3`), not a single verdict. Re-run with `samples=K`. The flaky case now reads as a rate; a flaky case is itself a *finding*, not noise to ignore.
+3. **The A/B.** Run the same eval set against **Sonnet 4.6**, then against **Haiku 4.5**, K samples each. Put the two pass-rate columns side by side. Watch Haiku's rates drop — especially on the multi-step chaining and the failure-recovery cases. This is a *quantified* demonstration of what a lower-powered model can and "cannot" do on the same task.
+4. Reframe the same comparison as a **regression** check: run Sonnet *before* and *after* a small prompt edit and report which cases went pass→fail (a **regression**) or fail→pass (a **fix**). Same machinery, different question: "did my change break anything that used to work?"
 
 **What to highlight:**
 
-- **A node returns an update; a reducer merges it.** "Return a dict and hope" is the trap — teach the reducer, not just the return. The append-vs-overwrite distinction is the whole objective.
-- **The reducer enforces by construction the rule L07 made you remember.** L07 made you *manually* keep each `tool_use` paired with its `tool_result` in order; the add-messages reducer guarantees it. That's the framework earning its keep.
-- **State is data that flows; clients and tools are dependencies.** Getting this boundary right is the difference between a clean graph and a tangled one.
+- **You measure rates, not verdicts.** One green run on a non-deterministic agent can be luck. The pass rate over a few samples is the cheapest answer you can actually trust. (This is the disciplined version of L11's "a single differing run proves nothing.")
+- **The eval set is a measurement instrument, not just a guard.** Sonnet vs. Haiku on identical cases turns "Haiku is weaker here" from an assertion into a number — and feeds Demo 4's cost/capability trade-off directly.
+- **The ratchet.** Once a case passes, a later change that breaks it is a regression you catch *before* shipping. That is the payoff students carry into every later lesson.
 
 **If the demo misbehaves:**
 
-- If the overwrite variant happens to *not* break on a short run (the clobber lands harmlessly), use a multi-tool task so a `tool_use`/`tool_result` pair is visibly orphaned. The point is to *show* the invariant breaking, not to argue it in the abstract.
+- If the flaky case refuses to flake on the day, force variance: raise the task's ambiguity, or lower the iteration cap so a borderline run sometimes hits `max_steps`. The point is to *show* a rate mattering, not to shame a model.
+- If Haiku happens to match Sonnet on your toy cases, add one genuinely multi-step case (deeper chaining, or the full four-URL `flaky_fetch` recovery) where capability separates them. Don't manufacture a gap that isn't there — pick a harder case that honestly exposes one.
+- If both models pass everything, your cases are too easy to be a measurement instrument — that's a teachable point in itself: a green eval set tells you nothing about *headroom*.
 
-## Demo 4 — Carry the eval set across, and find the trace in the same Langfuse (the payoff)
+## Demo 4 — What does an eval run cost, and which scorer is worth it? (Objective 4)
 
-**Goal:** make L09's **"carry it forward"** rule and L08's **portable tracing** concrete in one beat — run the *same* L09 eval set against the LangGraph rebuild (it passes → behavioral equivalence proven), and watch the graph's auto-emitted spans land in the *same* Langfuse dashboard next to the hand-rolled L08 traces. This is the strongest possible reinforcement that evaluation and tracing travel with the agent, not the implementation.
+**Goal:** put a real dollar/latency figure on an eval run two ways — a back-of-envelope formula *and* actual token numbers read off a trace — then walk the scorer **cost/judgment spectrum** and show one minimal LLM-as-judge. Land that **every scorer trades cost for judgment; there is no free, perfect, automatic check.**
 
 **Pre-flight:**
 
-- The L09 eval set and the `common/evals.py` harness, with the adapter that feeds the graph's output into the L09 scorers (see pre-flight `NEED INPUT`).
-- The Langfuse callback handler attached to Demo 2's compiled agent.
+- The token/cost readout from pre-flight (trace `usage` fields, or the run open in Langfuse).
+- A tiny LLM-as-judge scorer prepared: a small judge prompt that scores a `final_text` for a quality a cheap check can't express (e.g. "did the answer acknowledge the failures gracefully?"). Keep it minimal and clearly flagged as "the L25 version is more rigorous." <!-- *NEED INPUT*: confirm the one judged quality and the judge prompt. Recommendation: judge the flaky_fetch task's "gave up gracefully" answer — a genuinely fuzzy quality no substring check captures — so the judge earns its place rather than duplicating a cheap check. -->
 
 **Live script:**
 
-1. Recall L09 in one line — *"when you build or change an agent, you run its eval set"* — then run the **same L09 eval set** against the LangGraph rebuild. Read the pass table: the cases that passed on the L07 loop pass on the graph. *Same cases, different implementation, nothing regressed* — the cleanest proof the rebuild is correct.
-2. Open **Langfuse**: the graph's run is *already there* (the callback emitted it), rendered as the **same spans** students know — a GENERATION for each model call, a SPAN for each tool call — sitting next to their hand-rolled L08 traces in the same project. The skill is portable; only the trace's packaging changed.
-3. Re-do one L08 reading task in the Langfuse UI on the *graph's* trace — locate the tool calls, read the arguments, confirm termination — to feel that "read the trace" works identically whether the trace came from the hand-rolled loop or the framework.
+1. **Back-of-envelope first.** Write the formula on the board: `cost ≈ cases × samples × avg model-calls-per-run × per-call cost`. Plug in the toy set's numbers (e.g. 8 cases × 3 samples × ~3 calls/run). Get a rough figure. Note that **each case is a *full* `agent_loop.run(...)`** — multiple model calls, not one.
+2. **Ground it in real data.** Open the trace (or Langfuse) for one run and read the *actual* per-call `usage` token counts. Multiply through. Compare to the estimate — close enough to trust the formula, real enough to not hand-wave. This is the "both ways" the objectives ask for.
+3. **The sample-size trade-off.** More samples → a more trustworthy pass rate, but cost grows *linearly*. State how you'd pick K for a real set vs. the toy set.
+4. **The scorer spectrum.** Put it on a slide, ordered by cost and by how much judgment each exercises: **exact assertion → fuzzy/automated check → LLM-as-judge → human review.** Then run the prepared **LLM-as-judge** on the "gave up gracefully" quality — show it scoring something a substring check can't. Flag its own costs out loud: it's a model call (so it costs tokens), and it can be wrong, biased, or gameable.
+5. Place **human review** at the expensive end: the most *accurate* and most *expensive* scorer, the only one that can judge qualities nothing automated captures cheaply. Choosing a scorer is choosing a point on that curve — a design decision, not a default.
 
 **What to highlight:**
 
-- **Bring your eval set across — make it a *visible* beat, not an afterthought.** The eval set is the regression ratchet from L09; running it against the rebuild is L09's whole "carry it forward" thesis cashing out one lesson later.
-- **Tracing transfers, too.** LangGraph emits the same model-call / tool-call / state-update story L08 taught students to read — in the same dashboard. The graph didn't make you relearn observation; it reused it.
-- One honest caveat: the framework's auto-trace is *shaped* by LangGraph, so span names/nesting differ slightly from the hand-rolled `TraceEvent`s — the *structure* (GENERATION/SPAN, tokens, args) is the same, which is the recognition payoff.
+- **An eval run is not free** — it's N cases × K samples × several model calls each. "More cases / more samples" is a deliberate cost/confidence trade, not "max it out."
+- **Every scorer trades cost for judgment.** Exact assertions are cheap and dumb; humans are expensive and wise; the LLM-as-judge sits in between with its *own* error modes. The L12 judge is a one-screen illustration; L25 unpacks what an LLM-judge can and can't reliably score.
+- The token numbers you're reading are the *same* fields L11 told you to trace and L01 taught you to cost. The eval cost model is those two lessons cashing out.
 
 **If the demo misbehaves:**
 
-- If a couple of eval cases flake on the rebuild, that's L09's non-determinism lesson, not a port bug — bump samples and read the **pass rate**, don't chase a single red.
-- If the Langfuse instance is down, fall back to the graph's in-memory/auto-emitted trace object and read it inline; the carry-forward point stands without the dashboard (Langfuse is the *payoff*, not a hard dependency — same stance as L08).
+- If the LLM-judge gives an obviously wrong verdict on the day, **keep it** — that's the most honest possible demonstration that a judge is a fallible scorer, not an oracle. Name it and move on.
+- If the live cost numbers are tiny and undramatic on the toy set, extrapolate out loud to a realistic set (hundreds of cases, K=10, on every commit) so the linear cost growth is felt, not dismissed.
 
-## Optional demo — toward L13 patterns
+## Optional bridge demo — carry the eval set forward (Objective 5)
 
-If time allows, point forward without teaching it: the prebuilt react-agent one-liner you revealed in Demo 2 *is* a named pattern (**ReAct**) — a *pattern over* the L12 primitives, not a new mechanism. L13 surveys the others (plan-and-execute, supervisor, hierarchical, state-machine routing) and *when* to reach for each. Ask the open question that L13 answers — *"what else can this graph shape express once control flow stops being a single loop?"* — and stop there.
+If time allows, close on the practice the PRD asks L12 to *establish*. Don't build anything new — make the handoff concrete:
 
-Don't teach any pattern here — L12 owns *one graph, one loop, state mechanics*; L13 owns the named patterns and their trade-offs. Just land that the graph mental model students now have is the thing L13 builds *patterns* on top of.
+1. State the rule on a slide and say it out loud: **when you build or change an agent, you add or run an eval set.** The L12 harness in `common/evals.py` is the seed every later agent plugs into.
+2. Preview L14: the *same* `EvalCase`s built today will run against the **LangGraph shallow agent** students build in L14 — *same cases, different implementation, did anything regress?* That is the cleanest possible demonstration of the ratchet, and it's already settled by the shared-`common/` decision (L14's lab imports `common/evals.py`). (In the mini cut the very next lesson is [L04 (workflows/DAGs)](../L04/objectives.md), whose deterministic flow is itself trivially evaluable — a natural place to reinforce the habit even earlier.)
+3. Signpost L25 as "where this scales" — multi-step graphs, retrieval quality (precision@k / recall@k), LLM-as-judge done properly, multi-agent systems. L12 is a *first pass* on purpose; naming the boundary keeps the lesson honest and the scope small.
 
-<!-- *NEED INPUT*: include this forward pointer in the lecture, or save it as L13's opener? Recommendation: a 60-second close — it frames create_react_agent as "a pattern, not magic" and motivates L13. -->
+Don't teach LangGraph or the L25 machinery here — just land that the tiny harness students just built is the thing they'll carry forward, the same way L11's hand-rolled trace mapped onto Langfuse.
+
+<!-- *NEED INPUT*: include this bridge demo as the L12 closer, or fold its "carry it forward" message into Demo 3's ratchet beat? Recommendation: keep it as a short explicit closer — objective 5 is a *practice* objective, and a named handoff lands it better than a buried aside. -->
 
 ## Pacing notes for the teacher
 
-- **Per-demo time:** Demo 1 is 10–15 minutes (diagram + L07 mapping, no build). Demo 2 is the long one, 25–35 minutes (live `StateGraph` build + two equivalence runs + the prebuilt reveal). Demo 3 is 12–18 (state inspection + the reducer-break). Demo 4 is 10–15 (eval carry-over + Langfuse). Optional close is 5–8. Total ~65–95 minutes plus discussion — fits the **~90–120 minute** lecture pinned in [objectives.md](objectives.md). If it runs long, split at the Demo 2/3 boundary: "graph model + build" then "state/reducers + eval carry-over."
-- **Live-coding budget:** only Demo 2's graph needs a full live build. Demo 3 is a small edit (the reducer swap) to Demo 2; Demos 1 and 4 are diagram/run, not build. Do **not** re-derive the graph in each demo — reuse Demo 2's compiled agent.
-- **Single model, on purpose:** L12 holds the model at Sonnet 4.6 so the only variable vs. L07 is the *shape*. Resist mixing models here — that was L11's mechanism demo; the *which-model* decision is L10's.
-- **Variance budget:** the agent loop is non-deterministic (L08) — budget a re-run wherever a specific tool sequence matters, and lean on the **eval set** (Demo 4), not a single run, for the equivalence claim.
-- **The audience watches, doesn't participate.** Resist "what should the routing function return here?" as a group question — that's a lab pattern. Hands-on graph-building and the eval carry-over are for the L12 labs.
+- **Per-demo time:** Demo 1 is the long one (15–20 minutes including the live-code build of the harness). Demo 2 is 12–18 (two cases from saved traces + the brittleness beat). Demo 3 is the centerpiece, 15–22 (single→rate, then the Sonnet/Haiku A/B). Demo 4 is 12–18 (cost both ways + the scorer spectrum + the LLM-judge). Bridge is 5–8. Total ~60–85 minutes plus discussion — fits the **~75–100 minute** single lecture pinned in [objectives.md](objectives.md). If it runs long, split at the Demo 2/3 boundary: "build an eval set / score answer vs. trajectory" then "compare runs / reason about cost."
+- **Live-coding budget:** only Demo 1's harness and Demo 2's two scorers need live-coding. Demos 3 and 4 *reuse* that harness with small additions (`samples=K`, the judge scorer); do **not** re-derive the harness in each demo. Keep the completed `common/evals.py` ready to paste.
+- **Variance budget:** the agent loop is non-deterministic — that's the *subject* of Demo 3, not just a nuisance. Budget a re-run wherever a specific tool-call path matters, and **capture the saved failure traces ahead of class** so Demo 2 never depends on reproducing a failure live.
+- **The audience watches, doesn't participate.** Resist "what should this case check?" as a group question — that's a lab pattern. Hands-on case-writing and the run-it-yourself eval are for the L12 labs.
 
 ## Open authoring questions
 
-Most of L12's big decisions are already pinned in [objectives.md](objectives.md) (native `ChatAnthropic` not the seam; single anchor model Sonnet 4.6 with model-power deferred to L10; `langgraph` + `langchain-anthropic` deps already added; reuse `common/tools.py` and the L09 `common/evals.py` against the rebuild; Langfuse callback into L08's instance; hand-assemble `StateGraph` then reveal the prebuilt; state kept to messages + one counter; persistence/checkpointing out of scope as a forward pointer to L15/L16/L17; the intentional L11↔L12 primitives overlap). The remaining open items are stage-2 mechanics:
+Most of L12's big decisions are already pinned in [objectives.md](objectives.md) (anchor + Haiku contrast, the `EvalCase`/`Scorer`/`evaluate()` schema in `common/evals.py`, reuse of `common/tools.py`, single-pass-then-rate, cost-both-ways, one illustrative LLM-judge, reinforce-don't-re-teach L11). The remaining open items are stage-2 mechanics:
 
-- <!-- *NEED INPUT*: the exact Sonnet 4.6 model id string passed to ChatAnthropic, read from common/config.py. Mirrors L11's demos. -->
-- <!-- *NEED INPUT*: the adapter mapping the compiled graph's output (a messages-list state dict) into the shape `common/evals.py` scorers expect (a RunResult-like wrapper exposing final_text + trace), so the L09 EvalCases run unchanged against the rebuild. This is the concrete mechanism behind "bring your eval set across." -->
-- <!-- *NEED INPUT*: which prebuilt to reveal in Demo 2 — a prebuilt ToolNode swapped into the hand-wired graph (smallest diff) and/or the create_react_agent whole-graph one-liner. Recommendation: ToolNode first, then mention create_react_agent as the L13 lead-in. -->
-- <!-- *NEED INPUT*: confirm the graph-diagram render path (draw_mermaid_png vs Mermaid text vs ASCII) works in the demo environment. Mirrors L11's demos. -->
-- <!-- *NEED INPUT*: are the demos run in a projected Jupyter notebook, a slide-embedded REPL, or a demo-runner script? Mirrors the same open question in L07's, L09's, and L11's demos. -->
-- <!-- *NEED INPUT*: include the optional L13 forward-pointer in the lecture or hold it for L13's opener? Recommendation: a 60-second close. -->
+- <!-- *NEED INPUT*: the exact two-or-three saved L11 failure traces Demo 2 converts into cases, captured as `.jsonl` fixtures. Recommendation in the pre-flight (one runaway/`max_steps`, one flaky_fetch tool-error). -->
+- <!-- *NEED INPUT*: the final eval-case list and the precise `reference_outputs` shape for outcome vs. trajectory cases (6–8 cases recommended). -->
+- <!-- *NEED INPUT*: the sample count K for the toy set (3–5 recommended) — concept is the pass rate, not the number. -->
+- <!-- *NEED INPUT*: which case is the deliberately flaky one in Demo 3, and that it flakes reliably on Sonnet on a dry-run. -->
+- <!-- *NEED INPUT*: the one quality the Demo 4 LLM-as-judge scores, and its judge prompt (the flaky_fetch "gave up gracefully" answer recommended). -->
+- <!-- *NEED INPUT*: are the demos run in a projected Jupyter notebook, a slide-embedded REPL, or a demo-runner script? Affects how the harness is shown live. Mirrors the same open question in L10's demos. -->
+- <!-- *NEED INPUT*: whether to show the cost readout (Demo 4) off the in-memory trace `usage` fields or the shared Langfuse instance — the latter ties back to L11's hosted-tracer step but adds a dependency on the cohort instance being up. -->
