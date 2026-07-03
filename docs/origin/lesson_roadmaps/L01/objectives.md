@@ -104,8 +104,8 @@ The single sentence to leave students with at the end of L01: *"Everything you f
 ## Open authoring questions
 
 - <!-- *NEED INPUT*: the model-scale beat (objective 3 / demo 3.5) uses a local small→medium→large model ladder (GPT-2 124M → 355M → 774M via HuggingFace) so the next-token distribution is visible offline and deterministically. Confirm we accept transformers+torch as lesson dependencies for this one demo, versus a lighter (but softer) API-tier quality comparison. -->
-- <!-- *NEED INPUT*: does adding the model-scale mechanistic beat warrant a one-line note on the L01 row in CURRICULUM_PRD.md, or is it fine to leave the PRD subgoals as-is since scale is delivered as a foreshadow of L13 rather than a new assessable subgoal? -->
-- <!-- *NEED INPUT*: estimated lecture duration — the added next-word-prediction / model-scale / preamble framing pushes this past the earlier 60–75 min estimate; best guess now 75–90 minutes, possibly split into two lecture items. -->
+- **RESOLVED:** the model-scale beat gets a one-line note on the L01 row in `CURRICULUM_PRD.md`, flagging it as a mechanistic foreshadow of L13 rather than a separately assessed subgoal.
+- **RESOLVED:** L01 stays a single lecture item (~75–90 min) — not split into two blocks.
 - <!-- *NEED INPUT*: is prompt caching introduced here (as a foreshadow when discussing the "every call re-sends the preamble + history" cost surprise), or strictly deferred to L19 (context management)? -->
 - <!-- *NEED INPUT*: confirm token *counting* stays on `tiktoken` (offline, deterministic) for the labs, with Anthropic's count-tokens endpoint shown once for the anchor model — versus standardizing on one of them. -->
 - <!-- *NEED INPUT*: prerequisite-API-key setup — handled in a pre-lesson onboarding doc, in L01 itself, or as the first lab? Determines whether the cost-estimation objective uses real spend. -->
