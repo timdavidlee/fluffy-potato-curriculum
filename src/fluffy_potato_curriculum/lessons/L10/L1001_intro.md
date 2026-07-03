@@ -2,7 +2,7 @@
 
 ```yaml
 title: "Hand-rolled agent loop: an agent is a loop, not a model"
-keywords: agent loop, model tool model, termination, iteration cap, max steps, tool failure, tool_result, is_error, hand-rolled, anthropic, claude
+keywords: agent loop, model tool model, termination, iteration cap, max steps, tool failure, ToolMessage, status error, hand-rolled, langchain, anthropic, claude
 estimated duration: 10
 ```
 
@@ -51,15 +51,15 @@ If you remember nothing else from L10, remember this: **an agent is a loop, not 
 
 These three rules are the spine of the lesson — the lecture, the demo, and both labs return to them:
 
-- **The message-history invariant is load-bearing.** Every `tool_use` block the model emits must be
-  answered by a matching `tool_result` block — same id, in the *next* user-role message — before you
-  call the model again. Get this wrong and the API rejects the request or produces garbage. This is
-  the single most common bug in hand-rolled loops.
+- **The message-history invariant is load-bearing.** Every tool call the model makes must be
+  answered by a matching `ToolMessage` — same `tool_call_id`, appended before you call the model
+  again. Skip one, or mismatch an id, and the next request is rejected or the model produces
+  garbage. This is the single most common bug in hand-rolled loops.
 - **Termination is a design decision, not a default.** Left alone, the model will happily call tools
   forever. A loop with no cap is not "minimal" — it is *broken*. Every loop you write has at least a
   `max_steps` cap. Hitting the cap always means something is worth investigating.
 - **Tool failures are messages, not exceptions.** When a tool raises, the loop's job is to convert
-  that exception into a well-formed `tool_result` with `is_error: true` and hand it back to the
+  that exception into a well-formed `ToolMessage` with `status="error"` and hand it back to the
   model — not to crash, and not to decide the recovery itself. The model is often the best component
   to decide whether to retry, swap tools, or give up. This builds directly on L08's
   error-handling thinking: L08 taught the *tool author* what to return on failure; L10 teaches the
@@ -68,28 +68,30 @@ These three rules are the spine of the lesson — the lecture, the demo, and bot
 ## How we teach it: a stub model, then one live run
 
 The hard part of an agent loop is the **control flow** — iterate until done, trip the cap, handle a
-failure — not the live model. So most of L10 is built on a tiny **stub model**: a fake whose
-`.create(...)` pops the next *scripted* response off a list (a `tool_use` turn, then another, then a
-final text turn). With a scripted model:
+failure — not the live model. So most of L10 is built on a tiny **stub model** (the course's
+`FakeModel`): a fake whose `.invoke(...)` returns the next *scripted* `AIMessage` off a list (a
+tool-call turn, then another, then a final text turn). With a scripted model:
 
 - the loop is fully **deterministic** — it runs the same way every time, no API key, no cost;
 - you can script a runaway (the model "never stops") and watch the `max_steps` cap *catch* it;
-- you can script a tool that raises and watch the loop turn the exception into a `tool_result`.
+- you can script a tool that raises and watch the loop turn the exception into a `ToolMessage`.
 
 That is how the demo ([L1003](L1003_lecture.ipynb)) and both labs ([L1004](L1004_lab_empty.ipynb),
 [L1005](L1005_lab_empty.ipynb)) work — **offline and verifiable**. Exactly **one** notebook
-([L1006](L1006_lecture.ipynb)) swaps the stub for the real Anthropic SDK and runs a genuine
-multi-step loop, so you see the same code drive a live model.
+([L1006](L1006_lecture.ipynb)) swaps the stub for a real model and runs a genuine multi-step loop, so
+you see the same code drive a live model.
 
 ## A note on the code you'll see
 
-The same wrinkle from [L07](../L07/L0701_intro.md) applies. The course's `potato_llm` seam is
-**text-only** — its `Message` carries a string and cannot represent `tool_use` / `tool_result`
-blocks. The agent loop is *built on* those blocks, so the **live** demo reaches under the seam and
-calls the raw Anthropic SDK directly (the key still loads through the config seam,
-`require_anthropic_key` — never hard-coded). The stub-model notebooks don't call any SDK at all; the
-stub mimics the SDK's response shape with `SimpleNamespace`, so the loop code is identical whether a
-fake or a real client is plugged in. That interchangeability is the whole point.
+From here on the course drives models through a **LangChain chat model**, not the raw Anthropic SDK —
+that is what makes the loop provider-agnostic. The loop only ever touches a tiny slice of the
+interface: `model.bind_tools(tools)`, then `.invoke(messages)` → an `AIMessage` whose `.tool_calls`
+say which tools to run, each answered by a `ToolMessage`. Because that slice is all the loop needs,
+the **live** demo (a real `ChatAnthropic` via `init_chat_model("anthropic:…")`, key through the
+config seam — never hard-coded) and the stub-model notebooks (the course's `FakeModel`, which
+implements the same `.bind_tools()` / `.invoke()`) run the **identical** loop code. That
+interchangeability is the whole point — swap the model object, keep the loop. (Swap the provider
+prefix to `"openai:…"` and the same loop drives a different vendor.)
 
 The one sentence to leave L10 with:
 
