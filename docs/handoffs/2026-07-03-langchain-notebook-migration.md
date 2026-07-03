@@ -1,7 +1,14 @@
 # Handoff — migrate the tool/agent lesson notebooks to LangChain
 
-**Status: IN PROGRESS.** Foundation landed ([PR #19](https://github.com/timdavidlee/fluffy-potato-curriculum/pull/19), commit `2377969`); ~35 notebooks across 7 lessons remain.
+**Status: IN PROGRESS.** Foundation landed ([PR #19](https://github.com/timdavidlee/fluffy-potato-curriculum/pull/19), commit `2377969`). **Batch A (L07 + L08) DONE** on branch `worktree-langchain-notebook-migration` (commits `6abd8cc` L07, `1e61b39` L08). Batches B (L10/L11/L12) and C (L14/L22 + docs) remain.
 **Date:** 2026-07-03 · **Slug owner:** curriculum LangChain migration
+
+### Decisions locked in while doing Batch A (apply to B/C)
+- **Model construction:** use `ChatAnthropic(model=SONNET, api_key=require_anthropic_key(), max_tokens=…)` behind a `LIVE = bool(get_settings().anthropic_api_key)` gate — matches L14 and **works with the config seam** (`.env` keys are NOT in `os.environ`, so bare `init_chat_model("anthropic:…")` would not find a `.env`-only key). Live cells are `if LIVE: … else: print("offline: …")`.
+- **L07 framing:** normalized-only (`.tool_calls` / `ToolMessage`); raw `tool_use`/`tool_result` kept only as a one-line "under the hood" aside. Added a `convert_to_openai_tool(fn)` beat so students see the derived schema.
+- **L08 schema teaching:** full **Python-native** reframe (user decision) — express tight schemas via typed functions: `Literal[...]` for enums, no-default for required, `Annotated[int, Field(ge=, le=)]` for bounds, Google-style docstring `Args` (+ `parse_docstring=True`) for per-field descriptions. Validate against the derived **`args_schema`** (a Pydantic model), not a hand-rolled JSON-Schema dict. Swap descriptions mid-demo with `StructuredTool.from_function(func, name=, description=)`. The three pure-Python design labs (L0804/L0808/L0810) needed no change.
+- **Offline-deterministic** notebooks (crafted transcripts) build real `HumanMessage`/`AIMessage(tool_calls=…)`/`ToolMessage` objects (import `ToolCall` from `langchain_core.messages.tool`).
+- **Worktree gotcha:** edit files at the **worktree path** (`.claude/worktrees/langchain-notebook-migration/…`), not the main-repo absolute path, or edits land on `main`.
 
 ---
 
@@ -124,9 +131,10 @@ Item files flagged below still import removed symbols or call `.create(...)` / b
 `tool_use`/`tool_result` blocks. Some flags are **prose-only** (a lecture explaining the concept) —
 those need framing updates, not code rewrites; the heavy ones are code cells.
 
-### Batch A — L07 (Tool calling) + L08 (Designing good tools)
+### Batch A — L07 (Tool calling) + L08 (Designing good tools) — ✅ DONE (`6abd8cc`, `1e61b39`)
 The biggest reframe: L07 stops teaching raw `tool_use`/`tool_result` and teaches `.bind_tools()` +
-`.tool_calls` + `ToolMessage`.
+`.tool_calls` + `ToolMessage`. All item files below migrated and verified (offline keyless-clean,
+gate green). L07's `L0709` labs (not in the original list) were migrated too.
 - **L07:** `L0701_intro.md`, `L0702_lecture.md`, `L0703_lecture.ipynb`, `L0704_lecture.ipynb`,
   `L0705_lab_empty/solutions.ipynb`, `L0706_lecture.ipynb`, `L0707_lab_empty/solutions.ipynb`,
   `L0708_lecture.ipynb`, `PROCTOR_NOTES.md`.
