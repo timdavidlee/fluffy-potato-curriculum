@@ -94,14 +94,16 @@ Each demo lands one sentence. If you remember nothing else, remember these:
 
 ## A note on the code seam
 
-The `potato_llm` client you have used since L02 is deliberately **text-only** — its `Message` carries
-plain text, not tool-use or tool-result blocks. L08's demos register tools and observe the model
-*choose* and *call* them, so the demo notebooks drop down to the **raw Anthropic SDK**
-(`client.messages.create(..., tools=[...])`), exactly as [L07](../L07/L0701_intro.md) introduced. The
-API key still loads through the same config seam (`require_anthropic_key()`) — we change the *client*,
-not where secrets come from. The **labs** stay pure-Python and offline wherever the concept allows
-(designing a schema, rewriting an error, classifying a task) so you can practice the *design* without
-spending a token.
+L08's demos register tools and observe the model *choose* and *call* them, so — like L07 — they drive
+the model through a **LangChain chat model** (`ChatAnthropic`, swappable for any provider) rather than
+the text-only `potato_llm` seam. A tool is a **plain typed Python function**: `model.bind_tools([fn])`
+derives the tool's name, description, and JSON-Schema from the function's signature and docstring, so
+*designing the tool* becomes *writing the function and its docstring well* — which is exactly what this
+lesson is about. You can always inspect the derived schema with `convert_to_openai_tool(fn)` to see the
+contract the model receives. The API key still loads through the config seam
+(`require_anthropic_key()`) — we change the *client*, not where secrets come from. The **labs** stay
+pure-Python and offline wherever the concept allows (designing a schema, rewriting an error,
+classifying a task) so you can practice the *design* without spending a token.
 
 ## What L08 deliberately does *not* teach
 

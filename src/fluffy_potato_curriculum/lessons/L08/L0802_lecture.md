@@ -2,7 +2,7 @@
 
 ```yaml
 title: Designing good tools: name, schema, and error as interface
-keywords: tool design, tool description, json schema, parameter schema, validation errors, recoverable errors, unrecoverable errors, idempotency, side effects, tool soup, tool-or-no-tool, anthropic, claude
+keywords: tool design, tool description, json schema, parameter schema, typed function, Literal enum, derived schema, validation errors, recoverable errors, unrecoverable errors, idempotency, side effects, tool soup, tool-or-no-tool, langchain, anthropic, claude
 estimated duration: 80
 ```
 
@@ -168,6 +168,12 @@ estimated duration: 80
 - **Rule of thumb:** every parameter description should include an **example or a constraint**
   (`"RFC 5322 email, e.g. 'tim@example.com'"`, `"integer between 15 and 240"`). The model has no other
   source of truth for the parameter.
+- **How you write it in this course:** you don't hand-author the JSON-Schema. A tool is a **typed
+  Python function**, and `model.bind_tools([fn])` derives the schema from it — `str`/`int` types, a
+  `Literal["low","medium","high"]` for an enum, no default for a required field, a
+  `typing.Annotated[int, Field(ge=15, le=240)]` for a bound, and the docstring's `Args` for per-field
+  descriptions. Inspect the result with `convert_to_openai_tool(fn)`; the [L0806 lab](L0806_lab_empty.ipynb)
+  builds exactly this and validates against the derived schema.
 
 ### slide 4.3 Schemas validate shape, not truth
 

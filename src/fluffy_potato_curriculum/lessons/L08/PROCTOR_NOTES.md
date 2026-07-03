@@ -14,12 +14,15 @@ Times are rough and assume a semi-technical student with basic Python who comple
 > by spending tokens. The labs map to the four subgoals: **L0804** → tool-or-no-tool; **L0806** →
 > name + schema design; **L0808** → error shapes; **L0810** → idempotency + side effects.
 >
-> **Why the demos use the raw Anthropic SDK and not `potato_llm`:** the course's `potato_llm` seam is
-> text-only — its `Message` cannot carry `tool_use`/`tool_result` blocks, which L08's demos need in
-> order to watch the model *choose* and *call* tools. So the L08 demo notebooks call the raw SDK
-> directly (the key still loads through `common.config`), exactly as L07 does. The labs don't touch
-> the SDK at all. (Open course question, same as L07: extend `potato_llm` to model tool blocks, or
-> keep L07+ demos on the raw SDK.)
+> **The demos use LangChain, not `potato_llm` or a raw SDK:** like L07, the L08 demos drive a LangChain
+> `ChatAnthropic` (swappable for any provider). A tool is a **typed Python function**; `bind_tools`
+> derives its name, description, and JSON-Schema from the signature + docstring, so *designing the
+> tool* is *writing the function and docstring well* — the exact skill this lesson teaches. `Literal`
+> gives an enum, no-default gives a required field, `Annotated[..., Field(ge=, le=)]` gives a bound,
+> and `convert_to_openai_tool(fn)` prints the derived contract. Descriptions are swapped mid-demo with
+> `StructuredTool.from_function(func, name=, description=)`. The key still loads through `common.config`.
+> The labs don't call a model at all — they build tools and validate against the **derived**
+> `args_schema` (a Pydantic model) offline.
 >
 > L08 assumes the L07 mechanics work. If a student is shaky on the tool-call round-trip, redirect to
 > the L07 lab before this lesson — L08 does **not** re-teach the protocol.
@@ -76,23 +79,29 @@ Times are rough and assume a semi-technical student with basic Python who comple
 
 ## L0806_lab problem 2 — Tighten the parameter schema
 
-- **Common gotchas:** leaving `level` optional (it should be required); using a free string for `level`
-  instead of an `enum`; dropping the per-field descriptions (the rule of thumb: each carries an example
-  or a constraint).
-- **Unblockers:** "`required` = both fields; `level` gets `\"enum\": [\"low\", \"medium\", \"high\"]`;
-  every property gets a `description`."
-- **Time:** ~7 min.
+- **Common gotchas:** giving `level` a default (that makes it optional — drop the default so it's
+  required); typing `level` as `str` instead of `Literal["low","medium","high"]` (the `Literal` is what
+  becomes the enum); forgetting `parse_docstring=True` (so the `Args` per-field descriptions don't reach
+  the schema); a malformed `Args:` block (each line must be `name: text`, or `parse_docstring` raises).
+- **Unblockers:** "Type both params (no defaults), make `level` a `Literal`, put one `Args:` line per
+  field in the docstring, then `StructuredTool.from_function(func, name='set_priority',
+  parse_docstring=True)` and print `convert_to_openai_tool(TIGHT_TOOL)['function']['parameters']`." The
+  asserts check `required == ['ticket_id','level']`, the `level` enum, and a description on each field.
+- **Time:** ~8 min.
+- **Key point:** nobody hand-writes the JSON — the typed function *is* the schema; the print just lets
+  you read what the model will receive.
 
 ## L0806_lab problem 3 — Validate sample arguments against your schema
 
-- **Common gotchas:** forgetting that `bool` is a subclass of `int` in Python (so `True` would pass an
-  `integer` check unless guarded); checking enum on fields that have none (use `if \"enum\" in spec`);
-  not handling the missing-required case before the type checks.
-- **Unblockers:** "Three passes: required keys present? each present value the right `type`? enum
-  members where an enum exists?" Expected: sample 1 `ok`, the other three each a distinct reason.
-- **Time:** ~9 min.
-- **Key point:** this tiny validator is the *shape* line of defense — it does not (and can't) check
-  whether a well-formed value is *true* (L0808/L0809's job).
+- **Common gotchas:** reaching for a hand-rolled type check instead of the derived schema — the point
+  is `TIGHT_TOOL.args_schema.model_validate(args)` does it for you; forgetting to import/catch
+  `pydantic.ValidationError`; indexing `exc.errors()[0]["loc"]` without guarding an empty tuple.
+- **Unblockers:** "`try: TIGHT_TOOL.args_schema.model_validate(args); return 'ok'` / `except
+  ValidationError as exc:` pull `exc.errors()[0]` for the field + message." Expected: sample 1 `ok`, the
+  other three each a distinct reason (missing `level`, bad enum, wrong type for `ticket_id`).
+- **Time:** ~7 min.
+- **Key point:** the derived `args_schema` is a real Pydantic validator — the same contract the model
+  sees. It checks *shape*; it can't check whether a well-formed value is *true* (L0808/L0809's job).
 
 ## L0806_lab problem 5 — Why an enum over a free string? (written)
 
