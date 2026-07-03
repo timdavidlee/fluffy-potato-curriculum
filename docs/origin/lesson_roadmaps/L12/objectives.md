@@ -2,7 +2,7 @@
 
 > Parent design doc: [CURRICULUM_PRD.md](../../CURRICULUM_PRD.md) (lesson-plan row L12).
 > Folder conventions: [docs/origin/CLAUDE.md](../../CLAUDE.md).
-> Preceding lesson: [L11 Tracing — reading what your agent did](../L11/objectives.md). Following lesson: L13 Choosing model power for the task (roadmap not yet written; in the mini cut the next taught lesson is [L04 Explicit graphs & workflows in LangGraph](../L04/objectives.md), then [L14 Shallow agents in LangGraph](../L14/objectives.md)).
+> Preceding lesson: [L11 Tracing — reading what your agent did](../L11/objectives.md). Following lesson: L13 Choosing models & providers for the task (roadmap not yet written; in the mini cut the next taught lesson is [L04 Explicit graphs & workflows in LangGraph](../L04/objectives.md), then [L14 Shallow agents in LangGraph](../L14/objectives.md)).
 
 ## Where this lesson sits
 
@@ -107,7 +107,7 @@ Looking further ahead, **L25 (Evaluation revisited)** — outside the mini cut �
 
 > Tooling forward pointer: the same **self-hosted Langfuse** instance students met in L11 (and reuse in L14) also has a datasets/experiments feature that stores eval runs and scores — i.e. the platform version of L12's hand-rolled `evaluate()`. L12 stays the hand-rolled harness (so students see the mechanism), with Langfuse-backed evaluation named as a forward pointer toward L25, consistent with the L11 "concept first, then tooled" stance. **Decided:** Langfuse-backed eval is a name-drop only here; the full treatment is L25.
 
-> Note on lesson numbering: in the full plan, L13 (Choosing model power) sits between L12 and L04. In the mini cut, L13 is dropped, so L12 hands directly to L04 (workflows), then L14 (agents). If the L13 roadmap is later authored, revisit this bridge — L12's cost-and-model-class reasoning (objective 4) is a natural lead-in to L13's model-power trade-offs. **Decided:** in the mini cut the bridge points at L04→L14; L13 is mentioned only as a parenthetical, so the doc serves both the mini and full-course delivery without rework.
+> Note on lesson numbering: in the full plan, L13 (Choosing models & providers) sits between L12 and L04. In the mini cut, L13 is dropped, so L12 hands directly to L04 (workflows), then L14 (agents). If the L13 roadmap is later authored, revisit this bridge — L12's cost-and-model-class reasoning (objective 4) is a natural lead-in to L13's model-power trade-offs. **Decided:** in the mini cut the bridge points at L04→L14; L13 is mentioned only as a parenthetical, so the doc serves both the mini and full-course delivery without rework.
 
 ## Open authoring questions
 

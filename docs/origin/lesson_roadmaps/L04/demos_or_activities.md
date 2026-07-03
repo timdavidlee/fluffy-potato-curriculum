@@ -89,7 +89,7 @@ The teacher should have, before the first demo starts:
 
 - **A conditional edge is *not* the model deciding** — in L04 the routing function branches on **state the developer set** (here a model *classification label*). In L14 the routing function branches on whether the **model asked for a tool**. Same mechanism, different decider — call out which it is *every time*.
 - **Each node can use its own model.** A node is an independent call, so a graph mixes models: Haiku where you need a label, Sonnet where you need quality. The trace makes it tangible — each span shows its own model and cost. This is the **mechanism** of mixed-model design.
-- **The *which-model* decision framework is L13's job, not L04's.** L04 shows only *that* you can mix and *how*; the capability/latency/cost axes and budgets ("small model for routing, capable for reasoning") are L13 (Choosing model power). In the mini cut L13 is dropped, so this is students' first and only mixed-model exposure — keep it light but make it land.
+- **The *which-model* decision framework is L13's job, not L04's.** L04 shows only *that* you can mix and *how*; the capability/latency/cost axes and budgets ("small model for routing, capable for reasoning") are L13 (Choosing models & providers). In the mini cut L13 is dropped, so this is students' first and only mixed-model exposure — keep it light but make it land.
 
 **If the demo misbehaves:**
 
