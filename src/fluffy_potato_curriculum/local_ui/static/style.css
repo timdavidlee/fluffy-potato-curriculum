@@ -72,8 +72,36 @@ body {
   background: var(--bg);
 }
 
+.search-box {
+  margin-top: 10px;
+}
+
+#lesson-search {
+  display: block;
+  width: 100%;
+  padding: 6px 8px;
+  font: inherit;
+  font-size: 14px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--bg);
+}
+
+#lesson-search:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px var(--accent-soft);
+}
+
 #lesson-list {
   padding: 8px 0 40px;
+}
+
+.empty-note {
+  color: var(--muted);
+  font-size: 13px;
+  padding: 14px 18px;
+  margin: 0;
 }
 
 .lesson {
@@ -110,6 +138,29 @@ body {
 .lesson-count {
   color: var(--muted);
   font-size: 12px;
+}
+
+.track-badge {
+  align-self: center;
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  border-radius: 4px;
+  padding: 1px 6px;
+  border: 1px solid transparent;
+}
+
+.track-mini {
+  color: #2f6f3e;
+  background: #e3f2e6;
+  border-color: #b9dcc0;
+}
+
+.track-full {
+  color: var(--muted);
+  background: var(--bg);
+  border-color: var(--line);
 }
 
 .item-list {
