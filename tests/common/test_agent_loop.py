@@ -1,9 +1,9 @@
 from fluffy_potato_curriculum.common.agent_loop import dispatch, run
 from fluffy_potato_curriculum.common.fake_model import (
     FakeModel,
-    response,
-    text_block,
-    tool_use_block,
+    text_reply,
+    tool_call,
+    tool_reply,
 )
 from fluffy_potato_curriculum.common.tools import TOOLS
 from fluffy_potato_curriculum.common.tracing import from_jsonl, to_jsonl
@@ -13,34 +13,29 @@ def _chaining_model() -> FakeModel:
     """A fresh model scripted to call calculator, then lookup, then answer."""
     return FakeModel(
         [
-            response([tool_use_block("c1", "calculator", {"expression": "17*23"})]),
-            response([tool_use_block("c2", "lookup", {"city": "Tokyo"})]),
-            response([text_block("17*23 is 391, and Tokyo has 37,000,000 people.")]),
+            tool_reply(tool_call("c1", "calculator", {"expression": "17*23"})),
+            tool_reply(tool_call("c2", "lookup", {"city": "Tokyo"})),
+            text_reply("17*23 is 391, and Tokyo has 37,000,000 people."),
         ]
     )
 
 
 def _runaway_model() -> FakeModel:
     """A model that always asks for the same failing tool — it never finishes."""
-    return FakeModel([response([tool_use_block("c", "lookup", {"city": "Atlantis"})])])
+    return FakeModel([tool_reply(tool_call("c", "lookup", {"city": "Atlantis"}))])
 
 
-def test_dispatch_success_returns_a_tool_result() -> None:
-    call = tool_use_block("c1", "calculator", {"expression": "17*23"})
-    assert dispatch(TOOLS, call) == {
-        "type": "tool_result",
-        "tool_use_id": "c1",
-        "content": "391",
-    }
+def test_dispatch_success_returns_a_tool_message() -> None:
+    result = dispatch(TOOLS, tool_call("c1", "calculator", {"expression": "17*23"}))
+    assert (result.content, result.tool_call_id, result.status) == ("391", "c1", "success")
 
 
-def test_dispatch_unknown_tool_is_marked_is_error() -> None:
-    assert dispatch(TOOLS, tool_use_block("c1", "nope", {}))["is_error"] is True
+def test_dispatch_unknown_tool_is_marked_error() -> None:
+    assert dispatch(TOOLS, tool_call("c1", "nope", {})).status == "error"
 
 
-def test_dispatch_tool_exception_becomes_is_error() -> None:
-    call = tool_use_block("c1", "lookup", {"city": "Atlantis"})
-    assert dispatch(TOOLS, call)["is_error"] is True
+def test_dispatch_tool_exception_becomes_error() -> None:
+    assert dispatch(TOOLS, tool_call("c1", "lookup", {"city": "Atlantis"})).status == "error"
 
 
 def test_run_terminates_naturally_when_model_stops_calling_tools() -> None:
@@ -81,13 +76,18 @@ def test_runaway_records_the_repeated_tool_call() -> None:
 def test_tool_error_sets_the_error_field_on_its_span() -> None:
     model = FakeModel(
         [
-            response([tool_use_block("c1", "flaky_fetch", {"url": "https://crash"})]),
-            response([text_block("could not fetch")]),
+            tool_reply(tool_call("c1", "flaky_fetch", {"url": "https://crash"})),
+            text_reply("could not fetch"),
         ]
     )
     result = run(model, TOOLS, "q", max_steps=8)
     tool_span = next(event for event in result.trace if event.run_type == "tool")
     assert tool_span.error is not None
+
+
+def test_final_text_is_the_last_llm_reply() -> None:
+    result = run(_chaining_model(), TOOLS, "q", max_steps=8)
+    assert result.final_text == "17*23 is 391, and Tokyo has 37,000,000 people."
 
 
 def test_trace_serializes_to_jsonl_and_back() -> None:

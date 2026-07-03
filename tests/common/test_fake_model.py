@@ -1,29 +1,42 @@
 from fluffy_potato_curriculum.common.fake_model import (
     FakeModel,
-    response,
-    text_block,
-    tool_use_block,
+    text_reply,
+    tool_call,
+    tool_reply,
 )
 
 
-def test_response_stop_reason_is_tool_use_when_a_tool_block_is_present() -> None:
-    reply = response([tool_use_block("c1", "calculator", {"expression": "17*23"})])
-    assert reply.stop_reason == "tool_use"
+def test_tool_reply_carries_tool_calls() -> None:
+    reply = tool_reply(tool_call("c1", "calculator", {"expression": "17*23"}))
+    assert reply.tool_calls[0]["name"] == "calculator"
 
 
-def test_response_stop_reason_is_end_turn_for_text_only() -> None:
-    assert response([text_block("done")]).stop_reason == "end_turn"
+def test_text_reply_has_no_tool_calls() -> None:
+    assert text_reply("done").tool_calls == []
 
 
-def test_fake_model_returns_scripted_responses_in_order() -> None:
-    first = response([text_block("a")])
-    second = response([text_block("b")])
+def test_reply_reports_usage_metadata() -> None:
+    assert text_reply("hi", input_tokens=100, output_tokens=20).usage_metadata == {
+        "input_tokens": 100,
+        "output_tokens": 20,
+        "total_tokens": 120,
+    }
+
+
+def test_bind_tools_returns_the_model_itself() -> None:
+    model = FakeModel([text_reply("x")])
+    assert model.bind_tools([]) is model
+
+
+def test_fake_model_returns_scripted_replies_in_order() -> None:
+    first = text_reply("a")
+    second = text_reply("b")
     model = FakeModel([first, second])
-    assert [model.create(), model.create()] == [first, second]
+    assert [model.invoke([]), model.invoke([])] == [first, second]
 
 
-def test_fake_model_repeats_last_response_when_script_is_exhausted() -> None:
-    last = response([text_block("only")])
+def test_fake_model_repeats_last_reply_when_script_is_exhausted() -> None:
+    last = text_reply("only")
     model = FakeModel([last])
-    model.create()
-    assert model.create() is last
+    model.invoke([])
+    assert model.invoke([]) is last

@@ -14,9 +14,9 @@ from fluffy_potato_curriculum.common.evals import (
 )
 from fluffy_potato_curriculum.common.fake_model import (
     FakeModel,
-    response,
-    text_block,
-    tool_use_block,
+    text_reply,
+    tool_call,
+    tool_reply,
 )
 from fluffy_potato_curriculum.common.tools import TOOLS
 
@@ -25,9 +25,9 @@ def _chaining_run() -> RunResult:
     """A clean calculator -> lookup -> answer run that terminates naturally."""
     model = FakeModel(
         [
-            response([tool_use_block("c1", "calculator", {"expression": "17*23"})]),
-            response([tool_use_block("c2", "lookup", {"city": "Tokyo"})]),
-            response([text_block("17*23 is 391, and Tokyo has 37000000 people.")]),
+            tool_reply(tool_call("c1", "calculator", {"expression": "17*23"})),
+            tool_reply(tool_call("c2", "lookup", {"city": "Tokyo"})),
+            text_reply("17*23 is 391, and Tokyo has 37000000 people."),
         ]
     )
     return run(model, TOOLS, "q", max_steps=8)
@@ -35,7 +35,7 @@ def _chaining_run() -> RunResult:
 
 def _runaway_run() -> RunResult:
     """A run that repeats one failing call until max_steps halts it."""
-    model = FakeModel([response([tool_use_block("c", "lookup", {"city": "Atlantis"})])])
+    model = FakeModel([tool_reply(tool_call("c", "lookup", {"city": "Atlantis"}))])
     return run(model, TOOLS, "q", max_steps=3)
 
 

@@ -1,8 +1,8 @@
 """The hand-rolled model -> tool -> model loop, instrumented to emit a trace.
 
-This is the canonical reference copy of the loop students built inline in L07.
-L07's loop *printed* one line per iteration — a "minimum-viable trace" that
-vanished when the run ended. L08 keeps the **control flow identical** and adds
+This is the canonical reference copy of the loop students built inline in L10.
+L10's loop *printed* one line per iteration — a "minimum-viable trace" that
+vanished when the run ended. L11 keeps the **control flow identical** and adds
 *observation*: a ``TraceEvent`` emitted at each boundary (before/after the model
 call, around each tool dispatch, and a framing span for the whole run), collected
 into ``RunResult.trace``.
@@ -11,50 +11,53 @@ The headline rule: **instrumentation is a wrapper, not a rewrite.** Tracing only
 *observes* the loop; it never changes how the loop decides things. If adding a
 trace ever changed the run's behavior, observation has leaked into control flow.
 
-``run()`` works with any object exposing a ``create(...)`` method that returns a
-response with ``content`` blocks — both ``anthropic.Anthropic().messages`` and the
-offline :class:`~fluffy_potato_curriculum.common.fake_model.FakeModel` qualify.
+The loop drives a **LangChain chat model** the standard way — ``model.bind_tools(...)``
+then ``.invoke(messages)`` -> an ``AIMessage`` whose ``.tool_calls`` say which tools
+to run. Any ``bind_tools``-capable model (``ChatAnthropic``, ``ChatOpenAI``, an
+``init_chat_model(...)`` handle, or the offline
+:class:`~fluffy_potato_curriculum.common.fake_model.FakeModel`) satisfies it — that
+interchangeability is what makes the loop provider-agnostic and lets it run live or
+offline unchanged.
 """
 
 from __future__ import annotations
 
 import time
 import uuid
-from collections.abc import Callable, Mapping
+from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass, field
-from typing import Any, Protocol
+from typing import Any, Protocol, cast
+
+from langchain_core.messages import AIMessage, BaseMessage, HumanMessage, ToolMessage
+from langchain_core.messages.tool import ToolCall
 
 from .tracing import SpanUsage, TraceEvent
 
-DEFAULT_MODEL = "claude-sonnet-4-6"
-"""The course anchor model (Sonnet 4.6), so a trace of this loop matches the
-behavior students saw in L07."""
+DEFAULT_MODEL = "anthropic:claude-sonnet-4-6"
+"""The course anchor as an ``init_chat_model`` identifier (provider:model). Swap
+the provider prefix (e.g. ``"openai:gpt-..."``) and the same loop runs unchanged —
+that is the point of driving the model through LangChain."""
 
 
-class SupportsCreate(Protocol):
-    """Anything with a ``create(...)`` returning a message-like object.
+class _BoundModel(Protocol):
+    """A tool-bound chat model: ``.invoke(messages)`` -> a message.
 
-    The real ``anthropic.Anthropic().messages`` and the teaching ``FakeModel``
-    both satisfy this — that interchangeability is what lets the same loop run
-    live or offline.
+    The message parameter is positional-only so both a real LangChain runnable
+    (whose first arg is ``input``) and the teaching ``FakeModel`` (``messages``)
+    satisfy it structurally regardless of the name they give it.
     """
 
-    def create(self, **kwargs: Any) -> Any: ...
+    def invoke(self, messages: list[BaseMessage], /) -> BaseMessage: ...
 
 
-class ToolCall(Protocol):
-    """The shape of one ``tool_use`` block the loop reads (SDK block or fake).
+class ChatModel(Protocol):
+    """Anything with ``.bind_tools(...)`` returning an invokable model.
 
-    Declared with read-only properties so both a mutable SDK block and a frozen
-    teaching block satisfy it — the loop only ever *reads* these.
+    A real LangChain chat model and the teaching ``FakeModel`` both satisfy this —
+    that interchangeability is what lets the same loop run live or offline.
     """
 
-    @property
-    def id(self) -> str: ...
-    @property
-    def name(self) -> str: ...
-    @property
-    def input(self) -> dict[str, Any]: ...
+    def bind_tools(self, tools: Sequence[Any], /) -> _BoundModel: ...
 
 
 def _empty_trace() -> list[TraceEvent]:
@@ -64,7 +67,7 @@ def _empty_trace() -> list[TraceEvent]:
 @dataclass
 class RunResult:
     """What the loop returns: the answer, how many model calls it took, why it
-    stopped, and — new in L08 — the full ``trace`` the summary was derived from.
+    stopped, and — new in L11 — the full ``trace`` the summary was derived from.
 
     You should be able to point at where each summary field came from in the
     trace: ``final_text`` is the last ``llm`` span's text, ``iterations`` is the
@@ -77,70 +80,74 @@ class RunResult:
     trace: list[TraceEvent] = field(default_factory=_empty_trace)
 
 
-def dispatch(tools: Mapping[str, Callable[..., str]], call: ToolCall) -> dict[str, Any]:
-    """Run one requested tool and return a ``tool_result`` block.
+def dispatch(tools: Mapping[str, Callable[..., str]], call: ToolCall) -> ToolMessage:
+    """Run one requested tool and return a ``ToolMessage`` carrying the result.
 
-    On success: a ``tool_result`` carrying the tool's output. On ANY exception
-    (unknown tool name, or the tool raised): a ``tool_result`` with
-    ``is_error=True`` and a SHORT message (``repr(exc)``) — never a traceback.
-    The loop keeps going; the model decides what to do next.
+    On success: a ``ToolMessage`` (``status="success"``) with the tool's output. On
+    ANY failure (unknown tool name, or the tool raised): a ``ToolMessage`` with
+    ``status="error"`` and a SHORT message (``repr(exc)``) — never a traceback. The
+    ``tool_call_id`` matches the call so the model can pair result to request. The
+    loop keeps going; the model decides what to do next.
 
     Example output (failure)::
 
-        {"type": "tool_result", "tool_use_id": "c1",
-         "content": "KeyError(\\"no population on file for 'Atlantis'\\")",
-         "is_error": True}
+        ToolMessage(content="KeyError(\\"no population on file for 'Atlantis'\\")",
+                    tool_call_id="c1", status="error")
     """
-    fn = tools.get(call.name)
+    fn = tools.get(call["name"])
     if fn is None:
-        return {
-            "type": "tool_result",
-            "tool_use_id": call.id,
-            "content": f"no such tool {call.name!r}",
-            "is_error": True,
-        }
+        return ToolMessage(
+            content=f"no such tool {call['name']!r}",
+            tool_call_id=call["id"] or "",
+            status="error",
+        )
     try:
-        output = fn(**call.input)
-        return {"type": "tool_result", "tool_use_id": call.id, "content": output}
+        output = fn(**call["args"])
+        return ToolMessage(content=output, tool_call_id=call["id"] or "", status="success")
     except Exception as exc:
         # The loop turns ANY tool failure into a message, not a crash.
         # repr(exc) is a class name + one line, e.g. KeyError('no population...').
         # Short, descriptive, cheap -- never dump a traceback at the model.
-        return {
-            "type": "tool_result",
-            "tool_use_id": call.id,
-            "content": repr(exc),
-            "is_error": True,
-        }
+        return ToolMessage(content=repr(exc), tool_call_id=call["id"] or "", status="error")
 
 
 def _new_id() -> str:
     return uuid.uuid4().hex
 
 
-def _extract_usage(response: Any) -> SpanUsage | None:
-    """Pull token counts off a response, if it reports any."""
-    usage = getattr(response, "usage", None)
+def _extract_usage(message: AIMessage) -> SpanUsage | None:
+    """Pull token counts off a reply, if it reports any."""
+    usage = message.usage_metadata
     if usage is None:
         return None
-    return SpanUsage(input_tokens=usage.input_tokens, output_tokens=usage.output_tokens)
+    return SpanUsage(input_tokens=usage["input_tokens"], output_tokens=usage["output_tokens"])
+
+
+def _text_of(message: AIMessage) -> str:
+    """The plain-text answer of a reply, whether ``content`` is a string or blocks."""
+    if isinstance(message.content, str):
+        return message.content
+    parts: list[str] = []
+    for block in message.content:
+        if isinstance(block, str):
+            parts.append(block)
+        elif block.get("type") == "text":  # a content block dict, e.g. {"type": "text", ...}
+            parts.append(str(block.get("text", "")))
+    return "".join(parts)
 
 
 def run(
-    model: SupportsCreate,
+    model: ChatModel,
     tools: Mapping[str, Callable[..., str]],
     user_msg: str,
     max_steps: int = 8,
-    *,
-    tool_schemas: list[dict[str, Any]] | None = None,
-    model_name: str = DEFAULT_MODEL,
 ) -> RunResult:
     """Run a model -> tool -> model loop until the model stops asking for tools.
 
-    Each iteration: call the model; if it emitted ``tool_use`` blocks, run EVERY
-    one, package ALL their ``tool_result``s into a single user-role message, and
-    loop; if it emitted only text, return it (natural termination). The
-    ``max_steps`` cap forces a halt even if the model still wants tools.
+    Each iteration: invoke the tool-bound model; if the reply carried ``tool_calls``,
+    run EVERY one, append a ``ToolMessage`` per call, and loop; if it carried only
+    text, return it (natural termination). The ``max_steps`` cap forces a halt even
+    if the model still wants tools.
 
     Returns a :class:`RunResult` whose ``trace`` is the ordered list of spans
     emitted at the loop's boundaries (one ``chain`` span for the run, one ``llm``
@@ -149,8 +156,8 @@ def run(
     """
     trace_id = _new_id()
     events: list[TraceEvent] = []
-    schemas: list[Any] = tool_schemas if tool_schemas is not None else list(tools)
-    messages: list[dict[str, Any]] = [{"role": "user", "content": user_msg}]
+    bound = model.bind_tools(list(tools.values()))
+    messages: list[BaseMessage] = [HumanMessage(content=user_msg)]
 
     final_text = ""
     termination = "max_steps"
@@ -160,56 +167,52 @@ def run(
     for step in range(1, max_steps + 1):
         # --- the model call: one `llm` span ---
         llm_start = time.time()
-        response = model.create(model=model_name, max_tokens=512, tools=schemas, messages=messages)
+        reply = cast(AIMessage, bound.invoke(messages))
         llm_end = time.time()
-        blocks: list[Any] = list(response.content)
-        tool_uses = [block for block in blocks if block.type == "tool_use"]
         events.append(
             TraceEvent(
                 run_id=_new_id(),
                 trace_id=trace_id,
                 run_type="llm",
-                name="model.create",
+                name="model.invoke",
                 inputs={"messages": len(messages)},
-                outputs={"tool_calls": [call.name for call in tool_uses]},
-                usage=_extract_usage(response),
+                outputs={"tool_calls": [call["name"] for call in reply.tool_calls]},
+                usage=_extract_usage(reply),
                 start_time=llm_start,
                 end_time=llm_end,
             )
         )
 
-        # No tool_use block -> the model thinks it's done. NATURAL termination.
-        if not tool_uses:
-            final_text = "".join(block.text for block in blocks if block.type == "text")
+        # No tool calls -> the model thinks it's done. NATURAL termination.
+        if not reply.tool_calls:
+            final_text = _text_of(reply)
             termination = "natural"
             iterations = step
             break
 
-        # Record the assistant turn, then answer EVERY tool_use with a matching
-        # tool_result in ONE user-role message before the next call.
-        messages.append({"role": "assistant", "content": blocks})
-        results: list[dict[str, Any]] = []
-        for call in tool_uses:
+        # Record the assistant turn, then answer EVERY tool call with a matching
+        # ToolMessage before the next model invocation.
+        messages.append(reply)
+        for call in reply.tool_calls:
             # --- the tool dispatch: one `tool` span ---
             tool_start = time.time()
             result = dispatch(tools, call)
             tool_end = time.time()
-            is_error = bool(result.get("is_error"))
+            is_error = result.status == "error"
             events.append(
                 TraceEvent(
                     run_id=_new_id(),
                     trace_id=trace_id,
                     run_type="tool",
-                    name=call.name,
-                    inputs=dict(call.input),
-                    outputs={"content": result["content"]},
-                    error=result["content"] if is_error else None,
+                    name=call["name"],
+                    inputs=dict(call["args"]),
+                    outputs={"content": result.content},
+                    error=cast(str, result.content) if is_error else None,
                     start_time=tool_start,
                     end_time=tool_end,
                 )
             )
-            results.append(result)
-        messages.append({"role": "user", "content": results})
+            messages.append(result)
 
     # The framing `chain` span goes first so a reader sees the run summary up top.
     events.insert(
