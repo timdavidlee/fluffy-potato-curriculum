@@ -1,0 +1,56 @@
+name: bump
+
+# Auto-bump the version on every merge to main. Reads the Conventional Commit
+# history since the last tag, updates the version in pyproject.toml, regenerates
+# CHANGELOG.md, and pushes a `bump: ...` commit plus a vX.Y.Z tag.
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  bump:
+    name: Bump version and changelog
+    runs-on: ubuntu-latest
+    # Skip the run triggered by our own bump commit (belt-and-suspenders: pushes
+    # made with GITHUB_TOKEN don't trigger workflows, but guard anyway).
+    if: "!startsWith(github.event.head_commit.message, 'bump:')"
+    steps:
+      - name: Check out full history
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+
+      - name: Configure git identity
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Bump version and changelog
+        run: |
+          set +e
+          uv run cz bump --yes
+          code=$?
+          # 21 = nothing to increment, 3 = no commits found. Both mean "no
+          # release-worthy changes since the last tag" — a no-op, not a failure.
+          if [ "$code" -eq 21 ] || [ "$code" -eq 3 ]; then
+            echo "No eligible commits to bump; skipping release."
+            echo "did_bump=false" >> "$GITHUB_ENV"
+            exit 0
+          fi
+          if [ "$code" -ne 0 ]; then
+            exit "$code"
+          fi
+          echo "did_bump=true" >> "$GITHUB_ENV"
+
+      - name: Push bump commit and tag
+        if: env.did_bump == 'true'
+        run: git push --follow-tags origin HEAD:main
