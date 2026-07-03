@@ -90,7 +90,10 @@ Every L02 lever has an L01 cost shadow, and we keep printing the numbers:
 This lesson is narrow on purpose. It does **not** cover:
 
 - **Chain-of-thought / scratchpad reasoning** — that is L06. L02 teaches the *structured-answer*
-  half of `<thinking>…</thinking><answer>{…}</answer>`; L06 teaches the thinking half.
+  half of `<thinking>…</thinking><answer>{…}</answer>` and *shows* the channel split (the demo parses
+  the answer straight past a thinking block); L06 teaches the thinking half — what to reason about and
+  when it helps. (Mini-track note: the mini skips L06, so that small beat is your only look at the
+  thinking channel.)
 - **Tool calling / forcing schema-conformant output via tool-use** — that is L07. Here we ask for
   JSON *by instruction only* and parse defensively. In production you would use Anthropic's
   tool-use mechanism for stricter structure — you will see it in L07, and the parsing discipline
