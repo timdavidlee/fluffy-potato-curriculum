@@ -2,7 +2,7 @@
 
 > Parent design doc: [CURRICULUM_PRD.md](../../CURRICULUM_PRD.md) (lesson-plan row L14).
 > Folder conventions: [docs/origin/CLAUDE.md](../../CLAUDE.md).
-> Preceding lesson: L13 Choosing model power for the task (roadmap not yet written; in the mini cut, which drops L13, the previous taught lesson is [L12 Evaluation — first pass](../L12/objectives.md)). Following lesson: L15 LangGraph design patterns (roadmap not yet written).
+> Preceding lesson: L13 Choosing models & providers for the task (roadmap not yet written; in the mini cut, which drops L13, the previous taught lesson is [L12 Evaluation — first pass](../L12/objectives.md)). Following lesson: L15 LangGraph design patterns (roadmap not yet written).
 >
 > Conceptually L14 **closes the workflow-vs-agent arc opened by the early graph block** ([L04 sequential chaining](../L04/objectives.md) + L05 conditional routing): those lessons wired *acyclic*, developer-owned graphs (workflows); L14 adds the one thing that turns a graph into an agent — a **cycle** plus model-driven control (the model decides what runs next by emitting tool calls).
 
@@ -86,7 +86,7 @@ Define these explicitly and reuse them verbatim through the labs and into L15:
 
 L15 (LangGraph design patterns) is the direct sequel: once students can think in nodes, edges, and state, L15 surveys the *patterns* those primitives compose into — ReAct, plan-and-execute, supervisor, hierarchical, state-machine routing — and when to reach for each. L14's job is to make the **primitives and the single-loop graph** second nature so L15 can move at the level of *patterns* without re-teaching graph mechanics. The concrete handoff: at the end of L14 students have a compiled, working shallow-agent graph with typed state and a passing eval set; L15 starts by asking "what else can this graph shape express?" **Decided:** the L14→L15 boundary is "L14 owns one graph, one loop, state mechanics; L15 owns named multi-node patterns and their trade-offs." When L15's roadmap is authored, ReAct in particular should be framed there as a *pattern over* the L14 primitives, not re-introduced from scratch.
 
-> Note on lesson numbering: in the full 20-lesson plan, **L13 (Choosing model power for the task)** precedes L14. It is dropped from the mini cut, so L14 follows L12 directly. If L13's roadmap is later authored, revisit this lesson's model-selection asides — L14 deliberately keeps "which model to use" out of scope (it anchors on **Sonnet 4.6** for clarity), and that choice should hand cleanly to L13 in the full course. **Decided:** L14 anchors on a single model (Sonnet 4.6) and defers all model-power trade-offs to L13; in the mini cut, model selection is simply not covered.
+> Note on lesson numbering: in the full 20-lesson plan, **L13 (Choosing models & providers for the task)** precedes L14. It is dropped from the mini cut, so L14 follows L12 directly. If L13's roadmap is later authored, revisit this lesson's model-selection asides — L14 deliberately keeps "which model to use" out of scope (it anchors on **Sonnet 4.6** for clarity), and that choice should hand cleanly to L13 in the full course. **Decided:** L14 anchors on a single model (Sonnet 4.6) and defers all model-power trade-offs to L13; in the mini cut, model selection is simply not covered.
 
 ## Open authoring questions
 

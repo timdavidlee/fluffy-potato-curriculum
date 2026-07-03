@@ -48,7 +48,7 @@ By the end of L06, a student should be able to:
 - **The shape of the reasoning matters.** A free-form "think step by step" instruction is the cheapest CoT to write but the least controllable. Numbered scaffolds, named sub-tasks, and worked-example few-shots give the model a template — useful when you need consistent structure, more brittle to off-distribution inputs.
 - **Scratchpads are an interface contract, not a capability.** The model can already reason inline; wrapping reasoning in `<thinking>` tags is purely about giving downstream code (parsers, evals, UIs) a clean boundary to ignore or surface. Treat it the same way as JSON-mode output: a contract about *shape*, not *substance*.
 - **Self-critique is a sampling technique, not a correctness oracle.** It works best when the critic has information the original generator didn't — a different model, a different prompt, retrieved context, ground-truth examples. Without that, the critic is prone to sycophantic agreement: "yes, that answer looks right" regardless of whether it is.
-- **Reasoning is not free.** Every CoT or scratchpad token is paid for, latency-incurring, and competing with other content for the context window. L06 is the first lesson where the student must consciously weigh reasoning quality against cost — a theme that returns in L13 (model power) and L19 (context management).
+- **Reasoning is not free.** Every CoT or scratchpad token is paid for, latency-incurring, and competing with other content for the context window. L06 is the first lesson where the student must consciously weigh reasoning quality against cost — a theme that returns in L13 (models & providers) and L19 (context management).
 
 ## Common student confusions to watch for
 
@@ -65,6 +65,6 @@ L07 introduces tool calling, which adds an outer loop: the model decides whether
 
 - <!-- *NEED INPUT*: estimated lecture duration — best guess 60–90 minutes as one lecture, or split into two (CoT + scratchpad, then self-critique + when-to-use)? -->
 - The L06 labs target the course's anchor model: **Claude Sonnet 4.6**. CoT example difficulty must be tuned for Sonnet 4.6's zero-shot baseline (see Demo 1 in [demos_or_activities.md](demos_or_activities.md) — the chosen problem must produce ≥2 zero-shot failures in 5 dry-runs).
-- <!-- *NEED INPUT*: should self-critique introduce the idea of using a *different* model as the critic, or defer that to L13 (model power)? -->
+- <!-- *NEED INPUT*: should self-critique introduce the idea of using a *different* model as the critic, or defer that to L13 (models & providers)? -->
 - <!-- *NEED INPUT*: any specific L01/L02 labs that must be completed before this lesson is taught, beyond the prerequisite skills above? -->
 - <!-- *NEED INPUT*: is "extended thinking" / Anthropic's thinking-mode API in scope here, or is L06 deliberately scoped to prompt-only reasoning with deeper API features deferred? -->

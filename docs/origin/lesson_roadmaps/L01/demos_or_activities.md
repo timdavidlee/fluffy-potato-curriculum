@@ -43,12 +43,12 @@ The teacher should have, before the first demo starts:
 **Pre-flight:**
 
 - The `gpt2` (small) model from the Demo 3.5 ladder, loaded locally. GPT-2 is perfect here because you can read its raw next-token probabilities directly — no API, no key, fully offline and deterministic.
-- One seed string with an obvious continuation: `"The capital of France is"`.
+- One seed string with an obvious continuation: `"Water is made of hydrogen and"`. (Empirically validated on the local ladder — see Demo 3.5. Avoid `"The capital of France is"`: GPT-2's factual recall on it is weak and non-monotonic across the ladder, which breaks the contrast.)
 
 **Live script:**
 
-1. Show the seed string. Ask the room (rhetorically): "what's the next word?" Everyone thinks *Paris*.
-2. Run one forward pass of `gpt2` and print the top-10 next-token probabilities. `Paris` is high but not alone — ` the`, ` a`, ` located` all have mass. **The model didn't 'know' Paris; it ranked it.**
+1. Show the seed string. Ask the room (rhetorically): "what's the next word?" Everyone thinks *oxygen*.
+2. Run one forward pass of `gpt2` and print the top-10 next-token probabilities. ` oxygen` leads (~0.46) but the model **hedges** — ` helium` (~0.28), ` carbon`, ` nitrogen` all carry real mass. **The model didn't 'know' oxygen; it ranked it.**
 3. Sample one token, append it, and run again. Do this 5–6 times so the room watches a sentence *assemble* one token at a time. Narrate: "this loop is the entire show — everything else today is a consequence of it."
 4. State the load-bearing consequence out loud: **each forward pass sees only the text you give it. Between calls there is no memory.** Write it on the board; you will point back to it in Demos 4 and 5.
 
@@ -123,12 +123,12 @@ Show `tiktoken` counts on screen; run Anthropic's count-tokens endpoint on **Cla
 
 **Pre-flight:**
 
-- The local ladder loaded: `gpt2` (124M) → `gpt2-medium` (355M) → `gpt2-large` (774M). Same seed string from Demo 1 (`"The capital of France is"`), plus one harder seed where the small model visibly flounders (e.g. `"The mitochondria is the powerhouse of the"`).
+- The local ladder loaded: `gpt2` (124M) → `gpt2-medium` (355M) → `gpt2-large` (774M). Same seed string from Demo 1 (`"Water is made of hydrogen and"`), plus one harder seed where the small model visibly flounders: `"The Eiffel Tower is located in the city of"` (small model spreads across cities; the larger models commit to Paris).
 
 **Live script:**
 
 1. Reuse Demo 1's seed. Run all three models on the *same* string and print each one's top-5 next-token probabilities side by side.
-2. Read the trend aloud: as the model grows, probability mass **concentrates** on the right continuation (`Paris` climbs from, say, 0.31 → 0.55 → 0.71) and the long tail of noise thins out.
+2. Read the trend aloud: as the model grows, probability mass **concentrates** on the right continuation (` oxygen` climbs ~0.46 → ~0.63 → ~0.84 across 124M → 355M → 774M) and the long tail of noise thins out. (These numbers are validated on the current `transformers`/`gpt2*` weights; re-run once before class in case weights update.)
 3. Run the harder seed. The small model spreads its bets or picks something wrong; the large model commits correctly. Same loop, better predictor.
 4. Draw the boundary explicitly: "more capable = sharper distribution. *Which* model or provider you'd actually pick for a given capability — a vision model for OCR, a strong reasoner for planning, a cheap fast model for execution, trading capability against cost and latency — is a real decision we make in **L13**. Today we're only establishing *that* a more capable model sharpens prediction."
 
