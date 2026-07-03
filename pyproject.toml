@@ -1,6 +1,6 @@
 [project]
 name = "fluffy-potato-curriculum"
-version = "0.1.0"
+version = "0.2.0"
 description = "Python curriculum: code + materials"
 readme = "README.md"
 authors = [
@@ -86,7 +86,7 @@ addopts = "-ra --strict-markers --strict-config"
 
 [tool.commitizen]
 name = "cz_conventional_commits"
-version = "0.1.0"
+version = "0.2.0"
 version_files = ["pyproject.toml:^version"]
 tag_format = "v$version"
 update_changelog_on_bump = true
