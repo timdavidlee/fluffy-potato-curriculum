@@ -27,6 +27,7 @@ src/fluffy_potato_curriculum/common      # shared runtime layer imported across 
 src/fluffy_potato_curriculum/potato_llm   # provider-agnostic LLM client seam
 src/fluffy_potato_curriculum/lessons      # generated teaching materials, one L<NN>/ per lesson
 src/fluffy_potato_curriculum/projects     # end-of-week project briefs + starter code
+src/fluffy_potato_curriculum/local_ui     # local read-only FastAPI viewer for lesson materials
 tests/                                    # pytest tests (mirrors src/ one-to-one)
 ```
 
@@ -36,6 +37,7 @@ Each subsystem has a local map — read it before working in that tree:
 - [potato_llm/CLAUDE.md](src/fluffy_potato_curriculum/potato_llm/CLAUDE.md) — the hand-rolled `PotatoLLMClient` interface and its Anthropic/OpenAI implementations.
 - [lessons/CLAUDE.md](src/fluffy_potato_curriculum/lessons/CLAUDE.md) — how `L<NN>/` materials are laid out and generated from roadmaps.
 - [projects/CLAUDE.md](src/fluffy_potato_curriculum/projects/CLAUDE.md) — end-of-week brief structure and the Claude-maintained idea bank.
+- [local_ui/CLAUDE.md](src/fluffy_potato_curriculum/local_ui/CLAUDE.md) — a local, read-only FastAPI server for browsing/reviewing lesson materials in a browser.
 - [docs/origin/CLAUDE.md](docs/origin/CLAUDE.md) — the curriculum design docs and lesson roadmaps that drive generation.
 
 Curriculum modules go under `src/fluffy_potato_curriculum/lessons/L<NN>/` where `<NN>` is the

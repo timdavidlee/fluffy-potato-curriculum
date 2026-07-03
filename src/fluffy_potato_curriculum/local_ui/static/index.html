@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Fluffy Potato — lesson viewer</title>
+    <link rel="stylesheet" href="/static/style.css" />
+  </head>
+  <body>
+    <div id="layout">
+      <aside id="sidebar">
+        <header id="sidebar-head">
+          <h1>🥔 Lesson viewer</h1>
+          <label class="track-picker">
+            Track
+            <select id="track-select"></select>
+          </label>
+        </header>
+        <nav id="lesson-list" aria-label="Lessons"></nav>
+      </aside>
+      <main id="content">
+        <div id="welcome">
+          <h2>Pick a lesson item on the left</h2>
+          <p>Browse a track's lessons, expand one, and click an item to read it.</p>
+        </div>
+        <article id="item-view" hidden>
+          <div id="item-meta"></div>
+          <div id="item-html"></div>
+        </article>
+      </main>
+    </div>
+    <script src="/static/app.js"></script>
+  </body>
+</html>
