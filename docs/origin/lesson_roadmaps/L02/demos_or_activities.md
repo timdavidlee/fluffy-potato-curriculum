@@ -14,7 +14,7 @@ Each demo is a self-contained block with:
 - **What to highlight** — the moment(s) where the teacher should slow down and call out the takeaway out loud.
 - **If the demo misbehaves** — graceful fallback for when the model surprises you (because it will).
 
-The three demos map one-to-one to the three learning objectives in [objectives.md](objectives.md). Run them in order on the first delivery — Demo 3 (few-shot) reuses parsing scaffolding from Demo 2 (structured output) and roles framing from Demo 1.
+The four demos map one-to-one to the four learning objectives in [objectives.md](objectives.md). Run them in order on the first delivery — Demo 3 (few-shot) reuses parsing scaffolding from Demo 2 (structured output) and roles framing from Demo 1; Demo 4 (the single-step task catalog) reuses the defensive parser from Demo 2 and the classification framing from Demo 3, and shows all three levers pointed at five everyday task shapes.
 
 L02 follows L01 ([objectives](../L01/objectives.md), [demos](../L01/demos_or_activities.md)) directly. Students are warm on tokens, context windows, sampling, and cost. Reuse the L01 wrapper that prints `input_tokens`, `output_tokens`, latency, and per-call cost — every L02 demo benefits from showing those numbers without ceremony, and reinforcing the L01 framing that *every prompt is a budget decision*.
 
@@ -159,6 +159,43 @@ A small multi-turn script for the second half of the demo: a 4-turn conversation
 - If variant (2)'s overfitting doesn't reproduce, swap to a more uniform example set (e.g. all five examples are slight variants of the *same* P0-bug). The failure mode is real but model-dependent.
 - If variant (3)'s diverse few-shot still fails the off-distribution ticket, that's the punchline of step 6 anyway — lean into it and add the sixth example live.
 
+## Demo 4 — The single-step task catalog: five shapes, one toolkit (Subgoal 4)
+
+**Goal:** show that the everyday jobs a single LLM call does — extraction, classification, ranking, constrained generation, summarization — are all the *same three levers* (roles, structured output, few-shot) aimed at different output contracts. Land the framing from [objectives.md](objectives.md): *"most real work is a single-step task shape in disguise; name the shape, ask for its contract, validate the contract."*
+
+**Pre-flight:**
+
+- Reuse the defensive parser from Demo 2 — it does double duty here for every shape that returns JSON.
+- One short source text per shape, pre-loaded as a variable/cell so each is a single keystroke:
+  - **Extraction:** a short support email (reuse Demo 2's) — extract a fixed field set, then a *mixed-schema* variant that pulls a list of heterogeneous line-items.
+  - **Classification:** a support ticket — classify into a flat label set, then into a two-level taxonomy (`category` → `subcategory`).
+  - **Ranking:** five candidate feature requests plus a criterion ("rank by likely user impact") — the model returns an ordered list of candidate **ids**, not rewritten text.
+  - **Constrained generation:** "generate exactly 5 onboarding-email subject lines, each ≤ 8 words" — a hard count and a length bound.
+  - **Summarization:** a paragraph → a one-sentence summary for a *named audience*, then a rewrite in a different register.
+- A tiny validator per shape (count check; label-in-set check; "every candidate id present exactly once"), reusing Subgoal 2's *validate-the-contract* discipline.
+
+**Live script:**
+
+1. **Extraction.** Run the fixed-field prompt, parse, show the dict. Then the mixed-schema variant (a list of heterogeneous items). Highlight: extraction is structured output pointed at "pull these fields."
+2. **Classification.** Run the flat classifier; then the hierarchical one (ask for `{"category": ..., "subcategory": ...}`). The idiosyncratic-label problem from Demo 3 returns here — if a flat label misses, add two few-shot examples and re-run, calling the callback out loud.
+3. **Ranking.** Run the ranking prompt. Show the model returning an ordered list of candidate ids. Run the validator: did it keep every candidate exactly once, or drop / duplicate one? Name the failure mode — *ranking silently mutates the candidate set unless you check for it.*
+4. **Constrained generation.** Run "exactly 5, ≤ 8 words each." Count the items and the words. When the count or length drifts (it will, some runs), show the validator catching it — *a constraint you don't check is a constraint the model is free to miss.*
+5. **Summarization / transformation.** Run the one-sentence summary for the named audience, then the register rewrite. Highlight the **system message** doing the work (audience / length / style = always-true policy → `system`). Name the failure mode — *summaries hallucinate additions and drift in length.*
+6. **Closing synthesis.** Put the five shapes side by side: same three levers, five output contracts. Say out loud: *"a hard task is usually a pipeline of these single steps — which is exactly what L03–L05 wire together, one step per node."*
+
+**What to highlight:**
+
+- **One toolkit, many shapes.** Nothing new was taught here — every shape is roles + structured output + (sometimes) few-shot, aimed at a different contract.
+- **The contract is the shape you *validate*, not just the shape you *ask for*** (Subgoal 2 again): count for generation, label-in-set for classification, no-drop / no-dupe for ranking, required-keys for extraction.
+- **Temperature by shape** (L01 callback): near-0 for extraction / classification / ranking; lift it only where you actually want variety in generation.
+- **Each of these is one *node* in disguise** — the vocabulary L03 picks up when it wraps a single call as a graph node.
+
+**If the demo misbehaves:**
+
+- If a shape lands cleanly with no failure to show, raise temperature (generation and ranking wander sooner) or feed a messier source text; the validators will light up.
+- If ranking returns rewritten candidate text instead of ids, that *is* the teachable moment — show the validator failing to match, then reframe the prompt to "return the ids in order."
+- Time-box each shape to ~2–3 minutes; this is a *survey*, not five deep dives. Short on time? Cut ranking or the mixed-schema extraction variant first.
+
 ## Optional bridge demo — toward chain-of-thought (L06)
 
 If time allows, run one final demo that previews L06. Take Demo 2's structured-output prompt and add a `<thinking>...</thinking>` block before the JSON. Don't *teach* chain-of-thought — just show that the same structured-output discipline (Subgoal 2) gracefully accommodates a thinking block, and the parser pulls the JSON out as before. Say out loud: "L06 is about what to put inside that thinking block, and when it's worth the extra tokens."
@@ -167,7 +204,7 @@ If time allows, run one final demo that previews L06. Take Demo 2's structured-o
 
 ## Pacing notes for the teacher
 
-- **Per-demo time:** 15–20 minutes including the post-demo discussion. Three demos plus the optional bridge fits in a 75–90 minute block, matching the duration estimate in [objectives.md](objectives.md). Demo 2 is the longest of the three because of the five test emails — budget time for it. <!-- *NEED INPUT*: confirm against the lesson-time budget once duration is pinned in objectives.md's open questions. -->
+- **Per-demo time:** 15–20 minutes each for Demos 1–3, including the post-demo discussion; Demo 4 is a faster ~12–15 minute *survey* (five shapes, ~2–3 minutes apiece). Four demos plus the optional bridge fits in a ~100–120 minute block, matching the updated duration estimate in [objectives.md](objectives.md). Demo 2 is the longest of the levers demos because of the five test emails — budget time for it; if the whole block runs long, Demo 4 is the one to shorten (cut ranking or the mixed-schema extraction variant) or push its lab to take-home. <!-- *NEED INPUT*: confirm against the lesson-time budget once duration is pinned in objectives.md's open questions. -->
 - **Variance budget:** model outputs vary run-to-run (recall L01 Demo 3). Budget at least one re-run per demo. If a demo lands cleanly the first time, don't re-run for the sake of it — use the time to extend the discussion.
 - **Resist live-coding tangents.** Students may ask "what about chain-of-thought?", "what about tools?", "what about prompt caching?" — name each as a "we'll get there" callback (CoT → L06, tools → L07, caching → L19) and *do not detour*. L02's job is the prompting toolkit; depth lives in later lessons.
 - **Reinforce L01 vocabulary at every opportunity.** Token counts, cost staircases, temperature. Every demo should casually print these alongside its core point. The compounding builds the cost-aware mindset the rest of the course depends on.

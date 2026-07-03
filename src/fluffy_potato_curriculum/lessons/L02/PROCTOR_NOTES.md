@@ -3,16 +3,18 @@
 Notes for whoever runs the L02 labs. One section per problem, keyed by lab id and problem number.
 Times are rough and assume a semi-technical student with basic Python who completed L01.
 
-> Cross-cutting note: the teacher demos (L0203 / L0205 / L0207) make **live** Claude calls and need
-> `ANTHROPIC_API_KEY` set (copy `.env.example` to `.env`); the **L0206 lab** is mostly pure-Python
-> parsing but its Problem 3 ends with one live call, so it needs a key too. The **L0204 and L0208
-> labs stay offline** (pure Python — building message lists, counting tokens), no key required.
-> Because the model varies run to run, a live run may not reproduce every effect the prose calls
-> out — that variance is part of the lesson. Run the demos yourself before class, and clear cell
-> outputs (any that hit the API) before committing.
+> Cross-cutting note: the teacher demos (L0203 / L0205 / L0207 / L0209) make **live** Claude calls
+> and need `ANTHROPIC_API_KEY` set (copy `.env.example` to `.env`); the **L0206 and L0210 labs** are
+> mostly pure-Python but each ends with one live call (L0206 Problem 3, L0210 Problem 3), so they
+> need a key too. The **L0204 and L0208 labs stay offline** (pure Python — building message lists,
+> counting tokens), no key required. Because the model varies run to run, a live run may not
+> reproduce every effect the prose calls out — that variance is part of the lesson. Run the demos
+> yourself before class, and clear cell outputs (any that hit the API) before committing.
 >
 > The labs are: **L0204** (roles & content placement), **L0206** (structured output & defensive
-> parsing), **L0208** (few-shot & its cost). Each maps to one L02 subgoal.
+> parsing), **L0208** (few-shot & its cost), **L0210** (the single-step task catalog). The first
+> three map one-to-one to the first three L02 subgoals; **L0210 covers Subgoal 4** (the task shapes:
+> extraction, classification, ranking, constrained generation, summarization).
 
 ## L0204_lab problem 1 — Build a multi-turn conversation
 
@@ -45,7 +47,7 @@ Times are rough and assume a semi-technical student with basic Python who comple
   `turns` times — `est_tokens(system) * turns`."
 - **Time:** ~5 min.
 - **Key point:** this is the cost half of "keep `system` lean," and the motivation for prompt
-  caching (L16). Don't teach caching here — just name it.
+  caching (L19). Don't teach caching here — just name it.
 
 ## L0204_lab problem 4 — Continue or start fresh? (written)
 
@@ -97,7 +99,7 @@ Times are rough and assume a semi-technical student with basic Python who comple
 
 - **Common gotchas:** answering only "so it's neat"; missing the core idea that it makes the
   response *programmatic* (indexable) rather than *conversational* (prose you must read).
-- **Unblockers:** acceptable points: it's the precondition for evals (L11), tool calling (L07), and
+- **Unblockers:** acceptable points: it's the precondition for evals (L12), tool calling (L07), and
   multi-step pipelines; L07 adds tool-use-as-schema to *force* conformance, but defensive parsing
   still applies because tool-call arguments can be malformed too.
 - **Time:** ~5 min.
@@ -141,3 +143,55 @@ Times are rough and assume a semi-technical student with basic Python who comple
   few-shot (idiosyncratic format the model can't guess); row 3 → not few-shot (needs reasoning →
   L06's CoT); row 4 → not few-shot (examples would dominate the window → retrieval/other approach).
 - **Time:** ~5 min.
+
+## L0210_lab problem 1 — Classification: prompt + validator
+
+- **Common gotchas:** `validate_label` checking `label == allowed` (comparing to the whole list)
+  instead of `label in allowed`; returning a bare bool instead of a list of problem strings;
+  over-engineering `classify_prompt` (it just needs to name the labels and say "return only the
+  label").
+- **Unblockers:** "`classify_prompt` = an instruction plus `', '.join(labels)`. `validate_label` =
+  `[] if label in allowed else ["...not in set..."]`." The `"bug"` case should produce a problem
+  (the model's near-miss for `"P0-bug"`).
+- **Time:** ~6 min.
+- **Key point:** this is the enum-is-a-contract idea from L0206 applied to labels — the model can
+  return anything; the validator is what enforces the set.
+
+## L0210_lab problem 2 — Ranking: validate the set is preserved
+
+- **Common gotchas:** checking only length (misses a dropped-and-duplicated pair that keeps the
+  length the same); forgetting the duplicate check entirely; comparing lists instead of sets (a
+  valid reordering is not equal as a list).
+- **Unblockers:** "Two checks: `len(ranked_ids) != len(set(ranked_ids))` catches duplicates;
+  `set(ranked_ids) != set(candidate_ids)` catches drops and inventions." The `[3, 1, 2, 2]` case
+  exercises both at once (2 duplicated, 4 missing).
+- **Time:** ~6 min.
+- **Key point:** ranking's failure is *silent* — the output looks like a plausible order even when an
+  item vanished. The set check is the whole reason to reference candidates by id.
+
+## L0210_lab problem 3 — Constrained generation: count + length, then a live call
+
+- **Common gotchas:** validating only the count and not the per-item length bound; using
+  `len(line)` (characters) instead of `len(line.split())` (words); letting a malformed live reply's
+  `ValueError` crash the cell instead of noting it (the parser is *given*, so this is rare, but the
+  live reply can still surprise).
+- **Unblockers:** "`if len(items) != n` for the count; a loop with `len(line.split()) > max_words`
+  for the bound. Collect problems in a list." The live call usually returns a clean array of 5 — the
+  point is that the *validator* would catch it if it didn't.
+- **Note:** needs `ANTHROPIC_API_KEY` for the live call; remind students to clear that output before
+  committing.
+- **Time:** ~9 min.
+- **Key point:** a constraint you don't re-check in code is one the model is free to miss; higher
+  temperature (0.7 here, for variety) makes a miss more likely, which is exactly why the check exists.
+
+## L0210_lab problem 4 — Name the shape (written)
+
+- **Common gotchas:** naming a *technique* (e.g. "few-shot") instead of a *task shape*; giving a
+  validation check that doesn't match the shape (e.g. "check it parses" for summarization).
+- **Unblockers:** expected: row 1 → extraction (validate required keys present); row 2 → ranking
+  (every id present exactly once); row 3 → constrained generation (exactly 3, each ≤ 280 chars);
+  row 4 → summarization/transformation (no invented facts, length within bound). The solutions
+  notebook fills the table in; use it as the answer key.
+- **Time:** ~5 min.
+- **Key point:** naming the shape *first* is the habit — it tells you the prompt to write and the
+  validator to reach for before you touch the model.

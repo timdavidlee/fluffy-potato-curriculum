@@ -2,8 +2,8 @@
 
 ```yaml
 title: Prompting fundamentals: roles, structured output, few-shot
-keywords: prompting, system user assistant roles, messages list, structured output, json, defensive parsing, few-shot, in-context examples, cost
-estimated duration: 80
+keywords: prompting, system user assistant roles, messages list, structured output, json, defensive parsing, few-shot, in-context examples, task shapes, extraction, classification, ranking, constrained generation, summarization, cost
+estimated duration: 110
 ```
 
 > **Lesson:** L02. **Roadmap:** [objectives.md](../../../../docs/origin/lesson_roadmaps/L02/objectives.md).
@@ -22,8 +22,10 @@ estimated duration: 80
   *in* it — the prompt.
 - The whole lesson rests on one claim: **the same content, arranged differently, produces a
   different answer.** Structure is a lever, not decoration.
-- L02 hands you exactly three levers — **roles**, **structured output**, **few-shot** — and nothing
-  more. It is narrow on purpose: this is the minimum toolkit L06 (reasoning) and L07 (tools) assume.
+- L02 hands you three levers — **roles**, **structured output**, **few-shot** — and then a **catalog**
+  of the single-step task shapes they unlock (extract, classify, rank, generate-to-a-constraint,
+  summarize). The levers are the minimum toolkit L06 (reasoning) and L07 (tools) assume; the catalog
+  (section 5) is what one call can *do* with them.
 
 ### slide 1.2 The three levers at a glance
 
@@ -35,13 +37,19 @@ estimated duration: 80
 | Structured output | a *negotiation*, not a guarantee — parse defensively | tight schema ⇒ fewer output tokens (output is pricey) |
 | Few-shot | a behavior nudge, priced in tokens; diversity beats volume | every example costs input tokens on every call |
 
+- The three levers are *mechanics*; **section 5** turns them on the five everyday **task shapes** —
+  extraction, classification, ranking, constrained generation, summarization.
+
 ### slide 1.3 What L02 does not teach
 
 - **Not chain-of-thought.** Scratchpad / `<thinking>` reasoning is L06. L02 teaches the
   structured-*answer* half; L06 teaches the *thinking* half. They compose later.
 - **Not tool calling.** Forcing schema-conformant output via the tool-use protocol is L07. Here we
   ask for JSON *by instruction only* and parse defensively.
-- Resist broadening scope. The job of L02 is to hand L06 a competent multi-turn chat user.
+- **Not orchestration.** Chaining several single-step tasks into a pipeline is L03–L05. Section 5's
+  catalog is the menu of what *one* node can do; wiring nodes together is the graph ramp.
+- Resist broadening past these shapes — no reasoning, no tools, no multi-step control yet. The job of
+  L02 is the prompting toolkit and the single-step tasks it unlocks.
 
 [↑ Back to top](#prompting-fundamentals-roles-structured-output-few-shot)
 
@@ -63,7 +71,7 @@ estimated duration: 80
   goes in `user`.** The system message is the part that is true on *every* call of this prompt.
 - Why it matters two ways: (a) **reuse** — a lean, durable system message can front many different
   user requests unchanged; (b) **cost** — the system message is re-sent every turn, so bloat there
-  is paid for forever (and it is exactly what *prompt caching*, a later L16 topic, exists to fight).
+  is paid for forever (and it is exactly what *prompt caching*, a later L19 topic, exists to fight).
 - diagram: two boxes — `system: "You are a triage assistant. Answer in two short paragraphs…"`
   (stamped "always true") and `user: "My head has hurt for three days."` (stamped "this call only").
 
@@ -110,7 +118,7 @@ estimated duration: 80
 
 - Structured output makes the model's response **programmatic** rather than **conversational** — a
   dict your code can index, not a paragraph you have to read.
-- It is the precondition for almost everything later: evals (L11), tool calling (L07), and
+- It is the precondition for almost everything later: evals (L12), tool calling (L07), and
   multi-step pipelines all need the model's output to be *machine-readable*.
 - The shapes you'll ask for: a **JSON object**, a **fixed list of fields**, or **XML-ish tags**
   like `<answer>…</answer>`.
@@ -206,24 +214,134 @@ estimated duration: 80
 | A single clear instruction already works | just the instruction — skip few-shot |
 | The model needs the team's idiosyncratic format/labels | few-shot (for format) |
 | The task needs *reasoning* steps, not pattern-matching | chain-of-thought — L06 |
-| The example set would dominate the context window | a different approach (retrieval L17, model class L12, fine-tuning — out of scope) |
+| The example set would dominate the context window | a different approach (retrieval L21, model class L13, fine-tuning — out of scope) |
 
 [↑ Back to top](#prompting-fundamentals-roles-structured-output-few-shot)
 
-## section 5. Wrap-up and the bridge to L06
+## section 5. The common single-step task shapes
 
-### slide 5.1 The three levers, reconnected
+### slide 5.1 One call, many shapes
+
+- The three levers so far are *mechanics*. Point them at a goal and you get the everyday jobs a
+  **single LLM call** does. Learn to **name the shape** — the name tells you which lever to reach for
+  and, crucially, what to **validate**.
+- The catalog is five shapes: **extraction**, **classification**, **ranking / recommendation**,
+  **constrained generation**, **summarization / transformation**. Nothing here is a new technique —
+  each is the three levers aimed at a different **output contract**.
+- table: the five shapes, the lever each leans on, the output contract, and the failure a validator
+  must catch.
+
+| Shape | Leans on | Output contract | Watch-for failure |
+| --- | --- | --- | --- |
+| Extraction | structured output | JSON with the required fields | dropped / hallucinated fields |
+| Classification | structured output (+ few-shot) | a value from a fixed label set | invented, out-of-set label |
+| Ranking / recommendation | structured output | the candidate ids, reordered | dropped, duplicated, or rewritten candidates |
+| Constrained generation | structured output + explicit rule | exactly N items / within a bound | wrong count, over-length |
+| Summarization / transformation | system message (role) | shorter or restyled text, meaning kept | added facts, length drift |
+
+### slide 5.2 Extraction — pull fields out of text
+
+- **Extraction is structured output (section 3) pointed at "pull these fields."** You already did it
+  in the structured-output demo: name the fields, ask for one JSON object, parse defensively.
+- **Single-schema:** a fixed set of keys every time (e.g. `customer_name`, `order_id`, `intent`).
+- **Mixed-schema:** pull a *list* of heterogeneous items whose fields differ (e.g. line-items where a
+  product row has `sku` + `qty` and a discount row has `code` + `percent`). Ask for a JSON array of
+  objects and validate each item against the shape it claims to be.
+- Failure to name out loud: the model **invents** a field it wasn't asked for, or **drops** one that
+  was in the text — the required-keys check from section 3 is exactly what catches it.
+
+### slide 5.3 Classification — sort into a fixed label set
+
+- **Classification is structured output constrained to a label set** — and the place **few-shot
+  (section 4)** most earns its keep, because a team's label *wording* is often idiosyncratic.
+- Three flavours: **flat** (one of N labels), **hierarchical / taxonomy** (`category` then
+  `subcategory` — ask for both keys), and **multi-label** (return a JSON *array* of labels when more
+  than one applies).
+- **An enum is a contract, not a constraint** (section 3 again): the model can return a label outside
+  the set, so validate `label in ALLOWED` — and for a taxonomy, validate the subcategory belongs to
+  the chosen category.
+- diagram: an input ticket flowing into a flat label, then into a two-level `category → subcategory`
+  pair, with the validator rejecting an out-of-set label.
+
+### slide 5.4 Ranking / recommendation — order a candidate list
+
+- **Give the candidates ids and ask the model to return the ids in order** — never ask it to rewrite
+  the candidates. Referencing by id keeps the output tiny and the contract checkable.
+- The contract to **validate**: every candidate id appears in the output **exactly once** — no drops,
+  no duplicates, nothing invented. This is the classic silent failure: the ranking *looks* fine until
+  you notice one item vanished.
+- Optionally ask for a one-line justification per rank — useful, but it costs output tokens and is not
+  the thing you validate.
+- table: candidate list in, ordered id list out, validator preserving the set.
+
+| Prompt gives | Model returns | Validator checks |
+| --- | --- | --- |
+| `[{id: 1, …}, {id: 2, …}, {id: 3, …}]` + a criterion | `[3, 1, 2]` | each id present exactly once |
+
+### slide 5.5 Constrained generation — produce exactly N, within a bound
+
+- Generation is the one shape where you may *want* a higher temperature — but the **constraint** (a
+  count, a length cap, a required format) must be **explicit in the prompt and re-checked in code**.
+- Ask for a **JSON array of length N** rather than a prose list — a shape you can `len()`-check beats
+  counting bullet points by eye.
+- The contract to validate: the count is exactly N, and each item respects the bound (e.g.
+  `≤ 8 words`). **A constraint you don't check is a constraint the model is free to miss** — and it
+  will, some runs.
+- Failure to name: the model returns 4 or 6 items, or one item blows the length cap. The validator
+  turns that into a caught error instead of a downstream surprise.
+
+### slide 5.6 Summarization and the transformation family
+
+- **Summarization, rewriting, normalization, translation** are one family: text in, *transformed* text
+  out, **meaning preserved**. The **system message (section 2)** carries the durable policy — audience,
+  length, register — because it is true on *every* call of this transformer.
+- diagram: `system: "Summarize for a non-technical exec in one sentence."` + `user: <the document>`
+  → a one-sentence summary; swap the system policy to restyle without touching the user text.
+- The contract here is softer (there is no single right answer), so validation is about **guardrails,
+  not equality**: length within bound, no invented facts, required elements present. Failure modes to
+  name: **hallucinated additions** and **length drift**.
+- Low temperature still helps for faithful summaries; lift it only for deliberately creative rewrites.
+
+### slide 5.7 Picking the shape, and chaining shapes
+
+- **Name the shape first.** "This is a classification problem" tells you to reach for a fixed label
+  set, few-shot if the labels are idiosyncratic, and a `label in ALLOWED` validator — before you write
+  a word of prompt.
+- **Temperature by shape** (L01 callback): near-0 for extraction / classification / ranking (you want
+  the single most-likely, repeatable answer); higher only where generation genuinely wants variety.
+- **A hard task is usually a *pipeline* of these single steps** — extract, then classify, then
+  summarize. That is exactly the seam **L03–L05** pick up, where each step becomes one **node** in a
+  graph. L02 gives you the vocabulary of the single step; the graph ramp wires several together.
+
+[↑ Back to top](#prompting-fundamentals-roles-structured-output-few-shot)
+
+## section 6. Wrap-up and the bridge to L06
+
+### slide 6.1 The three levers and the catalog, reconnected
 
 - **Roles** decide *where* content lives and how the model weights it. **Structured output** decides
   the *shape* of the answer and forces you to parse defensively. **Few-shot** *nudges behavior* at a
   per-call token price.
+- Those three levers are exactly what the **task catalog** (section 5) runs on: extraction and
+  classification lean on structured output (and few-shot for odd labels); ranking and constrained
+  generation add a checkable rule; summarization leans on the system message. Same toolkit, five
+  output contracts.
 - They interlock: a good prompt often uses all three — a lean `system` message, a `user` request
   that asks for a tight JSON shape, and a couple of diverse `assistant`/`user` examples when an
   instruction alone won't do it.
 - The sentence to leave with: *you now know how to ask the model for what you want, in the shape you
   want.*
 
-### slide 5.2 What L06 does with this
+### slide 6.2 Where this goes next
+
+- **Immediate next lesson: [L03](../../../../docs/origin/lesson_roadmaps/L03/objectives.md)
+  (single-node operations).** It takes one task shape from section 5 — **extraction** — and wraps it as
+  a reusable **graph node**: the same structured-output discipline, now living inside a
+  framework-managed function. L03–L05 then chain several single-step shapes into a graph.
+- **Later: L06 (reasoning).** The three levers are also what L06 builds chain-of-thought on — that
+  hand-off is the next slide.
+
+### slide 6.3 What L06 does with this
 
 - L06 (teaching an LLM to think) sends its chain-of-thought prompts through **the same role
   structure** you just learned — a `system` message that licenses reasoning plus a `user` message
