@@ -42,8 +42,13 @@ injects them. No JS build step.
   small, controllable fragment with no `<html>` wrapper or surprise CSS. Rendered notebook
   HTML from cell outputs is treated as *trusted local material* — do not point this at
   untrusted `.ipynb` files.
-- Deps: `fastapi`, `uvicorn`, `markdown` (runtime); `types-Markdown` (dev). Added via
-  `uv add`, so they're in `uv.lock`.
+- Deps: `fastapi`, `uvicorn`, `markdown`, `pygments` (runtime); `types-Markdown` (dev). Added
+  via `uv add`, so they're in `uv.lock`.
+- **Syntax highlighting is server-side via Pygments.** Markdown fences go through the
+  `codehilite` extension; notebook code cells (always Python) are highlighted directly. Both
+  emit a `.highlight` wrapper so one block of token CSS in `static/style.css` styles both. The
+  theme CSS is generated from Pygments' `friendly` style — regenerate with
+  `HtmlFormatter(style=...).get_style_defs("#item-html .highlight")` if you change it.
 - Tests live in `tests/local_ui/` and use FastAPI's `TestClient` fully offline. Its
   httpx-backed methods read as partially-typed under pyright strict, so the calls are
   isolated behind `tests/local_ui/_api.py`.

@@ -74,6 +74,27 @@ def test_notebook_code_is_html_escaped(tmp_path: Path) -> None:
     assert "&lt;tag&gt;" in render_item(item, path)
 
 
+def test_notebook_code_is_syntax_highlighted(tmp_path: Path) -> None:
+    item, path = _nb_item(tmp_path)
+    # Pygments wraps highlighted code in a ``.highlight`` container.
+    assert 'class="highlight"' in render_item(item, path)
+
+
+def test_markdown_fenced_code_is_syntax_highlighted(tmp_path: Path) -> None:
+    path = tmp_path / "doc.md"
+    path.write_text("```python\nimport os\n```\n")
+    item = LessonItem(
+        item_id="L0101_intro",
+        lesson_id="L01",
+        order=1,
+        kind="intro",
+        fmt="markdown",
+        title="1. Intro",
+        filename="doc.md",
+    )
+    assert 'class="highlight"' in render_item(item, path)
+
+
 def test_notebook_stream_output_rendered(tmp_path: Path) -> None:
     item, path = _nb_item(tmp_path)
     assert "nb-stream" in render_item(item, path)
