@@ -1,24 +1,24 @@
 """The shared tools the hand-rolled agent loop dispatches.
 
 This is the canonical reference copy of the tools students first built inline in
-L07. L08 (and L09, and the later LangGraph lessons) import them from here instead
+L10. L11 (and L12, and the later LangGraph lessons) import them from here instead
 of re-deriving them, so every lesson traces and evaluates the *same* agent.
 
 The tools stay deliberately tiny and deterministic — the lessons are about the
-loop, the trace, and the eval set, not about tool design (that was L05). Each
+loop, the trace, and the eval set, not about tool design (that was L08). Each
 tool returns a ``str`` and signals failure in one of two ways, which is exactly
-what gives L08's "locate a failure" objective its raw material:
+what gives L11's "locate a failure" objective its raw material:
 
 - a tool that **raises** (``calculator`` on junk input, ``lookup`` on a missing
   city, ``flaky_fetch`` on a crashing URL) — the loop converts the exception
-  into a ``tool_result`` with ``is_error: true`` (see ``agent_loop.dispatch``);
+  into a ``ToolMessage`` with ``status="error"`` (see ``agent_loop.dispatch``);
 - a tool that **returns an error as data** (``flaky_fetch`` on an error URL) —
-  the L05 "errors are values" pattern; the call succeeds, the *content* is bad.
+  the L08 "errors are values" pattern; the call succeeds, the *content* is bad.
 """
 
 from __future__ import annotations
 
-from typing import Any
+from collections.abc import Callable
 
 # --- calculator -------------------------------------------------------------
 
@@ -70,9 +70,9 @@ def flaky_fetch(url: str) -> str:
 
     - ``"https://ok"``      -> returns a usable value (success).
     - ``"https://error"``   -> returns a structured **error as data** (the call
-      succeeds; the content says it failed — the L05 pattern).
+      succeeds; the content says it failed — the L08 pattern).
     - ``"https://crash"``   -> **raises** ``RuntimeError`` (an uncaught exception
-      the loop must convert into a ``tool_result``).
+      the loop must convert into an error ``ToolMessage``).
     - ``"https://garbage"`` -> returns **malformed** output (succeeds, but the
       content is unusable).
 
@@ -91,45 +91,23 @@ def flaky_fetch(url: str) -> str:
             raise ValueError(f"unknown url: {url!r}")
 
 
-# --- the dispatch table + JSON-Schema definitions ---------------------------
+# --- the dispatch table + the bindable tool list ----------------------------
 
-TOOLS: dict[str, Any] = {
+TOOLS: dict[str, Callable[..., str]] = {
     "calculator": calculator,
     "lookup": lookup,
     "flaky_fetch": flaky_fetch,
 }
 """Tool NAME -> the Python function that runs it. The loop never hard-codes a
-tool name; it looks each requested name up here."""
+tool name; it looks each requested name up here to *execute* a call."""
 
 
-TOOL_SCHEMAS: list[dict[str, Any]] = [
-    {
-        "name": "calculator",
-        "description": "Evaluate a basic arithmetic expression and return the exact result.",
-        "input_schema": {
-            "type": "object",
-            "properties": {"expression": {"type": "string", "description": "e.g. '17*23'."}},
-            "required": ["expression"],
-        },
-    },
-    {
-        "name": "lookup",
-        "description": "Look up a city's population from a small internal table.",
-        "input_schema": {
-            "type": "object",
-            "properties": {"city": {"type": "string", "description": "a city name, e.g. 'Tokyo'."}},
-            "required": ["city"],
-        },
-    },
-    {
-        "name": "flaky_fetch",
-        "description": "Fetch the contents of a URL. May fail in several ways.",
-        "input_schema": {
-            "type": "object",
-            "properties": {"url": {"type": "string", "description": "an https URL to fetch."}},
-            "required": ["url"],
-        },
-    },
-]
-"""JSON-Schema tool definitions a real model requires. The offline ``FakeModel``
-ignores them; the live Anthropic client needs them."""
+TOOL_LIST: list[Callable[..., str]] = [calculator, lookup, flaky_fetch]
+"""The tools to hand a chat model via ``model.bind_tools(TOOL_LIST)``.
+
+LangChain infers each tool's JSON schema from the function's **type hints and
+docstring** — so a plain typed function *is* the schema. That is the whole reason
+the tools above carry precise signatures and one-line docstrings. Any
+``bind_tools``-capable chat model (``ChatAnthropic``, ``ChatOpenAI``, …) accepts
+this same list, which is what makes the loop provider-agnostic; the offline
+:class:`~fluffy_potato_curriculum.common.fake_model.FakeModel` ignores it."""

@@ -1,111 +1,100 @@
-"""A scripted, offline stand-in for the Anthropic client.
+"""A scripted, offline stand-in for a LangChain chat model.
 
-The agent loop needs a model object with a ``.create(...)`` method that returns a
-response carrying ``content`` blocks (``tool_use`` / ``text``). The real Anthropic
-SDK provides that; ``FakeModel`` provides a *deterministic* version so the L08
-reading demos and the labs run with **no API key and no network**, and produce the
-exact same trace every time.
+The agent loop drives a chat model the LangChain way: ``model.bind_tools(...)``
+then ``.invoke(messages)`` -> an :class:`~langchain_core.messages.AIMessage`
+whose ``.tool_calls`` list says which tools (if any) the model wants run. The real
+``ChatAnthropic`` (or any ``bind_tools``-capable model) provides that; ``FakeModel``
+provides a *deterministic* version so the reading demos and labs run with **no API
+key and no network**, and produce the exact same trace every time.
 
-This matters pedagogically: objectives 1, 2, and 4 of L08 are *reading* skills,
-clearest on a fixed, known trace. A scripted model gives that — the model's moves
-are decided in advance, so a "runaway", a "wrong-arguments" run, or a clean run is
-reproducible on demand. The real model only appears in the live instrument/export
-demos, where *producing* a fresh trace is the point.
+This matters pedagogically: the L11 reading skills are clearest on a fixed, known
+trace. A scripted model gives that — its moves are decided in advance, so a
+"runaway", a "wrong-arguments" run, or a clean run is reproducible on demand. The
+real model only appears in the live instrument/export demos, where *producing* a
+fresh trace is the point.
 
-The block/response shapes mimic the SDK closely enough that the same loop code
-reads both: it touches ``block.type``, ``block.text``, ``block.id``,
-``block.name``, ``block.input``, ``response.content``, and ``response.usage``.
+``FakeModel`` mimics only the slice of the chat-model interface the loop touches:
+``.bind_tools(tools)`` (which it ignores, returning itself) and ``.invoke(messages)``
+(which returns the next scripted ``AIMessage``). Build the script with
+:func:`text_reply` and :func:`tool_reply` / :func:`tool_call`.
 """
 
 from __future__ import annotations
 
+from collections.abc import Sequence
 from dataclasses import dataclass, field
 from typing import Any
 
-
-@dataclass(frozen=True)
-class FakeTextBlock:
-    """A scripted assistant text block (mimics the SDK's text content block)."""
-
-    text: str
-    type: str = "text"
+from langchain_core.messages import AIMessage, BaseMessage
+from langchain_core.messages.tool import ToolCall
 
 
-@dataclass(frozen=True)
-class FakeToolUseBlock:
-    """A scripted assistant tool-use block (mimics the SDK's tool_use block)."""
+def tool_call(call_id: str, name: str, args: dict[str, Any]) -> ToolCall:
+    """Build one scripted tool call (``call_id`` becomes the LangChain tool_call id).
 
-    id: str
-    name: str
-    input: dict[str, Any]
-    type: str = "tool_use"
+    Example::
 
-
-@dataclass(frozen=True)
-class FakeUsage:
-    """Scripted token counts, so ``llm`` spans carry a believable ``usage``."""
-
-    input_tokens: int
-    output_tokens: int
+        tool_call("c1", "calculator", {"expression": "17*23"})
+    """
+    return ToolCall(id=call_id, name=name, args=args, type="tool_call")
 
 
-@dataclass(frozen=True)
-class FakeResponse:
-    """A scripted model response: the content blocks plus token usage."""
-
-    content: list[FakeTextBlock | FakeToolUseBlock]
-    usage: FakeUsage
-    stop_reason: str
-
-
-def text_block(text: str) -> FakeTextBlock:
-    """Build a scripted text block."""
-    return FakeTextBlock(text=text)
+def _usage(input_tokens: int, output_tokens: int) -> dict[str, int]:
+    return {
+        "input_tokens": input_tokens,
+        "output_tokens": output_tokens,
+        "total_tokens": input_tokens + output_tokens,
+    }
 
 
-def tool_use_block(call_id: str, name: str, args: dict[str, Any]) -> FakeToolUseBlock:
-    """Build a scripted tool-use block (``call_id`` becomes the ``tool_use_id``)."""
-    return FakeToolUseBlock(id=call_id, name=name, input=args)
+def text_reply(text: str, *, input_tokens: int = 100, output_tokens: int = 20) -> AIMessage:
+    """A scripted final answer: an ``AIMessage`` with text and no tool calls.
+
+    A reply with no ``tool_calls`` is how the loop recognizes the model is done
+    (natural termination)."""
+    return AIMessage(content=text, usage_metadata=_usage(input_tokens, output_tokens))
 
 
-def response(
-    blocks: list[FakeTextBlock | FakeToolUseBlock],
-    *,
-    input_tokens: int = 100,
-    output_tokens: int = 20,
-) -> FakeResponse:
-    """Build a scripted response. ``stop_reason`` is ``tool_use`` if any block is
-    a tool call, else ``end_turn`` — matching how the real SDK reports it."""
-    has_tool_use = any(isinstance(block, FakeToolUseBlock) for block in blocks)
-    stop = "tool_use" if has_tool_use else "end_turn"
-    return FakeResponse(
-        content=blocks,
-        usage=FakeUsage(input_tokens=input_tokens, output_tokens=output_tokens),
-        stop_reason=stop,
+def tool_reply(*calls: ToolCall, input_tokens: int = 100, output_tokens: int = 20) -> AIMessage:
+    """A scripted tool-requesting turn: an ``AIMessage`` carrying ``tool_calls``.
+
+    Example::
+
+        tool_reply(tool_call("c1", "calculator", {"expression": "17*23"}))
+    """
+    return AIMessage(
+        content="",
+        tool_calls=list(calls),
+        usage_metadata=_usage(input_tokens, output_tokens),
     )
 
 
 @dataclass
 class FakeModel:
-    """A model whose replies are scripted in advance.
+    """A chat model whose replies are scripted in advance.
 
-    ``create`` ignores its keyword arguments and returns the next scripted
-    response. When the script runs out it **repeats the last line** — which is how
-    a runaway loop (the ``max_steps`` case) is simulated: keep asking for the same
-    tool forever.
+    ``bind_tools`` ignores its argument and returns ``self`` (the script already
+    decides what the model "asks for"). ``invoke`` ignores the messages and returns
+    the next scripted ``AIMessage``; when the script runs out it **repeats the last
+    line** — which is how a runaway loop (the ``max_steps`` case) is simulated: keep
+    asking for the same tool forever.
 
     Example::
 
         model = FakeModel([
-            response([tool_use_block("c1", "calculator", {"expression": "17*23"})]),
-            response([text_block("17 * 23 is 391.")]),
+            tool_reply(tool_call("c1", "calculator", {"expression": "17*23"})),
+            text_reply("17 * 23 is 391."),
         ])
     """
 
-    scripted: list[FakeResponse]
+    scripted: list[AIMessage]
     calls: int = field(default=0)
 
-    def create(self, **kwargs: Any) -> FakeResponse:
+    def bind_tools(self, tools: Sequence[Any]) -> FakeModel:
+        """Match the chat-model interface; the script, not the tools, drives replies."""
+        return self
+
+    def invoke(self, messages: Sequence[BaseMessage]) -> AIMessage:
         index = min(self.calls, len(self.scripted) - 1)
         self.calls += 1
         return self.scripted[index]

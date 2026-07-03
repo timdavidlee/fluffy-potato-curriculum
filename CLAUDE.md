@@ -29,6 +29,7 @@ src/fluffy_potato_curriculum/lessons      # generated teaching materials, one L<
 src/fluffy_potato_curriculum/projects     # end-of-week project briefs + starter code
 src/fluffy_potato_curriculum/local_ui     # local read-only FastAPI viewer for lesson materials
 tests/                                    # pytest tests (mirrors src/ one-to-one)
+docs/                                     # design source, tracking notes, handoffs (markdown only)
 ```
 
 Each subsystem has a local map — read it before working in that tree:
@@ -38,7 +39,7 @@ Each subsystem has a local map — read it before working in that tree:
 - [lessons/CLAUDE.md](src/fluffy_potato_curriculum/lessons/CLAUDE.md) — how `L<NN>/` materials are laid out and generated from roadmaps.
 - [projects/CLAUDE.md](src/fluffy_potato_curriculum/projects/CLAUDE.md) — end-of-week brief structure and the Claude-maintained idea bank.
 - [local_ui/CLAUDE.md](src/fluffy_potato_curriculum/local_ui/CLAUDE.md) — a local, read-only FastAPI server for browsing/reviewing lesson materials in a browser.
-- [docs/origin/CLAUDE.md](docs/origin/CLAUDE.md) — the curriculum design docs and lesson roadmaps that drive generation.
+- [docs/CLAUDE.md](docs/CLAUDE.md) — the `docs/` tree: design source (`origin/`), dated tracking notes (`todos/`), work handoffs (`handoffs/`), and standalone reference docs — with when to use each. (Design source has its own deeper map at [docs/origin/CLAUDE.md](docs/origin/CLAUDE.md).)
 
 Curriculum modules go under `src/fluffy_potato_curriculum/lessons/L<NN>/` where `<NN>` is the
 zero-padded lesson number (e.g. `L01`, `L10`). Companion materials (notebooks, datasets, slides)

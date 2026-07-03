@@ -1,4 +1,4 @@
-"""Structured tracing for a hand-rolled agent loop (the L08 teaching artifact).
+"""Structured tracing for a hand-rolled agent loop (the L11 teaching artifact).
 
 A **trace** is the durable, structured record of what an agent run did: every
 model call, tool call, and the loop step itself, captured as an ordered list of
@@ -15,7 +15,7 @@ schema. The vocabulary lines up with the tools students meet later:
   (an ``llm`` span renders as a *GENERATION*, a ``tool``/``chain`` span as a
   *SPAN*); LangSmith calls it a **run**. We say **span** in prose.
 
-This module is imported by L08 (which instruments the loop), and reused by L09
+This module is imported by L11 (which instruments the loop), and reused by L12
 (evaluation reads ``RunResult.trace``) and the later LangGraph lessons.
 """
 
@@ -82,7 +82,7 @@ class TraceEvent(BaseModel):
     trace_id: str
     """Shared by every span of one run — the field that makes a run separable
     from another when traces are stored together, and the key a trace diff
-    (L08 objective 4) and the Langfuse view group on."""
+    (L11 objective 4) and the Langfuse view group on."""
     parent_run_id: str | None = None
     """Nesting parent, when spans nest. Mostly flat for a shallow loop."""
     run_type: RunType
