@@ -184,7 +184,21 @@ Times are rough and assume a semi-technical student with basic Python who comple
 - **Key point:** a constraint you don't re-check in code is one the model is free to miss; higher
   temperature (0.7 here, for variety) makes a miss more likely, which is exactly why the check exists.
 
-## L0210_lab problem 4 — Name the shape (written)
+## L0210_lab problem 4 — Summarization: a guardrail check
+
+- **Common gotchas:** using `len(summary)` (characters) instead of `len(summary.split())` (words);
+  forgetting the *not-shorter-than-source* check (a "summary" that restates the whole source clears
+  the word cap but isn't a summary); a case-sensitive `must_include` check so `Offline` misses
+  `offline`.
+- **Unblockers:** "Three guardrails: word count over `max_words`; `len(summary.split()) >=
+  len(source.split())`; and each `term.lower() in summary.lower()`. Collect problems in a list." The
+  three crafted cases are pass / missing-terms / too-long-and-not-shorter.
+- **Time:** ~7 min.
+- **Key point:** summarization has no single right answer, so you validate with **guardrails, not
+  equality** — and name the honest limit: a keyword check is a *proxy* for "kept the facts," not a
+  real hallucination detector (that is harder, and out of scope here).
+
+## L0210_lab problem 5 — Name the shape (written)
 
 - **Common gotchas:** naming a *technique* (e.g. "few-shot") instead of a *task shape*; giving a
   validation check that doesn't match the shape (e.g. "check it parses" for summarization).
