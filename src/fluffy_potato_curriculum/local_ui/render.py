@@ -16,14 +16,32 @@ from typing import Any, cast
 
 import markdown
 
+# Import from concrete submodules, not the lazy-loading `pygments.lexers` /
+# `pygments.formatters` namespaces, which resolve as untyped under pyright strict.
+from pygments import highlight
+from pygments.formatters.html import HtmlFormatter
+from pygments.lexers.python import PythonLexer
+
 from fluffy_potato_curriculum.local_ui.models import LessonItem
 
-_MD_EXTENSIONS = ["fenced_code", "tables", "toc", "sane_lists"]
+# `codehilite` runs fenced code through Pygments; `css_class="highlight"` makes it
+# share the same token classes as the notebook code cells below (see style.css).
+_MD_EXTENSIONS = ["fenced_code", "tables", "toc", "sane_lists", "codehilite"]
+_MD_EXTENSION_CONFIGS: dict[str, dict[str, Any]] = {
+    "codehilite": {"css_class": "highlight", "guess_lang": False},
+}
+
+# Notebook code cells are Python; highlight them directly with the same wrapper
+# class the markdown extension emits so one set of CSS styles both.
+_PY_LEXER = PythonLexer()
+_HTML_FORMATTER: HtmlFormatter[str] = HtmlFormatter()
 
 
 def _render_markdown(text: str) -> str:
     """Render a markdown document to an HTML fragment."""
-    return markdown.markdown(text, extensions=_MD_EXTENSIONS)
+    return markdown.markdown(
+        text, extensions=_MD_EXTENSIONS, extension_configs=_MD_EXTENSION_CONFIGS
+    )
 
 
 def _source_to_text(source: Any) -> str:
@@ -35,7 +53,8 @@ def _source_to_text(source: Any) -> str:
 
 
 def _code_block(text: str) -> str:
-    return f'<pre class="nb-code"><code>{html.escape(text)}</code></pre>'
+    # Pygments HTML-escapes the source as it tokenises, so no separate escape here.
+    return f'<div class="nb-code">{highlight(text, _PY_LEXER, _HTML_FORMATTER)}</div>'
 
 
 def _render_output(output: dict[str, Any]) -> str:

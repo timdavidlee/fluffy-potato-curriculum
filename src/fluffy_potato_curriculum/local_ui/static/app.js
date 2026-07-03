@@ -166,7 +166,9 @@ async function init() {
     ]);
     state.tracks = tracks;
     state.lessons = lessons;
-    state.currentTrack = tracks.length ? tracks[0].name : null;
+    // Default to the "mini" track when it exists; otherwise the first track.
+    const mini = tracks.find((t) => t.name === "mini");
+    state.currentTrack = mini ? mini.name : tracks.length ? tracks[0].name : null;
     const search = document.getElementById("lesson-search");
     search.oninput = () => {
       state.query = search.value;
