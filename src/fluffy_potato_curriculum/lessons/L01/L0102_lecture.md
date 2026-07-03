@@ -96,7 +96,7 @@ estimated duration: 70
 - The context window is a hard ceiling on how many tokens a single call can involve — **input and
   output combined**.
 - Everything competes for that one budget: the system message, every prior conversation turn,
-  tool definitions (relevant from L04 on), the current user input, *and* the model's own response.
+  tool definitions (relevant from L07 on), the current user input, *and* the model's own response.
 - Anchor number: **Claude Sonnet 4.6 has a 200,000-token standard window.** (A 1M-token
   long-context variant also exists; we use 200k as the default for this course.)
 
@@ -125,7 +125,7 @@ estimated duration: 70
 
 - More tokens cost more and slow inference down; quality can sag near the long-context tail.
 - "Use the whole window because it's there" is an anti-pattern. This tension drives later lessons:
-  context management (L15) and RAG (L17) exist to *push back* against window pressure rather than
+  context management (L17) and RAG (L19) exist to *push back* against window pressure rather than
   just buying a bigger window.
 
 ## section 4. Temperature and sampling
@@ -166,7 +166,7 @@ estimated duration: 70
 | Task                                         | Temperature | Why |
 | -------------------------------------------- | ----------- | --- |
 | Classification / extraction / structured output | low (≈0) | you want the single most-likely, repeatable answer |
-| Tool routing (preview of L04)                | low (≈0)    | a wrong "creative" tool choice is just a bug |
+| Tool routing (preview of L07)                | low (≈0)    | a wrong "creative" tool choice is just a bug |
 | Brainstorming / creative writing             | higher (≈0.7–1.0) | variety is the point |
 
 ## section 5. Cost
@@ -201,13 +201,13 @@ estimated duration: 70
 | 4    | ~200                 | ~800                     | turns 1–3 re-sent |
 | 5    | ~200                 | ~1000                    | the bill grows even though each message is small |
 
-- This staircase is exactly what **prompt caching** (a later topic, L15 context management) and
-  retrieval (L17) exist to fight. We only name it here.
+- This staircase is exactly what **prompt caching** (a later topic, L17 context management) and
+  retrieval (L19) exist to fight. We only name it here.
 
 ### slide 5.4 Order-of-magnitude: from "free" to "a real budget"
 
 - One call costs ~nothing. The number that matters is what happens when you *multiply*:
-  one call → a 10-step agent run (L07) → 100 dev iterations → a small production deployment.
+  one call → a 10-step agent run (L10) → 100 dev iterations → a small production deployment.
 - diagram: a ladder — `1 call ≈ $0.000X` → `×10 (agent run)` → `×100 (dev iteration)` →
   `×1000 (small deployment)` — with the final rung landing on a number students can *feel*.
 - The habit to build: do this back-of-envelope multiplication *before* you start running agents,

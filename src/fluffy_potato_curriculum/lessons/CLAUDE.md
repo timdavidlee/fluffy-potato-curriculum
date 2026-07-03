@@ -5,7 +5,7 @@ artifacts for one lesson (zero-padded, monotonically increasing — `L01` is tau
 
 ## Mini vs full tracks
 
-Lesson directories stay **flat** (`L01/` … `L23/`) — there is no `mini/` or `full/`
+Lesson directories stay **flat** (`L01/` … `L25/`) — there is no `mini/` or `full/`
 subfolder. Track membership is data, not directory structure: [tracks.toml](tracks.toml)
 is the single source of truth for which lessons belong to the mini vs full course
 (`mini` is always a subset of `full`), and [SYLLABUS.md](SYLLABUS.md) is the readable

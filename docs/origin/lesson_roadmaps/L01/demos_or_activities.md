@@ -90,13 +90,13 @@ Anchor model is **Claude Sonnet 4.6**, 200k-token standard context window. Size 
 4. Without re-running, walk the room through the three failure modes from [objectives.md](objectives.md):
    - **Hard rejection** — what they just saw.
    - **Silent truncation** — some clients/wrappers (or some agent frameworks they'll use later) will quietly drop the oldest turns. Name this as a *footgun*: the call succeeds but the model has forgotten things you assumed it remembered.
-   - **Quality degradation** near the long-context tail — even when a call fits, models can struggle to attend to material in the middle of a very long context. Foreshadow that this motivates the techniques in L17 (context management) and L19 (RAG).
+   - **Quality degradation** near the long-context tail — even when a call fits, models can struggle to attend to material in the middle of a very long context. Foreshadow that this motivates the techniques in L19 (context management) and L21 (RAG).
 
 **What to highlight:**
 
-- The window is shared. Every byte of system message, every prior turn, every tool definition (relevant from L04 onward), and every output token competes for the same budget.
+- The window is shared. Every byte of system message, every prior turn, every tool definition (relevant from L07 onward), and every output token competes for the same budget.
 - The illusion of "the model remembers our conversation" is the client re-sending history. Demo 4 will make the cost of that illusion visible.
-- "Bigger window" does not mean "use it all." More tokens = more cost, more latency, and (often) lower quality near the tail. Foreshadow L10 (model power) and L14.
+- "Bigger window" does not mean "use it all." More tokens = more cost, more latency, and (often) lower quality near the tail. Foreshadow L13 (model power) and L16.
 
 **If the demo misbehaves:**
 
@@ -126,7 +126,7 @@ Anchor model is **Claude Sonnet 4.6**. At temperature 0, Sonnet 4.6 is reliably 
 **What to highlight:**
 
 - Temperature acts on the distribution *before* sampling. It does not change what the model "knows" — it changes how aggressively the sampler commits to the most-likely token.
-- Temperature 0 is the right default for classification, extraction, structured output, and tool-routing (foreshadow L04). Temperature 1-ish is for brainstorming, creative writing, and deliberate exploration.
+- Temperature 0 is the right default for classification, extraction, structured output, and tool-routing (foreshadow L07). Temperature 1-ish is for brainstorming, creative writing, and deliberate exploration.
 - Reproducibility is a *separate* problem from temperature. Even at temperature 0, floating-point math, server-side batching, and tie-breaking can cause output to vary across runs. Set the expectation now so future evals don't shock anyone.
 
 **If the demo misbehaves:**
@@ -151,15 +151,15 @@ Anchor model is **Claude Sonnet 4.6**. At temperature 0, Sonnet 4.6 is reliably 
 2. Run a longer prompt (paste in a paragraph of context, ask for a short answer). Show input tokens up, output tokens flat, cost up.
 3. Now flip it: short prompt, ask for a 500-word answer. Show input tokens flat, output tokens up *a lot*, cost up *a lot* — typically more than the long-input case, because output tokens cost ~3–5x more.
 4. Run the multi-turn conversation script. Print the cumulative input tokens at each turn. Show the staircase. Compute the total session cost.
-5. Order-of-magnitude: take the per-turn cost, multiply by 10 (a typical agent run length, foreshadowing L07), then by 100 (a typical iteration count during development), then by 1000 (a small production deployment running once a minute for ~16 hours). Read the final number aloud. This is the punchline — students should leave the room with a felt sense for what an agent budget looks like.
-6. Briefly mention prompt caching exists as a way to push back on the staircase cost in step 4. <!-- *NEED INPUT*: introduce prompt caching here as a one-line foreshadow, or strictly defer to L17 (context management)? Mirrored from [objectives.md](objectives.md). -->
+5. Order-of-magnitude: take the per-turn cost, multiply by 10 (a typical agent run length, foreshadowing L10), then by 100 (a typical iteration count during development), then by 1000 (a small production deployment running once a minute for ~16 hours). Read the final number aloud. This is the punchline — students should leave the room with a felt sense for what an agent budget looks like.
+6. Briefly mention prompt caching exists as a way to push back on the staircase cost in step 4. <!-- *NEED INPUT*: introduce prompt caching here as a one-line foreshadow, or strictly defer to L19 (context management)? Mirrored from [objectives.md](objectives.md). -->
 
 **What to highlight:**
 
 - Output tokens cost more than input tokens. Long prompt + short answer is often cheaper than short prompt + long answer. This flips most students' intuition.
 - The conversation history staircase is the single biggest cost surprise students will encounter on their own. Naming it now prevents a surprise bill in the lab.
 - The order-of-magnitude jump from "one call costs ~nothing" to "an agent in dev iteration costs real money" is the moment cost becomes a design concern, not an accounting concern.
-- Bridge: the cost-awareness mindset installed here is what makes L17 (context management), L10 (model power), and prompt-caching design moves *land* later. Without L01, those lessons feel like premature optimization.
+- Bridge: the cost-awareness mindset installed here is what makes L19 (context management), L13 (model power), and prompt-caching design moves *land* later. Without L01, those lessons feel like premature optimization.
 
 **If the demo misbehaves:**
 
@@ -176,14 +176,14 @@ If time allows, run one final mini-demo to set up L02. Take Demo 4's multi-turn 
 
 - **Per-demo time:** 10–15 minutes including the post-demo discussion. Four demos plus the optional bridge fits in a 60–75 minute block, matching the duration estimate in [objectives.md](objectives.md). <!-- *NEED INPUT*: confirm against the lesson-time budget once duration is pinned in objectives.md's open questions. -->
 - **Variance budget:** model outputs vary run-to-run (Demo 3 makes this explicit, but it applies to all four). Budget at least one re-run per demo. If a demo lands cleanly the first time, don't re-run for the sake of it — use the time to extend the discussion.
-- **Resist live-coding tangents.** Students may ask "what about embedding tokens?" or "what about prompt caching?" or "what about images and multimodal tokens?" — name each as a "we'll get there" callback (embeddings → L18, caching → L17, multimodal → out of scope for this course unless the PRD changes) and *do not detour*. L01 is foundational; depth lives in later lessons.
+- **Resist live-coding tangents.** Students may ask "what about embedding tokens?" or "what about prompt caching?" or "what about images and multimodal tokens?" — name each as a "we'll get there" callback (embeddings → L20, caching → L19, multimodal → out of scope for this course unless the PRD changes) and *do not detour*. L01 is foundational; depth lives in later lessons.
 - **The audience watches, doesn't participate.** Resist the temptation to ask "what do you think will happen?" — that is a lab pattern, not a demo pattern. Hands-on tokenization, temperature sweeps, and cost estimation are for the L01 labs.
 
 ## Open authoring questions
 
 - <!-- *NEED INPUT*: do we use the Anthropic SDK exclusively from L01, or briefly show `tiktoken` / a tokenizer comparison so students see that tokenization is a *family* of choices? Mirrored from [objectives.md](objectives.md). -->
-- <!-- *NEED INPUT*: is prompt caching introduced here (as a one-line foreshadow in Demo 4), or strictly deferred to L17 (context management)? Mirrored from [objectives.md](objectives.md). -->
-- <!-- *NEED INPUT*: should "rate limits" (RPM/TPM, retry/backoff) be demoed here alongside cost, or deferred until students hit them in L07? Mirrored from [objectives.md](objectives.md). -->
+- <!-- *NEED INPUT*: is prompt caching introduced here (as a one-line foreshadow in Demo 4), or strictly deferred to L19 (context management)? Mirrored from [objectives.md](objectives.md). -->
+- <!-- *NEED INPUT*: should "rate limits" (RPM/TPM, retry/backoff) be demoed here alongside cost, or deferred until students hit them in L10? Mirrored from [objectives.md](objectives.md). -->
 - <!-- *NEED INPUT*: are the demos run in a Jupyter notebook the teacher projects, or in a slide-embedded REPL, or via a custom demo runner script? Affects how prompts are pre-loaded. -->
 - <!-- *NEED INPUT*: a pointer/link to where the demo wrapper (token + cost + latency printer) lives as code — not yet decided. -->
 - <!-- *NEED INPUT*: include the optional L02 bridge demo here, or save it as the opener for L02? -->

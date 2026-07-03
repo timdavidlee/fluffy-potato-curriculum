@@ -1,158 +1,136 @@
-# L09 Proctor Notes — Evaluation: first pass
+# L09 Proctor Notes
 
-Covers both L09 labs: **L0903** (write your first eval set) and **L0905** (pass rates and
-regressions). Both run **offline with no API key** (scripted `FakeModel` / a deterministic model
-simulator). One section per problem.
+Notes for whoever runs the L09 labs. One section per problem, keyed by lab id and problem number.
+Times are rough and assume a semi-technical student with basic Python who completed L01–L08.
 
-General setup gotchas:
+> **Environment note (read first):** the Python **`mcp` package is not installed** in the course env.
+> Both L09 labs (**L0904** validate/translate a tool spec, **L0907** the MCP-vs-inline decision) are
+> therefore **fully offline / pure standard library** (`json`, `dataclasses`) — **no API key, no `mcp`
+> package, no network.** They run here deterministically. The lab teaches the conceptual core of MCP —
+> *a well-designed tool serialized to a portable spec, and the decision to package it that way* —
+> without a live server.
+>
+> Two L09 lecture artifacts **show code that needs `mcp`** and are deliberately **not runnable** in
+> this env: the connect walkthrough ([L0605_lecture.md](L0605_lecture.md), a slide outline) and the
+> build-a-server walkthrough ([L0606_lecture.ipynb](L0606_lecture.ipynb), shown but not executed). Do
+> **not** ask students to run those — they read them for the wire shape and the server skeleton. The
+> runnable offline counterpart is the [L0903 demo](L0603_lecture.ipynb).
+>
+> **The single most repeated correction this lesson:** *MCP changes packaging and transport, not tool
+> design.* Every L08 principle (name, description, schema, error shape) is unchanged. If a student
+> thinks MCP makes design easier or harder, redirect to the [L0902 lecture](L0602_lecture.md) slide 1.5.
+>
+> The labs map to the L09 subgoals: **L0904** → describe the spec / connect-discover mechanics by
+> translating and validating a tool spec; **L0907** → decide when MCP is worth the overhead.
 
-- Everything imports from `fluffy_potato_curriculum.common` — the loop (`agent_loop.run` → `RunResult`),
-  the tools (`common.tools.TOOLS`), and the new eval harness (`common.evals`). If imports fail, the
-  student's environment isn't synced: `uv sync` from the repo root.
-- The harness is ~30 lines in `common/evals.py`. Encourage a student who is stuck on *what a scorer
-  returns* to open that file and read `EvalResult` and `evaluate` — it is meant to be read.
-- A **scorer** is keyword-only: `def my_scorer(*, run, example) -> EvalResult`. Forgetting the `*`
-  (or calling it positionally) is the most common signature error.
+## L0604_lab problem 1 — Translate inline -> MCP tool spec
 
----
+- **Common gotchas:** rewriting or "improving" the schema contents instead of carrying them over
+  unchanged (the whole point is that they *don't* change); using snake_case `inputschema` or leaving it
+  as `input_schema` (MCP specs use camelCase `inputSchema`); dropping `name` or `description`.
+- **Unblockers:** "Return `{'name': ..., 'description': ..., 'inputSchema': inline['input_schema']}`.
+  The only change is the key name on the schema — copy everything else verbatim."
+- **Time:** ~6 min.
+- **Key point:** the translation is a key rename. That it's *this trivial* is the lesson — the design
+  surface is identical across packagings.
 
-## L0903_lab problem 1
+## L0604_lab problem 2 — Prove the design surface survives
 
-**Task:** write the `answer_correct` outcome scorer (reference answer is a substring of `final_text`).
+- **Common gotchas:** comparing `json.dumps` strings (key order can differ) instead of the dict objects;
+  asserting against the wrong key on one side.
+- **Unblockers:** "Three asserts: `mcp_spec['inputSchema'] == BOOK_MEETING_INLINE['input_schema']`, and
+  the same for `name` and `description`. Dict `==` is fine — no need to stringify."
+- **Time:** ~4 min.
+- **Key point:** this is the [lecture](L0602_lecture.md) slide 2.2 claim, checked mechanically rather
+  than asserted in prose.
 
-COMMON GOTCHAS:
-- Returning a bare `bool` instead of an `EvalResult`. The scorer must return
-  `EvalResult(key="answer_correct", score=<bool>)`.
-- Comparing against `example.reference_outputs` (the dict) instead of `["answer"]` (the value).
-- `reference_outputs["answer"]` is a **string** here (`"37000000"`); `in run.final_text` is a plain
-  substring test — no `int` conversion needed.
+## L0604_lab problem 3 — Round-trip back to inline
 
-UNBLOCKERS:
-- "A scorer is a function from one run to one verdict. Read `run.final_text`; does the expected
-  answer appear in it? Return that as the `score`."
-- Point them at the `EvalResult` fields: `key`, `score`, optional `comment`.
+- **Common gotchas:** not reversing the rename (returning `inputSchema` again); reordering keys and then
+  expecting `==` to fail (dict equality ignores order, so this still passes — reassure the student).
+- **Unblockers:** "Mirror Problem 1: `input_schema` <- `spec['inputSchema']`. `mcp_spec_to_inline(mcp_spec)`
+  must equal the original `BOOK_MEETING_INLINE`."
+- **Time:** ~4 min.
+- **Key point:** lossless *both* directions is *why* the tool is portable — a client can consume a
+  discovered spec or publish an inline one with no information loss.
 
-TIME: ~4 min. STRETCH: add a `comment=` that records what it was looking for, then print the
-report and read the comment off `report.sample_results[0].results[0]`.
+## L0604_lab problem 4 — Validate a discovered spec
 
-## L0903_lab problem 2
+- **Common gotchas:** using truthiness on a missing key and hitting `KeyError` (use `.get(...)`);
+  checking only the name and forgetting the `inputSchema['type'] == 'object'` rule; returning a bare
+  `False` instead of an informative `REJECTED: ...` string (the whole L08 lesson is that errors should
+  *say why*).
+- **Unblockers:** "Three guards in order: empty `name` -> reject; empty `description` -> reject;
+  `inputSchema` not a dict or its `type` != `'object'` -> reject; else `'OK'`. Use `spec.get('name')`
+  so a missing key doesn't crash." Expected: good=OK, the other three each REJECTED with a reason.
+- **Time:** ~8 min.
+- **Key point:** a client discovers specs it did *not* write (ownership moved to the server author), so
+  validating the structure before trusting it is the cross-process analogue of L07's
+  "the application validates."
 
-**Task:** write the `expected_tools` trajectory scorer using `tool_trajectory(run)`.
+## L0604_lab problem 5 — Why is the description load-bearing? (written)
 
-COMMON GOTCHAS:
-- Confusing **outcome** with **trajectory**: this scorer reads `run.trace` (via `tool_trajectory`),
-  **not** `run.final_text`. If a student is parsing the answer text here, redirect.
-- `tool_trajectory(run)` returns a `list[str]` of tool **names** in order. Compare it to
-  `example.reference_outputs["expected_tools"]` with `==` (order matters).
-- Comparing a `list` to a `tuple`, or forgetting the call order, makes a correct path look wrong.
+- **Common gotchas:** "it documents the tool for developers" — backwards; the description is for the
+  *model's* selection step, and for an MCP server it is published to *every* connecting client.
+- **Unblockers:** expected: the published `description` is read by **every connecting model on every
+  conversation** — it becomes runtime system prompt for every agent that uses the server, owned by the
+  server author (lecture slide 2.3). An inline description is read by one agent's model; an MCP one is
+  read by all of them. Tie to L08's *more tools ≠ more capable agent* — a flabby server description
+  taxes every client.
+- **Time:** ~4 min.
 
-UNBLOCKERS:
-- "The path is data: `tool_trajectory(run)` is the ordered list of tool names. Does it equal the
-  expected list?"
-- Have them `print(tool_trajectory(run))` for the `tokyo` run to see `['calculator', 'lookup']`.
+## L0607_lab problem 1 — The cost/benefit ledger (written)
 
-TIME: ~4 min. STRETCH: switch to `tool_calls(run)` and assert on the **arguments** too, not just the
-names (this is the L08 "arguments are where the truth is" point).
+- **Common gotchas:** listing benefits as costs or vice versa; conflating "extra process" and
+  "transport" into one item (they're distinct operational costs).
+- **Unblockers:** expected costs (any reasonable subset of the five): extra process to run; a transport
+  to keep healthy; a versioning surface (server vs client); a wider debugging surface (failure on
+  either side); a deployment story. Benefits (the four): portability (one server, many clients);
+  separation of concerns (tool author ≠ agent author); discoverability (clients introspect); a security
+  boundary (own credentials/permissions). See [lecture](L0602_lecture.md) slide 5.2.
+- **Time:** ~5 min.
+- **Key point:** the asymmetry — costs are immediate and roughly fixed; benefits compound with the
+  number of consumers. That asymmetry *is* the decision rule for the next problems.
 
-## L0903_lab problem 3
+## L0607_lab problem 2 — Encode the decision
 
-**Task:** write `no_runaway` (a trajectory check) and a regression case — red on `atlantis_runaway`,
-green on `atlantis_fixed`.
+- **Common gotchas:** wrong rule order (checking the consumer count before isolation, so a one-consumer
+  secrets tool wrongly returns inline); using `<` instead of `<=` for the single-consumer guard;
+  forgetting that a tight loop can still have multiple consumers (the loop rule must come *after* the
+  consumer-count rule and only fire for >1 consumer).
+- **Unblockers:** "Four guards in order: `needs_isolation` -> MCP; `consumers <= 1` -> inline;
+  `tight_loop` -> inline; else MCP." Walk them through *why* isolation is first (it's a benefit only the
+  cross-process split can buy, regardless of consumer count).
+- **Time:** ~8 min.
+- **Key point:** the decision keys on the **number of consumers** more than anything else, with
+  isolation and latency as overrides. This is the [lecture](L0602_lecture.md) section 5 logic in code.
 
-COMMON GOTCHAS:
-- The runaway signature is **two** things: a repeated `(name, args)` pair **or** `termination ==
-  "max_steps"`. Checking only one misses cases; the lab's `atlantis_runaway` trips both.
-- `dict`s aren't hashable, so you can't put `args` in a `set` directly — hence
-  `tuple(sorted(args.items()))`. A student who tries `set(tool_calls(run))` will hit
-  `TypeError: unhashable type: 'dict'`. That error *is* the teaching moment.
-- Misreading "red when broken" — the runaway case should score **0/1** (fail), not 1/1. A check that
-  passes on the broken run tests nothing.
+## L0607_lab problem 3 — Build the decision table
 
-UNBLOCKERS:
-- "A regression case is defined by its behavior under the bug: it must **fail when the bug is present
-  and pass when it's fixed.**"
-- For the hashing snag: "make each call hashable first — `tuple(sorted(args.items()))` — then count
-  duplicates."
+- **Common gotchas:** an f-string formatting slip with the boolean columns (cast to `str` before
+  width-aligning); re-deriving the verdict by hand instead of calling `recommend(s)`.
+- **Unblockers:** "Loop the scenarios; print `recommend(s)` alongside the fields. Don't hand-judge —
+  call your function." Expected verdicts down the table: inline, MCP, inline, MCP.
+- **Time:** ~5 min.
 
-TIME: ~8 min (the hardest problem in this lab). STRETCH: add a `comment` reporting the termination
-cause and the number of tool calls, so a failing run explains itself.
+## L0607_lab problem 4 — The gradient: a tool gains a consumer (written)
 
-## L0903_lab problem 4
+- **Common gotchas:** treating the original `inline` verdict as permanent; not connecting the flip to
+  the consumer-count rule from Problem 2.
+- **Unblockers:** expected: with a second consumer, `consumers` goes 1 -> 2, so the single-consumer
+  guard no longer fires and (absent a tight loop) `recommend` flips to **MCP**. It's a *gradient*
+  because the right answer moves with the situation — many tools start inline and graduate to MCP when
+  reuse appears (lecture slide 5.4). The decision is revisited, not locked.
+- **Time:** ~4 min.
 
-**Task:** loosen the brittle check (`answer_correct_loose`, normalize commas/spaces) and answer the
-written question (a quality only a judge/human can score).
+## L0607_lab problem 5 — Push back on premature MCP (written)
 
-COMMON GOTCHAS:
-- The point is **not** to make the check pass by any means — it's the *loosest check that still
-  catches the bug*. Normalizing commas/spaces is right; switching to "always return True" is the
-  anti-lesson (it would stop catching real errors).
-- Normalize **both** sides (expected and `final_text`) before comparing, not just one.
-- The written answer should name a *genuinely* un-stringifiable quality: tone, "did it acknowledge
-  the failure gracefully," factual correctness beyond the reference answer. "Spelling" or "a longer
-  number" don't count — those are still string checks.
-
-UNBLOCKERS:
-- "Why did the correct run go red? Look at the punctuation in the answer." (the commas)
-- "What could you *never* express as a substring rule, no matter how clever?" → leads to the judge.
-
-TIME: ~6 min. STRETCH: this is exactly the quality `L0906_lecture` builds an LLM-judge for — point
-finishers there.
-
----
-
-## L0905_lab problem 1
-
-**Task:** run the weak model at `samples=5` and read the `no_runaway` pass *rate* (a fraction).
-
-COMMON GOTCHAS:
-- Leaving `samples` at its default of 1 — then the "rate" is only ever 0/1 or 1/1 and the assert
-  `0.0 < rate < 1.0` fails. They must pass `samples=5`.
-- Calling `report.pass_rate` with the wrong order of arguments — it's `pass_rate(case_id, key)`,
-  i.e. `report.pass_rate("hard_lookup", "no_runaway")`.
-- Expecting the *same* number every run. It is deterministic here (the simulator is seeded by
-  attempt count) and should read `3/5`; reassure students the real loop would jitter, which is the
-  whole reason to sample.
-
-UNBLOCKERS:
-- "One run is a coin flip. Run it 5 times and report how often it passed — that's `evaluate(...,
-  samples=5)` and then `report.pass_rate(...)`."
-
-TIME: ~5 min. STRETCH: re-run with `samples=20` and watch the rate stabilize; discuss the
-cost/confidence trade (the lead-in to `L0906`).
-
-## L0905_lab problem 2
-
-**Task:** build strong and weak reports and `compare(before, after)` to flag regressions.
-
-COMMON GOTCHAS:
-- Argument **order** to `compare`: `compare(before, after)` — strong (baseline) first, weak
-  (changed) second. Reversing them turns the regressions into "fixes" and the assert fails.
-- A regression is reported per **(case, scorer)** pair as a tuple, e.g. `("recover",
-  "answer_correct")` — students sometimes look for just the case id.
-- `compare` uses `min_rate=1.0` by default (must pass on *every* sample to count as passing). That's
-  intended — mention it if a student asks why a 4/5 case counts as failing.
-
-UNBLOCKERS:
-- "Baseline first, changed second. `compare` returns `.regressions` (pass→fail) and `.fixes`
-  (fail→pass)."
-
-TIME: ~6 min. STRETCH: frame it as a *prompt edit* instead of a model swap — build two strong-ish
-run_cases that differ slightly and compare them; same machinery, the regression-guard framing.
-
-## L0905_lab problem 3
-
-**Task:** print both tables and write why a single run can't be trusted.
-
-COMMON GOTCHAS:
-- This is a *reading/writing* problem — the code is provided. The written answer should make two
-  points: (1) the agent is non-deterministic, so one run is luck; (2) report a **pass rate over K
-  samples**, not a single pass/fail.
-- Watch for answers that say "run it again until it passes" — that's cherry-picking, the opposite of
-  the lesson.
-
-UNBLOCKERS:
-- "If your teammate had run it a second time, what might they have seen? What single number would
-  you trust instead?"
-
-TIME: ~4 min. STRETCH: ask what pass rate they'd require before calling a case "passing" for a
-release gate, and why that threshold is itself a judgment call.
+- **Common gotchas:** agreeing with the teammate because MCP "sounds professional" — exactly the trap
+  the lecture warns against.
+- **Unblockers:** expected one-liner: **complexity that buys nothing is just complexity; inline is the
+  right default until a second consumer appears.** Exposing every tool over MCP pays the full cost
+  ledger for tools that have no portability benefit to earn it back (lecture slide 5.4).
+- **Time:** ~3 min.
+- **Stretch (for fast finishers):** add a `consumers=2, tight_loop=True, needs_isolation=True` scenario
+  and have them predict the verdict *before* running it (isolation wins -> MCP), reinforcing the
+  rule-ordering point.

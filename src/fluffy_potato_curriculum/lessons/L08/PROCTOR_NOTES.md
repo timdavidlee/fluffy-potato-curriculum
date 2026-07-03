@@ -1,139 +1,176 @@
-# L08 Proctor Notes — Tracing
+# L08 Proctor Notes
 
-Covers both labs in this lesson: **L0803** (read traces, locate failures) and **L0805**
-(instrument and compare traces). Both labs are **pure Python, offline — no API key needed**;
-they drive the shared `agent_loop.run` with a scripted `FakeModel`, so every trace is
-deterministic. If a student's trace looks different from the solution, suspect an edited setup
-cell, not "the model did something else" — there is no live model here.
+Notes for whoever runs the L08 labs. One section per problem, keyed by lab id and problem number.
+Times are rough and assume a semi-technical student with basic Python who completed L01–L07.
 
-General unblockers that apply across the lesson:
+> Cross-cutting note: the four teacher demos (L0803 tool-or-no-tool / L0805 the description / L0807
+> schemas + validation errors / L0809 errors & side effects) make **live** Claude calls and need
+> `ANTHROPIC_API_KEY` set (copy `.env.example` to `.env`). Dry-run them before class — model
+> behavior **varies**, and several demos (L0805's sparse-vs-rich, L0809's retry) are *distributional*,
+> so run the named variants twice. Clear any API-touching cell outputs before committing.
+>
+> **All four L08 labs are OFFLINE / pure Python** — no API key required. L08 is about *design
+> judgment*, and you practice that by designing schemas, rewriting errors, and classifying tasks, not
+> by spending tokens. The labs map to the four subgoals: **L0804** → tool-or-no-tool; **L0806** →
+> name + schema design; **L0808** → error shapes; **L0810** → idempotency + side effects.
+>
+> **Why the demos use the raw Anthropic SDK and not `potato_llm`:** the course's `potato_llm` seam is
+> text-only — its `Message` cannot carry `tool_use`/`tool_result` blocks, which L08's demos need in
+> order to watch the model *choose* and *call* tools. So the L08 demo notebooks call the raw SDK
+> directly (the key still loads through `common.config`), exactly as L07 does. The labs don't touch
+> the SDK at all. (Open course question, same as L07: extend `potato_llm` to model tool blocks, or
+> keep L07+ demos on the raw SDK.)
+>
+> L08 assumes the L07 mechanics work. If a student is shaky on the tool-call round-trip, redirect to
+> the L07 lab before this lesson — L08 does **not** re-teach the protocol.
 
-- The shared code lives in `fluffy_potato_curriculum.common` (`agent_loop`, `tools`, `tracing`,
-  `fake_model`). If imports fail, the student is likely running a stale kernel or the wrong venv —
-  `Restart Kernel` and confirm they launched with `uv run jupyter lab`.
-- Remind students of the span vocabulary: `trace[0]` is the `chain` (run summary) span; each model
-  call is an `llm` span; each tool dispatch is a `tool` span. `.one_line()` is the quickest way to
-  eyeball any span.
-- The through-line of the whole lesson: **read the arguments** (`span.inputs`), not just the call
-  names. Most "I can't find the bug" moments end the second a student actually reads `inputs`.
+## L0504_lab problem 1 — Decide tool-or-not for each task
 
----
+- **Common gotchas:** picking *more than one* signal per task (the lab wants the single dominant one);
+  flipping T6 to a tool ("summarize" feels tool-ish, but the model does it well unaided — it's a
+  no-tool case); reading T5 as `model_knows` rather than `verify` (a subscription status must be
+  checked against the database, not recalled).
+- **Unblockers:** "Ask the worked test: does it depend on data the model can't have (T2), need precise
+  computation (T3), cause a side effect (T4), or need verification (T5)? If the model nails it cold
+  (T1, T6), no tool."
+- **Time:** ~7 min.
+- **Note:** there is real judgment room on borderline tasks; what matters is that the chosen *signal*
+  matches the chosen *decision* (Problem 2 checks exactly that).
 
-## L0803_lab problem 1
+## L0504_lab problem 2 — Check your signals are valid
 
-**Narrate the good run** — loop over the trace printing `span.one_line()`, then answer which span
-is the natural-termination point.
+- **Common gotchas:** checking the signal against the *wrong* family (a `tool: True` decision whose
+  signal is from `NO_TOOL` should fail); hard-coding `True` instead of looking the key up.
+- **Unblockers:** "If `decision['tool']` is True, the signal must be in `WARRANTED`; otherwise it must
+  be in `NO_TOOL`." All six should print `True` once Problem 1 is internally consistent.
+- **Time:** ~4 min.
+- **Key point:** this is a *consistency* check, not a correctness oracle — it catches a tool decision
+  paired with a no-tool reason, which is the most common slip.
 
-- COMMON GOTCHAS: Students point at the `chain` summary span (`trace[0]`) as "where it stopped."
-  The termination *decision* is the last **`llm`** span — the one whose `outputs["tool_calls"]` is
-  empty (the model emitted text, no tool). The `chain` span only *records* the outcome.
-- UNBLOCKERS: Have them print `run_type` next to each `one_line()` and find the last `llm` span.
-  Ask: "which span shows the model choosing *not* to call a tool?"
-- APPROX TIME: 5 minutes.
-- STRETCH: Reconstruct the `RunResult` summary (`final_text`, `iterations`, `termination`) from the
-  trace alone, then assert it matches the real `RunResult` — proving the summary is derivable.
+## L0504_lab problem 3 — Defend each call in one sentence
 
-## L0803_lab problem 2
+- **Common gotchas:** writing prose by hand instead of pulling the signal's description text;
+  forgetting the `Tool:` / `No tool:` prefix.
+- **Unblockers:** "Look up `WARRANTED[signal]` (or `NO_TOOL[signal]`) and wrap it: `f\"Tool:
+  {...}.\"`." The one-sentence defense *is* the deliverable — naming *why* is the skill.
+- **Time:** ~5 min.
 
-**Find the runaway** — detect the repeated tool call and assert `termination == "max_steps"`.
+## L0504_lab problem 4 — Why is 'more tools' usually worse? (written)
 
-- COMMON GOTCHAS: `span.inputs` is a `dict` and therefore unhashable — counting it directly raises
-  `TypeError`. They must key on `tuple(sorted(span.inputs.items()))`. Second gotcha: forgetting to
-  filter to `run_type == "tool"` first, so `llm`/`chain` spans pollute the count.
-- UNBLOCKERS: Suggest `collections.Counter` over the normalized `(name, tuple(sorted(items)))` key,
-  built only from tool spans. The repeated key with count 4 is the runaway.
-- APPROX TIME: 8–10 minutes (the unhashable-dict snag is the time sink).
-- STRETCH: Generalize to "flag any tool call that repeats with identical args ≥ 3 times" — the seed
-  of a loop-detection check, and a natural L09 eval case.
+- **Common gotchas:** "more tools = more capable" — the exact confusion the lecture corrects.
+- **Unblockers:** expected: each extra tool eats system-prompt tokens (L01 context cost), dilutes the
+  model's attention across a longer tool list, and adds another wrong-tool failure mode; a focused
+  5-tool set the model can navigate beats a 20-tool grab bag.
+- **Time:** ~4 min.
 
-## L0803_lab problem 3
+## L0506_lab problem 1 — Rewrite the description for the model
 
-**Spot the wrong argument** — read the `lookup` span's `inputs["city"]` and assert the looked-up
-city was not `"Tokyo"`; explain why a success flag wouldn't catch it.
+- **Common gotchas:** writing a code-comment-style description ("sets the priority field") instead of
+  one for the model's selection step; omitting the *when NOT to call* clause; not stating the return
+  shape. The `assert len(... .split()) >= 25` nudges past a one-liner.
+- **Unblockers:** "Answer four things: what it does, when to call, when NOT to call, what it returns —
+  and name the allowed levels with an example." The checks look for `ticket`, `low`, `high`, `return`;
+  wording is the student's.
+- **Time:** ~8 min.
+- **Key point:** the audience is the model, not a human reading the source.
 
-- COMMON GOTCHAS: Students look for an `error` or `is_error` and find none — the run is `natural`,
-  `error=None`, and *looks green*. The whole point: the call **succeeded** at answering the **wrong
-  question** (`{"city": "Paris"}`). The bug is visible only in the arguments.
-- UNBLOCKERS: "The tool returned successfully — so why is the answer wrong? Read what we asked it to
-  look up." Point them at the single `tool` span's `inputs`.
-- APPROX TIME: 5–7 minutes.
-- STRETCH: Write the assertion as a reusable check ("the answer about city X must have looked up
-  city X") and note it's an outcome-vs-trajectory check — foreshadowing L09.
+## L0506_lab problem 2 — Tighten the parameter schema
 
-## L0803_lab problem 4
+- **Common gotchas:** leaving `level` optional (it should be required); using a free string for `level`
+  instead of an `enum`; dropping the per-field descriptions (the rule of thumb: each carries an example
+  or a constraint).
+- **Unblockers:** "`required` = both fields; `level` gets `\"enum\": [\"low\", \"medium\", \"high\"]`;
+  every property gets a `description`."
+- **Time:** ~7 min.
 
-**Classify the signatures** — fill a markdown table mapping each failure trace to its signature name
-and the field that reveals it.
+## L0506_lab problem 3 — Validate sample arguments against your schema
 
-- COMMON GOTCHAS: `tool_error` and `runaway` both surface an `[is_error]` tool span, so students
-  conflate them. The distinguisher is `termination` (`natural` vs `max_steps`) plus the repetition,
-  not the error flag alone. `premature` has **zero** tool spans — students expect a tool error and
-  don't find one.
-- UNBLOCKERS: Build a tiny table together for one trace (signature, the field that proves it), then
-  let them fill the rest. The four tells: error field set (tool_error), wrong `inputs` on a green
-  run (wrong_args), repeated call + `max_steps` (runaway), `natural` with no tool span (premature).
-- APPROX TIME: 8 minutes.
-- STRETCH: For each signature, name the L09 eval case it would become ("a check that fails when the
-  bug is present") — these are literally next lesson's first cases.
+- **Common gotchas:** forgetting that `bool` is a subclass of `int` in Python (so `True` would pass an
+  `integer` check unless guarded); checking enum on fields that have none (use `if \"enum\" in spec`);
+  not handling the missing-required case before the type checks.
+- **Unblockers:** "Three passes: required keys present? each present value the right `type`? enum
+  members where an enum exists?" Expected: sample 1 `ok`, the other three each a distinct reason.
+- **Time:** ~9 min.
+- **Key point:** this tiny validator is the *shape* line of defense — it does not (and can't) check
+  whether a well-formed value is *true* (L0808/L0809's job).
 
----
+## L0506_lab problem 5 — Why an enum over a free string? (written)
 
-## L0805_lab problem 1
+- **Common gotchas:** "it's just type-checking" — misses that the enum also *teaches* the model the
+  value space.
+- **Unblockers:** expected: the enum shrinks the value space to three legal options the model can't
+  misfill, and turns an out-of-range guess into a recoverable validation error instead of a silent
+  bad write. (Problem is numbered 5 because Problem 4 is the written schema-tightening reflection folded
+  into Problem 2's discussion — keep the numbering as printed.)
+- **Time:** ~4 min.
 
-**Trajectory from a trace** — write `tool_trajectory(trace) -> list[tuple[str, dict]]` returning
-each tool span's `(name, inputs)`; assert it equals the expected sequence for the good run.
+## L0508_lab problem 1 — Rewrite the traceback as a structured error
 
-- COMMON GOTCHAS: Forgetting to filter to `run_type == "tool"` — including the `chain` and `llm`
-  spans makes the trajectory wrong and the assert fail. Type-hint drift (`list[tuple[str, dict]]`)
-  if they model it strictly.
-- UNBLOCKERS: "What's the *path* through the tools — just the tool spans, in order?" One list
-  comprehension filtered on `run_type == "tool"`.
-- APPROX TIME: 5 minutes.
-- STRETCH: Return inputs as a hashable, comparable form so two trajectories can be `==`-compared
-  directly (sets/tuples) — useful for Problem 2's diff.
+- **Common gotchas:** echoing the traceback text into `message` instead of writing an *actionable*
+  sentence; forgetting the `field` key; using `error=\"error\"` instead of the class `\"validation\"`.
+- **Unblockers:** "`{'error': 'validation', 'field': 'duration_minutes', 'message': 'must be an integer
+  between 15 and 240, got ...'}`. The message tells the model *which* field and *how* to fix it."
+- **Time:** ~7 min.
+- **Key point:** the error is a *prompt for the next turn*, not a debugger dump.
 
-## L0805_lab problem 2
+## L0508_lab problem 2 — Rewrite the missing-field error
 
-**Write `diff_traces(a, b)`** — compare two traces' tool trajectory, termination, and total tokens,
-and report the differences.
+- **Common gotchas:** classifying a missing required field as `unrecoverable` (it's `validation` — the
+  model can supply the field); leaving out the example email.
+- **Unblockers:** "Same shape as Problem 1: name `attendee_email`, say it's required, give the format
+  to supply."
+- **Time:** ~5 min.
 
-- COMMON GOTCHAS: Reading `termination` off the wrong span — it lives on the **`chain`** span's
-  `outputs["termination"]`, not the last `llm` span. Summing tokens without guarding `usage is None`
-  — `tool` and `chain` spans carry no `usage`, so `span.usage.total_tokens` raises `AttributeError`
-  on them; only sum over `llm` spans (or `if span.usage is not None`).
-- UNBLOCKERS: Give the three things to compare as a checklist: trajectory (Problem 1), termination
-  (chain span), total tokens (sum over llm spans). Build the return dict field by field.
-- APPROX TIME: 12–15 minutes (this is the core problem).
-- STRETCH: Add a per-span latency delta (`end_time - start_time`) and discuss why it's almost always
-  noise on this offline model — real latency only shows up against a live model.
+## L0508_lab problem 3 — Classify each error into one of three classes
 
-## L0805_lab problem 3
+- **Common gotchas:** marking `no_such_user` / `forbidden` as recoverable (they are *final* —
+  unrecoverable, stop retrying); marking `timeout` / `rate_limited` as validation (they're transient
+  recoverable runtime errors, not bad arguments).
+- **Unblockers:** "Bad arguments → validation. Transient (rate limit, timeout) → recoverable. Final
+  (no such entity, no permission) → unrecoverable." Expected: bad_duration/missing_field=validation,
+  rate_limited/timeout=recoverable, no_such_user/forbidden=unrecoverable.
+- **Time:** ~7 min.
 
-**Signal vs noise (written)** — apply `diff_traces` to the A/B pair and explain which difference is
-signal and which would be noise, and why one run can't prove a fix.
+## L0508_lab problem 4 — Which class should the model retry? (written)
 
-- COMMON GOTCHAS: Students label the **token delta** as "signal." On its own it's noise — the
-  meaningful change is `termination: max_steps → natural` (the runaway was fixed). The deeper point
-  they often miss: because the loop is non-deterministic, a *single* A-vs-B pair can't prove the
-  prompt edit caused the fix — you'd need several runs (the seed of L09's eval set).
-- UNBLOCKERS: Ask two questions: "Which difference would a user actually feel?" (the runaway) and
-  "If you re-ran B five times, are you sure it always terminates naturally?" (you're not — hence
-  eval).
-- APPROX TIME: 6–8 minutes.
-- STRETCH: Have them sketch how they'd turn this one comparison into a repeatable check run many
-  times — they're describing L09's eval harness before it's taught.
+- **Unblockers:** expected: validation → retry *with a fix* (correct the named field); recoverable →
+  retry *as-is* (the same call may succeed, ideally with runtime backoff); unrecoverable → *stop and
+  report* / route around — retrying just burns budget. The error *shape* is what lets the model pick.
+- **Time:** ~4 min.
 
-## L0805_lab problem 4
+## L0510_lab problem 1 — Tag each tool safe-or-unsafe to retry
 
-**A trace is data** — round-trip the good trace through `to_jsonl`/`from_jsonl` (or
-`write_jsonl`/`read_jsonl` to a `tmp` path) and assert equality.
+- **Common gotchas:** marking `upsert_contact` unsafe (it has a *stable key*, so a repeat is
+  idempotent — safe); marking `add_numbers` unsafe (pure computation, no side effect); treating
+  `create_ticket` as safe (no key → a second ticket each call).
+- **Unblockers:** "Read-only / pure / keyed-upsert → safe. Sending / charging / create-without-key →
+  unsafe." From the lecture's safe-vs-not table.
+- **Time:** ~6 min.
 
-- COMMON GOTCHAS: Comparing object identity instead of value, or forgetting to actually pass through
-  the string/file. `TraceEvent` is a Pydantic model, so `from_jsonl(to_jsonl(trace)) == trace` is
-  value-equal — but only if they round-trip, not just `trace == trace`. Path handling: use the
-  provided `tmp` path / `pathlib.Path`, not a hard-coded filename.
-- UNBLOCKERS: "Serialize to text, parse it back, compare the two lists." Point at `to_jsonl` →
-  `from_jsonl`. If using files, remind them `write_jsonl`/`read_jsonl` take a `Path`.
-- APPROX TIME: 5 minutes.
-- STRETCH: Open the `.jsonl` and read one line — it's one span as JSON. Connect to L0806: this is
-  exactly the shape Langfuse ingests (one observation per span).
+## L0510_lab problem 2 — Recommend a mitigation for each unsafe tool
+
+- **Common gotchas:** giving a mitigation to a *safe* tool (should be `none_needed`); inventing a
+  mitigation outside the three named ones.
+- **Unblockers:** "Pick one of `idempotency_key`, `confirmation_step`, `warn_in_description` per unsafe
+  tool — any defensible mapping. A high-stakes `charge_card` is a natural `confirmation_step`; a
+  `create_ticket` a natural `idempotency_key`."
+- **Time:** ~5 min.
+- **Note:** there is judgment room — accept any of the three so long as it's defensible for that tool.
+
+## L0510_lab problem 3 — Show a duplicate slips through without a key
+
+- **Common gotchas:** returning `None` instead of `len(sent)`; resetting the log between the two calls
+  (then it never shows the duplicate); deduping inside `send_email` (that would *be* a mitigation — the
+  point here is to show the unmitigated failure).
+- **Unblockers:** "Just append `(to, body)` and return `len(sent)`. Call it twice on the same `log`;
+  expect length 2." This mirrors the L0809 demo's OUTBOX growing to two entries.
+- **Time:** ~5 min.
+
+## L0510_lab problem 4 — Write the side-effect sentence (written)
+
+- **Common gotchas:** describing *what the tool returns* instead of *the side effect*; burying the
+  create in soft language ("may update records") instead of stating it plainly.
+- **Unblockers:** expected: something like *\"If the user does not exist, this tool will create one
+  with default settings — call only when a missing user should be auto-created.\"* Name the effect so
+  the model can reason about it before calling. Forward-link to L14 (approval gates).
+- **Time:** ~4 min.

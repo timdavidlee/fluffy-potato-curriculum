@@ -1,8 +1,10 @@
-# L04: Teacher-led demos — Tool calling: how it works
+# L04: Teacher-led demos — Explicit graphs & workflows in LangGraph (deterministic DAGs)
 
 > Sibling docs: [objectives.md](objectives.md) (what the lesson aims for), parent design [CURRICULUM_PRD.md](../../CURRICULUM_PRD.md).
 >
-> **Audience for this file:** the teacher running L04. Every demo below is *teacher-driven, no student participation*. Student-driven exercises live in the L04 labs (separate file).
+> **Audience for this file:** the teacher running L04. Every demo below is *teacher-driven, no student participation*. Student-driven exercises live in the L04 labs (separate file, stage 2).
+>
+> **Anchor model: Claude Sonnet 4.6** for the heavy reasoning nodes, **Claude Haiku 4.5** for the light nodes (classify / route / extract). **L04 deliberately mixes models per node** — that mixing is the point of objective 1's per-node binding, *not* an accident. **This is the course's first framework lesson:** nodes call the **native LangChain `ChatAnthropic`** client directly, *not* the hand-rolled `potato_llm` seam used in L01–L12. Call that departure out loud.
 
 ## How to read this file
 
@@ -11,163 +13,168 @@ Each demo is a self-contained block with:
 - **Goal** — the single insight the demo should land. Tied to a learning objective from [objectives.md](objectives.md).
 - **Pre-flight** — what the teacher needs loaded before class.
 - **Live script** — the order of operations during the demo. Treat it as a checklist, not a teleprompter.
-- **What to highlight** — the moment(s) where the teacher should slow down and call out the takeaway out loud.
-- **If the demo misbehaves** — graceful fallback for when the model surprises you (because it will).
+- **What to highlight** — the moment(s) where the teacher should slow down and say the takeaway out loud.
+- **If the demo misbehaves** — graceful fallback for when the model surprises you (it will).
 
-The demos are ordered to build the protocol from the inside out: Demo 1 shows what a tool call *is* (a block of tokens), Demo 2 wires a full round-trip end-to-end, Demo 3 slows down and traces that round-trip message by message, and Demo 4 breaks it on purpose to show the three observable outcomes. Run them in order on the first delivery — Demo 3 dissects the exact exchange Demo 2 produced, and Demo 4's failures only read as failures once Demos 2–3 have established what success looks like.
+The demos are ordered to match the four learning objectives from [objectives.md](objectives.md). Demo 1 builds a **prompt-chaining** workflow from scratch on `StateGraph` and lands "control flow as data" (objectives 1 & 3a); Demo 2 builds a **routing** workflow and uses it to show **per-node model mixing** (objectives 1, 2 & 3b); Demo 3 swaps the router's decider to **user input** and puts the two side by side (objectives 2 & 3c); Demo 4 names the **workflow-vs-agent** line as a single back-edge and points it forward to L14 (objective 4). The optional demo carries L12's eval discipline onto the workflow. They build on each other — Demos 2–4 reuse Demo 1's graph and the same support-ticket domain, never a fresh one. Run them in order on first delivery.
 
-This lesson is the first time the model is given the ability to *act*. The single most important thing every demo must reinforce — stated four different ways across the four demos — is that **the model never runs anything; it emits structured tokens and the application does the work.** If students leave with only one sentence, it should be that one.
+> **The spine of L04: graphs first, agency second.** L04 is the *first* LangGraph lesson and it deliberately builds a **workflow** (a developer-wired *acyclic* graph), not an agent. The model lives *inside* the nodes (classify, draft, summarize); the **developer owns the edges**. Keep saying "in a workflow you wire the flow; in an agent (L14) the model drives the flow." The single thing that separates this lesson from L14 is a **back-edge** — Demo 4 names it explicitly so L14 feels like one small step, not a new world.
 
 ## Pre-flight (once, at the top of the lesson)
 
 The teacher should have, before the first demo starts:
 
-- A working REPL or notebook with the project's Claude SDK setup (per the project's `uv` env).
-- A **demo harness** that wraps every model call and prints, for each turn: the full list of content blocks in the response (so a `text` block and a `tool_use` block are both visible side by side), the tool-use request (name + parsed arguments + the call/use id), the tool result handed back (with the id it answers), and per-call `input_tokens` / `output_tokens` / wall-clock time. This is the same wrapper described in [L03's demos](../L03/demos_or_activities.md) and extended again in [L05's demos](../L05/demos_or_activities.md) — here it must surface the *raw block structure* of a response, because the whole lesson is about seeing the tool-call block as tokens, not as a magic event.
-- One pre-built tool: a `calculator(expression: str) -> str` function that evaluates a simple arithmetic expression deterministically, plus its tool definition (name, description, JSON-Schema for the single `expression` argument). This one tool carries Demos 1–4 — resist adding more; L04 is deliberately a *single-tool* lesson (multi-tool selection is [L05](../L05/objectives.md), the agent loop over many calls is L07).
-- A way to display the tool definition (name, description, input schema) on screen next to the model's output, so the audience sees exactly what the model was handed.
-- A second model client for Demo 4's hallucination beat. **Primary model: Claude Sonnet 4.6** (the course anchor). **Cheap contrast: Claude Haiku 4.5** — a smaller model is more likely to fumble tool selection or arguments, which makes the "the application must validate" point land harder.
+- **LangGraph + the native LangChain Claude client ready.** `from langgraph.graph import StateGraph, END` and `from langchain_anthropic import ChatAnthropic`. Both `langgraph` and `langchain-anthropic` are already project dependencies (added via `uv add` in the L14 decision); no install during class. The API key still loads through `common/config.py` (`ChatAnthropic` reads `ANTHROPIC_API_KEY` from the same environment the config seam populates) — key handling is unchanged, only the *client* is the framework's now.
+- **Two model clients constructed and named:** `haiku = ChatAnthropic(model="claude-haiku-4-5-...")` for light nodes, `sonnet = ChatAnthropic(model="claude-sonnet-4-6-...")` for heavy nodes. Each node constructs/uses its own — that *is* objective 1's per-node binding. <!-- *NEED INPUT*: confirm exact model id strings for the Haiku 4.5 and Sonnet 4.6 snapshots used by ChatAnthropic, read from common/config.py rather than hard-coded in cells. -->
+- **The shared Langfuse callback handler wired up**, pointing at the *same* self-hosted Langfuse instance students met in L11 (LangChain/LangGraph callback handler; keys via `common/config.py`). The workflows run with this callback so their spans land in the dashboard students already know — "watch the workflow run" reuses an L11 skill, it is not new.
+- **A graph-diagram renderer ready** — LangGraph's `compiled_graph.get_graph().draw_mermaid_png()` (or the Mermaid text) — so "control flow as data" is *literally visible* (a decided beat: render each workflow's diagram once). <!-- *NEED INPUT*: confirm the diagram render path works in the demo environment (draw_mermaid_png needs a renderer; the Mermaid-text or ASCII fallback is fine if the PNG path is awkward to set up live). -->
+- **A small support-ticket dataset** for the running example (the decided domain): a handful of sample tickets that clearly fall into **billing / technical / general**, plus a short **policy snippet** the policy-check node checks a drafted reply against. <!-- *NEED INPUT*: confirm the exact sample tickets and the policy text. Recommendation: 3–4 tickets (one obviously billing, one technical, one general, one ambiguous to stress the classifier) and a 4–5 line refund/escalation policy for the policy-check node. Stage 2 ships these as a small fixture. -->
+- **Completed graph definitions in a sibling file** to paste if live-coding falls behind — the prompt-chaining graph (Demo 1), the routing graph (Demo 2), and the user-input-branching graph (Demo 3).
+- **`common/evals.py` importable** for the optional eval-the-workflow beat (the L12 harness — reused, not rebuilt).
 
-> Why pre-built and pre-loaded: L04 lives or dies on the audience seeing the *same* exchange slowly. If the teacher live-types a tool definition or a prompt mid-demo, the round-trip pacing breaks and the protocol reads as "some plumbing happened" instead of "here is each message, in order, and who produced it."
+> Why a support-ticket domain and not the L10/L11 tools: L04 is about graph *shape* (chaining, routing) and developer-owned control flow, which a parse→draft→check pipeline shows naturally; the `calculator`/`lookup` tools were about *tool calls*, which L04 deliberately defers to L14. (Stage 2 *may* call a plain Python helper inside a node, but **the model never chooses a tool in L04** — that is the workflow/agent line.)
 
-<!-- *NEED INPUT*: which API/SDK anchors the demos — this is the same open question raised in objectives.md (Anthropic Python SDK vs. OpenAI-style vs. generic-pseudocode-with-pinned-SDK). It propagates to the exact block names the harness prints (tool_use vs. function_call) and to how the round-trip is displayed. Pin once, course-wide, and reuse here. -->
+## Demo 1 — Prompt chaining: your first workflow graph (Objectives 1 & 3a)
 
-## Demo 1 — A tool call is just more tokens (Objective 3)
-
-**Goal:** show that a tool call is a *block of tokens the model emitted*, not an action the model took. Land the framing from [objectives.md](objectives.md): *tool calling is a protocol the model was trained to participate in, not a runtime capability.* This is the conceptual anchor for the whole lesson — run it first, before any working round-trip.
-
-**Pre-flight:**
-
-- The `calculator` tool definition loaded, but **no dispatch code wired up yet** — for this demo the teacher deliberately does *not* run the function. The point is to stop the moment the model emits the tool-call block and inspect it.
-- A prompt that should plausibly trigger the tool: *"What is 18,374 × 92,431?"* — arithmetic the model is unreliable at, so it has a real reason to reach for the calculator.
-
-**Live script:**
-
-1. First, run the prompt **with no tools registered at all.** The model answers directly — often with a confident, wrong number. Note it: this is the model doing what it has done in L01–L03, text in, text out.
-2. Now register the `calculator` tool definition and run the *exact same prompt*. Stop as soon as the response comes back — do **not** run the calculator.
-3. Print the raw response structure with the harness. Point at the `tool_use` block: it has a tool name (`calculator`), an arguments object (`{"expression": "18374 * 92431"}`), and a unique call/use id. Read each field aloud.
-4. Emphasize what just happened: nothing was computed. The model did not multiply anything. It emitted a block of tokens that *says* "I would like the calculator run with this expression." The number in the arguments came from the model's tokens, not from arithmetic.
-
-**What to highlight:**
-
-- The tool-call block is just more structured tokens — the same kind of shape-contract as the `<thinking>` / `<answer>` tags from [L03](../L03/objectives.md), except this time the surrounding application is expected to *act* on the shape. Reinforce that L03 framing explicitly; do not re-teach it.
-- Three actors exist, and only one of them has done anything so far: the **model** proposed a call, the **application** (us) has the block in hand and has not acted, the **tool** (the calculator function) has not run. Name all three now — the rest of the lesson fills in the remaining steps.
-- The decision to emit the tool call *instead of* answering directly is itself a reasoning step — the same kind of judgment from L03. Reinforce, don't re-teach: a vague tool the model can't tell when to use is a tool it will skip (forward-link to [L05](../L05/objectives.md)).
-
-**If the demo misbehaves:**
-
-- If the model answers the arithmetic directly *even with the tool registered* (skips the tool), that is a teaching gift, not a failure: it proves the schema is an *offer*, not a *command*. Show the response has only a `text` block and no `tool_use` block. Then make the prompt more obviously tool-shaped (*"Use the calculator to compute 18,374 × 92,431."*) and re-run to get the tool-call block. Name the contrast: the model chose.
-- If the model both answers in text *and* emits a tool call in the same response (a `text` block plus a `tool_use` block), lean in — that previews Demo 3's point that a single response can carry more than one block.
-
-## Demo 2 — One wired round-trip, end to end (Objective 1)
-
-**Goal:** complete the loop Demo 1 stopped halfway through: dispatch the tool call, run the real function, hand the result back, and get the model's final answer. Land the framing from [objectives.md](objectives.md): *wiring a tool is name → description → schema → dispatch → result → continue.*
+**Goal:** build a deterministic **prompt-chaining** workflow on `StateGraph` from scratch and land the headline framing — **a graph turns control flow into inspectable data, the model lives inside the nodes, and the developer owns the edges.** Land that an acyclic graph (no back-edge) is exactly what makes this a *workflow*, not an agent.
 
 **Pre-flight:**
 
-- The `calculator` tool from Demo 1, now with the dispatch code wired: read the `tool_use` block, check the tool name, pull the `expression` argument, call `calculator(...)`, capture the string result.
-- Reuse Demo 1's prompt (*"What is 18,374 × 92,431?"*) so students see the technique complete on something familiar.
+- An empty cell/file for the live build.
+- The support-ticket sample on the slide and a single ticket chosen to run end-to-end.
+- The pipeline shape on the board: **parse → draft → policy-check**, a fixed three-node chain.
 
 **Live script:**
 
-1. Recap Demo 1 in one line: the model emitted a `tool_use` block; last time we stopped here.
-2. Now run the dispatch: print the tool name the application matched on, the arguments it extracted, and the value `calculator(...)` returned. Show that *this* number is real — the function computed it.
-3. Build the next message: a user-role message carrying a `tool_result` block that references the same call/use id from the `tool_use` block and contains the function's output.
-4. Send the full conversation back to the model (original user message + the assistant's tool-use turn + the new tool-result turn). The model returns a final, natural-language answer that uses the real number.
-5. Put the wrong number from Demo 1, step 1 (model answering with no tool) next to the right number from the calculator. Same model, same question — the tool closed the accuracy gap.
+1. Sketch the chain on the board first: three boxes, two forward arrows, an entry and an `END`. Name it a **DAG** — every edge moves forward, no edge returns.
+2. Live-code the **typed state** schema (a `TypedDict` / annotated state) carrying the fields that flow between steps: the raw ticket, the parsed fields, the drafted reply, the policy verdict. Note the **reducer** idea in passing (a field is overwritten or, for accumulating fields, appended) — the *same* state/reducer machinery L14 will reuse for an agent's message history.
+3. Live-code the three **nodes** as plain typed functions, each reading state and returning an update:
+   - `parse` — calls **Haiku** (`ChatAnthropic`) to extract structured fields from the ticket (a light step).
+   - `draft` — calls **Sonnet** to write a reply (the heavy reasoning step).
+   - `policy_check` — checks the draft against the policy snippet (a Sonnet call, or a plain Python check).
+4. Wire it with the `StateGraph` builder: `add_node` ×3, `set_entry_point("parse")`, `add_edge("parse","draft")`, `add_edge("draft","policy_check")`, `add_edge("policy_check", END)`. **`compile()`**, then **`invoke()`** on the chosen ticket.
+5. **Render the compiled graph diagram** (`draw_mermaid_png`/Mermaid text) and put it next to the code — "this picture *is* the control flow, as data."
+6. Open the run in **Langfuse**: a linear chain of GENERATION spans, one per node, in order. Confirm the path was developer-determined.
 
 **What to highlight:**
 
-- Walk the five mechanical steps out loud as they happen: **name** the function, **describe** it, give it a **schema**, **dispatch** on the returned call, run the **result**, **continue** the conversation. This is the entire Objective-1 skill in one pass.
-- The application is the one that validated the arguments and ran the function. The model proposed; the application disposed. (Reinforce the Demo 1 framing — say it again, in these new words.)
-- The `tool_result` goes in a **user-role** message, not an assistant message. The application is speaking on the user's behalf. This surprises students and is worth pausing on — it sets up Demo 3's message-by-message trace.
+- **Control flow is now data.** Nodes and edges can be listed, drawn, and traced — unlike `if`/`while` buried in Python. Show the diagram and the trace as proof.
+- **The model lives *inside* the nodes; the developer owns the edges.** The model does the smart per-step work (parse, draft); *what runs next* is decided by the edges *you* wired. This is the contrast you'll repeat all lesson.
+- **First framework, native client.** Say the departure out loud: from L04 on, nodes call LangChain's `ChatAnthropic` directly, not the `potato_llm` seam from L01–L12 — "frameworks bring their own client abstraction."
+- **Why decompose into three prompts instead of one mega-prompt?** Smaller focused prompts are more reliable and individually testable; the cost is more calls (the L01 cost trade). Name it honestly: for a strictly linear chain the graph is near break-even — its payoff shows with branching, visualization, shared state, and tracing.
 
 **If the demo misbehaves:**
 
-- If the model, after receiving the tool result, calls the tool *again* instead of answering, don't fight it — name it: the model decided it needed another round-trip. L04 only promises a *single* round-trip; multi-step loops are [L07](../L07/objectives.md). Send the second result back manually to reach a final answer and move on.
-- If the calculator raises on a malformed expression, that is Demo 4's territory arriving early — note it, hand back a clean result for now, and promise the failure case is coming.
+- If live-coding the builder falls behind, paste the completed graph and walk it node by node — but keep the **`invoke()` run, the diagram, and the trace**, which is where "workflow" stops being abstract.
+- If a node's structured extraction is flaky, tighten its prompt to return a small structured shape (callback to L02 structured-output-by-instruction) — don't reach for tool calling, which is L14's territory.
 
-## Demo 3 — Trace the round-trip, message by message (Objective 2)
+## Demo 2 — Routing + mixed models: classify, then branch (Objectives 1, 2 & 3b)
 
-**Goal:** show that a single tool-using exchange is *at minimum four messages* in the conversation history, and that the call/use id is the thread tying request to result. Land the framing from [objectives.md](objectives.md): *every tool call grows the message history — that is the protocol, not a side effect.*
+**Goal:** build a **routing** workflow — an entry classifier labels the ticket and a **conditional edge** sends it down one of several specialized branches — and use it to show **each node can bind its own model** (cheap classifier on Haiku, capable branches on Sonnet). Land the critical L04-vs-L14 point: **the conditional edge branches on a model *classification result in state*, not on the model deciding to call a tool.**
 
 **Pre-flight:**
 
-- The completed exchange from Demo 2, captured so the full message list can be printed and walked slowly. No new model calls are required for this demo — it dissects the transcript Demo 2 already produced.
-- A simple on-screen diagram or four labeled boxes: `user → assistant(tool_use) → user(tool_result) → assistant(final)`.
+- Demo 1's state schema, extended with a `category` field.
+- The billing / technical / general branches sketched, each with its own focused prompt, converging to a single exit.
 
 **Live script:**
 
-1. Print the full conversation history from Demo 2 as an ordered list of messages, with each message's role and the *types* of blocks it contains.
-2. Walk the four messages in order, naming the role and the producer of each:
-   - **Message 1 — user:** the original question. Produced by the human.
-   - **Message 2 — assistant, `tool_use` block:** the model's request to call `calculator`. Produced by the model. Read off its call/use id.
-   - **Message 3 — user, `tool_result` block:** the calculator's output. Produced by the *application*, wearing the user role. Point at the call/use id — it matches Message 2.
-   - **Message 4 — assistant, `text` block:** the final answer. Produced by the model.
-3. Draw the id-matching arrow explicitly: the `tool_result` in Message 3 names the same id as the `tool_use` in Message 2. That id is how the application says "this result answers *that* request" — essential once there is more than one call in flight (forward-link to L07).
-4. Count it out: the user "asked once," but the history grew by four messages. Underline that every future tool call repeats this growth.
+1. Add a `classify` entry node that calls **Haiku** and writes a `category` label into state (billing / technical / general). Cheap model, because the job is just a label.
+2. Add three specialized branch nodes (`billing`, `technical`, `general`), each a **Sonnet** call with its own prompt. They converge to `END`.
+3. Wire the **conditional edge**: a routing function reads `state["category"]` and returns the matching branch name — `add_conditional_edges("classify", route_fn, {...})`. Say the line out loud: *the **classification result in state** picks the branch; re-running the same ticket takes the same path.*
+4. `compile()`, render the diagram (now it visibly **branches**), and `invoke()` on one ticket per category. Re-run the *same* ticket and show the path is identical — **deterministic**.
+5. Open **Langfuse**: the `classify` span shows **Haiku** (and its cost); the chosen branch span shows **Sonnet** (and its cost). Point at the two different models on two spans. A light cost/latency aside: the label step is cheap, the reasoning step is where the spend goes.
 
 **What to highlight:**
 
-- The conversation alternates assistant ↔ user even though one of those "users" is the application speaking for itself. The role labels are about *protocol position*, not about who is human.
-- The model is **stateless across calls** — Message 4's request had to include Messages 1–3 *and* the tool definition again. The model did not "remember" the tool from Message 2; the schema rode along in the prompt every time. This is the single most common student misconception; name it here.
-- Tools cost tokens **twice over**: the tool *definition* is re-sent on every request, and the tool *result* lives in the history for every subsequent turn. A 500-token tool definition across a 10-turn chat is ~5,000 input tokens before the tool is even called. Forward-link to [L09](../L09/objectives.md) (model power) and L17 (context management), which return to this cost.
+- **A conditional edge is *not* the model deciding** — in L04 the routing function branches on **state the developer set** (here a model *classification label*). In L14 the routing function branches on whether the **model asked for a tool**. Same mechanism, different decider — call out which it is *every time*.
+- **Each node can use its own model.** A node is an independent call, so a graph mixes models: Haiku where you need a label, Sonnet where you need quality. The trace makes it tangible — each span shows its own model and cost. This is the **mechanism** of mixed-model design.
+- **The *which-model* decision framework is L13's job, not L04's.** L04 shows only *that* you can mix and *how*; the capability/latency/cost axes and budgets ("small model for routing, capable for reasoning") are L13 (Choosing model power). In the mini cut L13 is dropped, so this is students' first and only mixed-model exposure — keep it light but make it land.
 
 **If the demo misbehaves:**
 
-- This demo replays a captured transcript, so it should not vary. If the teacher prefers a live re-run and the model produces a *different* number of messages (e.g. an extra round-trip), use the actual transcript — count whatever messages are really there and note that four is the *minimum*, not a fixed number.
+- If Haiku mis-classifies the ambiguous ticket, **keep it** — it's a perfect lead-in to the optional eval beat ("a deterministic workflow is trivially testable; let's measure the classifier") and a callback to L12. Don't paper over it.
+- If the trace doesn't show distinct models per span, check that each node constructed its own `ChatAnthropic(model=...)` rather than sharing one client — that *is* the per-node-binding lesson surfacing as a bug.
 
-## Demo 4 — Three outcomes, including a hallucinated call (Objective 2 + 3)
+## Demo 3 — Same graph, different decider: user-input branching (Objectives 2 & 3c)
 
-**Goal:** show the three observable outcomes of handing a model a tool — it calls the tool, it answers without the tool, or it calls the tool with malformed/hallucinated arguments — and show that the **application**, not the model, is responsible for catching the bad case. Land the framing from [objectives.md](objectives.md): *the schema is a contract about shape, not a guarantee about behavior.*
+**Goal:** take the routing graph's shape and swap the decider from a model classifier to **direct user input**, then put the two head to head. Land the purest form of "you wire the flow": **a conditional edge can route on a value the *user* supplied, with no model in the routing decision at all.**
 
 **Pre-flight:**
 
-- The same `calculator` tool. Three prompts prepared to elicit the three outcomes:
-  - **P1 — clean tool call:** *"What is 47,219 × 8,803?"* (arithmetic the model should defer to the tool).
-  - **P2 — answers without the tool:** *"What is 2 + 2?"* (trivial; the model answers directly and usually skips the tool — adding a tool to a task the model already owns is wasted overhead, a forward-link to [L05](../L05/objectives.md)'s "tool or no tool?" demo).
-  - **P3 — provoke a malformed call:** a prompt that nudges the model toward a bad argument — e.g. *"Use the calculator to work out the average of these: 12, 19, and 'twenty'."* The non-numeric token tends to produce a malformed `expression`. Have a backup prompt warmed up in case the model sanitizes the input cleanly.
-- The dispatch code from Demo 2, but with its validation step made **visible**: when the arguments fail to validate (or the function raises), the harness prints the rejection rather than crashing.
-- The Haiku 4.5 client ready, in case the primary model is too well-behaved to fumble P3.
+- Demo 2's routing graph.
+- A version where the branch is chosen by a `user_choice` field supplied in the **initial state** (a menu choice / structured selection), not by a `classify` node.
 
 **Live script:**
 
-1. Run **P1**. Outcome one: a clean `tool_use` block, valid arguments, a real result, a correct final answer. (A fast recap of Demos 1–2.)
-2. Run **P2**. Outcome two: the response has only a `text` block, no `tool_use`. The model judged the tool unnecessary. Note that a registered tool is an *option*, never an obligation.
-3. Run **P3**. Outcome three: the model emits a `tool_use` block whose arguments are malformed (a non-numeric expression, a missing field, or an invented argument name). Let the application's validation **catch and reject** it — show the rejection message the harness prints.
-4. If the primary model handles P3 cleanly, re-run P3 on **Haiku 4.5** to surface the fumble. Make the model-class contrast explicit: smaller models stress your validation harder.
-5. Optionally, hand the structured rejection back to the model as a tool-result-style error and show it can sometimes correct itself on the next turn — but keep this light; error-handling *design* is [L05](../L05/objectives.md), not L04.
+1. Show the change: replace the `classify` node with a `user_choice` value that arrives **as part of the initial state**, and a routing function that reads it directly — `if state["user_choice"] == "billing": return "billing"`. No model call in the routing decision.
+2. `invoke()` with different `user_choice` values and watch the deterministic branch each time.
+3. Put the **two graphs side by side**: Demo 2 (model-classifier routing) and Demo 3 (user-input routing). *Same graph shape, different decider* — the **user** chose the path here, the **model classification** chose it there. **Both are still workflows** because the developer wired every branch.
+4. Show a natural **combined** shape in one line: route on the user's choice *first*, then run a model-driven *node* inside the chosen branch — **user owns the edge, model works inside the node.**
 
 **What to highlight:**
 
-- The model can hallucinate a tool call: wrong argument types, missing required arguments, extra invented arguments, even a tool name that doesn't exist. The schema did *not* stop any of this at generation time — **the application validates; the model proposes.** Say it in exactly those terms.
-- Showing one hallucination is worth ten clean runs — it is the L04 analogue of L03's tag-violation moment, where a single contract failure taught that the contract is best-effort.
-- Tool calls are **not deterministic**: the same prompt and schema can produce a call on one run and a skip on the next, with slightly different arguments each time. This is why validation is not optional.
-- Resist going deep on *how* to design the error response or *how* to recover — name that as [L05](../L05/objectives.md)'s job (errors as part of the tool's interface) and move on.
+- **Routing can be driven by derived data, a model label, or a human choice** — and user input is the sharpest contrast with an agent: here the *user/developer* decides the path; in L14 the *model* does. Most real "AI workflows" mix model-classified routing with plain user-input routing.
+- **No model in the routing decision** is allowed and common — agency is about who controls the *path*, not whether a model is called somewhere in the graph.
+- **Forward pointer, one line, don't teach it:** the *interactive* version — a graph that **pauses to ask** the user and resumes on their answer — needs LangGraph's `interrupt` + a checkpointer and is **L17's** territory (human-in-the-loop). In L04 the user input arrives in the initial state, so the graph runs straight through.
 
 **If the demo misbehaves:**
 
-- If neither the primary nor the Haiku model produces a malformed call on the day, fall back to **hand-editing** the model's `tool_use` arguments before dispatch (e.g. replace the expression with `"twenty + 1"`) to force the validation path. The teaching point is the application's *response* to a bad call, which you can demonstrate regardless of whether the model cooperated in producing one.
-- If the model invents a tool name that doesn't exist, that is the best possible version of this demo — slow down and show the dispatch step finding no matching tool.
+- If students conflate "user-input branch" with "the agent asked the user," re-draw the side-by-side: in Demo 3 the value is *already in state* before the run; nothing is asked mid-run. The asking-mid-run version is L17.
 
-## Optional bridge demo — toward designing good tools (L05)
+## Demo 4 — Workflow vs. agent: the line is a single back-edge (Objective 4)
 
-If time allows, run one final demo that previews [L05](../L05/objectives.md): take the `calculator` tool and swap its rich description for a deliberately vague one (e.g. `"Does math."`), changing nothing else. Re-run Demo 4's P1 prompt and show the model now hesitates, skips the tool, or calls it with worse arguments. Don't teach *how* to write a good description here — just show that the description visibly moved the model's behavior, and name the question L05 will answer: *what makes a tool worth adding, well-named, and well-described?* This mirrors the bridge demo L03 used to set up L04, and the one [L05](../L05/demos_or_activities.md) uses to set up L06.
+**Goal:** make the **workflow-vs-agent** distinction crisp and concrete, and point it forward to L14 with surgical precision: **everything built in L04 carries into L14 unchanged; L14 adds exactly one thing — a conditional edge that loops back to the model.** That single back-edge is the line between the two lessons.
 
-<!-- *NEED INPUT*: include this bridge demo, or save it as the opener for L05? Mirrors the same open question on the L03→L04 and L05→L06 bridges. -->
+**Pre-flight:**
+
+- One of the compiled workflows from Demos 1–2, with its rendered (acyclic) diagram.
+- A **sketch** (not a live build) of the L14 shallow-agent shape: an `agent` node, a `tools` node, and a conditional edge out of `agent` that loops back to `tools` or exits.
+
+**Live script:**
+
+1. Put the L04 workflow diagram up: trace any path with your finger — every arrow goes forward, it always reaches `END`. Name it: **DAG, acyclic, developer-wired = workflow.**
+2. Now draw **one new edge** on top of the sketch: a conditional edge out of the model node that routes *back* into the loop (call a tool) or to `END` (finish). That back-edge hands the *model* control of the path.
+3. State the distinction verbatim (it reappears in L14): a **workflow** is a graph whose path is fixed or chosen by *developer logic* (acyclic, predictable, model inside nodes); an **agent** is a graph whose path is chosen by the *model*, via a **cycle** that loops model → tools → model until the model stops. That cyclic loop is exactly L10's hand-rolled loop, and L14's shallow agent.
+4. Reason about **when to use which**: prefer a **workflow** when the task has a known shape — predictable, cheaper, lower-latency, far easier to test and trace; reach for an **agent** only when the steps can't be known in advance and the model genuinely needs to decide its own path. Name the common failure mode out loud: **reaching for an agent when a workflow would do** (more cost, less predictability, harder to debug).
+
+**What to highlight:**
+
+- **The workflow→agent line is one back-edge.** Don't let it feel like a new world — L14 keeps nodes, edges, typed state, reducers, compile/invoke, and the Langfuse hookup *unchanged*, and adds only the cycle. Framing it this way is the whole reason L04 comes first.
+- **Determinism is a feature, not a limitation.** Most production "AI features" are workflows, not agents. Choosing the simplest shape that solves the task — usually a workflow — *is* the engineering skill.
+- Do **not** build the agent here. Building the cycle is **L14's** lesson; L04 only *names* the back-edge. (L04 and L14 intentionally overlap on the primitives so each stands alone — but the cyclic agent belongs to L14.)
+
+**If the demo misbehaves:**
+
+- This demo is mostly diagram + discussion, so little can flake. If a student insists "but the classifier *is* the model deciding," reach back to Demo 2's highlight: the model produced a *label in state*; the developer's routing function read that label and chose the edge. The model didn't choose the edge — and it never loops.
+
+## Optional demo — evaluate the workflow (carry L12 forward)
+
+If time allows, close by reinforcing L12's discipline on the cheapest possible target. A deterministic workflow is the *easiest* thing to evaluate — **same input → same path** — so a tiny eval set over the routing classifier is a natural, honest reinforcement of "evaluate everything you build."
+
+1. Import the L12 harness from `common/evals.py` (reused, **not** rebuilt — recall it in one line; don't re-teach eval design).
+2. Write ~3–4 `EvalCase`s over the `classify` node: a labeled ticket in, the expected `category` out. Run `evaluate(...)` and read the pass rate.
+3. Land two things: workflows are **trivially testable** (which is half the reason to prefer them), and L12's rule — *when you build or change something, you evaluate it* — applies to workflows just as much as agents. This is the same eval set students will carry onto the **L14** LangGraph agent next lesson.
+
+Don't re-teach eval mechanics here — that's L12. Just show the harness *pointing at a workflow* so the carry-forward habit stays visible.
+
+<!-- *NEED INPUT*: include this eval beat in the lecture, or hold it for the L04 lab? Recommendation: keep it as a short optional closer — it reinforces L12 cheaply and sets up L14's "same eval set, new implementation" beat. -->
 
 ## Pacing notes for the teacher
 
-- **Per-demo time:** 8–12 minutes including post-demo discussion. Four demos plus the optional bridge fits in a 50–70 minute block. <!-- *NEED INPUT*: confirm against the lesson-time budget once duration is pinned in objectives.md's open questions (best guess there is 60–90 minutes, possibly split into two lectures). -->
-- **Variance budget:** model behavior varies run-to-run — especially Demo 4, where the whole point is that the same prompt can produce different outcomes. Budget at least one re-run per demo. Demo 3 replays a captured transcript and should not vary.
-- **The audience watches, doesn't participate.** Resist asking "what arguments do you think it'll pass?" — that is a lab pattern, not a demo pattern. Hands-on wiring is for the L04 labs.
-- **Keep the same `calculator` tool across all four demos.** One tool, seen four times under different conditions, is what makes the protocol legible. Don't introduce a second tool for variety — that dilutes the single-round-trip focus and strays into L05/L07 territory.
+- **Per-demo time:** Demo 1 is the long one (18–25 minutes including the live `StateGraph` build + diagram + trace). Demo 2 is 12–18 (routing + per-node models). Demo 3 is 8–12 (the decider swap + side-by-side). Demo 4 is 8–12 (diagram + discussion, no build). Optional eval beat is 5–8. Total ~50–75 minutes plus discussion — fits the **~75–100 minute** single lecture pinned in [objectives.md](objectives.md). If it runs long, split at the Demo 2/3 boundary: "graph primitives + prompt chaining" then "routing (incl. user-input branching + per-node models) + workflow-vs-agent."
+- **Live-coding budget:** only Demo 1's chain and Demo 2's routing additions need live-coding. Demo 3 is a small edit to Demo 2; Demo 4 is diagram + talk. Do **not** re-derive the `StateGraph` builder in each demo — reuse Demo 1's.
+- **Determinism is the point, but the *model inside nodes* still varies:** a node's Claude call is non-deterministic even though the *path* is fixed. Budget a re-run where a node's output quality matters (the draft, the classification label); the **path** will be stable, which is exactly the lesson.
+- **The audience watches, doesn't participate.** Resist "what node should run next?" as a group question — that's a lab pattern. Hands-on graph-building and the user-input-vs-classifier comparison are for the L04 labs.
 
 ## Open authoring questions
 
-- <!-- *NEED INPUT*: which API/SDK anchors the demos and labs (Anthropic Python SDK, OpenAI-style, or generic-pseudocode-with-pinned-SDK)? Mirrors objectives.md's open question — this drives the exact block names the harness prints (tool_use vs. function_call) and must be pinned once, course-wide. -->
-- <!-- *NEED INPUT*: which model class anchors the labs and demos — Sonnet 4.6 is the assumed primary with Haiku 4.5 as the Demo 4 contrast, mirroring objectives.md. Smaller models fumble tool selection and arguments more, which sharpens Demos 1 and 4; confirm once the course-wide model choice is settled. -->
-- <!-- *NEED INPUT*: should the demo tool be a pure-Python calculator (current choice — keeps the focus on the protocol) or a real external service (weather, time-of-day) that teaches failure modes earlier at the cost of flakiness? Mirrors objectives.md's open question. -->
-- <!-- *NEED INPUT*: include tool_choice / forced-tool-call mechanics in a Demo 4 sub-step, or defer entirely to L05? objectives.md leans "brief mention here, deeper in L05" — if mentioned, the natural spot is right after P2 (the model skipping the tool), showing that forcing a call still does not guarantee well-formed arguments. -->
-- <!-- *NEED INPUT*: are the demos run in a Jupyter notebook the teacher projects, or a slide-embedded REPL, or a custom demo runner? Affects how the harness and the single tool are pre-loaded. Mirrors the same question in the L03 and L05 demo docs. -->
-- <!-- *NEED INPUT*: a pointer/link to where the demo tool and harness live as code (a demos/ subdir? inline in a notebook?) — not yet decided in non-draft docs. -->
+Most of L04's big decisions are already pinned in [objectives.md](objectives.md) (native `ChatAnthropic` not the seam; Haiku-light/Sonnet-heavy per-node mixing as *mechanism only*, with the decision framework deferred to L13; the support-ticket domain; Langfuse tracing via the L11 instance; render-the-diagram-once; user-input branching in the initial-state form with `interrupt`/checkpointer deferred to L17; parallel branches as a forward-pointer mention only; the intentional L04↔L14 primitives overlap). The remaining open items are stage-2 mechanics:
+
+- <!-- *NEED INPUT*: exact model id strings for the Haiku 4.5 and Sonnet 4.6 snapshots, read from common/config.py rather than hard-coded in cells. -->
+- <!-- *NEED INPUT*: the sample support tickets (3–4, including one ambiguous to stress the classifier) and the policy snippet for the policy-check node, shipped as a fixture. -->
+- <!-- *NEED INPUT*: confirm the graph-diagram render path (draw_mermaid_png vs Mermaid text vs ASCII) works in the demo environment. -->
+- <!-- *NEED INPUT*: per-node model assignment in the chaining demo — recommended parse=Haiku, draft=Sonnet, policy_check=Sonnet (or a plain Python check); confirm in stage 2. -->
+- <!-- *NEED INPUT*: the user_choice shape in Demo 3 (a menu string / structured selection) and the combined "user picks branch, model works inside node" example. -->
+- <!-- *NEED INPUT*: are the demos run in a projected Jupyter notebook, a slide-embedded REPL, or a demo-runner script? Mirrors the same open question in L10's and L12's demos. -->
+- <!-- *NEED INPUT*: include the optional eval-the-workflow beat in the lecture or hold it for the lab? Recommendation: short optional closer (reinforces L12, sets up L14). -->

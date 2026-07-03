@@ -14,7 +14,7 @@ live-by-default — notebooks make real calls through the
 
 - **One shared budget** the instructor funds, not N individual billing accounts.
 - **Per-student usage visibility** — who spent what.
-- **Per-student spend caps** — a runaway loop (cf. L07's `max_steps`) shouldn't drain the pool.
+- **Per-student spend caps** — a runaway loop (cf. L10's `max_steps`) shouldn't drain the pool.
 - **No change to what students import** — the lesson code keeps using `PotatoLLMClient`.
 
 ## The key distinction
@@ -39,7 +39,7 @@ The Anthropic Console supports **Workspaces**: create separate API keys with per
 and pull per-key cost/usage from the Admin API (or the Console usage/cost dashboard).
 
 - ✅ First-party; **no third party in the request path**; no surcharge.
-- ✅ Stays on the native Anthropic Messages API, so it doesn't disturb the L04+ "we call Claude's
+- ✅ Stays on the native Anthropic Messages API, so it doesn't disturb the L07+ "we call Claude's
   native API" framing.
 - ✅ Plugs into the config seam as a per-student key (and optionally an org/workspace).
 - ⚠️ Per-student keys are an admin task (provision/rotate per cohort).
@@ -66,7 +66,7 @@ OpenRouter is an OpenAI-format gateway across many providers, with per-key usage
 - ✅ **BYOK ("bring your own key")** mode: attach your own Anthropic key and have OpenRouter route
   through it while recording usage — the literal *"track calls against a shared Anthropic API."*
 - ⚠️ **OpenAI-format gateway.** It binds to the project's `openai_client.py` (base-url swap), **not**
-  the Anthropic-SDK `anthropic_client.py` — which quietly undercuts the L04+ native-Messages-API
+  the Anthropic-SDK `anthropic_client.py` — which quietly undercuts the L07+ native-Messages-API
   framing.
 - ⚠️ **BYOK surcharge.** OpenRouter takes a percentage fee on BYOK requests. <!-- *NEED INPUT*: verify current OpenRouter BYOK surcharge % before relying on it; figure changes over time. -->
 - ⚠️ Reintroduces the OpenRouter dependency the course already chose to avoid for the provider
@@ -98,7 +98,7 @@ For *"let a class share one Anthropic budget with per-student visibility and cap
 
 ## Tracing / observability — DECIDED: self-hosted Langfuse
 
-Separate from the *budget/spend* concern above: from **L08 (Tracing)** onward, students view agent
+Separate from the *budget/spend* concern above: from **L11 (Tracing)** onward, students view agent
 runs in a real observability dashboard. **Decision: self-hosted [Langfuse](https://langfuse.com)**
 (open-source, MIT) is the course's tracing tool.
 
@@ -110,15 +110,15 @@ runs in a real observability dashboard. **Decision: self-hosted [Langfuse](https
   per account (no shared free workspace).
 - **Free cloud fallback** (Langfuse Cloud *Hobby*: 50k units/mo, 2 seats, 30-day retention, no card)
   for solo/self-paced learners who don't want to run Docker.
-- **Ingests OpenTelemetry (OTLP)** — the L08 hand-rolled `TraceEvent` schema is OTel-shaped on
+- **Ingests OpenTelemetry (OTLP)** — the L11 hand-rolled `TraceEvent` schema is OTel-shaped on
   purpose, so exporting to Langfuse is a natural step, not a rewrite.
-- **Same instance serves L12** — the LangGraph agent's traces route to the *same* Langfuse via the
+- **Same instance serves L14** — the LangGraph agent's traces route to the *same* Langfuse via the
   LangChain/LangGraph Langfuse callback handler, so framework traces land next to hand-rolled ones.
 
 **How it plugs in:** Langfuse keys/URL load through [`common/config.py`](../src/fluffy_potato_curriculum/common/config.py)
 (same seam as the model key), never hard-coded. The `langfuse` SDK is a project dependency (added
 via `uv add`). Tracing export is **additive** — a student without the instance configured still
-completes the L08 objectives on the in-memory/`.to_jsonl()` trace.
+completes the L11 objectives on the in-memory/`.to_jsonl()` trace.
 
 **Infra to stand up (one shared instance):** Langfuse server + **PostgreSQL** + **ClickHouse**
 (via the official Docker Compose). The instructor hosts it; students get a URL and project keys.
@@ -127,7 +127,7 @@ completes the L08 objectives on the in-memory/`.to_jsonl()` trace.
 > pricing gates. Self-hosting only lacks enterprise extras (SCIM, audit logs, retention policies),
 > none of which a classroom needs. Worth re-checking the license terms before a cohort starts.
 
-The trade-off accepted: **LangSmith** integrates with LangGraph (L12) zero-config, but its free tier
+The trade-off accepted: **LangSmith** integrates with LangGraph (L14) zero-config, but its free tier
 can't be a shared cohort instance. We chose Langfuse's open-source/self-host model over that
 convenience.
 
@@ -145,6 +145,6 @@ convenience.
 
 - Provider abstraction decision (hand-rolled `PotatoLLMClient`, not LangChain/OpenRouter).
 - Live-demos + config seam (`common/config.py`) — the integration point for all options above.
-- L12 roadmap open question on reconciling LangGraph's own client with the `potato_llm` seam —
+- L14 roadmap open question on reconciling LangGraph's own client with the `potato_llm` seam —
   a related "framework brings its own client" tension, tracked in
-  [`docs/origin/lesson_roadmaps/L12/objectives.md`](origin/lesson_roadmaps/L12/objectives.md).
+  [`docs/origin/lesson_roadmaps/L14/objectives.md`](origin/lesson_roadmaps/L14/objectives.md).

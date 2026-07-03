@@ -1,59 +1,104 @@
-# L09 intro: Evaluation — first pass
+# MCP: same tool, new packaging
 
 ```yaml
-title: "L09 intro: Evaluation — first pass"
-keywords: evaluation, eval set, eval case, scorer, runner, pass rate, regression, ratchet, agent, trace
+title: "MCP: same tool, new packaging"
+keywords: mcp, model context protocol, portable tool contract, tool spec, discovery, transport, stdio, client, server, inline tool, packaging
 estimated duration: 10
 ```
 
-> **Lesson:** L09 — Evaluation: first pass.
-> **Roadmap:** [objectives.md](../../../../docs/origin/lesson_roadmaps/L09/objectives.md) · [demos_or_activities.md](../../../../docs/origin/lesson_roadmaps/L09/demos_or_activities.md)
-> **Read in order:** this intro → `L0902_lecture` (build the harness: case / scorer / runner) → `L0903_lab` → `L0904_lecture` (non-determinism → pass rate, and a model A/B) → `L0905_lab` → `L0906_lecture` (eval cost + the scorer spectrum) → `L0907_lecture` (carry it forward).
-> **Anchor model: Claude Sonnet 4.6**, with **Haiku 4.5 as the contrast** in the model A/B. Every notebook runs **offline with no API key** (the scripted `FakeModel` from L08); the live Sonnet-vs-Haiku A/B and the live LLM-judge are clearly-marked optional cells.
+> **Lesson:** L09 — MCP: packaging tools as a portable contract.
+> **Roadmap:** see this lesson's [objectives.md](../../../../docs/origin/lesson_roadmaps/L09/objectives.md).
+> This is a short framing piece. Read it before the written reference lecture
+> ([L0602_lecture.md](L0602_lecture.md)), the offline spec-translation demo
+> ([L0603_lecture.ipynb](L0603_lecture.ipynb)), the connect-to-a-server slide outline
+> ([L0605_lecture.md](L0605_lecture.md)), and the build-a-server walkthrough
+> ([L0606_lecture.ipynb](L0606_lecture.ipynb)).
+> **Anchor model throughout: Claude Sonnet 4.6** (same anchor as [L07](../L07/L0401_intro.md) / [L08](../L08/L0501_intro.md)).
 
 ## Where this lesson sits
 
-In [L08](../L08/L0801_intro.md) you learned to *read* what your agent did: you instrumented the L07 loop so `run(...)` returns a `RunResult` carrying a **trace** — an ordered list of `TraceEvent` spans — and you read that trace to reconstruct a run, locate a failure, and eyeball-diff two runs of the same task. L08's framing was **"produce the record."** L09 is the turn from *observation* to *judgment*:
+[L07](../L07/objectives.md) taught the **mechanics** of a tool call — the `tool_use` / `tool_result`
+round-trip, who runs what, and why the application validates. [L08](../L08/objectives.md) taught the
+**design** of a good tool — naming, descriptions written for the model's eyes, tight schemas,
+informative errors, named side effects. In both lessons the tool was a Python function living inside
+**one process**: your code registered it, your code ran it when the model asked.
 
-> **L08 produces the record; L09 judges it.** Tracing tells you *what happened* on one run. Evaluation tells you *whether it was good* — and, crucially, whether it is *still* good after you change something.
+L09 changes exactly **one thing**: the *packaging*. The tool's implementation is still a Python
+function with the same name, description, schema, and error shape. But now it sits behind a standard
+wire protocol — the **Model Context Protocol (MCP)** — so the *same* tool can be discovered and called
+by *any* MCP-compatible client without rewiring. A custom Python agent, an IDE plugin, and Claude
+Desktop can all talk to one MCP server.
 
-The headline move is to stop asking "did this one run look right?" (the L08 eyeball diff) and start asking **"do my agent's runs pass a fixed set of cases I defined in advance?"** That fixed set of cases, plus a way to score them, is an **eval set**. It turns L08's ad-hoc failure-spotting into a repeatable practice.
+This is the first lesson where you cross a process boundary on purpose. That move is a feature (the
+tool can crash, upgrade, or run with different permissions independently of the agent) and a tax (an
+extra process to run, a transport to keep healthy, failures that can now happen on either side).
 
-## The one idea, said three ways
+## The one idea, said five ways
 
-- **Good eval cases come from real failures, not imagination.** The traces you captured in L08 are the source of your cases. The loop is plain: **trace a failure → write a case that catches it → keep the case forever.** A case grown from an observed failure stays relevant; one invented up front tends to test the wrong thing.
-- **An eval set is a ratchet against regressions.** Its real payoff isn't the first green run — it's catching the day a prompt tweak or a model swap silently breaks something that used to work. Without the ratchet you rediscover the bug in production weeks later; with it you catch it before shipping.
-- **You measure rates, not verdicts.** The agent loop is non-deterministic (L08's "variance budget"). One green run can be luck. The cheapest honest answer is a **pass rate** over a few samples — and a flaky case is itself a *finding*, not noise to ignore.
+If you remember nothing else from L09, remember this: **MCP changes where the tool lives and how it is
+reached — not how it should be designed.** Said five ways, because students keep expecting MCP to do
+more (or less) than it does:
 
-## What you'll be able to do
+1. MCP is a **protocol, not a framework**. It specifies how a client and server *talk* about tools.
+   It does not prescribe an SDK, a language, or a hosting model. Any process that speaks the protocol
+   on a supported transport is a valid MCP server.
+2. **The L08 design lessons carry over wholesale.** A bad name, weak description, or loose schema is
+   just as bad over MCP as inline. MCP makes a *well-designed* tool portable; it does not rescue a
+   badly designed one.
+3. **Discovery is the new capability.** With an inline tool, the agent author knows what tools exist
+   at code-write time. With MCP, the client *asks* the server at connect time: "what tools do you
+   expose?" The server's published tool list becomes an external API the server author owns.
+4. **The model can't tell the difference.** From the model's seat, an MCP tool call is the same
+   `tool_use` / `tool_result` round-trip as [L07](../L07/objectives.md). MCP is invisible to the
+   model — it shows up only in the *client's* implementation and the *operator's* config.
+5. **MCP earns its overhead when a second consumer appears.** One agent, one tool, one place — inline
+   wins. The moment a different agent, team, or app wants the same tool, MCP's portability starts
+   paying for its tax.
 
-By the end of L09 you can:
+## Vocabulary this lesson lands
 
-1. **Build a minimal eval set** for the hand-rolled loop — a **case** (input + what "good" means), a **scorer** (turns one run into a verdict), and a **runner** (runs every case and reports a summary) — and score the **answer**, the **path** (trajectory), or both.
-2. **Design regression cases** that target failure modes you saw in L08 traces — each a check that *fails when the bug is present and passes when it's fixed*.
-3. **Compare two runs** of the same task to flag regressions — and confront non-determinism by moving from a single pass/fail to a **pass rate** over K samples.
-4. **Reason about eval cost** — back-of-envelope *and* off the real token numbers in a trace — and place each scorer on the **cost/judgment spectrum**: exact assertion → fuzzy check → LLM-as-judge → human review.
-5. **Carry the practice forward:** when you build or change an agent, you add or run an eval set. The harness you build here lives in `common/evals.py` and is the seed every later agent plugs into.
+These terms recur whenever tools are packaged for reuse:
 
-## The vocabulary this lesson fixes
+- **MCP (Model Context Protocol)** — an open protocol for a *client* and a *server* to talk about
+  tools (and, beyond this lesson's scope, resources and prompts).
+- **MCP server** — a process that *exposes* one or more tools over the protocol. Can be a 50-line
+  Python script, not necessarily a microservice.
+- **MCP client** — the agent or app that *connects* to a server, discovers its tools, and routes the
+  model's tool calls to it.
+- **Tool spec** — the on-the-wire description of a tool a server publishes: `name`, `description`,
+  `inputSchema`. This is the [L08](../L08/objectives.md) design surface, serialized.
+- **Discovery** — the handshake where a client asks a server for its tool list at connect time.
+- **Transport** — *how* the bytes move between client and server. **stdio** (server is a child
+  process the client launches and pipes to) and **HTTP/SSE** (server is a separate networked process)
+  are the two you'll meet.
 
-Use these terms verbatim — they line up with real eval platforms (LangSmith's *Example / Evaluator / `evaluate()`*, Langfuse's *dataset item / score*), so they transfer if you adopt a tool later:
+## A note on the code you'll see (read this carefully)
 
-- **Eval set** — a fixed collection of cases plus the machinery to run and score them. The unit of "is my agent good, and is it still good?"
-- **Case** (`EvalCase`) — one input the agent runs on (`inputs`), paired with what "good" means (`reference_outputs`: an expected answer, an expected trajectory, or both).
-- **Scorer / check** (`Scorer`) — a function `(*, run, example) -> EvalResult` that turns one run into a verdict (`key`, `score`, `comment`).
-- **Runner** (`evaluate`) — runs every case (optionally K times), applies the scorers, and reports a per-case **pass rate**.
-- **Regression** — a case that used to pass and now fails after a change. The thing an eval set exists to catch.
-- **Outcome vs. trajectory** — checking the *final answer* (`run.final_text`) vs. checking the *path* through the trace (`run.trace`). For agents, the path often matters as much as the answer.
+The official Python **`mcp` package is not installed in this course environment**, and we do not add
+it. That has a deliberate consequence for how L09 is built:
 
-## A note on the code you'll see
+- The **offline** material — the spec-translation demo ([L0903](L0603_lecture.ipynb)) and all three
+  labs ([L0904](L0604_lab_empty.ipynb), [L0907](L0607_lab_empty.ipynb), and the validator lab) — uses
+  **only the Python standard library** (`json`, `dataclasses`). It runs here, deterministically, with
+  no API key and no `mcp` package. These labs work directly with the *tool spec* — the JSON shape that
+  crosses the wire — which is the part of MCP you most need to understand.
+- The material that genuinely needs a live MCP connection — **connecting to an existing server**
+  ([L0905](L0605_lecture.md), a slide outline) and **building your own server**
+  ([L0906](L0606_lecture.ipynb), a code walkthrough) — shows the real code but is **marked
+  NOT-RUNNABLE without the `mcp` package**. You read it to see the wire shape and the server skeleton;
+  you do not execute it in this environment. (If your local environment installs `mcp`, the code is
+  written to run — but that is outside the course's pinned env.)
 
-The eval harness is the new shared module `fluffy_potato_curriculum.common.evals` — `EvalCase`, the `Scorer` protocol, `EvalResult`, and the `evaluate(...)` runner. It sits alongside L07's `common/agent_loop.py` (`run()` → `RunResult`), L08's `common/tracing.py` (`TraceEvent`), and `common/tools.py` (`calculator`, `lookup`, `flaky_fetch`). You'll *read* the harness end-to-end — it's about thirty lines of plain Python, not a framework. The labs drive the loop with the scripted `FakeModel`, so an eval run is deterministic and keyless.
+This split is intentional. The conceptual core of MCP — *a well-designed tool, serialized to a
+portable spec, discovered and called across a process boundary* — is fully teachable offline. The live
+connection is a demonstration of a thing you already understand on paper.
 
-## This is a first pass, on purpose
+The one sentence to leave L09 with:
 
-L09 is a tiny, readable harness over the hand-rolled loop — **not** a production eval system. That smallness is deliberate: the goal is to make the *habit* cheap enough to keep. [L23 (Evaluation revisited)](../../../../docs/origin/CURRICULUM_PRD.md) — outside the mini cut — scales the same discipline to multi-step graphs, retrieval quality (precision@k / recall@k), LLM-as-judge done properly, and multi-agent systems. Knowing where the first pass stops is part of the lesson.
+> *MCP takes a tool you already know how to design and serializes it to a portable spec, so any client
+> that speaks the protocol can discover and call it — the design is unchanged; only the packaging and
+> the boundary are new.*
 
-## The takeaway
-
-Tracing without evaluation tells you *what happened*; evaluation without tracing tells you *that something is wrong but not where*. They are a pair, and tracing came first because you cannot evaluate a run you cannot read. The failures you found in L08 traces are your first eval cases — bring them.
+Next: the written reference lecture in [L0602_lecture.md](L0602_lecture.md), then the offline
+spec-translation demo ([L0903](L0603_lecture.ipynb)) and the connect/build walkthroughs
+([L0905](L0605_lecture.md) / [L0906](L0606_lecture.ipynb)).

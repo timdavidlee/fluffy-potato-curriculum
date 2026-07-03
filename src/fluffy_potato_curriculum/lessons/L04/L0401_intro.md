@@ -1,115 +1,76 @@
-# Tool calling: a tool call is also just tokens
+# Workflows before agents: you wire the flow, the model works inside the nodes
 
 ```yaml
-title: Tool calling: a tool call is also just tokens
-keywords: tool calling, tool use, tool_use, tool_result, tool definition, schema, round-trip, protocol, anthropic, claude
+title: "Workflows before agents: you wire the flow, the model works inside the nodes"
+keywords: langgraph, workflow, agent, dag, directed acyclic graph, stategraph, node, edge, conditional edge, state, reducer, prompt chaining, routing, control flow as data, chatanthropic
 estimated duration: 10
 ```
 
-> **Lesson:** L04 — Tool calling: how it works.
+> **Lesson:** L04 — Explicit graphs & workflows in LangGraph (deterministic DAGs).
 > **Roadmap:** see this lesson's [objectives.md](../../../../docs/origin/lesson_roadmaps/L04/objectives.md).
 > This is a short framing piece. Read it before the written reference lecture
-> ([L0402_lecture.md](L0402_lecture.md)) and the four teacher demo notebooks
-> (a-tool-call-is-tokens [L0403_lecture.ipynb](L0403_lecture.ipynb), one-wired-round-trip
-> [L0404_lecture.ipynb](L0404_lecture.ipynb), trace-the-round-trip [L0406_lecture.ipynb](L0406_lecture.ipynb),
-> three-outcomes [L0408_lecture.ipynb](L0408_lecture.ipynb)).
-> **Anchor model throughout: Claude Sonnet 4.6** (Claude Haiku 4.5 is the smaller-model contrast in the last demo).
+> ([L1102_lecture.md](L1102_lecture.md)) and the two teacher demo notebooks
+> (prompt chaining [L1103_lecture.ipynb](L1103_lecture.ipynb), routing + user-input branching
+> [L1105_lecture.ipynb](L1105_lecture.ipynb)), with the workflow-vs-agent wrap-up in
+> [L1107_lecture.md](L1107_lecture.md). Hands-on practice is in the L04 labs (L0404, L0406).
+> **Anchor model: Claude Sonnet 4.6** for the heavy reasoning nodes, **Claude Haiku 4.5** for the
+> light nodes (classify / route / extract). L04 deliberately *mixes* models per node.
 
 ## Where this lesson sits
 
-L01–L03 covered everything a model can do that is purely *text-in, text-out*: tokenization and
-cost (L01), prompting roles and structured output (L02), and getting the model to reason better
-by changing the *content* of the prompt (L03). In every one of those lessons the model only ever
-produced text, and your program read that text. Nothing the model said ever *ran*.
+This is the course's **first LangGraph lesson**, and it deliberately does *not* build an agent.
+Up to here you have written control flow as plain Python: a single call (L01–L06), a single tool
+round-trip (L07–L08), and in L10 a hand-rolled **model → tool → model loop** whose path your own
+Python `while`/`if` decided. L04 introduces LangGraph by building a **workflow** — a fixed,
+**directed acyclic graph (DAG)** of explicit nodes where *you* wire the path and the model never
+decides what runs next. L14 then takes the *same* primitives and adds the one thing that turns a
+workflow into an agent: a cycle.
 
-L04 is the first lesson where the model is given the ability to **act** — to request that your
-application run a function and feed the result back. This is the bedrock of every agent in the
-rest of the course. But the framing from L03 carries over almost word for word:
-
-> *Reasoning is just more tokens. A `<thinking>` block is a contract about **shape**, not a new
-> capability.*
-
-becomes, in L04:
-
-> *A tool call is also just more tokens. A tool definition is a contract about **shape**, not a new
-> capability — and the model never runs anything; your application does.*
-
-That last clause is the single most important sentence in the lesson. Keep it in mind through
-every demo and lab.
+That ordering is the whole point. "Learn a graph framework" and "let the model drive its own
+process" are **two** hard ideas. Teaching the deterministic workflow first means that when L14
+hands the model control of the path, you will see *exactly* what changed — an acyclic graph gained
+a back-edge — instead of meeting graphs and agency fused into one intimidating thing.
 
 ## The one idea, said five ways
 
-If you remember nothing else from L04, remember this: **the model does not run your tool.** It
-emits a block of tokens that — by training — has the *shape* of a tool-call request. Your
-application reads those tokens, decides what to do, runs the real function, and hands the result
-back. Said five ways, because it reshapes how you debug, secure, and scale every agent later:
+If you remember nothing else from L04, remember this: **in a workflow, the model lives *inside*
+the nodes; the developer owns the edges.** The model still does the smart per-step work — classify
+a ticket, draft a reply, summarize — but *what runs next* is decided by code you wrote, not by the
+model. Said five ways, because it is the line between this lesson and the next:
 
-1. The model **proposes**; the application **disposes**. A tool call is a request, not an
-   execution.
-2. The tool **definition** is a contract about shape (like L03's `<thinking>` tags), not a
-   guarantee about behavior. It does not force a call, validate arguments, or stop the model from
-   inventing a tool that doesn't exist.
-3. A single tool-using exchange is **at minimum four messages**: `user → assistant(tool_use) →
-   user(tool_result) → assistant(final)`. Every tool call grows the history — that *is* the
-   protocol, not a side effect.
-4. The model is **stateless across calls**. The tool definitions and the full history ride along
-   in *every* request; the model does not "remember" the tool from last turn.
-5. Tools cost tokens **twice over**: the definition is re-sent on every request, and the result
-   lives in the history forever after.
+1. A **workflow** runs through predefined paths *you* laid out. An **agent** lets the *model*
+   direct its own process — choosing tools and looping until it decides it's done. (This is the
+   industry distinction from Anthropic's *Building Effective Agents*.)
+2. LangGraph expresses **both**. A graph is just wired nodes; it is an *agent* only when the
+   **model** drives the path. L04's graphs are **workflows**.
+3. A **conditional edge is not the model deciding.** In L04 a routing function branches on
+   **state you set** — derived data, a model *classification label*, or **direct user input**.
+   In L14 it branches on whether the model asked for a tool. Same mechanism, different decider.
+4. **Determinism is a feature, not a limitation.** A workflow takes the same path on the same
+   input: predictable, cheaper, lower-latency, and trivially testable. Most production "AI
+   features" are workflows, not agents.
+5. **The workflow → agent line is a single back-edge.** Everything you build here carries into
+   L14 unchanged; the only addition is a conditional edge that loops back to the model.
 
 ## Vocabulary this lesson lands
 
-These five terms recur all the way through L05–L18, so we pin them now:
+You will leave L04 able to define each of these — and they all reappear, unchanged, in L14:
 
-- **Tool** — a callable in your application (here, a plain Python function) that the model can
-  *request* via the tool-call protocol.
-- **Tool definition / schema** — a structured description (name, natural-language description,
-  JSON-Schema input shape) you pass to the model alongside the prompt. It tells the model what
-  tools exist and how to invoke them.
-- **Tool call** (also *tool-use block*) — the block in a model response saying "I want to call
-  tool X with arguments Y." A request, not an execution.
-- **Tool result** (also *tool-result block*) — the block in the *next* user-side message carrying
-  the output of running the requested tool. It closes the loop and references the call's id.
-- **Round-trip** — one full `model → tool-call → application runs tool → tool-result → model`
-  exchange. L04 deals only with *single* round-trips; multi-step loops arrive in L07.
+- **Graph** — a task expressed as nodes connected by edges, compiled into a runnable.
+- **Node** — a typed function that reads state and returns a state update; may call the model
+  (`ChatAnthropic`) internally, and **each node may bind its own model**.
+- **Edge** — a fixed transition (`A → B`, always).
+- **Conditional edge** — a routing function reads **state** and returns the next node's name.
+- **State** — the shared, typed object threaded through every node.
+- **Reducer** — the rule that merges a node's returned update into state per field.
+- **DAG (directed acyclic graph)** — a graph with no back-edges; the defining shape of a workflow.
+- **Workflow vs. agent** — workflow = developer wires the (acyclic) path; agent = the model drives
+  the (cyclic) path. The lesson's headline contrast.
 
-## What L04 deliberately does *not* do
+## A note on the client: first framework, native client
 
-L04 is scoped tight on purpose, the same way L03 stayed prompt-only:
-
-- **One tool, one round-trip.** Every demo and lab uses a single `calculator` tool and a single
-  model→tool→model exchange. Multi-tool *selection* and tool-error *design* are **L05**; an agent
-  loop over many calls is **L07**. Resisting "just one more tool" is what keeps the protocol legible.
-- **Mechanics, not judgment.** L04's job is to make the protocol mechanically obvious — to let you
-  *build* a tool-using exchange that works. **L05 ("Designing good tools")** asks the design
-  questions: should this be a tool at all, what should it be named, what should the schema look
-  like, how should it report failure? We share vocabulary with L05 exactly so you don't relearn
-  terms.
-
-## A note on the code you'll see
-
-There is one wrinkle worth flagging up front. The course's `potato_llm` seam (the provider-agnostic
-client you used in L02–L03) is **text-only** — its `Message` carries a string and cannot represent
-tool-use or tool-result blocks. Because L04 is *about* those blocks, the L04 demos and the live labs
-reach **under** the seam and call the raw Anthropic SDK directly:
-
-```python
-import anthropic
-from fluffy_potato_curriculum.common.config import require_anthropic_key
-
-client = anthropic.Anthropic(api_key=require_anthropic_key())
-resp = client.messages.create(model="claude-sonnet-4-6", max_tokens=512, tools=[...], messages=[...])
-```
-
-This is the one lesson that legitimately bypasses `potato_llm`. The key still loads through the
-config seam (`require_anthropic_key`) — we never hard-code it. Two of the labs are **offline pure
-Python** (no key needed): they hand you a *crafted* `tool_use` block to dispatch on and validate, so
-you can practice the mechanics deterministically.
-
-The one sentence to leave L04 with:
-
-> *A tool call is a block of tokens the model emitted; your application is the one that reads it,
-> runs the function, and hands the result back — and that exchange is always at least four messages.*
-
-Next: the written reference lecture in [L0402_lecture.md](L0402_lecture.md), then the live demos
-(L0403 / L0404 / L0408) and the hands-on labs (L0405 / L0407 / L0409).
+L01–L12 talked to the model through the hand-rolled `potato_llm` seam, so swapping providers was a
+one-line change. From L04 on, the course **reaches for a framework**, and frameworks bring their
+own client abstraction. So inside graph nodes we call LangChain's **`ChatAnthropic`** directly,
+not `potato_llm`. The API key still loads through the same `common/config.py` seam — only the
+*client* is the framework's now. Watch for that departure called out in the first demo.

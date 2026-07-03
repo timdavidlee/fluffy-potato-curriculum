@@ -1,8 +1,10 @@
-# L05: Teacher-led demos — Designing good tools
+# L05: Teacher-led demos — Conditional graphs (routing & branching)
 
 > Sibling docs: [objectives.md](objectives.md) (what the lesson aims for), parent design [CURRICULUM_PRD.md](../../CURRICULUM_PRD.md).
 >
-> **Audience for this file:** the teacher running L05. Every demo below is *teacher-driven, no student participation*. Student-driven exercises live in the L05 labs (separate file).
+> **Audience for this file:** the teacher running L05. Every demo below is *teacher-driven, no student participation*. Student-driven exercises live in the L05 labs (separate file, stage 2).
+>
+> **Anchor model: Claude Sonnet 4.6** for the specialized branch nodes, **Claude Haiku 4.5** for the entry classifier/router node — the same per-node mixing mechanism L04 already demonstrated; this file reuses it rather than re-explaining it. **Client: native LangChain `ChatAnthropic`**, same as L04 — the "frameworks bring their own client" departure was already made and called out there; no need to re-make the point here beyond a one-line recall.
 
 ## How to read this file
 
@@ -11,174 +13,172 @@ Each demo is a self-contained block with:
 - **Goal** — the single insight the demo should land. Tied to a learning objective from [objectives.md](objectives.md).
 - **Pre-flight** — what the teacher needs loaded before class.
 - **Live script** — the order of operations during the demo. Treat it as a checklist, not a teleprompter.
-- **What to highlight** — the moment(s) where the teacher should slow down and call out the takeaway out loud.
-- **If the demo misbehaves** — graceful fallback for when the model surprises you (because it will).
+- **What to highlight** — the moment(s) where the teacher should slow down and say the takeaway out loud.
+- **If the demo misbehaves** — graceful fallback for when the model surprises you (it will).
 
-The demos are ordered to match the four learning objectives from [objectives.md](objectives.md). Demo 4 (idempotency / side effects) builds on Demo 3 (errors), so run the sequence in order on the first delivery of the lesson.
+The demos are ordered to match L05's four learning objectives. Demo 1 introduces the **conditional edge** itself, tracing one value from a node's write to a branch decision (objective 1). Demo 2 builds the full **router/switch** — classifier entry node fanning out to specialized branches, including the ambiguous/fallback case (objective 2). Demo 3 swaps the router's decider to **direct user input** and puts the two deciders side by side (objective 3). Demo 4 is the **closing argument** of the workflow-vs-agent arc, naming precisely what L14 will change (objective 4). An optional demo carries L04's eval-the-workflow habit onto the router. **They build on each other** — Demos 2–4 reuse Demo 1's graph skeleton and the same running-example domain, never a fresh one. Run them in order on first delivery.
+
+> **This lesson expands, not repeats, three demos already sketched in [L04's demos file](../L04/demos_or_activities.md).** L04's Demo 2 (routing + mixed models), Demo 3 (user-input branching), and Demo 4 (workflow-vs-agent line) covered this ground at the depth a shared lesson could afford. L05 owns this material outright now — each demo below goes deeper (the fallback-branch case, the side-by-side decider comparison, the precise L14 delta) than L04's versions had room for. **L05's Demo 0 (sequential chaining) does not exist** — that content stays in L04; this file opens directly on the conditional edge and assumes students walk in already able to build a fixed-edge `StateGraph`.
+
+> **The spine of L05: one new primitive, pressure-tested from every angle.** Everything except the conditional edge is L04, reused without re-teaching. Keep saying "the routing function decides — and the routing function is *your* code, reading state *you* control." The lesson's payoff is Demo 4: naming exactly what L14 changes, so nothing about the agent lesson comes as a surprise.
 
 ## Pre-flight (once, at the top of the lesson)
 
 The teacher should have, before the first demo starts:
 
-- A working REPL or notebook with the project's Claude SDK setup (per the project's `uv` env).
-- A small **demo harness** that wraps every model call to print: the model's tool-use request (name + arguments), the tool result (or error) handed back, the next model turn, and per-call `input_tokens` / `output_tokens` / wall-clock time. This is the same kind of wrapper used in [L03's demos](../L03/demos_or_activities.md), extended to also surface the tool call/result pair. Without this wrapper, the L05 demos read as "the model did something" instead of "the model picked *this* tool with *these* arguments because of *that* description."
-- All four demo tools below pre-implemented as Python functions, registered with the SDK, and ready to swap in/out by name. Each demo intentionally swaps the *same* tool's description, schema, or error shape — *not* the implementation — so the contrast lands cleanly.
-- A second tool registry pre-loaded with the **bad-design variants** (cryptic name, sparse description, loose schema, opaque errors). The teacher should be able to flip between "good" and "bad" registries with a single line.
-- A way to display the active tool's full schema (name, description, parameter list with descriptions) on screen alongside the model's output — so the audience sees what the model is reading when it decides to call the tool.
+- **LangGraph + the native LangChain Claude client ready**, exactly as in L04: `from langgraph.graph import StateGraph, END` and `from langchain_anthropic import ChatAnthropic`. No re-introduction needed — one line of recall ("same client as last lesson") is enough.
+- **Two model clients constructed and named:** `haiku = ChatAnthropic(model="claude-haiku-4-5-...")` for the classifier/router entry node, `sonnet = ChatAnthropic(model="claude-sonnet-4-6-...")` for the specialized branch nodes. <!-- *NEED INPUT*: confirm exact model id strings for the Haiku 4.5 and Sonnet 4.6 snapshots used by ChatAnthropic, read from common/config.py rather than hard-coded in cells — same open item as L04's demos file; resolve once, reuse in both. -->
+- **A completed L04-style sequential graph on hand, uninstantiated** (not rebuilt live) — just enough to point at and say "this is where we left off: fixed edges only." Used for a 30-second recall at the top of Demo 1, not a rebuild.
+- <!-- *NEED INPUT*: running-example domain — this file assumes continuation of L04's support-ticket domain (billing / technical / general categories, a short policy snippet), matching the recommendation flagged in objectives.md. If a different domain is chosen in stage 2, every demo below needs its sample inputs swapped, but the demo *structure* (classify → branch → converge; then swap decider; then close the arc) does not change. -->
+- **A small support-ticket dataset**, reused/extended from L04's fixture: at minimum one clearly-billing, one clearly-technical, one clearly-general, and **one deliberately ambiguous** ticket that a Haiku classifier is likely to mis-label or split a coin flip on — the ambiguous one is load-bearing for Demo 2's fallback-branch teaching moment, don't skip it. <!-- *NEED INPUT*: confirm the exact sample tickets (recommend reusing L04's fixture and adding one more ambiguous ticket if L04's set doesn't already stress the classifier hard enough). Stage 2 ships these as a shared fixture between L04 and L05. -->
+- **A `user_choice` version of the same tickets** — the same requests, but expressed as a structured menu selection a user would pick (e.g. a dropdown value `"billing" | "technical" | "general"`) rather than free text a model must classify. Used in Demo 3. <!-- *NEED INPUT*: confirm the exact user_choice shape (a plain string enum is the simplest; confirm no richer structure is wanted for the demo). -->
+- **A lightweight run-inspection fallback ready, not Langfuse.** L05, like L04, is before L11 (tracing) — don't depend on the shared Langfuse instance. The simplest fallback: print the `category` (or `user_choice`) value and the node names visited after each `invoke()`, or use LangGraph's own stream/debug output (`.stream(...)` with node-name events) to show the path taken. Whatever is chosen, it needs to make "which branch ran" visible without a dashboard. <!-- *NEED INPUT*: confirm the exact fallback (print-the-path vs. `.stream()` node events vs. a minimal Mermaid diagram highlight) — same open question raised in objectives.md's Prerequisites section; resolve once for the whole lesson. -->
+- **A graph-diagram renderer ready**, same as L04 (`compiled_graph.get_graph().draw_mermaid_png()` or Mermaid text) — reused for Demo 1 and Demo 3's side-by-side, not re-explained.
+- **Completed graph definitions in a sibling file** to paste if live-coding falls behind — the router graph (Demo 2) and the user-input-branching variant (Demo 3).
+- **`common/evals.py` importable** for the optional eval-the-router beat.
 
-> Why pre-built variants: L05 lives or dies on contrast — same task, same model, *different tool design*, different model behavior. Editing tool descriptions live during the demo eats time and breaks pacing. Have the variants ready.
+> Why continuing the support-ticket domain (pending confirmation above): L05 is about the conditional edge, not about learning a new domain from scratch — reusing L04's tickets means the *only* new thing on screen is the branch, exactly matching the lesson's narrow scope. If stage 2 picks a different domain, keep this same "everything held constant except the branch" design principle when re-picking sample data.
 
-<!-- *NEED INPUT*: which model class anchors the demos — the "description quality" and "schema design" demos land more sharply on a smaller model where the design errors bite harder. Best guess Sonnet 4.6 as the primary, with one Demo 2 re-run on Haiku 4.5 to show the gap widens. Pin once the course-wide model choice is settled in CURRICULUM_PRD. -->
+## Demo 1 — The conditional edge: from state write to branch decision (Objective 1)
 
-## Demo 1 — Tool or no tool? (Objective 1)
-
-**Goal:** show that the same task can be answered model-alone or with a tool, and that the right call depends on the kind of question. Land the framing from [objectives.md](objectives.md): *tool design starts with the decision to add a tool at all.*
-
-**Pre-flight:**
-
-- Three task prompts pre-loaded:
-  - **Task A — model has it cold:** a general-knowledge question the model nails zero-shot (e.g. *"What is the capital of France?"*). Adding a tool here is pure overhead.
-  - **Task B — model can't have it:** a question that depends on data the model can't have memorized (e.g. *"What is the current time in Tokyo?"* or *"What's the weather in Seattle right now?"*). The model has no choice but to guess or refuse without a tool.
-  - **Task C — borderline:** an arithmetic problem at the edge of model reliability (e.g. *"What's 18,374 × 92,431?"* or *"How many days between 1987-03-12 and 2024-11-04?"*). The model often produces a wrong answer with confidence — exactly the case where a tool is warranted even though the model *will* attempt it.
-- A single `calculator(expression: str) -> str` tool and a single `current_time(tz: str) -> str` tool, both with clean designs. Save the design walkthrough for Demo 2 — here the tools are just props.
-
-**Live script:**
-
-1. Run Task A model-alone. Note: instant, free, correct. Run Task A *with* the calculator tool registered. The model usually answers without calling the tool — point that out (good model, no tool needed). If it does call the tool, the result is the same answer at higher cost.
-2. Run Task B model-alone. The model either refuses, hedges ("I don't have access to real-time data"), or hallucinates a time. Run Task B with `current_time` registered. The model calls the tool, gets the real answer, returns it.
-3. Run Task C model-alone three times. Show the answers — often inconsistent across runs, sometimes wrong. Run Task C with `calculator` registered. The model calls the tool, gets a deterministic right answer.
-
-**What to highlight:**
-
-- The four "tool warranted" signals from [objectives.md](objectives.md) — data the model can't memorize (B), precise computation it's bad at (C), side effects (not in this demo, foreshadow), verification against ground truth (foreshadow Demo 4). Name the signals as they appear.
-- The "no tool needed" cases (A): adding a tool to a task the model already handles wastes round-trips and tokens, and gives the model a wrong-tool option to pick by mistake.
-- Task C is the subtle one: the model *will* answer without the tool, and confidently. The tool isn't there to fill a gap the model knows about — it's there to fill a gap the *designer* knows about.
-
-**If the demo misbehaves:**
-
-- If the model nails Task C zero-shot on the day, swap to a harder arithmetic problem (more digits) or a date-math problem with a leap year. Have one in reserve.
-- If the model on Task A insists on calling the calculator anyway, lean into it: this previews the "tool soup" failure mode in Demo 2 — too many tools, too eager a hand.
-
-## Demo 2 — The description is the tool (Objective 2)
-
-**Goal:** show that the same tool, with the same name and schema, behaves differently depending on the description the model reads. Land the framing from [objectives.md](objectives.md): *the description is the model's only training signal at inference time for when to use the tool.*
+**Goal:** introduce the **conditional edge** as the one new primitive this lesson adds, and trace a single value all the way from *a node writing it* to *a routing function reading it* to *the branch that executes*. Land the vocabulary: routing function, decider, `add_conditional_edges`.
 
 **Pre-flight:**
 
-- One tool implementation: `lookup_user(query: str) -> dict` that returns user records from a tiny in-memory dict (3–5 fake users keyed by both email and username).
-- Three description variants of the same tool:
-  - **Sparse:** `"Looks up a user."` — no guidance on when to call, what `query` accepts, what comes back.
-  - **Rich:** a 3–5 sentence description that names the tool's purpose, lists the accepted query formats with examples (`"e.g. 'tim@example.com' (email) or 'tim_lee' (username)"`), states the return shape, and names when *not* to call the tool (e.g. "do not call this if the user has not been mentioned by name in the conversation — ask the user instead").
-  - **Misleading:** a description that overstates the tool's capabilities (e.g. *"Looks up any information about any user — email, billing, preferences, history."*) when the implementation only returns a name and email. This previews how a description-implementation mismatch produces hard-to-debug failures.
-- Two test prompts:
-  - **Prompt P1:** *"Find me the email for the user named Alex."* — straightforward case, all three descriptions should produce a tool call.
-  - **Prompt P2:** *"Tell me about our users."* — ambiguous case. Sparse description: model often calls the tool with garbage queries. Rich description: model usually asks for clarification or refuses. Misleading description: model calls the tool expecting rich data and is then confused by the thin response.
+- The completed L04 sequential graph on screen (not live-built) — point at it, don't rebuild it.
+- One support ticket chosen to run through, plus its expected category.
 
 **Live script:**
 
-1. Show all three descriptions side-by-side on screen. Read them aloud. Ask the audience (rhetorically) to predict which produces the best tool use.
-2. Run P1 with the sparse description. Note tool args and result.
-3. Run P1 with the rich description. Note: usually tool args are formatted more precisely (e.g. uses the example format from the description).
-4. Run P2 with each description in turn. Show how model behavior diverges — sparse leads to bad arguments, rich leads to clarification or refusal, misleading leads to confused follow-up.
-5. Run P1 once with the misleading description, then immediately follow up with: *"Now show me their billing history."* The model often tries to call the same tool again expecting more data, because the description promised it.
+1. **30-second recall, not a rebuild:** put L04's fixed-edge graph diagram up. "Every edge here is `add_edge` — always A to B, no matter what state says. That's the whole graph vocabulary from last lesson except one thing."
+2. State the new primitive on the board: a **conditional edge** is a transition chosen at *runtime* by a **routing function** — a plain Python function that reads **state** and returns the name of the next node. Write the skeleton on the board: `def route(state) -> str: ...` then `add_conditional_edges("classify", route, {"billing": "billing_node", ...})`.
+3. Live-code a minimal two-node graph: a `classify` node that calls **Haiku** and writes a `category` field into state, and a routing function that reads `state["category"]` and returns it directly (mapping label to node name one-to-one). Wire it with a single conditional edge out of `classify`.
+4. `compile()`, then `invoke()` on the chosen ticket. Use the pre-flight run-inspection fallback to show, explicitly, which branch executed.
+5. **Trace the value by hand on the board**, slowly: the model produced a label → the `classify` node wrote it into `state["category"]` → the routing function *read* `state["category"]` → `add_conditional_edges`'s mapping turned that string into a node name → LangGraph executed that node. Five arrows, five hops — walk every one.
 
 **What to highlight:**
 
-- Same tool, same model, same task — only the *description* changed. Behavior changed dramatically.
-- A description is two things at once: a *recruitment ad* (when to reach for the tool) and a *contract* (what the tool will return). Mismatches in either dimension cascade into bad calls.
-- The audience to write *for* is the model's selection step at inference time — not the human reader of the source code. Comments in code are for humans; tool descriptions are for the model.
-- This is also where students should start to feel that designing tools is *prompt engineering* (back-reference [L02](../L02/objectives.md) when that roadmap exists, and [L03](../L03/objectives.md) on token-level reasoning).
+- **The routing function is plain Python, not a model call.** It's an `if`/dict-lookup over state — the "decision" already happened when the `classify` node wrote its label; the routing function only *reads*.
+- **"Runtime-chosen" is not "unpredictable."** Say it early, it recurs all lesson: a conditional edge is still a deterministic function of state. Same state in, same branch out.
+- **Name the L05-vs-L14 line for the first time here, briefly** (Demo 4 owns the full version): "the routing function reads state *I* control. Ten lessons from now, a routing function will read whether the *model* asked for a tool. Different question, same LangGraph mechanism — we'll come back to this."
 
 **If the demo misbehaves:**
 
-- If P2 with the sparse description happens to produce a clean call, re-run with a slightly more ambiguous prompt (*"Look up our customers"*). The lesson is the *distribution* of behavior, not a single run — if the first run is clean, do a second to show it isn't.
-- If the rich-description variant calls the tool with garbage anyway, point out that descriptions reduce variance, not eliminate it. This sets up Demo 3's schema discussion (validation as a second line of defense).
+- If live-coding the conditional edge falls behind, paste the completed two-node graph and walk the five-hop trace on the board anyway — the trace, not the typing, is the point of this demo.
+- If Haiku's label doesn't match any key in the routing map, let it happen and note it out loud: "see that? An unmapped label is exactly the gap Demo 2 spends its whole time on." Don't fix it live — it's a preview, not a bug to squash.
 
-## Demo 3 — Schemas as a teaching tool (Objective 2 + 3)
+## Demo 2 — Router/switch: classify, branch, converge — and the fallback case (Objective 2)
 
-**Goal:** show that a tight schema produces structured validation errors the model can recover from on the next turn, while a loose schema pushes the ambiguity into runtime failures the model can't interpret. Land the framing from [objectives.md](objectives.md): *errors are part of the tool's interface.*
+**Goal:** build the full **router/switch** pattern — an entry classifier fanning out to specialized branches that converge — and use it to (a) reinforce **per-node model mixing** as a *known* mechanism from L04, and (b) make the **ambiguous-classification / fallback-branch** case a deliberate, worked example rather than an embarrassment to route around.
 
 **Pre-flight:**
 
-- Two schema variants of a `book_meeting` tool:
-  - **Loose:** `book_meeting(details: str) -> str` — one free-form string parameter.
-  - **Tight:** `book_meeting(attendee_email: str, start_iso: str, duration_minutes: int, title: str) -> dict` — typed, all required, with per-parameter descriptions specifying formats (RFC 5322 email, ISO 8601 datetime, integer between 15 and 240).
-- Two error-handler variants on the *tight* tool, swappable:
-  - **Informative errors:** validation errors return `{"error": "validation", "field": "<name>", "message": "<constraint>"}` with the offending field and the constraint. E.g. `{"error": "validation", "field": "duration_minutes", "message": "must be between 15 and 240, got 500"}`.
-  - **Opaque errors:** validation errors return a generic `"error: bad input"` with no field or constraint info.
-- One ambiguous test prompt: *"Book a 90-minute design review with Priya next Tuesday afternoon."* This deliberately omits an email, leaves "afternoon" vague, and uses a relative date — exactly the conditions under which a loose schema lets the model paper over the gaps and a tight schema forces them into the open.
+- Demo 1's two-node skeleton, extended with three specialized branch nodes.
+- The billing / technical / general branches sketched on the board, each with its own focused prompt, converging to a single `END`.
+- The ambiguous ticket queued and ready to run *after* the clean cases.
 
 **Live script:**
 
-1. Run the prompt against the **loose** schema. The model packs everything into the `details` string and "succeeds" — the tool returns "Meeting booked." Show that whether the meeting was actually booked correctly is impossible to tell from the conversation.
-2. Run the prompt against the **tight** schema with **opaque** errors. The model takes a guess at each field and submits. The runtime returns `"error: bad input"`. The model's next turn typically retries with a different guess — still wrong, still opaque. Run it twice to show the loop.
-3. Run the same prompt against the **tight** schema with **informative** errors. The model submits, gets a structured error naming the offending field, and on the next turn either asks the user for the missing detail (e.g. Priya's email) or fixes the field and retries. Show the recovery path.
+1. Extend Demo 1's graph: add three specialized branch nodes (`billing`, `technical`, `general`), each a **Sonnet** call with its own prompt, all wired to converge at `END`.
+2. Recall, in one line, the per-node model-mixing mechanism from L04: "classify only needs a label — cheap model. The branches need judgment — capable model. Same mechanism as the sequential chain, just a different graph shape." Do not re-derive *why* this works; that was L04's job.
+3. Run the three clean tickets (billing / technical / general) one at a time. Use the run-inspection fallback each time to confirm the branch matches the category, and re-run **one** ticket a second time to reinforce determinism from Demo 1: same input, same branch, every time.
+4. **Now run the ambiguous ticket.** Let Haiku produce whatever label it produces — possibly a wrong one, possibly a label that isn't exactly `"billing"` / `"technical"` / `"general"` (e.g. it hedges, or returns something slightly off-format). Do not pre-fix the prompt to avoid this.
+5. Show what happens without a fallback branch wired: either the routing function raises, or (if only the three keys are mapped) the graph errors on an unmapped label. Name it: "a router that only knows how to succeed isn't done."
+6. Add a **fallback/default branch** — a `general` (or dedicated `needs_review`) node the routing function returns for any unmapped label — and re-run the ambiguous ticket. Show it now completes, landing somewhere defined.
 
 **What to highlight:**
 
-- The loose schema *appears* to work and is the worst outcome — silent wrongness. The tight schema with opaque errors *fails noisily but unhelpfully*. The tight schema with informative errors *fails productively* — the model learns from each turn.
-- An error message is a *prompt* for the model's next turn. Write it as if it were a system message, not as if it were a Python traceback. (Stage-2 lab idea: have students rewrite a stack-trace error into an informative one.)
-- The three error classes from [objectives.md](objectives.md): this demo is the *validation error* case. Point at recoverable runtime errors (transient API failures) and unrecoverable errors (entity does not exist) as the next two cases — Demo 4 will cover the latter.
+- **The router pattern:** one entry classifier, N specialized branches, one convergence point. This shape recurs constantly — name it so students recognize it in the wild.
+- **Determinism, reinforced a second time (first in Demo 1):** the same ticket takes the same path on every run. This is *why* a router is trivially testable — the optional eval demo below cashes this in directly.
+- **The fallback branch is not optional-nice-to-have, it's part of "the router is done."** A routing function needs defined behavior for every label it might see, not just the labels you expected. This is the single most important craft lesson in this demo — slow down here.
+- **Per-node model mixing is exactly L04's mechanism, applied to a new shape.** Don't re-teach *why* mixing works (cost/latency/quality trade, L01-adjacent); just point at the two different models on the two kinds of nodes and move on. The *decision framework* for when to mix is L13's job — say that explicitly and keep going, don't improvise a mini-lecture on it.
 
 **If the demo misbehaves:**
 
-- If the model on the tight-schema run guesses an email so confidently that it submits a fake `priya@example.com` and the validation passes (because email format is correct even if the address is fake), use it as a teaching moment: schemas validate *shape*, not *truth*. Then add a note that this is exactly why the next demo (errors for nonexistent entities) matters.
-- If the loose-schema run produces a tool call that happens to be parseable, run a second variant of the prompt with even more vagueness (*"Book me a meeting with the design folks soon"*) to provoke the failure.
+- If Haiku actually classifies the "ambiguous" ticket cleanly (models are good at this), that's fine — pick a harder ambiguous example live, or manually construct a state dict with an out-of-vocabulary `category` value and invoke the graph directly with it (skipping the classify node) to force the fallback path deliberately. The teaching point (a router needs a defined fallback) doesn't require the *model* to be the one that produces the bad label.
+- If the trace/run-inspection doesn't clearly show which node ran, fall back to printing `state` before and after `invoke()` and diffing by eye — the mechanism matters more than the tooling polish.
 
-## Demo 4 — Errors that close the loop, side effects that don't (Objectives 3 + 4)
+## Demo 3 — Same shape, different decider: user-input branching (Objective 3)
 
-**Goal:** show the difference between recoverable, unrecoverable, and side-effecting errors — and the model's behavior in each case. Land the framing from [objectives.md](objectives.md): *the model will retry on its own when results look ambiguous, regardless of whether retry is safe.*
+**Goal:** take the router's exact shape from Demo 2 and swap the decider from a model classifier to **direct user input**, then put the two deciders head to head. Land the sharpest possible contrast with an agent: **a conditional edge can route on a value with no model anywhere near the decision.**
 
 **Pre-flight:**
 
-- The tight `book_meeting` tool from Demo 3 with informative errors enabled.
-- A `lookup_user_by_email(email: str)` tool with two response shapes wired up:
-  - **Returns `{"found": false, "email": "..."}`** when the email is not in the user database — clean unrecoverable signal.
-  - **Returns `{"error": "lookup_failed"}`** when a hidden `--simulate-flake` flag is on — fake transient error, recoverable on retry.
-- A `send_message(recipient_id: str, body: str)` tool that:
-  - **Logs every call to a visible "outbox" panel on screen** so the audience can see when a message is sent.
-  - **Has no idempotency key.** Calling it twice with the same arguments sends two messages.
-  - Has a description that *does not mention* the side effect. We'll fix this mid-demo.
-- One test prompt: *"Look up the user with email priya@example.com, then send them a message saying the design review is at 2pm Tuesday."*
+- Demo 2's completed router graph.
+- The `user_choice` version of the sample tickets from pre-flight (a structured selection, not free text).
 
 **Live script:**
 
-1. **Unrecoverable error path.** Run the prompt with `lookup_user_by_email` returning `{"found": false}` for that address. The model sees a clean "no such user" signal in the tool result and either reports back to the user or asks for the right email — *no retry loop*. Show the trace.
-2. **Recoverable error path.** Flip the `--simulate-flake` flag and re-run. The lookup returns `{"error": "lookup_failed"}`. The model usually retries the same call once, sometimes twice. Show this in the trace. Then turn the flake off and the retry succeeds. Discuss: who should retry — the runtime (silently, with backoff) or the model (visibly, costing a turn)?
-3. **Hidden side effects.** Replace the `lookup_user_by_email` tool with one that *also creates a user record if not found* (a deliberately bad design). Re-run prompt 1. Show the audience the outbox panel: a message went out *and* a user was silently created. The model didn't intend the side effect — the tool description hid it.
-4. **Fixing the side effect.** Update the description in place to say *"Looks up a user by email. If the user does not exist, this tool will create one with default settings — call only when a missing user should be auto-created."* Re-run. The model now reasons about the side effect before calling and often pauses to ask the user.
-5. **Non-idempotent retry.** Manually trigger the model to retry the `send_message` call (e.g. by saying *"I'm not sure that went through, try again"*). Show the outbox: two identical messages. Discuss the mitigation options from [objectives.md](objectives.md): runtime-level idempotency keys, an explicit confirmation step, a tool description that warns against retry.
+1. Show the swap explicitly: remove the `classify` node, and instead have `user_choice` arrive as a field already present in the **initial state** passed to `invoke()` — e.g. `graph.invoke({"ticket": ..., "user_choice": "billing"})`. The routing function changes from reading `state["category"]` (a model's label) to reading `state["user_choice"]` (a value nobody computed — it was just handed in).
+2. Run it with a few different `user_choice` values and confirm the deterministic branch each time, using the same run-inspection fallback as before.
+3. **Put the two graphs side by side on screen** — Demo 2's classifier-routed graph and this user-input-routed graph. Same node shapes, same conditional-edge mechanism, same convergence at `END`. The only difference: *where the value in state came from.* Say it as a single sentence and repeat it: "same graph shape, different decider."
+4. Land the sharpest framing of the lesson: in the user-input version, **no model is involved in the routing decision at all** — not even to produce a label. The user picked; the developer wired the options; the routing function just read a field. This is as far from "the model is deciding" as a conditional edge can get.
+5. Build the **combined** shape in a few lines: route on `user_choice` first (developer-owned edge), and *inside* the chosen branch node, still make a model call (e.g. the `billing` branch still calls Sonnet to draft a reply). Say the rule this demonstrates out loud: **the user (or developer logic) owns the edge; the model can still do real work inside a node.** This is the shape most real conditional workflows actually take.
 
 **What to highlight:**
 
-- The three error classes are *interfaces*, not just edge cases. The model's recovery behavior is determined by the shape of the error.
-- A side effect that isn't named in the description is a side effect the model can't reason about — and therefore can't avoid. Naming it isn't paranoia; it's part of the contract.
-- Idempotency is a *system* concern, not just a tool-author concern. Even a perfectly described tool can be called twice by a confused model. The mitigation lives at the runtime/design layer.
-- Bridge forward: L15 (human-in-the-loop and approval gates) revisits this exact tension for high-stakes side effects. L05 plants the seed; L15 builds the structure.
+- **"Same shape, different decider" is the single most reusable sentence in this lesson.** A router's *shape* — entry point, conditional edge, branches, convergence — doesn't care whether the decider is derived data, a model label, or a human choice. Only the source of the value changes.
+- **User-input branching is the cleanest anchor against "the model is choosing."** Whenever a student later conflates a conditional edge with model agency, come back to this demo: here, unambiguously, there is no model in the loop at all.
+- **Forward pointer, one line, don't teach it:** "this `user_choice` arrived before the graph ever started running. A graph that *pauses mid-run* to ask the user and *resumes* on the answer needs LangGraph's `interrupt` and a checkpointer — that's L17's territory, much later. Today, the input is just... already there."
 
 **If the demo misbehaves:**
 
-- If the model refuses to retry the flaky lookup at all (and just reports the error to the user), that's a fine outcome — name it as the *other* end of the design spectrum and discuss when each is preferable.
-- If the model on step 5 catches the duplicate-send risk and refuses to retry, lean into it: well-trained models sometimes get this right zero-shot, but you can't *rely* on that — design for the worst case.
+- If students conflate "the user picked a branch" with "the agent asked the user a question," re-draw the side-by-side: in this demo the value is sitting in the initial state dict *before* `invoke()` is ever called — nothing is asked *during* the run. The asking-mid-run version doesn't exist yet in anything students have seen.
+- If time is short, cut the combined shape (step 5) to a single slide rather than live code — the side-by-side comparison (steps 3–4) is the load-bearing part of this demo.
 
-## Optional bridge demo — toward MCP (L06)
+## Demo 4 — Closing the arc: what L05 is, and precisely what L14 changes (Objective 4)
 
-If time allows, run one final demo that previews L06: take one of the well-designed tools from Demos 2–4 and walk through how its name, description, schema, and error shape would translate one-to-one into an MCP server's tool spec. Don't teach the MCP wire format here; just show that the *design* survives the packaging change. The point is to set up L06's framing: MCP is about portability, not about redoing the design work.
+**Goal:** deliver the **closing argument** of the workflow-vs-agent arc that opened at L04: name, with precision, the *one* thing that changes between a L05 conditional edge and an L14 (agent) conditional edge. Do **not** build the agent or a cycle here — this demo is diagram and discussion, naming the delta so precisely that L14 contains no surprises.
 
-<!-- *NEED INPUT*: include this bridge demo, or save it as the opener for L06? -->
+**Pre-flight:**
+
+- Demo 2's or Demo 3's compiled router diagram, rendered and on screen.
+- A **sketch** (not a live build, not runnable code) of the L14 shallow-agent shape: an `agent` node, a `tools` node, and a conditional edge out of `agent` that either loops back to `tools` or exits to `END`.
+
+**Live script:**
+
+1. Put a L05 router diagram up. Trace a path with your finger: entry → conditional edge → one branch → `END`. Every arrow still moves forward. Name it: **still a DAG, still acyclic, still a workflow** — no matter how many branches it has.
+2. Ask the routing-function question out loud for the L05 graph: "what does this routing function look at?" Answer together: **state the developer put there** — a computed value, a model's classification label, or direct user input. Never "did the model decide to call a tool."
+3. Now put the L14 sketch up next to it. Same shape of question, same LangGraph mechanism (`add_conditional_edges`, a routing function) — but ask it again for this graph: "what does *this* routing function look at?" Answer: **whether the model's last message contains a `tool_use`.** The value being read didn't come from a developer-written node — it came from the model's own output, un-mediated by a developer-authored label.
+4. Point at the one structural difference beyond the decider: the L14 sketch has an edge **from `tools` back to `agent`** — a cycle. Name it precisely: "every graph you built today was acyclic. The agent has exactly one back-edge. That back-edge, plus a model-authored decision instead of a developer-authored one, is the entire distance between what you built this lesson and an agent."
+5. Say the full closing line, slowly, as the lesson's last main point: *"L04 gave you a graph with no branches. L05 gave you a graph with branches you own. In a few lessons, L14 gives you a graph with a branch the **model** owns, wired into a loop. Same primitives the entire way — `StateGraph`, nodes, edges, conditional edges, state, reducers. The only thing that ever changes is who decides."*
+6. Reason briefly about **when developer-controlled branching (today) is the right tool** versus when it isn't: a router is right whenever the set of possible paths is known ahead of time and choosing among them is a classification, lookup, or user choice. Name the common failure mode: reaching for an agent to do what a router would do at a fraction of the cost and unpredictability — this is the same failure mode named in L04's Demo 4, reinforced here on the routing case specifically.
+
+**What to highlight:**
+
+- **The delta is precise, not vague.** Resist "agents are just fancier routing" — that's true mechanically and misleading pedagogically. The precise version: *same API, different source of authority over the value being read, plus a back-edge.* Say the precise version.
+- **This demo is mostly diagram + discussion — resist the urge to build anything.** Building the cycle is L14's entire lesson; if this demo starts writing agent code, it has overstepped into L14's territory and stolen its payoff.
+- **The arc has a start (L04) and this is its middle-to-end, not its final word** — L14 is still where the agent actually gets built. This demo's job is to make sure that when it does, nothing about it is a new mental model, only a change of decider plus one new edge.
+
+**If the demo misbehaves:**
+
+- This demo is low-risk (no live code to break). If a student pushes back with "but the classifier in Demo 2 already feels like the model deciding," reach back to Demo 2 and Demo 3's framing together: the model produced a *label*; a *user* produced a *value with no model at all*; in both cases a developer-written routing function did the actual choosing. Only in the L14 sketch does the *model's own tool-call decision* get read directly by the routing function, with no developer-authored label in between.
+
+## Optional demo — evaluate the router (carry L04's eval habit forward)
+
+If time allows, close by reinforcing the same habit L04's optional demo introduced, now applied to routing instead of chaining. A router is, if anything, an *easier* eval target than a linear chain — every case is "given this input, was the branch correct?"
+
+1. Recall L04's optional eval-the-workflow beat in one line — don't re-teach `common/evals.py`'s mechanics, just recall that it exists and was used once already.
+2. Import the harness from `common/evals.py` and write ~4–5 `EvalCase`s over the Demo 2 router: an input ticket in, the expected `category` (and by extension, the expected branch) out. Include the ambiguous ticket as one case, with the **fallback branch** as its expected outcome — this doubles as a regression check that the fallback wiring from Demo 2 actually works.
+3. Run `evaluate(...)` and read the pass rate. Land the point: a router's determinism (Demos 1–2) is *why* this eval is cheap and meaningful — same input always takes the same path, so "did it take the right path" is a clean, binary, automatable question.
+
+<!-- *NEED INPUT*: include this eval-the-router beat in the lecture, or hold it for the L05 lab? Same open question as L04's demos file raised for its own optional eval beat — resolve both together if possible, since a consistent answer (both in-lecture, or both lab-only) will read better across the two lessons than a split decision. -->
 
 ## Pacing notes for the teacher
 
-- **Per-demo time:** 10–15 minutes including post-demo discussion. Demo 4 is the longest (5 sub-steps). Four demos plus the optional bridge fits in a 60–80 minute block. <!-- *NEED INPUT*: confirm against the lesson-time budget once duration is pinned in [objectives.md](objectives.md)'s open questions. -->
-- **Variance budget:** model behavior varies run-to-run, especially in Demo 2 where the whole point is *distributional* behavior. Budget at least one re-run per demo, and on Demo 2 explicitly run each variant twice so the audience sees variance, not just a single result.
-- **The audience watches, doesn't participate.** Resist the temptation to ask "what would *you* call this tool?" — that is a lab pattern, not a demo pattern. Hands-on practice is for the L05 labs.
-- **Keep the same task across Demos 2–3 where possible.** Repetition of the same input across changing tool designs is what makes the contrast legible. Don't rotate problems for variety's sake.
+- **Per-demo time:** Demo 1 is short (10–15 minutes — it's one new idea, traced once). Demo 2 is the long one (18–22 minutes including the router build, the clean runs, and the fallback-branch worked example — don't rush the ambiguous-ticket beat, it's the demo's whole point). Demo 3 is 12–15 (the decider swap, the side-by-side, the combined shape). Demo 4 is 10–15 (diagram + discussion, no build, but don't rush the closing line — let it land). Optional eval beat is 5–8. Total ~55–75 minutes plus discussion — fits the ~60–75 minute single lecture proposed in [objectives.md](objectives.md)'s open questions. If it runs long, the natural split point is after Demo 2: "the conditional edge + router" then "user-input decider + workflow-vs-agent close."
+- **Live-coding budget:** only Demo 1's minimal two-node graph and Demo 2's branch-node additions need live-coding. Demo 3 is a small, mostly-edit change to Demo 2's graph. Demo 4 is diagram + talk, no code. Do **not** re-derive `StateGraph`'s basic builder API — that was L04's job; if a student has forgotten it, point back to L04 rather than re-teaching it here.
+- **The ambiguous ticket is not optional.** Every other demo file in this course has a "keep the misbehavior, don't paper over it" note; here it's promoted to a required beat, because the fallback-branch lesson doesn't land without a genuine (or deliberately constructed) unmapped-label case.
+- **The audience watches, doesn't participate.** Hands-on router-building, the decider comparison exercise, and constructing a fallback branch from scratch are L05 lab material (stage 2), not this file's job.
 
 ## Open authoring questions
 
-- <!-- *NEED INPUT*: which model class(es) anchor the demos — see top-of-file pre-flight. This decision propagates to every demo, especially Demo 2 where the description-quality gap widens on smaller models. -->
-- <!-- *NEED INPUT*: are the demos run in a Jupyter notebook the teacher projects, or in a slide-embedded REPL, or via a custom demo runner script? Affects how the tool-registry swap (good vs. bad variants) is wired. -->
-- <!-- *NEED INPUT*: should Demo 4's recoverable-error case introduce *runtime-level* retry logic with backoff, or stay strictly at the model-visible layer? Going deeper foreshadows L07 (hand-rolled agent loop), which may be the better home. -->
-- <!-- *NEED INPUT*: should the side-effect discussion in Demo 4 introduce typed effects (read vs. write vs. external) or keep it informal? Mirrors the same open question in [objectives.md](objectives.md). Forward link to L15 (approval gates) may be sufficient. -->
-- <!-- *NEED INPUT*: do the L05 demo tools share an implementation with the L05 lab tools, or are lab tools designed from scratch by students? Affects how much of the demo code is reusable. Mirrors the lab-design question in [objectives.md](objectives.md). -->
-- <!-- *NEED INPUT*: a pointer/link to where the demo tools live as code (a `demos/` subdir? inline in a notebook?) — not yet decided in non-draft docs. -->
+Most of L05's big decisions are already pinned in [objectives.md](objectives.md) (developer-owned deciders only; native `ChatAnthropic`, reused not re-explained; Haiku-classifier/Sonnet-branch mixing as mechanism only, decision framework deferred to L13; user-input branching in the initial-state form only, `interrupt`/checkpointer deferred to L17; the precise L05-vs-L14 delta). The remaining open items are stage-2 mechanics, several shared with L04's still-open items:
+
+- <!-- *NEED INPUT*: exact model id strings for the Haiku 4.5 and Sonnet 4.6 snapshots, read from common/config.py rather than hard-coded in cells — same open item as L04's demos file; resolve once for both lessons. -->
+- <!-- *NEED INPUT*: running-example domain — this file assumes continuation of L04's support-ticket domain; confirm in stage 2 or pick a distinct domain (see objectives.md for the same flagged choice). -->
+- <!-- *NEED INPUT*: the exact sample tickets, in particular the deliberately ambiguous one that stresses the classifier for Demo 2's fallback-branch beat — recommend reusing L04's fixture plus one additional hard case. -->
+- <!-- *NEED INPUT*: the exact user_choice shape for Demo 3 (a plain string enum is the simplest option; confirm no richer structure is wanted). -->
+- <!-- *NEED INPUT*: confirm the run-inspection fallback (print-the-path vs. LangGraph `.stream()` node events vs. a highlighted Mermaid diagram) — same question raised in objectives.md's Prerequisites section; resolve once, apply to every demo in this file. -->
+- <!-- *NEED INPUT*: are the demos run in a projected Jupyter notebook, a slide-embedded REPL, or a demo-runner script? Mirrors the same open question in L04's, L10's, and L12's demos files. -->
+- <!-- *NEED INPUT*: include the optional eval-the-router beat in the lecture or hold it for the lab? Same open question as L04's demos file raised for its own optional eval beat — consider resolving both together for consistency. -->

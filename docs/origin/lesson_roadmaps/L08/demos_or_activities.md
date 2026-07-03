@@ -1,9 +1,8 @@
-# L08: Teacher-led demos — Tracing: reading what your agent did
+# L08: Teacher-led demos — Designing good tools
 
-> Sibling doc: [objectives.md](objectives.md) (what the lesson aims for), parent design [CURRICULUM_PRD.md](../../CURRICULUM_PRD.md) (lesson-plan row L08).
-> Preceding lesson demos: [L07 demos_or_activities.md](../L07/demos_or_activities.md) (the loop these demos instrument). Following lesson: [L09 Evaluation: first pass](../L09/objectives.md) (consumes the trace this lesson produces).
+> Sibling docs: [objectives.md](objectives.md) (what the lesson aims for), parent design [CURRICULUM_PRD.md](../../CURRICULUM_PRD.md).
 >
-> **Audience for this file:** the teacher running L08. Every demo below is *teacher-driven, no student participation*. Student-driven exercises live in the L08 labs (separate file, produced by stage 2).
+> **Audience for this file:** the teacher running L08. Every demo below is *teacher-driven, no student participation*. Student-driven exercises live in the L08 labs (separate file).
 
 ## How to read this file
 
@@ -13,215 +12,173 @@ Each demo is a self-contained block with:
 - **Pre-flight** — what the teacher needs loaded before class.
 - **Live script** — the order of operations during the demo. Treat it as a checklist, not a teleprompter.
 - **What to highlight** — the moment(s) where the teacher should slow down and call out the takeaway out loud.
-- **If the demo misbehaves** — graceful fallback for when the model surprises you (because it will; the loop is non-deterministic and that non-determinism is itself part of objective 4).
+- **If the demo misbehaves** — graceful fallback for when the model surprises you (because it will).
 
-The demos are ordered to follow the five learning objectives and the lesson's **concept-first, then tooled** spine: Demo 1 motivates *why* a structured trace beats a `print()` (the L07 bridge, now this lesson's opener) and produces the first tiny trace; Demo 2 *reads* a full trace and reconstructs the run (objective 1); Demo 3 *locates a failure* from the trace alone (objective 2); Demo 4 *instruments* the loop live to emit the full `TraceEvent` trace (objective 3); Demo 5 *compares two traces* of the same task (objective 4); Demo 6 *exports the same run to self-hosted Langfuse* and re-does objectives 2 and 4 in a real dashboard (objective 5). They build on each other — Demos 2, 3, and 5 read traces of the same loop Demo 4 instruments, so students see the artifact before they see how it is produced (concept first), then meet the real tool last (then tooled). Run them in order on first delivery.
-
-> **A note on what L08 reuses from L07, and what is new.** L08 does **not** re-teach or re-derive the L07 loop — the model→tool→model control flow is assumed (see the L07 "Bridge to L08" and this lesson's objectives "L07 overlap" decision). What L08 adds is *observation*: a structured trace emitted at the loop's boundaries, read after the fact. Per the objectives' "inline-build vs. reference" decision, the **canonical reference copy** of the loop and tools is authored in the shared `common/` layer during L08's stage-2 pass — `common/agent_loop.py`, `common/tools.py`, and the new `common/tracing.py` (`TraceEvent`) — and L08 is the first lesson that *imports* them rather than hand-building them. The demos below therefore reference the loop and tools by name as a stable import, not as live-coded scratch (the one live-code beat is Demo 4's instrumentation wrapper).
-
-## Naming and tooling reconciliation (read before building any demo)
-
-The L08 [objectives.md](objectives.md) describe the loop and tools as they should exist in `common/` *after* stage 2 authors them. The **already-built L07 materials** (under `src/fluffy_potato_curriculum/lessons/L07/`) use slightly different names, and one planned tool does not exist yet. Stage 2 must reconcile these before these demos are runnable; flagging them here so the demo scripts and the eventual `common/` modules agree.
-
-- **Loop function name.** L07's built lecture/labs name the loop `run_loop(model, tools, user_msg, max_steps) -> RunResult`. The objectives refer to it as `agent_loop.run(...)` / `common/agent_loop.py`'s `run()`. The demos below use **`agent_loop.run(...)`** to match the objectives and L09, on the assumption stage 2 names the `common/` reference copy that way. <!-- *NEED INPUT*: confirm the canonical name for the reference loop in common/agent_loop.py — keep the objectives' `run()` (and update any L07 cross-refs that still say `run_loop`), or rename to `run_loop` everywhere for continuity with what students built in L07. The name must be identical in L07's lecture/labs, this lesson, common/agent_loop.py, and L09, or the import story breaks. -->
-- **`RunResult` gains a `trace` field.** L07's built `RunResult` is a dataclass with exactly `final_text: str`, `iterations: int`, `termination: str` (`"natural"` | `"max_steps"`) — and **no trace field**. Objective 3's decided schema adds **`trace: list[TraceEvent]`**. Demo 4 is where that field first appears; stage 2 adds it to `common/agent_loop.py`'s `RunResult`. Demo 2's narration of "where each `RunResult` field came from in the trace" relies on this addition.
-- **`flaky_fetch` does not exist in L07 yet.** The L07 demos roadmap *planned* a `flaky_fetch(url)` tool with four URL behaviors, but the built L07 materials implement tool failure differently: `calculator(expression)` raises `ValueError` on non-arithmetic input, `lookup(city)` raises `KeyError` for a city not in its small `POPULATIONS` table, and `dispatch(...)` converts any raised exception into a `tool_result` with `is_error: True` and `repr(exc)` as content. The objectives nonetheless say L08 reuses `flaky_fetch` from `common/tools.py`. **Either path gives objective 2 its failure signatures**, so the demos below are written to work with whichever stage 2 ships, and call out where the choice matters. <!-- *NEED INPUT*: decide what backs objective 2's "locate a failure" signatures in common/tools.py — (a) author the planned flaky_fetch(url) with the four URL behaviors fresh in common/tools.py (matches the objectives' wording, gives a clean tool-error signature), or (b) reuse the already-built calculator ValueError / lookup KeyError failures plus a wrong-arguments task (no new tool, matches what students saw in L07). Recommendation: (a) flaky_fetch, because a dedicated failing tool makes the tool-error and runaway signatures far easier to provoke reliably than coaxing the model into a bad calculator expression. Whichever is chosen must match L09's reuse of the same tools. -->
-- **Anchor model.** Decided in the objectives: Claude **Sonnet 4.6**, inheriting the L01–L07 precedent so a trace of the `common/` loop matches the behavior students saw in L07. Used live in Demos 4–6; Demos 1–3 read pre-captured traces and need no live call.
+The demos are ordered to match the four learning objectives from [objectives.md](objectives.md). Demo 4 (idempotency / side effects) builds on Demo 3 (errors), so run the sequence in order on the first delivery of the lesson.
 
 ## Pre-flight (once, at the top of the lesson)
 
 The teacher should have, before the first demo starts:
 
-- A working notebook/REPL with the project `uv` env, able to `from fluffy_potato_curriculum.common import agent_loop, tools, tracing` (the stage-2 reference modules). Keys load through `common/config.py` (the pydantic-settings seam), never hard-coded — consistent with the project's live-by-default notebook stance.
-- **A set of pre-captured traces, saved to disk as `.jsonl`** (one `TraceEvent` span per line, via the decided `.to_jsonl()` helper), captured *before class* on Sonnet 4.6 so the reading demos (2, 3, 5) are deterministic and don't depend on a live model behaving on the day:
-  - `trace_good.jsonl` — one clean multi-step run of the L07 chaining task that terminates `natural` (Demo 2).
-  - Four short *failing* traces, one per failure signature from objective 2 (Demo 3): `trace_tool_error.jsonl`, `trace_wrong_args.jsonl`, `trace_runaway.jsonl` (ends in `max_steps`), `trace_premature.jsonl` (terminates `natural` on a wrong/incomplete answer).
-  - Two traces of the *same task* for the comparison demo (Demo 5): `trace_run_a.jsonl` and `trace_run_b.jsonl` — ideally one where a behavior actually changed (e.g. a runaway in A that a tightened prompt fixed in B) and the run-to-run noise is visible alongside it.
-  - <!-- *NEED INPUT*: confirm where these captured traces live in the repo (a demos/ subdir under the L08 lesson folder? a fixtures file?) and that they are committed so the teacher isn't re-capturing live before every class. The compare demo (5) especially benefits from a saved A/B pair with a known, explainable difference. -->
-- **The exact chaining task** used to produce `trace_good.jsonl`. It must force a *multi-step* run (at least two tool calls in sequence plus a natural-termination text turn) so there is something to narrate. L07's built tools are `calculator` (number in, number out) and `lookup` (city in, population out), which do not chain cleanly on their own. <!-- *NEED INPUT*: confirm the concrete multi-step task and that common/tools.py supports it. Options: (a) a task that calls calculator then lookup independently and combines them in the final answer (e.g. "What is 17*23, and what is the population of Tokyo?" — two tool calls, one text turn); (b) if flaky_fetch is added, a fetch-then-summarize task; (c) restore the L07 demos-roadmap puzzle ("population of the city whose name is the answer to 17 squared minus 1") only if common/tools.py's lookup table actually contains a matching keyed entry — the current L07 table is keyed by city name (tokyo/lagos/paris), not by number, so that puzzle does not run as-is. -->
-- A slide (or printed handout) with the **`TraceEvent` field list** from the objectives' decided schema, so the teacher can point at it while narrating: `run_id`, `trace_id`, `parent_run_id`, `run_type` (`llm` | `tool` | `chain`), `name`, `inputs`, `outputs`, `error`, `start_time`, `end_time`, `usage` (`input_tokens` / `output_tokens` / `total_tokens` on `llm` spans).
-- For Demos 4–6 only: a live Sonnet 4.6 client (through `common/config.py`) and, for Demo 6, the cohort's **self-hosted Langfuse** base URL + project keys (also through `common/config.py`). Infra and fallback in [docs/classroom-llm-management.md](../../../classroom-llm-management.md). If Langfuse isn't reachable on the day, Demo 6 degrades to a screenshot walk-through (see that demo's misbehave note) — objectives 1–4 stand alone without it.
+- A working REPL or notebook with the project's Claude SDK setup (per the project's `uv` env).
+- A small **demo harness** that wraps every model call to print: the model's tool-use request (name + arguments), the tool result (or error) handed back, the next model turn, and per-call `input_tokens` / `output_tokens` / wall-clock time. This is the same kind of wrapper used in [L06's demos](../L06/demos_or_activities.md), extended to also surface the tool call/result pair. Without this wrapper, the L08 demos read as "the model did something" instead of "the model picked *this* tool with *these* arguments because of *that* description."
+- All four demo tools below pre-implemented as Python functions, registered with the SDK, and ready to swap in/out by name. Each demo intentionally swaps the *same* tool's description, schema, or error shape — *not* the implementation — so the contrast lands cleanly.
+- A second tool registry pre-loaded with the **bad-design variants** (cryptic name, sparse description, loose schema, opaque errors). The teacher should be able to flip between "good" and "bad" registries with a single line.
+- A way to display the active tool's full schema (name, description, parameter list with descriptions) on screen alongside the model's output — so the audience sees what the model is reading when it decides to call the tool.
 
-> Why pre-capture the reading traces: objectives 1, 2, and 4 are *reading* skills. Reading is clearest on a fixed, known artifact the teacher has already studied — not on a live run that might take a different path mid-demo. Capture once before class, read live in class. The live model only appears in Demos 4–6, where *producing* and *exporting* a trace is the point.
+> Why pre-built variants: L08 lives or dies on contrast — same task, same model, *different tool design*, different model behavior. Editing tool descriptions live during the demo eats time and breaks pacing. Have the variants ready.
 
-## Demo 1 — From `print()` to a structured event (Objective 3, opener; reinforces the L07 bridge)
+<!-- *NEED INPUT*: which model class anchors the demos — the "description quality" and "schema design" demos land more sharply on a smaller model where the design errors bite harder. Best guess Sonnet 4.6 as the primary, with one Demo 2 re-run on Haiku 4.5 to show the gap widens. Pin once the course-wide model choice is settled in CURRICULUM_PRD. -->
 
-**Goal:** motivate the whole lesson in two minutes. Land the main point *"structured beats printed the moment you have two runs"* by turning one of L07's `print()` lines into a structured event appended to a list — the simplest possible trace. This is the L07 optional bridge demo, promoted to L08's opener per the objectives' "L07 overlap" decision (the L07 demos file left "include the bridge here or save it as L08's opener?" open; L08 claims it).
+## Demo 1 — Tool or no tool? (Objective 1)
+
+**Goal:** show that the same task can be answered model-alone or with a tool, and that the right call depends on the kind of question. Land the framing from [objectives.md](objectives.md): *tool design starts with the decision to add a tool at all.*
 
 **Pre-flight:**
 
-- L07's per-iteration print wrapper visible in scrollback or on a slide: the line that prints iteration number, tool calls, tool results, cumulative tokens, latency. Recall it by name as the *"minimum-viable trace"* L07 already called it.
-- An empty `events: list[dict] = []` ready to append to.
+- Three task prompts pre-loaded:
+  - **Task A — model has it cold:** a general-knowledge question the model nails zero-shot (e.g. *"What is the capital of France?"*). Adding a tool here is pure overhead.
+  - **Task B — model can't have it:** a question that depends on data the model can't have memorized (e.g. *"What is the current time in Tokyo?"* or *"What's the weather in Seattle right now?"*). The model has no choice but to guess or refuse without a tool.
+  - **Task C — borderline:** an arithmetic problem at the edge of model reliability (e.g. *"What's 18,374 × 92,431?"* or *"How many days between 1987-03-12 and 2024-11-04?"*). The model often produces a wrong answer with confidence — exactly the case where a tool is warranted even though the model *will* attempt it.
+- A single `calculator(expression: str) -> str` tool and a single `current_time(tz: str) -> str` tool, both with clean designs. Save the design walkthrough for Demo 2 — here the tools are just props.
 
 **Live script:**
 
-1. Recall L07's print-per-iteration wrapper out loud: *"L07 ended with this — one printed line per loop step. We called it a minimum-viable trace. Watch what's wrong with it the moment we have more than one run."*
-2. Run a single loop iteration with the print wrapper. Read the printed line. Then ask the rhetorical question: *"Now compare this run to yesterday's run. How? Scroll up and eyeball two walls of text?"*
-3. Replace **one** `print(...)` with a structured dict appended to a list — exactly the L07 bridge shape, e.g. `events.append({"run_type": "tool", "name": call.name, "inputs": call.input})`. Run again. Show `events` at the end: a list of records, not a wall of text.
-4. Land the contrast explicitly: a printed line is human-readable and ephemeral; a record can be **filtered, counted, diffed, and fed to evaluation** (forward-point to L09). That jump — print → structured record — is the single most important instrumentation move in the lesson.
+1. Run Task A model-alone. Note: instant, free, correct. Run Task A *with* the calculator tool registered. The model usually answers without calling the tool — point that out (good model, no tool needed). If it does call the tool, the result is the same answer at higher cost.
+2. Run Task B model-alone. The model either refuses, hedges ("I don't have access to real-time data"), or hallucinates a time. Run Task B with `current_time` registered. The model calls the tool, gets the real answer, returns it.
+3. Run Task C model-alone three times. Show the answers — often inconsistent across runs, sometimes wrong. Run Task C with `calculator` registered. The model calls the tool, gets a deterministic right answer.
 
 **What to highlight:**
 
-- A trace is the **durable memory of an ephemeral run.** The loop runs and exits; without a record, all you keep is the final answer and whatever scrolled past. Say this first and say it plainly — it's the reason the lesson exists.
-- *"Tracing is just logging"* is the confusion to pre-empt right here. A pile of `print()` lines is not a trace until it has **order, structure, and a run identifier**. This demo shows structure; Demo 4 adds the run identifier.
-- This dict is a hand-rolled stand-in; Demo 4 replaces it with the real `TraceEvent` Pydantic model from `common/tracing.py`. Don't polish the dict — it's a teaser.
+- The four "tool warranted" signals from [objectives.md](objectives.md) — data the model can't memorize (B), precise computation it's bad at (C), side effects (not in this demo, foreshadow), verification against ground truth (foreshadow Demo 4). Name the signals as they appear.
+- The "no tool needed" cases (A): adding a tool to a task the model already handles wastes round-trips and tokens, and gives the model a wrong-tool option to pick by mistake.
+- Task C is the subtle one: the model *will* answer without the tool, and confidently. The tool isn't there to fill a gap the model knows about — it's there to fill a gap the *designer* knows about.
 
 **If the demo misbehaves:**
 
-- Nothing model-dependent here; a single iteration is enough. If a live call is slow, run it against one of the pre-captured traces instead and just show the difference between the printed line and the structured record.
+- If the model nails Task C zero-shot on the day, swap to a harder arithmetic problem (more digits) or a date-math problem with a leap year. Have one in reserve.
+- If the model on Task A insists on calling the calculator anyway, lean into it: this previews the "tool soup" failure mode in Demo 2 — too many tools, too eager a hand.
 
-## Demo 2 — Read a trace and narrate the run (Objective 1)
+## Demo 2 — The description is the tool (Objective 2)
 
-**Goal:** reconstruct a multi-step run *by reading the trace alone*, out loud, event by event. Land that a trace is structured, complete, and **replayable on the page** — no re-execution needed.
+**Goal:** show that the same tool, with the same name and schema, behaves differently depending on the description the model reads. Land the framing from [objectives.md](objectives.md): *the description is the model's only training signal at inference time for when to use the tool.*
 
 **Pre-flight:**
 
-- `trace_good.jsonl` loaded into a list of `TraceEvent` and pretty-printed (a compact one-line-per-span rendering the class can read top to bottom).
-- The `TraceEvent` field-list slide from pre-flight visible alongside.
-- The `RunResult` for the same run on hand (its `final_text`, `iterations`, `termination`), so the teacher can point from summary back into the trace.
+- One tool implementation: `lookup_user(query: str) -> dict` that returns user records from a tiny in-memory dict (3–5 fake users keyed by both email and username).
+- Three description variants of the same tool:
+  - **Sparse:** `"Looks up a user."` — no guidance on when to call, what `query` accepts, what comes back.
+  - **Rich:** a 3–5 sentence description that names the tool's purpose, lists the accepted query formats with examples (`"e.g. 'tim@example.com' (email) or 'tim_lee' (username)"`), states the return shape, and names when *not* to call the tool (e.g. "do not call this if the user has not been mentioned by name in the conversation — ask the user instead").
+  - **Misleading:** a description that overstates the tool's capabilities (e.g. *"Looks up any information about any user — email, billing, preferences, history."*) when the implementation only returns a name and email. This previews how a description-implementation mismatch produces hard-to-debug failures.
+- Two test prompts:
+  - **Prompt P1:** *"Find me the email for the user named Alex."* — straightforward case, all three descriptions should produce a tool call.
+  - **Prompt P2:** *"Tell me about our users."* — ambiguous case. Sparse description: model often calls the tool with garbage queries. Rich description: model usually asks for clarification or refuses. Misleading description: model calls the tool expecting rich data and is then confused by the thin response.
 
 **Live script:**
 
-1. Narrate the run from the trace, in order, the way the objective phrases it: *"span 1 is an `llm` call — the model asked for `calculator(expression=...)`; span 2 is a `tool` call running it, output `…`; span 3, another `llm` call; …; the last `llm` span emitted text and no tool call — terminated `natural`."* Read it like a story.
-2. For each span, name **which kind** it is from `run_type` (`llm` / `tool` / `chain`) and show where one loop iteration ends and the next begins.
-3. Stop on a tool-call span and read the **arguments** out loud. Make the point that the arguments — `calculator(expression="17*23")`, not just "called calculator" — are where the model's *thinking* shows. Read arguments first, always.
-4. Point at the **intermediate state** the trace carries: cumulative token `usage` on the `llm` spans, per-span latency from `start_time`/`end_time`, the growing message history. Tie each field to a question it answers: *"why slow?" → latency; "why expensive?" → per-call tokens.*
-5. Close by distinguishing the three things students now have in front of them: a **log line** (one event), a **trace** (the ordered record of the whole run), and the **`RunResult`** (the loop's summary). Point at where each `RunResult` field — `final_text`, `iterations`, `termination` — *came from* in the trace.
+1. Show all three descriptions side-by-side on screen. Read them aloud. Ask the audience (rhetorically) to predict which produces the best tool use.
+2. Run P1 with the sparse description. Note tool args and result.
+3. Run P1 with the rich description. Note: usually tool args are formatted more precisely (e.g. uses the example format from the description).
+4. Run P2 with each description in turn. Show how model behavior diverges — sparse leads to bad arguments, rich leads to clarification or refusal, misleading leads to confused follow-up.
+5. Run P1 once with the misleading description, then immediately follow up with: *"Now show me their billing history."* The model often tries to call the same tool again expecting more data, because the description promised it.
 
 **What to highlight:**
 
-- **Arguments are where the truth is.** Call counts say *how much*; arguments say *what the model was thinking*. This is the through-line of the entire lesson — set it here so Demo 3's "wrong arguments" signature lands.
-- A trace sits **between** raw prints and the summary: more structured than a print, more complete than a `RunResult`. Students should be able to derive the `RunResult` from the trace by hand.
-- Use the word **span** consistently for one trace entry, with the one-line note that OpenTelemetry says "spans," Langfuse says "observations," LangSmith says "runs" — so the structure is recognizable when they meet Langfuse in Demo 6.
+- Same tool, same model, same task — only the *description* changed. Behavior changed dramatically.
+- A description is two things at once: a *recruitment ad* (when to reach for the tool) and a *contract* (what the tool will return). Mismatches in either dimension cascade into bad calls.
+- The audience to write *for* is the model's selection step at inference time — not the human reader of the source code. Comments in code are for humans; tool descriptions are for the model.
+- This is also where students should start to feel that designing tools is *prompt engineering* (back-reference [L02](../L02/objectives.md) when that roadmap exists, and [L06](../L06/objectives.md) on token-level reasoning).
 
 **If the demo misbehaves:**
 
-- This reads a fixed file, so it can't "misbehave" — but if the trace is too long to narrate in full, pre-trim it to ~6–8 spans. A trace you can't read top-to-bottom in ninety seconds is too long for a first narration.
+- If P2 with the sparse description happens to produce a clean call, re-run with a slightly more ambiguous prompt (*"Look up our customers"*). The lesson is the *distribution* of behavior, not a single run — if the first run is clean, do a second to show it isn't.
+- If the rich-description variant calls the tool with garbage anyway, point out that descriptions reduce variance, not eliminate it. This sets up Demo 3's schema discussion (validation as a second line of defense).
 
-## Demo 3 — Locate a failure from the trace alone (Objective 2)
+## Demo 3 — Schemas as a teaching tool (Objective 2 + 3)
 
-**Goal:** find *where a run went wrong by reading*, not by re-running, and classify the failure by its **trace signature**. Land the headline skill: *a good trace lets you find the failure by reading; re-running a non-deterministic agent to "reproduce" a bug is slow and unreliable — the trace is the reproduction.*
-
-**Pre-flight:**
-
-- The four failing traces from pre-flight loaded and ready to show one at a time: `trace_tool_error.jsonl`, `trace_wrong_args.jsonl`, `trace_runaway.jsonl`, `trace_premature.jsonl`.
-- A side panel showing, per iteration, the `(run_type, name, inputs)` triple — so a repeated call lands visually for the runaway case.
-
-**Live script:** walk the four signatures, one trace each. For each, ask the class to watch, then point to the **exact span** where it went off the rails and name the signature:
-
-1. **Tool error** — find the `tool` span (or its result) carrying `error` set / `is_error: true`. Then read the model's *next* span: did it recover, retry with different arguments, or give up? The trace shows the recovery decision, not just the failure. (If stage 2 ships `flaky_fetch`, this is the `https://crash`/`https://error` span; if it reuses L07's tools, this is a `calculator` `ValueError` or `lookup` `KeyError` surfaced as `is_error` by `dispatch`.)
-2. **Wrong tool arguments** — the hardest and most important. The call **succeeded**, `error` is unset, the result looks fine — but the model passed a bad argument (wrong city, malformed expression), so it answered the *wrong question*. Show that the success flag tells you nothing here; only reading the `inputs` reveals it. This is the payoff of "trace arguments, not just call names."
-3. **Runaway loop** — the same `(name, inputs)` pair repeating across iterations, ending in `max_steps`. Point at the side panel: same call, again, again. The trace makes the repetition obvious at a glance; the `termination: max_steps` confirms it.
-4. **Premature termination** — terminated `natural` (the model emitted no tool call) but the `final_text` is wrong or incomplete: the model *thought* it was done when it wasn't. Show that `natural` is not a synonym for "correct" — it only means "the model stopped asking for tools."
-
-**What to highlight:**
-
-- **You debug agents by reading, not by re-running.** A normal program is deterministic — re-run it and the bug reproduces. An agent is not: re-running can hide the bug or produce a *different* one. Teach "read the trace" as the first move when an agent misbehaves.
-- Pre-empt *"the tool returned successfully, so that step was fine"* directly on the wrong-arguments case — a successful call to the wrong question is the bug a success flag will never show you.
-- Pre-empt *"I'll just re-run it to see what went wrong"* on the runaway case — the trace of the failing run *is* the evidence; capture it, don't chase it.
-- These four signatures are exactly L09's first eval cases (objective 2 of L09: "design eval cases that target failure modes already seen in traces from L08"). Tell students to keep the failures they find — they become regression cases next lesson.
-
-**If the demo misbehaves:**
-
-- All four traces are pre-captured, so behavior is fixed. If time is short, cut to the two highest-value signatures — **wrong arguments** and **runaway** — which are the ones a `print()` log makes hardest to see and a structured trace makes easy.
-
-## Demo 4 — Instrument the loop to emit a real trace (Objective 3)
-
-**Goal:** turn the toy dict from Demo 1 into the real thing — add `TraceEvent` emission at the loop's boundaries so `agent_loop.run(...)` returns a populated `RunResult.trace`. Land that **instrumentation is a wrapper, not a rewrite**: the L07 control flow is untouched; tracing only *observes* it.
+**Goal:** show that a tight schema produces structured validation errors the model can recover from on the next turn, while a loose schema pushes the ambiguity into runtime failures the model can't interpret. Land the framing from [objectives.md](objectives.md): *errors are part of the tool's interface.*
 
 **Pre-flight:**
 
-- The `common/agent_loop.py` reference loop open, *without* trace emission yet (or with it folded behind a flag the teacher toggles). This is the one live-code beat of the lesson.
-- The `TraceEvent` model from `common/tracing.py` importable.
-- A live Sonnet 4.6 client through `common/config.py`, and the chaining task from pre-flight.
+- Two schema variants of a `book_meeting` tool:
+  - **Loose:** `book_meeting(details: str) -> str` — one free-form string parameter.
+  - **Tight:** `book_meeting(attendee_email: str, start_iso: str, duration_minutes: int, title: str) -> dict` — typed, all required, with per-parameter descriptions specifying formats (RFC 5322 email, ISO 8601 datetime, integer between 15 and 240).
+- Two error-handler variants on the *tight* tool, swappable:
+  - **Informative errors:** validation errors return `{"error": "validation", "field": "<name>", "message": "<constraint>"}` with the offending field and the constraint. E.g. `{"error": "validation", "field": "duration_minutes", "message": "must be between 15 and 240, got 500"}`.
+  - **Opaque errors:** validation errors return a generic `"error: bad input"` with no field or constraint info.
+- One ambiguous test prompt: *"Book a 90-minute design review with Priya next Tuesday afternoon."* This deliberately omits an email, leaves "afternoon" vague, and uses a relative date — exactly the conditions under which a loose schema lets the model paper over the gaps and a tight schema forces them into the open.
 
 **Live script:**
 
-1. State the rule before typing: *"I am not changing how the loop decides anything. I'm adding an emit at each boundary — that's it."* Point at the boundaries on the loop: before/after each model call, before/after each tool call, and at termination.
-2. Live-add the emission. At each boundary, append a `TraceEvent`: an `llm` span around the model call (carrying `usage` token counts, `start_time`/`end_time`); a `tool` span around each dispatch (carrying `name` and `inputs`, and `error` on failure); and the loop/`chain` framing span. Give every span the **same `trace_id`** so they belong to one run — call out that this `trace_id` is the field that makes Demo 5's comparison and Demo 6's Langfuse view possible.
-3. Run it live on the chaining task. Show the returned `RunResult.trace` — the same shape students read in Demo 2, now produced in front of them.
-4. **Defend the field set out loud, and name what's left out.** Each field answers a question (latency → "why slow?"; repeated args → "why loop?"; per-call tokens → "why so expensive?"). Then name what is *deliberately omitted* — full prompt bodies, raw tracebacks, every intermediate variable — and why: a trace bloated with everything is as unreadable as no trace. Minimalism is a deliberate choice (objective 3; the "more fields is always better" confusion).
-5. Call `.to_jsonl()` and show one span per line — the on-disk form that fed Demos 2–3 and will feed Demo 5.
+1. Run the prompt against the **loose** schema. The model packs everything into the `details` string and "succeeds" — the tool returns "Meeting booked." Show that whether the meeting was actually booked correctly is impossible to tell from the conversation.
+2. Run the prompt against the **tight** schema with **opaque** errors. The model takes a guess at each field and submits. The runtime returns `"error: bad input"`. The model's next turn typically retries with a different guess — still wrong, still opaque. Run it twice to show the loop.
+3. Run the same prompt against the **tight** schema with **informative** errors. The model submits, gets a structured error naming the offending field, and on the next turn either asks the user for the missing detail (e.g. Priya's email) or fixes the field and retries. Show the recovery path.
 
 **What to highlight:**
 
-- **Instrumentation is a wrapper, not a rewrite.** If adding a trace ever changes *how the loop decides things*, observation has leaked into control flow — pull it back. Pre-empt *"tracing changes what my agent does"*: it shouldn't; it's read-only with respect to the loop's decisions.
-- The `run_type` values (`llm` / `tool` / `chain`) and token `usage` are chosen to match OpenTelemetry/Langfuse shape on purpose — Demo 6 shows the same spans rendered in the real tool, and L12's LangGraph traces land in the same Langfuse with the same vocabulary. The recognition *is* the payoff.
-- The `trace` field is what L09 consumes. Frame L08 as "produce the record," L09 as "judge the record" — say the pair out loud.
+- The loose schema *appears* to work and is the worst outcome — silent wrongness. The tight schema with opaque errors *fails noisily but unhelpfully*. The tight schema with informative errors *fails productively* — the model learns from each turn.
+- An error message is a *prompt* for the model's next turn. Write it as if it were a system message, not as if it were a Python traceback. (Stage-2 lab idea: have students rewrite a stack-trace error into an informative one.)
+- The three error classes from [objectives.md](objectives.md): this demo is the *validation error* case. Point at recoverable runtime errors (transient API failures) and unrecoverable errors (entity does not exist) as the next two cases — Demo 4 will cover the latter.
 
 **If the demo misbehaves:**
 
-- If live-coding the emission falls behind, toggle the prepared flagged version and walk it line by line — don't sacrifice the live run that produces the trace.
-- If the live model takes a different path than expected, that's fine — *any* successful multi-step run produces a readable trace. Only Demo 5 needs a *specific* behavior, and that one reads pre-captured traces.
+- If the model on the tight-schema run guesses an email so confidently that it submits a fake `priya@example.com` and the validation passes (because email format is correct even if the address is fake), use it as a teaching moment: schemas validate *shape*, not *truth*. Then add a note that this is exactly why the next demo (errors for nonexistent entities) matters.
+- If the loose-schema run produces a tool call that happens to be parseable, run a second variant of the prompt with even more vagueness (*"Book me a meeting with the design folks soon"*) to provoke the failure.
 
-## Demo 5 — Compare two traces of the same task (Objective 4)
+## Demo 4 — Errors that close the loop, side effects that don't (Objectives 3 + 4)
 
-**Goal:** diff two runs of the *same* task and separate **signal** (a real behavior change) from **noise** (run-to-run variance on a non-deterministic loop). Land that a single differing run proves nothing — you compare to know whether a change is real.
+**Goal:** show the difference between recoverable, unrecoverable, and side-effecting errors — and the model's behavior in each case. Land the framing from [objectives.md](objectives.md): *the model will retry on its own when results look ambiguous, regardless of whether retry is safe.*
 
 **Pre-flight:**
 
-- `trace_run_a.jsonl` and `trace_run_b.jsonl` from pre-flight — two runs of the same task, ideally with one explainable real difference (e.g. A runs away and hits `max_steps`; B, after a tightened system prompt, terminates `natural`) plus some benign variation.
-- A ~10-line trace-diff helper ready but **not shown yet** — it's the upgrade beat. It walks the two ordered span lists and reports: did the tool-call sequence change, did any `inputs` change, did an extra iteration appear, did a new `error` show up, did `usage`/latency move.
+- The tight `book_meeting` tool from Demo 3 with informative errors enabled.
+- A `lookup_user_by_email(email: str)` tool with two response shapes wired up:
+  - **Returns `{"found": false, "email": "..."}`** when the email is not in the user database — clean unrecoverable signal.
+  - **Returns `{"error": "lookup_failed"}`** when a hidden `--simulate-flake` flag is on — fake transient error, recoverable on retry.
+- A `send_message(recipient_id: str, body: str)` tool that:
+  - **Logs every call to a visible "outbox" panel on screen** so the audience can see when a message is sent.
+  - **Has no idempotency key.** Calling it twice with the same arguments sends two messages.
+  - Has a description that *does not mention* the side effect. We'll fix this mid-demo.
+- One test prompt: *"Look up the user with email priya@example.com, then send them a message saying the design review is at 2pm Tuesday."*
 
 **Live script:**
 
-1. **Eyeball first.** Put the two printed traces side by side. Walk them together: same first tool call? same arguments? does B have an extra iteration? a new error? Find the differences by eye. This is cheap and fits the time budget — do it before reaching for code.
-2. Ask the load-bearing question: *"B fixed the runaway — but is that because the prompt edit worked, or did I just get a lucky run?"* State plainly that a single A-vs-B difference **cannot** answer this; only comparing across runs (ideally several) can.
-3. **Now introduce the diff helper** — the ~10-line walk over the two event lists. Run it; it prints the same differences students just found by eye, plus the token/latency deltas. The point of showing code *after* the eyeball pass: reinforce "a trace is data" — once it's structured, diffing is trivial.
-4. Separate signal from noise explicitly on the output: *"this difference — runaway vs. natural — is signal; this one — 3 extra output tokens, 80ms slower — is noise."* Naming which is which is the skill.
+1. **Unrecoverable error path.** Run the prompt with `lookup_user_by_email` returning `{"found": false}` for that address. The model sees a clean "no such user" signal in the tool result and either reports back to the user or asks for the right email — *no retry loop*. Show the trace.
+2. **Recoverable error path.** Flip the `--simulate-flake` flag and re-run. The lookup returns `{"error": "lookup_failed"}`. The model usually retries the same call once, sometimes twice. Show this in the trace. Then turn the flake off and the retry succeeds. Discuss: who should retry — the runtime (silently, with backoff) or the model (visibly, costing a turn)?
+3. **Hidden side effects.** Replace the `lookup_user_by_email` tool with one that *also creates a user record if not found* (a deliberately bad design). Re-run prompt 1. Show the audience the outbox panel: a message went out *and* a user was silently created. The model didn't intend the side effect — the tool description hid it.
+4. **Fixing the side effect.** Update the description in place to say *"Looks up a user by email. If the user does not exist, this tool will create one with default settings — call only when a missing user should be auto-created."* Re-run. The model now reasons about the side effect before calling and often pauses to ask the user.
+5. **Non-idempotent retry.** Manually trigger the model to retry the `send_message` call (e.g. by saying *"I'm not sure that went through, try again"*). Show the outbox: two identical messages. Discuss the mitigation options from [objectives.md](objectives.md): runtime-level idempotency keys, an explicit confirmation step, a tool description that warns against retry.
 
 **What to highlight:**
 
-- The loop is **non-deterministic** (L07's "variance budget"). The same task can take a different path each run. A diff is how you tell a real regression from normal variation — but you must know what variation is *normal* before you call a difference a regression. Pre-empt *"the two traces are different, so I broke something"* head-on.
-- This is the **seed of evaluation.** Comparing runs by eye to flag a regression is exactly the discipline L09 formalizes into a repeatable eval set — *same comparison, scaled from one eyeball diff to a fixed set of cases run many times*. Forward-point to L09 by name.
-- The diff is only possible because every span carries a shared `trace_id` and structured fields (Demo 4). You cannot diff two walls of `print()` output — this is "structured beats printed," paid off.
+- The three error classes are *interfaces*, not just edge cases. The model's recovery behavior is determined by the shape of the error.
+- A side effect that isn't named in the description is a side effect the model can't reason about — and therefore can't avoid. Naming it isn't paranoia; it's part of the contract.
+- Idempotency is a *system* concern, not just a tool-author concern. Even a perfectly described tool can be called twice by a confused model. The mitigation lives at the runtime/design layer.
+- Bridge forward: L17 (human-in-the-loop and approval gates) revisits this exact tension for high-stakes side effects. L08 plants the seed; L17 builds the structure.
 
 **If the demo misbehaves:**
 
-- Reads pre-captured traces, so it's stable. If you *also* want to show a live A/B (e.g. run the same task twice live to show the path genuinely varies), budget a re-run or two and accept that the live pair may not show as clean a difference as the curated one — that messiness is itself the lesson about variance. <!-- *NEED INPUT*: confirm the A/B framing for the curated pair — same-task-twice (pure variance), before/after a prompt edit (regression framing), or model A vs model B. The objectives leave all three open as valid; the before/after-a-prompt-edit pair makes the "signal vs noise" point most cleanly and previews L09's regression framing. (Note: the *model* A/B — Sonnet vs Haiku — is L09's headline contrast, so consider leaving model-vs-model to L09 and using a prompt before/after here to avoid stealing L09's beat.) -->
+- If the model refuses to retry the flaky lookup at all (and just reports the error to the user), that's a fine outcome — name it as the *other* end of the design spectrum and discuss when each is preferable.
+- If the model on step 5 catches the duplicate-send risk and refuses to retry, lean into it: well-trained models sometimes get this right zero-shot, but you can't *rely* on that — design for the worst case.
 
-## Demo 6 — See the same trace in a real tool: self-hosted Langfuse (Objective 5)
+## Optional bridge demo — toward MCP (L09)
 
-**Goal:** export the hand-rolled `TraceEvent` spans from Demo 4 to the cohort's **self-hosted Langfuse** and read the *same run* in a real dashboard. Land that the structure students built by hand is exactly what the industry uses — the dashboard is not magic, it's their trace rendered. This is an **additive** step: objectives 1–4 already stand without it.
+If time allows, run one final demo that previews L09: take one of the well-designed tools from Demos 2–4 and walk through how its name, description, schema, and error shape would translate one-to-one into an MCP server's tool spec. Don't teach the MCP wire format here; just show that the *design* survives the packaging change. The point is to set up L09's framing: MCP is about portability, not about redoing the design work.
 
-**Pre-flight:**
-
-- The cohort's shared self-hosted Langfuse instance reachable; base URL + project keys loaded through `common/config.py` (never hard-coded). Fallback (local Docker, or a screenshot walk-through) per [docs/classroom-llm-management.md](../../../classroom-llm-management.md).
-- The export path wired: either the `langfuse` SDK (a project dep added via `uv add`) or OTLP export of the OTel-shaped spans, since Langfuse ingests OpenTelemetry. <!-- *NEED INPUT*: confirm the export mechanism for the demo — the langfuse SDK (simplest, most legible mapping to GENERATION/SPAN) or raw OTLP export of the TraceEvent spans (reinforces the "approximate-OTel schema" decision but more moving parts). Requires `uv add langfuse` either way; surface the dependency to the user rather than installing it from this stage. -->
-- The Langfuse project pre-opened in a browser tab the teacher can project.
-
-**Live script:**
-
-1. Re-run the Demo 4 task (or replay the captured run) with the Langfuse export enabled. Switch to the Langfuse tab and find the new trace.
-2. **Map the vocabulary explicitly**, pointing at the UI: a Langfuse **trace** = one run (shares the `trace_id`); a Langfuse **observation** = one span; an `llm` span renders as a **GENERATION** (carrying model, token `usage`, cost); a `tool`/`chain` span renders as a **SPAN**. Say it as a translation: *"the `run_type` field you set in Demo 4 is the thing that decides GENERATION vs SPAN here."*
-3. **Re-do objective 2** in the UI: filter to a failing run, expand the offending observation, read its `inputs`/`error`. Same reading as Demo 3, now point-and-click.
-4. **Re-do objective 4** in the UI: open two runs of the same task side by side and compare token usage, latency, and the span timeline. Same comparison as Demo 5, now visual.
-5. Close the arc: *"You built the minimal version by hand first, so none of this is mysterious — the timeline, the token counts, the errors are the exact `TraceEvent` fields you emitted. And when L12's LangGraph agent lands its traces in this same Langfuse, they'll look familiar, not new."*
-
-**What to highlight:**
-
-- **You build the trace by hand, then meet the real tool.** Learning to emit and read a trace by hand first is *why* the dashboard reads as obvious instead of magic. Concept-first, then tooled — the spine of the whole lesson, paid off in the last demo.
-- The export is *additive*. A student without the Langfuse instance configured still completed objectives 1–4 on the in-memory / `.to_jsonl()` trace. Langfuse is the "now see it in the real tool" payoff, not a hard dependency — say this so the keyless/offline path doesn't feel second-class.
-- The same Langfuse instance returns in L12 (LangGraph traces) and has a datasets/experiments feature L09 name-drops for eval. This is the cohort's one shared observability home.
-
-**If the demo misbehaves:**
-
-- If Langfuse is unreachable on the day, fall back to **pre-captured screenshots** of the trace timeline, a GENERATION observation, and a two-run comparison — narrate them against the live `TraceEvent` list students just produced. The mapping (trace=run, observation=span, GENERATION=llm) is the teachable content; the live click-through is a bonus, not the lesson.
-- If the export produces spans that don't render as expected (wrong observation type, missing usage), that's a real and useful aside about the *approximate* OTel mapping — show the mismatch, explain that exact field-name fidelity to one vendor is explicitly *not* required, only approximate OTel-ish structure.
+<!-- *NEED INPUT*: include this bridge demo, or save it as the opener for L09? -->
 
 ## Pacing notes for the teacher
 
-- **Per-demo time (targets the objectives' decided ~75–100 minute, one-lecture budget):** Demo 1 is short (3–5 min, it's a recap + one edit). Demo 2 is 10–15 min (the core reading skill — don't rush it). Demo 3 is 12–18 min (four signatures; the wrong-arguments one deserves the most time). Demo 4 is the long live-code beat, 15–20 min. Demo 5 is 10–15 min. Demo 6 is 10–15 min and is the trimmable one — drop to a 5-minute screenshot tour or cut entirely if time is tight, since objectives 1–4 stand alone. Total: ~60–90 min for all six, fitting the lecture block with discussion.
-- **If the lecture must split** (per the objectives' open question): break after Demo 3 — part one is "read a trace / locate a failure" (Demos 1–3, all reading pre-captured traces, no live model), part two is "instrument / compare / export" (Demos 4–6, the live + tooled half).
-- **Live-coding budget:** Demo 4's instrumentation wrapper is the *only* place to live-code. Demo 1 is a one-line edit; Demos 2, 3, 5 read fixed files; Demo 6 runs an export, not new logic. Do not re-derive the L07 loop anywhere — it's imported.
-- **Variance budget:** only Demos 4 and 6 touch a live model. Budget one re-run each. The reading demos (2, 3, 5) are deterministic by construction because they read pre-captured traces — that determinism is a deliberate teaching choice, not an accident.
-- **The audience watches, doesn't participate.** Resist *"where's the bug in this trace?"* as a class question — that's the L08 lab pattern, not a demo pattern. Hands-on trace-reading is for the labs (stage 2).
+- **Per-demo time:** 10–15 minutes including post-demo discussion. Demo 4 is the longest (5 sub-steps). Four demos plus the optional bridge fits in a 60–80 minute block. <!-- *NEED INPUT*: confirm against the lesson-time budget once duration is pinned in [objectives.md](objectives.md)'s open questions. -->
+- **Variance budget:** model behavior varies run-to-run, especially in Demo 2 where the whole point is *distributional* behavior. Budget at least one re-run per demo, and on Demo 2 explicitly run each variant twice so the audience sees variance, not just a single result.
+- **The audience watches, doesn't participate.** Resist the temptation to ask "what would *you* call this tool?" — that is a lab pattern, not a demo pattern. Hands-on practice is for the L08 labs.
+- **Keep the same task across Demos 2–3 where possible.** Repetition of the same input across changing tool designs is what makes the contrast legible. Don't rotate problems for variety's sake.
 
 ## Open authoring questions
 
-- <!-- *NEED INPUT*: loop/tool naming reconciliation between L07's built `run_loop` + exception-based failures and the objectives' `agent_loop.run()` + `flaky_fetch`. See "Naming and tooling reconciliation" above — this must be settled before any demo is runnable, and the resolution must be identical in L07, common/agent_loop.py, common/tools.py, this lesson, and L09. -->
-- <!-- *NEED INPUT*: where the pre-captured demo traces (trace_good, the four failure traces, the A/B pair) and the chaining task live in the repo, and that they're committed so the teacher isn't re-capturing live each delivery. -->
-- <!-- *NEED INPUT*: the concrete multi-step chaining task for Demo 2, confirmed runnable against common/tools.py (the current L07 calculator+lookup don't chain cleanly, and the old "288-city" puzzle needs a number-keyed lookup entry that doesn't exist). -->
-- <!-- *NEED INPUT*: the A/B framing for Demo 5's curated trace pair — prompt before/after vs. same-task-twice vs. model-vs-model — bearing in mind model-vs-model (Sonnet vs Haiku) is L09's headline contrast and may be best left to L09. -->
-- <!-- *NEED INPUT*: the Langfuse export mechanism for Demo 6 (langfuse SDK vs OTLP), and confirmation that `uv add langfuse` (or the OTLP exporter dep) is run during stage 2 — this stage does not install deps, only surfaces them. -->
-- <!-- *NEED INPUT*: whether Demo 6 runs live against the shared cohort Langfuse on first delivery or ships as a screenshot walk-through by default, gated on the shared instance being stood up (infra in docs/classroom-llm-management.md). -->
+- <!-- *NEED INPUT*: which model class(es) anchor the demos — see top-of-file pre-flight. This decision propagates to every demo, especially Demo 2 where the description-quality gap widens on smaller models. -->
+- <!-- *NEED INPUT*: are the demos run in a Jupyter notebook the teacher projects, or in a slide-embedded REPL, or via a custom demo runner script? Affects how the tool-registry swap (good vs. bad variants) is wired. -->
+- <!-- *NEED INPUT*: should Demo 4's recoverable-error case introduce *runtime-level* retry logic with backoff, or stay strictly at the model-visible layer? Going deeper foreshadows L10 (hand-rolled agent loop), which may be the better home. -->
+- <!-- *NEED INPUT*: should the side-effect discussion in Demo 4 introduce typed effects (read vs. write vs. external) or keep it informal? Mirrors the same open question in [objectives.md](objectives.md). Forward link to L17 (approval gates) may be sufficient. -->
+- <!-- *NEED INPUT*: do the L08 demo tools share an implementation with the L08 lab tools, or are lab tools designed from scratch by students? Affects how much of the demo code is reusable. Mirrors the lab-design question in [objectives.md](objectives.md). -->
+- <!-- *NEED INPUT*: a pointer/link to where the demo tools live as code (a `demos/` subdir? inline in a notebook?) — not yet decided in non-draft docs. -->

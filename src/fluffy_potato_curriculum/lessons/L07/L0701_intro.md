@@ -1,102 +1,115 @@
-# Hand-rolled agent loop: an agent is a loop, not a model
+# Tool calling: a tool call is also just tokens
 
 ```yaml
-title: "Hand-rolled agent loop: an agent is a loop, not a model"
-keywords: agent loop, model tool model, termination, iteration cap, max steps, tool failure, tool_result, is_error, hand-rolled, anthropic, claude
+title: Tool calling: a tool call is also just tokens
+keywords: tool calling, tool use, tool_use, tool_result, tool definition, schema, round-trip, protocol, anthropic, claude
 estimated duration: 10
 ```
 
-> **Lesson:** L07 — Hand-rolled agent loop.
+> **Lesson:** L07 — Tool calling: how it works.
 > **Roadmap:** see this lesson's [objectives.md](../../../../docs/origin/lesson_roadmaps/L07/objectives.md).
 > This is a short framing piece. Read it before the written reference lecture
-> ([L0702_lecture.md](L0702_lecture.md)), the stub-model demo notebook
-> ([L0703_lecture.ipynb](L0703_lecture.ipynb)), the two hands-on labs
-> ([L0704](L0704_lab_empty.ipynb), [L0705](L0705_lab_empty.ipynb)), and the one live multi-step demo
-> ([L0706_lecture.ipynb](L0706_lecture.ipynb)).
-> **Anchor model for the live demo: Claude Sonnet 4.6.**
+> ([L0402_lecture.md](L0402_lecture.md)) and the four teacher demo notebooks
+> (a-tool-call-is-tokens [L0403_lecture.ipynb](L0403_lecture.ipynb), one-wired-round-trip
+> [L0404_lecture.ipynb](L0404_lecture.ipynb), trace-the-round-trip [L0406_lecture.ipynb](L0406_lecture.ipynb),
+> three-outcomes [L0408_lecture.ipynb](L0408_lecture.ipynb)).
+> **Anchor model throughout: Claude Sonnet 4.6** (Claude Haiku 4.5 is the smaller-model contrast in the last demo).
 
 ## Where this lesson sits
 
-By L07 you have seen the *mechanics* of tool calling — wiring a single tool and tracing one
-round-trip ([L04](../L04/L0401_intro.md)) — and the *design* of good tools, including what a tool
-should return when it can't do its job ([L05](../L05/objectives.md)). What you have **not** built is
-the *outer loop* that turns one tool-call round-trip into something that resembles an agent.
+L01–L06 covered everything a model can do that is purely *text-in, text-out*: tokenization and
+cost (L01), prompting roles and structured output (L02), and getting the model to reason better
+by changing the *content* of the prompt (L06). In every one of those lessons the model only ever
+produced text, and your program read that text. Nothing the model said ever *ran*.
 
-L07 closes that gap. You assemble a minimal **model → tool → model** loop in plain Python and learn
-to reason about the two non-obvious questions that loop raises:
+L07 is the first lesson where the model is given the ability to **act** — to request that your
+application run a function and feed the result back. This is the bedrock of every agent in the
+rest of the course. But the framing from L06 carries over almost word for word:
 
-1. **When does it stop?**
-2. **What happens when a tool fails?**
+> *Reasoning is just more tokens. A `<thinking>` block is a contract about **shape**, not a new
+> capability.*
 
-This is the first lesson where you write code that *keeps calling the model on its own*. Everything
-before this was a single API call (L01–L05) or a single tool round-trip (L04). After this lesson you
-have a working agent — small, hand-built, no framework — that can chain multiple tool calls toward a
-goal.
+becomes, in L07:
 
-## The one idea, said three ways
+> *A tool call is also just more tokens. A tool definition is a contract about **shape**, not a new
+> capability — and the model never runs anything; your application does.*
 
-If you remember nothing else from L07, remember this: **an agent is a loop, not a model.**
+That last clause is the single most important sentence in the lesson. Keep it in mind through
+every demo and lab.
 
-1. The **model** is a stateless function call. You send it the whole conversation plus the tool
-   definitions; it emits one response. It does not remember the last turn, and it does not run your
-   tools — that framing is straight from [L04](../L04/L0401_intro.md).
-2. The **loop** is what makes it an agent. The loop calls the model, executes any tool the model
-   requested, appends the result, and calls the model *again* — over and over — until the model
-   stops asking for tools or a safety cap fires.
-3. **Every framework you will meet later is a fancier version of this loop.** LangGraph
-   ([L11](../../CURRICULUM_PRD.md)) reframes the same model→tool→model skeleton as a graph; deep
-   agents add planning and memory around it. Hand-rolling it once demystifies all of them.
+## The one idea, said five ways
 
-## The three rules this lesson lands
+If you remember nothing else from L07, remember this: **the model does not run your tool.** It
+emits a block of tokens that — by training — has the *shape* of a tool-call request. Your
+application reads those tokens, decides what to do, runs the real function, and hands the result
+back. Said five ways, because it reshapes how you debug, secure, and scale every agent later:
 
-These three rules are the spine of the lesson — the lecture, the demo, and both labs return to them:
+1. The model **proposes**; the application **disposes**. A tool call is a request, not an
+   execution.
+2. The tool **definition** is a contract about shape (like L06's `<thinking>` tags), not a
+   guarantee about behavior. It does not force a call, validate arguments, or stop the model from
+   inventing a tool that doesn't exist.
+3. A single tool-using exchange is **at minimum four messages**: `user → assistant(tool_use) →
+   user(tool_result) → assistant(final)`. Every tool call grows the history — that *is* the
+   protocol, not a side effect.
+4. The model is **stateless across calls**. The tool definitions and the full history ride along
+   in *every* request; the model does not "remember" the tool from last turn.
+5. Tools cost tokens **twice over**: the definition is re-sent on every request, and the result
+   lives in the history forever after.
 
-- **The message-history invariant is load-bearing.** Every `tool_use` block the model emits must be
-  answered by a matching `tool_result` block — same id, in the *next* user-role message — before you
-  call the model again. Get this wrong and the API rejects the request or produces garbage. This is
-  the single most common bug in hand-rolled loops.
-- **Termination is a design decision, not a default.** Left alone, the model will happily call tools
-  forever. A loop with no cap is not "minimal" — it is *broken*. Every loop you write has at least a
-  `max_steps` cap. Hitting the cap always means something is worth investigating.
-- **Tool failures are messages, not exceptions.** When a tool raises, the loop's job is to convert
-  that exception into a well-formed `tool_result` with `is_error: true` and hand it back to the
-  model — not to crash, and not to decide the recovery itself. The model is often the best component
-  to decide whether to retry, swap tools, or give up. This builds directly on L05's
-  error-handling thinking: L05 taught the *tool author* what to return on failure; L07 teaches the
-  *loop* what to do when the tool can't even return.
+## Vocabulary this lesson lands
 
-## How we teach it: a stub model, then one live run
+These five terms recur all the way through L08–L20, so we pin them now:
 
-The hard part of an agent loop is the **control flow** — iterate until done, trip the cap, handle a
-failure — not the live model. So most of L07 is built on a tiny **stub model**: a fake whose
-`.create(...)` pops the next *scripted* response off a list (a `tool_use` turn, then another, then a
-final text turn). With a scripted model:
+- **Tool** — a callable in your application (here, a plain Python function) that the model can
+  *request* via the tool-call protocol.
+- **Tool definition / schema** — a structured description (name, natural-language description,
+  JSON-Schema input shape) you pass to the model alongside the prompt. It tells the model what
+  tools exist and how to invoke them.
+- **Tool call** (also *tool-use block*) — the block in a model response saying "I want to call
+  tool X with arguments Y." A request, not an execution.
+- **Tool result** (also *tool-result block*) — the block in the *next* user-side message carrying
+  the output of running the requested tool. It closes the loop and references the call's id.
+- **Round-trip** — one full `model → tool-call → application runs tool → tool-result → model`
+  exchange. L07 deals only with *single* round-trips; multi-step loops arrive in L10.
 
-- the loop is fully **deterministic** — it runs the same way every time, no API key, no cost;
-- you can script a runaway (the model "never stops") and watch the `max_steps` cap *catch* it;
-- you can script a tool that raises and watch the loop turn the exception into a `tool_result`.
+## What L07 deliberately does *not* do
 
-That is how the demo ([L0703](L0703_lecture.ipynb)) and both labs ([L0704](L0704_lab_empty.ipynb),
-[L0705](L0705_lab_empty.ipynb)) work — **offline and verifiable**. Exactly **one** notebook
-([L0706](L0706_lecture.ipynb)) swaps the stub for the real Anthropic SDK and runs a genuine
-multi-step loop, so you see the same code drive a live model.
+L07 is scoped tight on purpose, the same way L06 stayed prompt-only:
+
+- **One tool, one round-trip.** Every demo and lab uses a single `calculator` tool and a single
+  model→tool→model exchange. Multi-tool *selection* and tool-error *design* are **L08**; an agent
+  loop over many calls is **L10**. Resisting "just one more tool" is what keeps the protocol legible.
+- **Mechanics, not judgment.** L07's job is to make the protocol mechanically obvious — to let you
+  *build* a tool-using exchange that works. **L08 ("Designing good tools")** asks the design
+  questions: should this be a tool at all, what should it be named, what should the schema look
+  like, how should it report failure? We share vocabulary with L08 exactly so you don't relearn
+  terms.
 
 ## A note on the code you'll see
 
-The same wrinkle from [L04](../L04/L0401_intro.md) applies. The course's `potato_llm` seam is
-**text-only** — its `Message` carries a string and cannot represent `tool_use` / `tool_result`
-blocks. The agent loop is *built on* those blocks, so the **live** demo reaches under the seam and
-calls the raw Anthropic SDK directly (the key still loads through the config seam,
-`require_anthropic_key` — never hard-coded). The stub-model notebooks don't call any SDK at all; the
-stub mimics the SDK's response shape with `SimpleNamespace`, so the loop code is identical whether a
-fake or a real client is plugged in. That interchangeability is the whole point.
+There is one wrinkle worth flagging up front. The course's `potato_llm` seam (the provider-agnostic
+client you used in L02–L06) is **text-only** — its `Message` carries a string and cannot represent
+tool-use or tool-result blocks. Because L07 is *about* those blocks, the L07 demos and the live labs
+reach **under** the seam and call the raw Anthropic SDK directly:
+
+```python
+import anthropic
+from fluffy_potato_curriculum.common.config import require_anthropic_key
+
+client = anthropic.Anthropic(api_key=require_anthropic_key())
+resp = client.messages.create(model="claude-sonnet-4-6", max_tokens=512, tools=[...], messages=[...])
+```
+
+This is the one lesson that legitimately bypasses `potato_llm`. The key still loads through the
+config seam (`require_anthropic_key`) — we never hard-code it. Two of the labs are **offline pure
+Python** (no key needed): they hand you a *crafted* `tool_use` block to dispatch on and validate, so
+you can practice the mechanics deterministically.
 
 The one sentence to leave L07 with:
 
-> *An agent is a loop around a stateless model: call the model, run the tool it asked for, feed the
-> result back, repeat — until the model stops asking or a cap you chose fires; and when a tool
-> breaks, the loop turns the break into a message, not a crash.*
+> *A tool call is a block of tokens the model emitted; your application is the one that reads it,
+> runs the function, and hands the result back — and that exchange is always at least four messages.*
 
-Next: the written reference lecture in [L0702_lecture.md](L0702_lecture.md), then the stub-model demo
-([L0703](L0703_lecture.ipynb)), the labs ([L0704](L0704_lab_empty.ipynb),
-[L0705](L0705_lab_empty.ipynb)), and the live multi-step run ([L0706](L0706_lecture.ipynb)).
+Next: the written reference lecture in [L0402_lecture.md](L0402_lecture.md), then the live demos
+(L0703 / L0704 / L0708) and the hands-on labs (L0705 / L0707 / L0709).

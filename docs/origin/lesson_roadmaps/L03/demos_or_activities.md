@@ -1,8 +1,10 @@
-# L03: Teacher-led demos — Teaching an LLM to think via prompting
+# L03: Teacher-led demos — Single-node operations
 
 > Sibling docs: [objectives.md](objectives.md) (what the lesson aims for), parent design [CURRICULUM_PRD.md](../../CURRICULUM_PRD.md).
 >
-> **Audience for this file:** the teacher running L03. Every demo below is *teacher-driven, no student participation*. Student-driven exercises live in the L03 labs (separate file).
+> **Audience for this file:** the teacher running L03. Every demo below is *teacher-driven, no student participation*. Student-driven exercises live in the L03 labs (separate file, stage 2).
+>
+> **Anchor model: Claude Sonnet 4.6**, and only Sonnet — L03 deliberately keeps the model constant so the *node* is the only new variable a student has to track. (No per-node model mixing here; that mechanism is [L04](../L04/objectives.md)'s.) **This is the course's first framework lesson:** the node calls the **native LangChain `ChatAnthropic`** client directly, *not* the hand-rolled `potato_llm` seam used in L01–L02. Call that departure out loud.
 
 ## How to read this file
 
@@ -11,155 +13,122 @@ Each demo is a self-contained block with:
 - **Goal** — the single insight the demo should land. Tied to a learning objective from [objectives.md](objectives.md).
 - **Pre-flight** — what the teacher needs loaded before class.
 - **Live script** — the order of operations during the demo. Treat it as a checklist, not a teleprompter.
-- **What to highlight** — the moment(s) where the teacher should slow down and call out the takeaway out loud.
-- **If the demo misbehaves** — graceful fallback for when the model surprises you (because it will).
+- **What to highlight** — the moment(s) where the teacher should slow down and say the takeaway out loud.
+- **If the demo misbehaves** — graceful fallback for when the model surprises you (it will).
 
-The demos are ordered to match the four subgoals from the lesson-plan row, but they are not strictly sequential — Demo 4 ("when CoT hurts") deliberately uses a contrast that builds on Demos 1–3, so run them in order on the first delivery of the lesson.
+The demos are ordered to match the four learning objectives from [objectives.md](objectives.md). Demo 1 wraps a single LLM call as a typed node (objectives 1 & 2); Demo 2 compiles, invokes, and inspects that same node in isolation (objective 3); Demo 3 is a short contrast-and-discussion beat, not a build, that lands *why* a node is the unit worth wiring (objective 4). They build on each other — Demo 2 reuses Demo 1's node and state unchanged, and Demo 3 reuses Demo 1's code as the "explicit node" side of its comparison. Run them in order.
+
+> **The spine of L03: one node, nothing wired to it.** L03 is the *first* LangGraph lesson and it deliberately stops at one node — no edges between nodes, no branching, no loop. Keep saying **"state goes in, state comes out"** and **"a node is one LLM call you wire."** The entire lesson is building toward the single sentence a student should leave with: *"you just wired one step — next lesson, you wire several of them together."*
 
 ## Pre-flight (once, at the top of the lesson)
 
 The teacher should have, before the first demo starts:
 
-- A working REPL or notebook with the project's Claude SDK setup (per the project's `uv` env).
-- The four demo prompts below pre-loaded as variables or cells, so each demo is a *single keystroke* to run. Live-typing prompts during demos eats time and breaks pacing.
-- A second model client configured for Demo 3's "different-model critic" beat. **Primary model: Claude Sonnet 4.6** (the course's anchor). **Cheap critic: Claude Haiku 4.5** (introduced briefly here as a different-model critic; treated more rigorously in L09).
-- A way to project token counts and latency alongside outputs (a small wrapper that prints `input_tokens`, `output_tokens`, and wall-clock time after every call). This is essential for Demo 4, where the *cost* of reasoning is the punchline.
+- **LangGraph + the native LangChain Claude client ready.** `from langgraph.graph import StateGraph, END` and `from langchain_anthropic import ChatAnthropic`. Both `langgraph` and `langchain-anthropic` are already project dependencies (added via `uv add`); no install during class. The API key still loads through `common/config.py` (`ChatAnthropic` reads `ANTHROPIC_API_KEY` from the same environment the config seam populates) — key handling is unchanged, only the *client* is the framework's now.
+- **One model client constructed and named:** `sonnet = ChatAnthropic(model="claude-sonnet-4-6-...")`. One client, used by the one node — keep it that simple. <!-- *NEED INPUT*: confirm exact model id string for the Sonnet 4.6 snapshot used by ChatAnthropic, read from common/config.py rather than hard-coded in cells. Mirrored from the equivalent open question in L04's demos. -->
+- **A small running-example dataset for the single node.** Decided running example: an **`extract` node** that pulls a handful of structured fields out of a short piece of raw text (reusing L02's structured-output-by-instruction discipline, now returned as a typed state update instead of a hand-parsed script variable). <!-- *NEED INPUT*: confirm the exact domain/text for the extract node — recommend reusing a support-ticket-style snippet so L04 (whose first node is also a `parse`/extract step over support tickets) can plausibly be read as "the next lesson takes this exact kind of node and adds two more." A different, unrelated domain is also fine if the intent is to keep L03 visually distinct from L04's running example. -->
+- **The one-node graph definition in a sibling file** to paste if live-coding falls behind.
+- LangGraph's own run/stream output ready to call (`stream()` on the compiled graph) — **not** Langfuse. Real trace tooling is [L11](../L11/objectives.md); name it as a forward pointer, don't reach for it.
 
-> Why pre-loaded prompts: L03 lives or dies on contrast — same input, different framing, different output. If the teacher mistypes a prompt mid-demo, the contrast breaks and the lesson lands as "the model is unpredictable" instead of "this technique caused this change."
+> Why one node, one model, one dataset: L03's entire pedagogical job is to make "what is a node" land cleanly before any wiring exists. Every extra moving part (a second model, a second node, a tracing platform) borrows attention from that one idea and belongs to a later lesson instead.
 
-## Demo 1 — CoT made visible (Subgoal 1)
+## Demo 1 — Wrapping one LLM call as a typed node (Objectives 1 & 2)
 
-**Goal:** show that asking for step-by-step reasoning changes the answer on a problem the model gets wrong zero-shot. Land the framing from [objectives.md](objectives.md): *"reasoning is a tokens-on-the-page phenomenon."*
-
-**Pre-flight:**
-
-- Pick a problem the chosen model gets wrong roughly half the time zero-shot but reliably right with CoT. Multi-step probability and constraint-satisfaction problems work well for current Claude models. Suggested prompt:
-
-  > A bag contains 5 red, 7 blue, and 3 green marbles. I draw 3 without replacement. What is the probability all three are different colors? Answer with a single number.
-
-  <!-- *NEED INPUT*: confirm this problem is in the right difficulty band for the target model — the teacher should dry-run it 5x before class and see at least 2 zero-shot failures, or pick a different problem. If pinning to a smaller model, use a harder problem; for a larger model, use a multi-step constraint puzzle instead. -->
-
-- Have a known-correct answer pre-computed and on a slide (so the teacher can confirm correctness in one glance).
-
-**Live script:**
-
-1. Run the prompt zero-shot, output answer only. Read the model's answer aloud, mark it ✓ or ✗ against the slide.
-2. Re-run the *exact same prompt* with `Let's think step by step.` appended. Read the reasoning aloud (or have it on screen), then the final answer.
-3. Re-run again with a numbered scaffold:
-   > Solve the problem in this order: (1) count total ways to draw 3 marbles, (2) count favorable outcomes, (3) divide.
-4. Show all three outputs side by side: zero-shot, free-form CoT, scaffolded CoT.
-
-**What to highlight:**
-
-- The model isn't different across the three runs — only the prompt is. The "thinking" is just more tokens.
-- Free-form CoT vs. scaffolded CoT: free-form is cheaper to write, scaffolded is more controllable. Foreshadow Subgoal 4 ("when does which help?").
-- Token counts: scaffolded CoT typically costs 3–10x more output tokens than zero-shot.
-
-**If the demo misbehaves:**
-
-- If the model nails the zero-shot answer on the day, fall back to a harder backup prompt (keep one warmed up). Do not change the *technique* on the fly — the contrast is the whole demo.
-- If the CoT reasoning is wrong but the final answer is right, lean into it: this is exactly the failure mode Subgoal 3 (self-critique) addresses, and it foreshadows that demo nicely.
-
-## Demo 2 — Scratchpad as interface contract (Subgoal 2)
-
-**Goal:** show that `<thinking>` tags don't *do* anything — they're a contract for downstream parsers. Wrap the same reasoning, but make it cleanly extractable.
+**Goal:** take a plain L01/L02-style model call and show, step by step, what changes when it becomes a **node**: a typed state schema appears, the function signature becomes state-in/state-out, and the model client switches from `potato_llm` to native `ChatAnthropic`. Land the **purity contract** — same relevant state in, same shape of update out, no hidden reads or side effects beyond the one LLM call.
 
 **Pre-flight:**
 
-- Reuse Demo 1's problem so students see the technique stack on something familiar.
-- Have a tiny Python parser ready (regex or `re.search` on `<answer>...</answer>`) so the teacher can show the extracted answer in one line.
+- A short reminder cell showing the L01/L02-style call: a plain function that takes a string, builds a prompt, calls `potato_llm`, and returns a parsed dict. Keep this on screen as the "before."
+- The `extract` task's target fields and one sample input text ready to paste.
 
 **Live script:**
 
-1. Take Demo 1's scaffolded CoT prompt and add: *"Put your reasoning inside `<thinking>...</thinking>` tags. Put only your final numeric answer inside `<answer>...</answer>` tags."*
-2. Run it. Show the structured output.
-3. Run the parser: pull the contents of `<answer>` and print them. Note that the reasoning is right there for debugging if needed, but the program-readable answer is now trivial to extract.
-4. Compare to Demo 1's free-form CoT output — to extract the final number from that, the teacher would need to scan the last line, hope the model is consistent, and write fragile parsing.
+1. Put the "before" cell on screen: a bare function calling `potato_llm` and returning a dict. Ask nothing of the room — this is a recap, not a quiz — just point at it and say: "this is everything you know how to do already."
+2. Live-code the **typed state** schema: a `TypedDict` with an input field (e.g. `raw_text: str`) and the output fields the node will populate (e.g. `extracted_fields: dict`). Keep it to two or three fields — this is the smallest state that makes the point.
+3. Live-code the **node** as a plain typed function: `def extract_node(state: ExtractState) -> dict:`. Inside, build the same structured-output prompt from L02 (ask for a shape, e.g. JSON with named fields), but call it through **`ChatAnthropic`** instead of `potato_llm`. Say the departure out loud: *"the framework brings its own client — this is the first of a few you'll meet."*
+4. Parse the model's response defensively (the same discipline from L02 Demo 2 — `json.loads` first, a regex fallback second) and **return a state update**, not the raw model response: `return {"extracted_fields": parsed}`. Underline that the function returns *an update*, not "the answer."
+5. Put the "before" and "after" functions side by side. Walk the diff out loud: same underlying API call, same structured-output discipline from L02 — what changed is the *signature* (state in, state-update out) and the *client* (`ChatAnthropic`, not `potato_llm`).
 
 **What to highlight:**
 
-- The model already reasoned in Demo 1. The tags add zero capability — they add a *contract*. This is the same kind of move as JSON-mode output: shape, not substance.
-- Why this matters for evals and tool-calling pipelines (foreshadow L04): downstream code consumes structured fields, not prose.
-- The model can ignore the tag contract. Showing a single failure (e.g. it puts the answer outside `<answer>` tags) is *more* educational than a clean run — it teaches that contracts are best-effort and need parser fallbacks.
+- **State goes in, state comes out.** The node doesn't hand back "the answer" the way L01–L02 code did — it hands back an *update* to a shared object. Say this is a small but real shift in mental model.
+- **The purity contract.** Given the same relevant state, the node does the same unit of work and returns the same *shape* of update. What's non-deterministic is the model's sampling, not the function's contract — the function doesn't secretly read a global, mutate something outside state, or depend on call order.
+- **This is the first framework lesson.** Name the client swap explicitly and don't let it pass silently: `potato_llm` was the course's own seam; `ChatAnthropic` is LangChain's. Both are still "just an API call" underneath.
+- **The node's job is narrow on purpose.** One node does one unit of work — here, extraction. Chaining several narrow steps together is next lesson's entire subject.
 
 **If the demo misbehaves:**
 
-- If the model stubbornly emits clean tags every run, run a deliberately ambiguous prompt to provoke a tag-violation (e.g. ask for the answer "as a fraction or a decimal"). Use the failure to discuss validation.
+- If the model's structured output comes back malformed on the sample input, that's a free bonus — run the L02-style defensive parser live and show it absorbing the failure. Don't treat it as a demo failure; it reinforces the L02 callback.
+- If a student asks "why does this need a `TypedDict` at all, a dict would work" — answer honestly: for *one* node it mostly would; the typed shape is the contract a *future* node (L04) will read without opening this node's source. The payoff isn't visible yet at one node.
 
-## Demo 3 — Self-critique: the good, the bad, the sycophantic (Subgoal 3)
+## Demo 2 — Compile, invoke, and inspect one node in isolation (Objective 3)
 
-**Goal:** show self-critique improving an answer, *and* show it failing via sycophantic agreement, in the same demo. Land that self-critique is a sampling technique, not a correctness oracle.
+**Goal:** take Demo 1's node and put it through the smallest possible `StateGraph`: one node, entry point, straight to `END`. Compile it, invoke it, and inspect the returned state. Use LangGraph's own stream output to "watch it run," and name — but do not use — real trace tooling as an L11 forward pointer.
 
 **Pre-flight:**
 
-- A prompt where the model often produces a plausible-but-wrong first answer. A classic: a logic puzzle with a misleading surface (e.g. *"A bat and a ball cost $1.10 in total. The bat costs $1.00 more than the ball. How much does the ball cost?"* — many models still fall for "$0.10").
-- Three critique framings prepared:
-  1. **Same-model, neutral framing** — *"Review your answer above. Is it correct?"*
-  2. **Same-model, adversarial framing** — *"You are a skeptical reviewer. Find the flaw in the answer above and produce a corrected version."*
-  3. **Different-model critique** — same as (1) but routed to the secondary model client.
-
-  <!-- *NEED INPUT*: the lesson-plan row mentions self-critique without specifying single-prompt vs. two-step. The objectives doc keeps both in scope; this demo uses two-step (separate calls). If the course settles on single-prompt as the canonical pattern, swap (1)–(3) for inline-critique variants. -->
+- Demo 1's `extract_node` function and `ExtractState` schema, already defined and on screen.
+- Two or three sample input texts of varying difficulty (one clean, one with a missing/ambiguous field) to invoke against.
 
 **Live script:**
 
-1. Run the prompt with no CoT, capture the (probably wrong) answer.
-2. Run critique framing (1) — the neutral same-model self-check. Roughly half the time the model will agree with its wrong answer. Read it aloud either way.
-3. Run framing (2) — adversarial same-model. Show the higher catch rate. Discuss *why*: the framing shifts the model into a different "role" with a different prior over what constitutes a good answer.
-4. Run framing (3) — different-model critique. Show the result. Discuss the trade-off: usually catches more, costs more, adds latency.
+1. Live-code the graph: `builder = StateGraph(ExtractState)`, `builder.add_node("extract", extract_node)`, `builder.set_entry_point("extract")`, `builder.add_edge("extract", END)`. Say out loud that there is exactly **one** node and **one** edge, and that edge goes straight to `END` — there is nothing to wire yet, on purpose.
+2. `graph = builder.compile()`. Note this turns the *declaration* into a *runnable* — nothing has executed yet.
+3. `graph.invoke({"raw_text": sample_1})`. Show the returned state on screen: the `raw_text` field is still there unchanged, and `extracted_fields` is now populated. Point at both — the input survived, the output appeared.
+4. Re-run with a second, harder sample text (missing or ambiguous field). Show the returned state again — reinforce that "state comes out" every time, even when the underlying extraction quality varies.
+5. Call `graph.stream({"raw_text": sample_1})` and watch the single step fire in the stream output. Say explicitly: *"this is LangGraph's own built-in way to watch a run — for one node it's almost overkill, but it's the same mechanism L04 will use to watch several nodes fire in sequence."*
+6. Forward-pointer, one line, do not demo it: *"Later, in L11, you'll route runs like this to a real tracing platform and read a structured trace — for now, the return value and the stream are all you need to answer 'did my node run, and what came back.'"*
 
 **What to highlight:**
 
-- Sycophancy is the failure mode to remember. Name it explicitly. If framing (1) catches the error this run, do framing (1) again with a slightly different problem and let the audience watch sycophancy happen live. (This is one of the few demos worth running twice.)
-- A critic that has *no new information* is a weak critic. Adversarial framing, different model, retrieved evidence — these are all ways of injecting new information.
-- Foreshadow that L10 (model power) revisits the "use a small cheap model as critic" pattern more rigorously.
+- **Compile then invoke is two separate steps.** Compiling declares the runnable; invoking runs it on a specific input. Worth saying plainly since students haven't seen this two-step shape before.
+- **The returned state has both the old and the new.** `invoke()` doesn't return "just the output" — it returns the whole state, input field intact, output field populated. This is the direct, hands-on version of "state comes out."
+- **More ceremony than just calling the function — and that's the point, not yet paid off.** Be honest: for one node, `graph.invoke(...)` is more setup than `extract_node_plain(sample_1)` would have been. The payoff is coming in L04, not here.
+- **This is not tracing.** `stream()` shows *that* the node ran; it is not a substitute for the structured, comparable traces L11 will teach. Naming the gap now makes L11 land as "now you get the real tool," not a redundant repeat.
 
 **If the demo misbehaves:**
 
-- If the model gets the puzzle right zero-shot every time on the day, fall back to a multi-step arithmetic problem and tweak the numbers until the model errs. Have one ready.
+- If `stream()`'s single-step output feels anticlimactic (it will — there's only one step), lean into it: *"one node, one step in the stream — next lesson this same call shows three or four steps firing in order, and it'll look a lot more interesting."*
+- If a student asks to see the graph diagram rendered, it's fine to show it (`get_graph().draw_mermaid_png()` or the Mermaid text) as a curiosity, but don't build the lesson around it — a one-node diagram is nearly content-free. L04 is where the diagram earns its keep.
 
-## Demo 4 — When reasoning hurts (Subgoal 4)
+## Demo 3 — Why wire a node at all? (Objective 4)
 
-**Goal:** show explicit reasoning making things *worse* — slower, more expensive, no accuracy gain (or even *worse* accuracy). The whole point of L03 is that reasoning is a tool, not a default.
+**Goal:** a short contrast-and-discussion beat, not a build. Put Demo 1's clean node-based `extract_node` next to an equivalent "just write one long function" version that does extraction *and* a second, unrelated step inline. Use the comparison to land *why* an explicit, narrow step is the unit worth orchestrating — and close with the exact forward pointer to L04.
 
 **Pre-flight:**
 
-- Two contrasting tasks:
-  - **Task A — easy zero-shot:** a sentiment classification on a clearly-positive review (*"I love this product, it's amazing — five stars!"* → `positive`). The model nails this in one or two output tokens.
-  - **Task B — talked-into-the-wrong-answer:** a simple factual question with a misleading hint (e.g. *"Most people think the answer to X is Y, but is that actually correct? Reason carefully."*) where free-form CoT often constructs a plausible but wrong justification. <!-- *NEED INPUT*: pick a task in this style that fits the target model — needs a dry-run pass to confirm the failure mode reproduces. The point is to show CoT making things worse, so if the model handles it cleanly, find a harder one or use a different model class. -->
-- The token-count + latency wrapper from pre-flight is essential here.
+- Demo 1's `extract_node`, already on screen.
+- A second, pre-written function — call it `extract_and_summarize_inline` — that does the same extraction *and* then, in the same function body with intermediate variables, drafts a one-line summary from the extracted fields. No state schema, no typed return — just sequential Python.
 
 **Live script:**
 
-1. Run Task A zero-shot. Note the output: ~2 tokens, near-zero latency, correct.
-2. Run Task A with `Let's think step by step.` Note the output: 50–200 tokens of reasoning, higher latency, **same answer**. Show the cost difference numerically.
-3. Run Task B zero-shot vs. Task B with free-form CoT. Show the case where CoT actually *changes the answer in the wrong direction* (or, if that doesn't reproduce on the day, where CoT and zero-shot disagree and CoT is the one that's wrong).
-4. Tie back to the budget: every CoT token is paid for. Reasoning is not free.
+1. Put both functions on screen side by side: `extract_node` (Demo 1's, one job, typed state in/out) and `extract_and_summarize_inline` (two jobs, one function, plain intermediate variables).
+2. Ask the room to imagine a very small, concrete change: *"the extraction prompt needs a fourth field."* Walk each version: in `extract_node`, the edit is contained to the node's own prompt and parser — the state schema and the function signature might need a field, but nothing about "what calls this" changes. In `extract_and_summarize_inline`, the same edit still works, but now imagine testing extraction *alone* — you can't easily run just that half without also running (and paying for) the summarize half.
+3. Name the concrete costs of the inline version out loud: harder to test one step alone, harder to swap the step's model or prompt without touching its neighbor, harder to see the shape of the pipeline at a glance (there is no diagram, no list of steps — just a function body).
+4. Name the concrete benefit the node version buys back: it can be **composed**, **reordered**, **tested in isolation** (Demo 2 just did this), and **swapped out**, in ways the inline version resists.
+5. Close with the exact forward pointer: *"L04 is this idea multiplied — the same typed-state-in, typed-state-out node design, several of them, wired with fixed edges into a sequence. If you understood today's one node, you already understand most of what L04 needs — it's mostly wiring, not new node design."* Say the bridge sentence from [objectives.md](objectives.md) verbatim: *"You just wired one step — next lesson, you wire several of them together."*
 
 **What to highlight:**
 
-- The decision to use CoT/scratchpad/self-critique is a *trade-off*, not a default. By the end of L03, students should be making this trade-off consciously.
-- Latency-sensitive flows (chat UIs, real-time agents) often can't afford CoT on every call even when accuracy would benefit.
-- Bridge to L09: choosing the right *model* for a step is a sibling decision to choosing the right *reasoning depth* for a step.
+- **This is a discussion, not a build.** No new code is written in this demo — the point is entirely in the comparison and the framing.
+- **Be honest about the break-even point.** For a single node, the ceremony from Demos 1–2 is not obviously worth it over a plain function — say so. The value shows up the moment there's a second step, which is exactly next lesson.
+- **Don't preview multi-node wiring mechanics.** It's fine to say "several of them, wired with fixed edges" as a *description*, but do not live-code two nodes or an edge here — that would pre-empt L04's own Demo 1, which builds exactly that from scratch.
 
 **If the demo misbehaves:**
 
-- If Task B doesn't reproduce a CoT-induced error on the day, fall back to a token-cost demo only. The latency/cost contrast on Task A still lands the main point.
-
-## Optional bridge demo — toward tool calling (L04)
-
-If time allows, run one final demo that previews L04: ask the model the same Task B question but give it a single tool (a calculator, or a "lookup" stub). Show that *the decision to call the tool* is itself a reasoning step — and that everything from Demos 1–4 (CoT, scratchpad, self-critique, when-not-to-reason) applies inside the tool-calling loop. Don't teach the tool-calling protocol here; just show the shape.
-
-<!-- *NEED INPUT*: include this bridge demo, or save it as the opener for L04? -->
+- If a student pushes back with "but I could just write good docstrings and keep my inline function organized" — that's a fair challenge, not a derail. Acknowledge it: discipline can get you partway there, but discipline isn't *enforced* by the language the way a typed state schema and a separate function are. Then return to the testability point (Demo 2 just ran the node alone) as the sharpest concrete difference.
 
 ## Pacing notes for the teacher
 
-- **Per-demo time:** 8–12 minutes including the post-demo discussion. Four demos plus the optional bridge fits in a 50–60 minute block. <!-- *NEED INPUT*: confirm against the lesson-time budget once duration is pinned in objectives.md's open questions. -->
-- **Variance budget:** model outputs vary run-to-run. Budget at least one re-run per demo. If a demo lands cleanly the first time, don't re-run for the sake of it — use the time to extend the discussion.
-- **The audience watches, doesn't participate.** Resist the temptation to ask "what do you think will happen?" — that is a lab pattern, not a demo pattern. Hands-on practice is for the L03 labs.
+- **Per-demo time:** Demo 1 is the longest (15–20 minutes, including the before/after walkthrough and the client-swap discussion). Demo 2 is short (10–12 minutes — compile/invoke/inspect is mechanically quick). Demo 3 is a discussion beat (8–10 minutes, no live-coding). Total ~35–42 minutes plus discussion, fitting a lesson noticeably shorter than L02 or L04. <!-- *NEED INPUT*: confirm against the lesson-time budget once duration is pinned in objectives.md's open questions (current estimate there is 40–55 minutes). -->
+- **Resist the urge to wire a second node "just to show what's coming."** It is tempting to tease L04 with a live two-node example — don't. L03's discipline is staying at one node; let L04 own that reveal on its own first day.
+- **Reinforce L01/L02 vocabulary at every opportunity.** Tokens, cost, structured-output-by-instruction, defensive parsing. Every demo should read as "the thing you already know, now inside a node" rather than a wholesale new topic.
+- **The audience watches, doesn't participate.** Resist "what field should we extract?" as a group question — that's a lab pattern. Hands-on node-building is for the L03 labs.
 
 ## Open authoring questions
 
-- <!-- *NEED INPUT*: are the demos run in a Jupyter notebook the teacher projects, or in a slide-embedded REPL, or via a custom demo runner script? Affects how prompts are pre-loaded. -->
-- <!-- *NEED INPUT*: should Demo 3 introduce different-model critique here, or defer to L10 (model power)? Mirrors the same open question in [objectives.md](objectives.md). -->
-- <!-- *NEED INPUT*: should this lesson use Anthropic's extended-thinking API anywhere, or stay strictly prompt-only? Mirrored from [objectives.md](objectives.md). -->
-- <!-- *NEED INPUT*: a pointer/link to where the demo prompts live as code (a `demos/` subdir? inline in a notebook?) — not yet decided in non-draft docs. -->
+- <!-- *NEED INPUT*: confirm the exact domain/text for the extract node (see Pre-flight) — recommend reusing a support-ticket-style snippet so L04's first node plausibly continues from it, but a distinct domain is also acceptable. -->
+- <!-- *NEED INPUT*: confirm exact model id string for the Sonnet 4.6 snapshot used by ChatAnthropic, read from common/config.py rather than hard-coded in cells. Mirrored from the equivalent open question in L04's demos and in objectives.md. -->
+- <!-- *NEED INPUT*: estimated lecture duration — demo pacing above sums to ~35–42 minutes; confirm this reconciles with the 40–55 minute estimate left open in objectives.md, and with the course's per-lesson time budget generally. -->
+- <!-- *NEED INPUT*: are the demos run in a projected Jupyter notebook, a slide-embedded REPL, or a demo-runner script? Mirrors the same open question in L02's and L04's demos. -->
+- <!-- *NEED INPUT*: should Demo 2 show the one-node graph diagram render (draw_mermaid_png/Mermaid text) as a brief curiosity, or skip it entirely as content-free at one node? Mirrors the same open question left in objectives.md. -->

@@ -4,7 +4,7 @@
 
 # Mini course — wrap-up
 
-> The closing recap for the **mini cut** (11 lessons). Read after the final mini lesson (L21).
+> The closing recap for the **mini cut** (11 lessons). Read after the final mini lesson (L23).
 > Track definition: [SYLLABUS.md](SYLLABUS.md) · [tracks.toml](tracks.toml). Rationale: [CURRICULUM_PRD.md](../../../docs/origin/CURRICULUM_PRD.md) ("Condensed Mini Lesson Plan").
 
 ## 1. What this course was
@@ -13,7 +13,7 @@
 
 ## 2. What you built (the arc)
 
-*The through-line as a sequence, in mini teaching order: L01 → L02 → L04 → L05 → L07 → L08 → L09 → L11 → L12 → L20 → L21. One line per lesson — what it added to the stack. End on the mental picture: tokens → prompts → tools → hand-rolled loop → tracing → eval → workflows → shallow agent → skills → skill systems.*
+*The through-line as a sequence, in mini teaching order: L01 → L02 → L07 → L08 → L10 → L11 → L12 → L04 → L14 → L22 → L23. One line per lesson — what it added to the stack. End on the mental picture: tokens → prompts → tools → hand-rolled loop → tracing → eval → workflows → shallow agent → skills → skill systems.*
 
 <!-- *NEED INPUT*: per-lesson recap granularity — one line each (11 bullets), or grouped into ~4 phases (foundations / tools / agent+observability / skills)? Recommendation: grouped phases with the lesson numbers in each, so the arc reads as a story, not a table. -->
 
@@ -33,7 +33,7 @@
 
 *The mini cut deliberately dropped lessons. List them in the PRD's "first to add back" order, one line each on what they'd add, linking to the full syllabus.* See [FULL_WRAPUP.md](FULL_WRAPUP.md) for the complete arc.
 
-<!-- *NEED INPUT*: pull the add-back list + order straight from CURRICULUM_PRD.md's "Cut, in rough order of first to add back" (L19+L18 RAG, L10 model power, L03 CoT, L15 HITL, L06 MCP, L13 patterns, L14 middleware, L16 deep/shallow, L17 context mgmt, L22 multi-agent, L23 eval revisited). Keep it a pointer to the PRD rather than duplicating the rationale, so it can't drift. -->
+<!-- *NEED INPUT*: pull the add-back list + order straight from CURRICULUM_PRD.md's "Cut, in rough order of first to add back" (L21+L20 RAG, L13 model power, L06 CoT, L17 HITL, L09 MCP, L15 patterns, L16 middleware, L18 deep/shallow, L19 context mgmt, L24 multi-agent, L25 eval revisited). Keep it a pointer to the PRD rather than duplicating the rationale, so it can't drift. -->
 
 ## 7. Further resources
 
