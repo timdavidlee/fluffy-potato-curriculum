@@ -1,6 +1,6 @@
-"""A tiny, hand-rolled evaluation harness for the agent loop (the L09 artifact).
+"""A tiny, hand-rolled evaluation harness for the agent loop (the L12 artifact).
 
-L08 taught you to *read* a run — its trace. L09 teaches you to *judge* it: stop
+L11 taught you to *read* a run — its trace. L12 teaches you to *judge* it: stop
 asking "did this one run look right?" and start asking "do my agent's runs pass a
 fixed set of cases I defined in advance, and do they *still* pass after I change
 something?" An **eval set** is that fixed set of cases plus the machinery to run
@@ -21,7 +21,7 @@ transfer: LangSmith calls a case an *Example* (``inputs`` / ``reference_outputs`
 a scorer an *Evaluator* returning ``{key, score}``, and the runner ``evaluate()``;
 Langfuse calls a case a *dataset item* with an expected output and a *score*.
 Exact field-name fidelity to any one vendor is **not** the goal — recognizable
-structure is. This is a *first pass*; L23 scales the same discipline to multi-step
+structure is. This is a *first pass*; L25 scales the same discipline to multi-step
 graphs, retrieval quality, LLM-as-judge done properly, and multi-agent systems.
 
 Promoted to ``common/`` (alongside ``agent_loop.py`` and ``tracing.py``) so the
@@ -69,7 +69,7 @@ class EvalResult(BaseModel):
     ``key`` names the metric (e.g. ``"answer_correct"``, ``"no_runaway"``);
     ``score`` is the verdict; ``comment`` is an optional human-readable why.
 
-    L09's scorers return a **bool** ``score`` (pass/fail). The ``float`` option
+    L12's scorers return a **bool** ``score`` (pass/fail). The ``float`` option
     exists so a graded scorer (an LLM-judge returning a confidence) fits the same
     type; :attr:`passed` treats any truthy score — ``True`` or a nonzero number —
     as a pass.
@@ -98,7 +98,7 @@ class Scorer(Protocol):
 
 
 # The "target" under test: how to produce a run for one case. Two run_cases over
-# the same cases (e.g. one per model) is exactly the A/B in L09's headline demo.
+# the same cases (e.g. one per model) is exactly the A/B in L12's headline demo.
 # (LangSmith calls this argument the *target* of ``evaluate()``.)
 RunCase = Callable[[EvalCase], RunResult]
 
@@ -119,7 +119,7 @@ def tool_calls(run: RunResult) -> list[tuple[str, dict[str, Any]]]:
     """The ordered ``(tool_name, args)`` pairs a run made, read off its trace.
 
     The path *with arguments* — e.g. ``[("lookup", {"city": "Tokyo"})]``. Use this
-    when the bug is in the arguments (the L08 "wrong arguments" signature) or to
+    when the bug is in the arguments (the L11 "wrong arguments" signature) or to
     detect a runaway (the same pair repeating).
     """
     return [(span.name, span.inputs) for span in run.trace if span.run_type == "tool"]
@@ -334,7 +334,7 @@ def compare(before: EvalReport, after: EvalReport, *, min_rate: float = 1.0) -> 
 
     A pair counts as passing when its pass rate is ``>= min_rate`` (default
     ``1.0``: must pass on every sample). Only pairs present in *both* reports are
-    compared. This is L08's eyeball trace-diff, promoted to a repeatable check.
+    compared. This is L11's eyeball trace-diff, promoted to a repeatable check.
     """
     regressions: list[tuple[str, str]] = []
     fixes: list[tuple[str, str]] = []
