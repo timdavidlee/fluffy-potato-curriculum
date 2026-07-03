@@ -2,7 +2,7 @@
 
 ```yaml
 title: "The agent loop: termination and tool-failure handling"
-keywords: agent loop, model tool model, message history invariant, termination, iteration cap, max steps, token budget, loop detection, tool failure, is_error, hand-rolled vs framework, anthropic, claude
+keywords: agent loop, model tool model, message history invariant, termination, iteration cap, max steps, token budget, loop detection, tool failure, ToolMessage, status error, hand-rolled vs framework, langchain, anthropic, claude
 estimated duration: 75
 ```
 
@@ -31,7 +31,7 @@ estimated duration: 75
 
 | Lesson | What it built | What L10 reuses |
 | --- | --- | --- |
-| [L07](L1001_intro.md) | one tool-call round-trip; the `tool_use` / `tool_result` protocol | the exact protocol, now repeated in a loop |
+| [L07](L1001_intro.md) | one tool-call round-trip; `.bind_tools()` + `.tool_calls` + `ToolMessage` | the exact interface, now repeated in a loop |
 | [L08](../L08/objectives.md) | tool design; what a tool *returns* on failure | the error-as-data idea, now propagated by the loop |
 | **L10** | the model→tool→model **loop**: termination + loop-level failure handling | — |
 | L11 (next) | tracing what the loop did | the loop becomes the thing you instrument |
@@ -43,12 +43,12 @@ estimated duration: 75
 ### slide 1.3 The three rules, up front
 
 - This whole lecture lands three rules. Read them now; every section returns to one of them.
-- **Rule 1 — the message-history invariant.** Every `tool_use` block must be answered by a matching
-  `tool_result` (same id) in the next user-role message before the next model call. (section 2)
+- **Rule 1 — the message-history invariant.** Every tool call must be answered by a matching
+  `ToolMessage` (same `tool_call_id`) before the next model call. (section 2)
 - **Rule 2 — termination is a design decision.** The model will call tools forever if you let it; a
   loop with no cap is broken, not minimal. (section 3)
 - **Rule 3 — tool failures are messages, not exceptions.** The loop converts a raised exception into a
-  `tool_result` with `is_error: true` and hands it back to the model. (section 4)
+  `ToolMessage` with `status="error"` and hands it back to the model. (section 4)
 
 [↑ Back to top](#the-agent-loop-termination-and-tool-failure-handling)
 
@@ -57,10 +57,10 @@ estimated duration: 75
 ### slide 2.1 The loop in three lines of pseudocode
 
 - Before any Python, the whole loop fits in three lines:
-- text: *call the model → got a `tool_use`? run the tool, append the `tool_result`, loop again. Got
-  plain text and no `tool_use`? return it — that's the answer.*
-- diagram: a cycle — `call model` → diamond `tool_use?` → (yes) `run tool` → `append tool_result` →
-  back to `call model`; (no) → `return final text`. A second arrow from the cycle labelled
+- text: *call the model → got tool calls? run each tool, append a `ToolMessage` per call, loop again.
+  Got plain text and no tool calls? return it — that's the answer.*
+- diagram: a cycle — `call model` → diamond `tool calls?` → (yes) `run tools` → `append ToolMessages`
+  → back to `call model`; (no) → `return final text`. A second arrow from the cycle labelled
   `max_steps reached` exits to `stop: cap hit`.
 
 ### slide 2.2 The function shape we standardize on
@@ -72,7 +72,7 @@ estimated duration: 75
 
 | Parameter | Type | What it is |
 | --- | --- | --- |
-| `model` | a client object | anything with a `.create(messages, tools, ...)` method — the **real SDK or a stub** |
+| `model` | a chat model | any `bind_tools`-capable chat model — a **real `ChatAnthropic` or a `FakeModel` stub** |
 | `tools` | `dict[str, Callable]` | maps a tool name to the Python function that runs it (the *dispatch table*) |
 | `user_msg` | `str` | the user's request that seeds the conversation |
 | `max_steps` | `int` | the iteration cap — the safety net of section 3 |
@@ -84,23 +84,21 @@ estimated duration: 75
 ### slide 2.3 Rule 1 — the message-history invariant
 
 - This is the single most common bug in hand-rolled loops, so we teach it as a rule, not a footnote.
-- text: after the model emits an assistant message containing `tool_use` blocks, the **next**
-  message you send must be a **user-role** message whose content contains a `tool_result` block for
-  **every** `tool_use` — each referencing the same `tool_use_id`, in order — *before* you call the
-  model again.
-- text: skip one, mismatch an id, or put the result in an `assistant` message instead of a `user`
-  message, and the API rejects the request (or, worse, accepts it and the model produces garbage).
-- diagram: two columns. Left "correct": `assistant[tool_use #a, tool_use #b]` → `user[tool_result
-  #a, tool_result #b]`. Right "broken": `assistant[tool_use #a, tool_use #b]` → `user[tool_result
-  #a]` with a red X and the caption "missing #b → API error".
+- text: after the model returns an `AIMessage` carrying `tool_calls`, you first append **that
+  `AIMessage`** to the history, then append **one `ToolMessage` for every tool call** — each
+  referencing the same `tool_call_id` — *before* you call the model again.
+- text: skip one, mismatch an id, or forget to append the assistant `AIMessage` first, and the next
+  request is rejected (or, worse, accepted and the model produces garbage).
+- diagram: two columns. Left "correct": `AIMessage[tool_calls #a, #b]` → `ToolMessage #a` →
+  `ToolMessage #b`. Right "broken": `AIMessage[tool_calls #a, #b]` → `ToolMessage #a` with a red X
+  and the caption "missing #b → API error".
 
-### slide 2.4 Multiple tool calls in one response
+### slide 2.4 Multiple tool calls in one reply
 
-- A single assistant response can contain **more than one** `tool_use` block (the model asks for two
-  lookups at once, say).
-- text: the loop must run **all** of them and package **all** their `tool_result`s into a **single**
-  user-role message before the next model call. One assistant turn with N tool calls is answered by
-  one user turn with N tool results.
+- A single `AIMessage` can carry **more than one** tool call in its `.tool_calls` (the model asks for
+  two lookups at once, say).
+- text: the loop must run **all** of them and append a `ToolMessage` for **each** — all of them
+  before the next model call. One assistant turn with N tool calls is answered by N `ToolMessage`s.
 - text: *executing* them one after another in a Python `for` loop is fine for L10. True *parallel*
   execution (threads / asyncio) and streaming are explicitly **out of scope** here — the control flow
   is identical; we get the simple case right first.
@@ -122,8 +120,8 @@ estimated duration: 75
 
 ### slide 3.1 Termination is a design decision
 
-- The model has no idea a loop exists. It will keep emitting `tool_use` blocks as long as it thinks
-  more tool calls help. **Nothing stops the loop unless you write the stop.**
+- The model has no idea a loop exists. It will keep emitting tool calls as long as it thinks
+  more of them help. **Nothing stops the loop unless you write the stop.**
 - text: a loop with no cap is not "minimal" — it is **broken**. Even a hand-rolled toy needs a cap.
 - text: there are four termination conditions worth naming. You will *implement* the first two and
   *sketch* the other two.
@@ -134,7 +132,7 @@ estimated duration: 75
 
 | Condition | Fires when | In L10 |
 | --- | --- | --- |
-| **Natural termination** | the model returns a response with **no `tool_use` block** — plain text. This is the happy path: "the model thinks it's done." | implement |
+| **Natural termination** | the model returns a reply with **no tool calls** — plain text. This is the happy path: "the model thinks it's done." | implement |
 | **Step / iteration cap** (`max_steps`) | the loop has run more model→tool→model cycles than the budget allows. Forces a halt even if the model still wants tools. | implement |
 | **Token budget** | cumulative input+output tokens (or cost) crosses a threshold. | sketch |
 | **Loop detection** | the model calls the *same tool with the same arguments* repeatedly without progress. Needs the call *history*, not just a counter. | sketch |
@@ -149,8 +147,8 @@ estimated duration: 75
 - text: **hitting the cap is always a signal worth investigating.** Either the task genuinely needs a
   higher cap, or the agent is misbehaving (fix the prompt, the tools, or the model). Treat a cap-hit
   as an alert, not as noise.
-- diagram: a runaway trace — iterations 1..6 each showing `tool_use lookup(args=...)` with identical
-  args, then iteration 6 boxed in red with "max_steps=6 hit — STOP".
+- diagram: a runaway trace — iterations 1..6 each showing a `lookup(args=...)` tool call with
+  identical args, then iteration 6 boxed in red with "max_steps=6 hit — STOP".
 
 ### slide 3.4 What the loop returns on a non-natural stop
 
@@ -166,7 +164,7 @@ estimated duration: 75
 
 ### slide 3.5 Sketching the other two caps
 
-- text: **token budget** — keep a running sum of `response.usage` input+output tokens across
+- text: **token budget** — keep a running sum of `reply.usage_metadata` input+output tokens across
   iterations; halt when it crosses a threshold. Trivial to add once you print per-iteration tokens
   (the demo does).
 - text: **loop detection** — keep a short history of `(tool_name, json.dumps(args))` tuples; halt if
@@ -185,7 +183,7 @@ estimated duration: 75
 - text: L10 teaches the **loop** what to do when the tool *can't even return* — it raised, or it
   returned the wrong shape. These are **different layers**, and the loop owns the second one.
 - diagram: a stack — top box "tool author (L08): return errors as data" over a bottom box "loop
-  (L10): catch raises, normalize shape, attach is_error" — with the model sitting above both.
+  (L10): catch raises, normalize shape, set status='error'" — with the model sitting above both.
 
 ### slide 4.2 Three failure modes at the loop level
 
@@ -193,21 +191,21 @@ estimated duration: 75
 
 | Failure mode | What it looks like | Default loop response |
 | --- | --- | --- |
-| **Tool raises an exception** | `network error`, `ZeroDivisionError`, an edge case the author missed — a Python traceback | catch it; build a `tool_result` with `is_error: true` and a short message; feed it back |
-| **Tool returns a structured error** | a well-formed `tool_result` whose content says `{"error": "..."}` (the L08 pattern) | **no loop change** — propagate it as-is; the tool already did the right thing |
-| **Tool output is malformed** | wrong type, unparseable, missing a field the model expected | normalize to a string / minimal shape check; surface as a (possibly `is_error`) `tool_result` |
+| **Tool raises an exception** | `network error`, `ZeroDivisionError`, an edge case the author missed — a Python traceback | catch it; build a `ToolMessage` with `status="error"` and a short message; feed it back |
+| **Tool returns a structured error** | a successful `ToolMessage` whose content says `{"error": "..."}` (the L08 pattern) | **no loop change** — propagate it as-is; the tool already did the right thing |
+| **Tool output is malformed** | wrong type, unparseable, missing a field the model expected | normalize to a string / minimal shape check; surface as a (possibly `status="error"`) `ToolMessage` |
 
-- text: the unifying move across all three: **turn the failure into a `tool_result` and hand it back
+- text: the unifying move across all three: **turn the failure into a `ToolMessage` and hand it back
   to the model.** The loop translates; it does not (by default) decide the recovery.
 
-### slide 4.3 Exception-to-`tool_result`, in five lines
+### slide 4.3 Exception-to-`ToolMessage`, in five lines
 
 - text: the core of loop-level failure handling is a `try/except` around the dispatch that converts
-  any uncaught exception into a `tool_result(is_error=True, content=<short message>)`. Five lines.
+  any uncaught exception into a `ToolMessage(status="error", content=<short message>)`. Five lines.
 - diagram: pseudocode block —
   `try: out = tools[name](**args)` /
-  `except Exception as exc: out = repr(exc); is_error = True` /
-  `append tool_result(tool_use_id, out, is_error)`.
+  `except Exception as exc: return ToolMessage(content=repr(exc), tool_call_id=id, status="error")` /
+  `else: return ToolMessage(content=out, tool_call_id=id, status="success")`.
 - text: a buggy tool now **degrades into a message** instead of crashing the agent. The model
   receives the error and can retry with corrected arguments, try a different tool, or apologize to
   the user — its call, not the loop's.
@@ -266,8 +264,8 @@ estimated duration: 75
 | --- | --- |
 | "the loop ends when the answer is right" | the loop ends when the model stops calling tools or a cap fires; *correctness* is a downstream concern (L11 traces, L12 eval) |
 | "I should retry every failed tool call" | usually not — a `404` is not a `503`; default to surfacing the error and letting the model decide |
-| "the model needs my Python traceback" | it doesn't and shouldn't — a short `is_error` string is better signal and cheaper |
-| "if I skip the `tool_result` the model will figure it out" | it won't — the API rejects the next request; the pairing is protocol, not a suggestion |
+| "the model needs my Python traceback" | it doesn't and shouldn't — a short error `ToolMessage` is better signal and cheaper |
+| "if I skip the `ToolMessage` the model will figure it out" | it won't — the next request is rejected; the pairing is protocol, not a suggestion |
 | "the model called the same tool 3× so my loop is broken" | maybe — or it's correctly exploring; loop-detection needs *args + progress*, not just counts |
 
 ### slide 5.4 The minimum-viable trace (bridge to L11)
