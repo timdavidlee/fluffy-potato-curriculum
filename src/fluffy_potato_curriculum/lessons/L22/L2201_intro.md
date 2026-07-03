@@ -10,9 +10,9 @@ estimated duration: 8
 > **Roadmap:** see this lesson's [objectives.md](../../../../docs/origin/lesson_roadmaps/L22/objectives.md)
 > and [demos_or_activities.md](../../../../docs/origin/lesson_roadmaps/L22/demos_or_activities.md).
 > This is a short framing piece. Read it first, then the written reference lecture on the
-> taxonomy ([L2002_lecture.md](L2002_lecture.md)), the hand-rolled JIT-loader demo notebook
-> ([L2003_lecture.ipynb](L2003_lecture.ipynb)), and the closing decision + real-Agent-Skills
-> lecture ([L2005_lecture.md](L2005_lecture.md)). Hands-on practice is in the L22 labs
+> taxonomy ([L2202_lecture.md](L2202_lecture.md)), the hand-rolled JIT-loader demo notebook
+> ([L2203_lecture.ipynb](L2203_lecture.ipynb)), and the closing decision + real-Agent-Skills
+> lecture ([L2205_lecture.md](L2205_lecture.md)). Hands-on practice is in the L22 labs
 > (L2204, L2206).
 > **Anchor model: Claude Sonnet 4.6** — the same model the whole course anchors on. Skills are
 > model-agnostic; we pin the demos to one model so the only new thing is *how a capability is
@@ -22,10 +22,10 @@ estimated duration: 8
 
 In the mini cut this is the **final lesson**, and it is a **capstone**. By now you have built the
 whole agent stack: prompting and structured output ([L02](../L02/L0201_intro.md)); tools — what
-they are, how they're wired, and what they cost ([L07](../L07/L0401_intro.md),
-[L08](../L08/L0501_intro.md)); the hand-rolled model → tool → model loop
-([L10](../L10/L0701_intro.md)); and that same loop drawn as a LangGraph graph
-([L04](../L04/L1101_intro.md), [L14](../L14/L1201_intro.md)).
+they are, how they're wired, and what they cost ([L07](../L07/L0701_intro.md),
+[L08](../L08/L0801_intro.md)); the hand-rolled model → tool → model loop
+([L10](../L10/L1001_intro.md)); and that same loop drawn as a LangGraph graph
+([L04](../L04/L0401_intro.md), [L14](../L14/L1401_intro.md)).
 
 All of that shares one nagging, unsolved problem: **everything the agent might need has to sit in
 the context window all the time.** Every tool's schema is re-sent on every request (L07's "tools

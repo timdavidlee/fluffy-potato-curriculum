@@ -9,10 +9,10 @@ estimated duration: 10
 > **Lesson:** L07 — Tool calling: how it works.
 > **Roadmap:** see this lesson's [objectives.md](../../../../docs/origin/lesson_roadmaps/L07/objectives.md).
 > This is a short framing piece. Read it before the written reference lecture
-> ([L0402_lecture.md](L0402_lecture.md)) and the four teacher demo notebooks
-> (a-tool-call-is-tokens [L0403_lecture.ipynb](L0403_lecture.ipynb), one-wired-round-trip
-> [L0404_lecture.ipynb](L0404_lecture.ipynb), trace-the-round-trip [L0406_lecture.ipynb](L0406_lecture.ipynb),
-> three-outcomes [L0408_lecture.ipynb](L0408_lecture.ipynb)).
+> ([L0702_lecture.md](L0702_lecture.md)) and the four teacher demo notebooks
+> (a-tool-call-is-tokens [L0703_lecture.ipynb](L0703_lecture.ipynb), one-wired-round-trip
+> [L0704_lecture.ipynb](L0704_lecture.ipynb), trace-the-round-trip [L0706_lecture.ipynb](L0706_lecture.ipynb),
+> three-outcomes [L0708_lecture.ipynb](L0708_lecture.ipynb)).
 > **Anchor model throughout: Claude Sonnet 4.6** (Claude Haiku 4.5 is the smaller-model contrast in the last demo).
 
 ## Where this lesson sits
@@ -111,5 +111,5 @@ The one sentence to leave L07 with:
 > *A tool call is a block of tokens the model emitted; your application is the one that reads it,
 > runs the function, and hands the result back — and that exchange is always at least four messages.*
 
-Next: the written reference lecture in [L0402_lecture.md](L0402_lecture.md), then the live demos
+Next: the written reference lecture in [L0702_lecture.md](L0702_lecture.md), then the live demos
 (L0703 / L0704 / L0708) and the hands-on labs (L0705 / L0707 / L0709).

@@ -9,11 +9,11 @@ estimated duration: 10
 > **Lesson:** L14 — Shallow agents in LangGraph.
 > **Roadmap:** see this lesson's [objectives.md](../../../../docs/origin/lesson_roadmaps/L14/objectives.md).
 > This is a short framing piece. Read it before the written reference lecture
-> ([L1202_lecture.md](L1202_lecture.md)), then the three teacher demo notebooks —
-> build the agent ([L1203_lecture.ipynb](L1203_lecture.ipynb)), state & reducers
-> ([L1205_lecture.ipynb](L1205_lecture.ipynb)), eval carry-over + tracing
-> ([L1207_lecture.ipynb](L1207_lecture.ipynb)) — with the bridge to L15 in
-> [L1208_lecture.md](L1208_lecture.md). Hands-on practice is in the L14 labs (L1404, L1406).
+> ([L1402_lecture.md](L1402_lecture.md)), then the three teacher demo notebooks —
+> build the agent ([L1403_lecture.ipynb](L1403_lecture.ipynb)), state & reducers
+> ([L1405_lecture.ipynb](L1405_lecture.ipynb)), eval carry-over + tracing
+> ([L1407_lecture.ipynb](L1407_lecture.ipynb)) — with the bridge to L15 in
+> [L1408_lecture.md](L1408_lecture.md). Hands-on practice is in the L14 labs (L1404, L1406).
 > **Anchor model: Claude Sonnet 4.6** — a *single* model throughout, so the graph shape is the
 > only thing that changed versus the L10 hand-rolled loop. (Mixing models per node was L04's demo;
 > *which* model to use is L13's topic.)

@@ -5,7 +5,7 @@ Times are rough and assume a semi-technical student with basic Python who comple
 
 > **Both L10 labs are OFFLINE — no API key needed.** They drive a *scripted stub model* (`FakeModel`),
 > so termination, the `max_steps` cap, and tool-failure handling are fully deterministic and run the
-> same way every time. The only **live** notebook in L10 is the [L1006](L0706_lecture.ipynb) demo
+> same way every time. The only **live** notebook in L10 is the [L1006](L1006_lecture.ipynb) demo
 > (raw Anthropic SDK, `ANTHROPIC_API_KEY` required) — that's a teacher demo, not a lab.
 >
 > **Why a stub model?** L10 is about LOOP CONTROL FLOW (iterate model→tool→model until done;
@@ -24,7 +24,7 @@ Times are rough and assume a semi-technical student with basic Python who comple
 > The labs map to the L10 subgoals: **L1004** → build the model→tool→model loop + reason about
 > termination; **L1005** → handle tool failures at the loop level.
 
-## L0704_lab problem 1 — Detect natural termination
+## L1004_lab problem 1 — Detect natural termination
 
 - **Common gotchas:** checking `stop_reason` instead of the blocks (works, but the lesson wants
   students to see that *no `tool_use` block* is the real signal); using `all(...)` instead of
@@ -36,7 +36,7 @@ Times are rough and assume a semi-technical student with basic Python who comple
 - **Key point:** natural termination is the *only* condition that means "the model thinks it's done."
   Every other stop is something *you* imposed.
 
-## L0704_lab problem 2 — Write run_loop
+## L1004_lab problem 2 — Write run_loop
 
 - **Common gotchas:** **(the big one)** breaking the message-history invariant — appending the
   `tool_result`s without first appending the assistant's `tool_use` turn, or putting the results in an
@@ -51,7 +51,7 @@ Times are rough and assume a semi-technical student with basic Python who comple
 - **Key point:** the loop is the agent. The model is a stateless function call; the loop is the part
   that makes it iterate.
 
-## L0704_lab problem 3 — Drive it: natural termination
+## L1004_lab problem 3 — Drive it: natural termination
 
 - **Common gotchas:** passing `happy_script` directly to `run_loop` instead of wrapping it in
   `FakeModel(...)`; expecting a different iteration count (it's exactly 3 — two tool turns + one text
@@ -60,7 +60,7 @@ Times are rough and assume a semi-technical student with basic Python who comple
   The `assert` at the end pins `termination == 'natural'` and `iterations == 3`.
 - **Time:** ~4 min.
 
-## L0704_lab problem 4 — The max_steps cap catches a runaway
+## L1004_lab problem 4 — The max_steps cap catches a runaway
 
 - **Common gotchas:** confusion about *why* the stub loops forever — explain that `FakeModel` reuses
   its last script line when it runs out, simulating a model that won't stop. Some students expect the
@@ -72,7 +72,7 @@ Times are rough and assume a semi-technical student with basic Python who comple
 - **Key point:** a loop with no cap is broken, not minimal. Hitting the cap is an **alert** worth
   investigating, not normal operation.
 
-## L0704_lab problem 5 — Two tool calls in one response (written)
+## L1004_lab problem 5 — Two tool calls in one response (written)
 
 - **Common gotchas:** answering "run the first one" — no, run **all** of them; or forgetting that all
   the `tool_result`s go in **one** user message.
@@ -81,7 +81,7 @@ Times are rough and assume a semi-technical student with basic Python who comple
   model call — otherwise the message-history invariant is violated and the API rejects the request.
 - **Time:** ~3 min.
 
-## L0705_lab problem 1 — Write dispatch: turn a raise into a tool_result
+## L1005_lab problem 1 — Write dispatch: turn a raise into a tool_result
 
 - **Common gotchas:** letting the exception propagate (the whole point is to *catch* it); catching
   only one exception type — use a broad `except Exception` here on purpose, because the loop must
@@ -95,7 +95,7 @@ Times are rough and assume a semi-technical student with basic Python who comple
 - **Key point:** this is the loop's safety layer. L08 taught the tool author what to *return*; this is
   what the loop does when the tool can't even return.
 
-## L0705_lab problem 2 — The three failure modes, one by one
+## L1005_lab problem 2 — The three failure modes, one by one
 
 - **Common gotchas:** the loop crashing here means Problem 1's `dispatch` is letting an exception
   escape — send them back. Expecting the unknown-tool case to raise (it shouldn't; `tools.get` returns
@@ -105,7 +105,7 @@ Times are rough and assume a semi-technical student with basic Python who comple
   unknown tool name.
 - **Time:** ~5 min.
 
-## L0705_lab problem 3 — Watch the model recover (no crash)
+## L1005_lab problem 3 — Watch the model recover (no crash)
 
 - **Common gotchas:** expecting the run to crash on the first (failing) `lookup` — it doesn't, because
   `dispatch` converted the `KeyError` into a `tool_result`; the scripted model then "recovers." Some
@@ -117,7 +117,7 @@ Times are rough and assume a semi-technical student with basic Python who comple
 - **Key point:** the loop *enabled* recovery by handing the error back; the model decided what to do
   with it.
 
-## L0705_lab problem 4 — Why not dump the traceback? (written)
+## L1005_lab problem 4 — Why not dump the traceback? (written)
 
 - **Common gotchas:** "the model needs the full traceback to debug" — backwards; the traceback is
   noise for the model.
@@ -126,7 +126,7 @@ Times are rough and assume a semi-technical student with basic Python who comple
   internals). `repr(exc)` — a class name plus a one-line message — is the right amount of signal.
 - **Time:** ~3 min.
 
-## L0705_lab problem 5 — Should the loop auto-retry? (written)
+## L1005_lab problem 5 — Should the loop auto-retry? (written)
 
 - **Common gotchas:** "always retry, retries are free" — wrong on both counts.
 - **Unblockers:** expected: not all failures are alike — a `404 not found` will never succeed on

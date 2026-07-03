@@ -14,14 +14,14 @@ estimated duration: 20
 > env, so the code blocks below are shown for their **wire shape**, not for execution. Read them to see
 > *what crosses the boundary*; do not try to run them here. (If your own environment has `mcp`
 > installed — `uv add mcp` — the snippets are written to run; that's outside the pinned course env.)
-> The fully-offline version of this idea is the [L0903 demo](L0603_lecture.ipynb) and the
-> [L0904 lab](L0604_lab_empty.ipynb), which work with the same tool *spec* without a live connection.
+> The fully-offline version of this idea is the [L0903 demo](L0903_lecture.ipynb) and the
+> [L0904 lab](L0904_lab_empty.ipynb), which work with the same tool *spec* without a live connection.
 
 ## section 1. The one config change
 
 ### slide 1.1 Adding a server is config, not code
 
-- Recall the [L0902 lecture](L0602_lecture.md) section 1 pain: each inline client needed tool-specific
+- Recall the [L0902 lecture](L0902_lecture.md) section 1 pain: each inline client needed tool-specific
   *integration code*. With MCP, adding a server is a **config entry**, not an integration.
 - diagram: contrast — left, three boxes of per-client integration code (the inline world); right, a
   single small config block naming the server (the MCP world).
@@ -70,7 +70,7 @@ async with connect_stdio(server_config) as session:
 ```
 
 - The `tool.name`, `tool.description`, `tool.inputSchema` you get back are **exactly the L08 design
-  surface**, serialized — the same fields the [L0903 demo](L0603_lecture.ipynb) translates offline.
+  surface**, serialized — the same fields the [L0903 demo](L0903_lecture.ipynb) translates offline.
 
 ### slide 2.2 What the discovery response looks like on the wire
 
@@ -84,7 +84,7 @@ async with connect_stdio(server_config) as session:
 | `inputSchema` | `{"type": "object", "properties": {…}, "required": ["attendee", "start"]}` | the L08 parameter schema (JSON Schema) |
 
 - The teacher-narration point: the client now "knows about tools it did not ship with." Ownership of the
-  tool list has moved to the **server author** (reinforce [L0902 lecture](L0602_lecture.md) slide 2.3).
+  tool list has moved to the **server author** (reinforce [L0902 lecture](L0902_lecture.md) slide 2.3).
 
 [↑ Back to top](#connecting-to-an-existing-mcp-server-wire-shape-walkthrough)
 
@@ -127,7 +127,7 @@ print(result.content)  # the server's structured tool result, sent back as a too
 
 - The teacher-demo move: stop the server process mid-conversation and re-issue the prompt. The client
   surfaces a **transport error** to the model — a failure mode an inline tool *cannot* have.
-- table: the boundary-specific failures (mirrors [L0902 lecture](L0602_lecture.md) slide 3.4) and how
+- table: the boundary-specific failures (mirrors [L0902 lecture](L0902_lecture.md) slide 3.4) and how
   the model reacts.
 
 | Failure | What the client surfaces | Model reaction (L08 error classes) |
@@ -144,7 +144,7 @@ print(result.content)  # the server's structured tool result, sent back as a too
 
 - Restart the server, re-run the prompt — recovery. The lesson: cross-process tools add an
   **operational** dimension inline tools don't have. Someone has to keep the server alive.
-- This operational tax is one row in the [L0902 lecture](L0602_lecture.md) section 5 cost ledger, made
+- This operational tax is one row in the [L0902 lecture](L0902_lecture.md) section 5 cost ledger, made
   concrete: "a transport to keep healthy" is not abstract once you've watched a stopped server break a
   conversation.
 
@@ -157,8 +157,8 @@ print(result.content)  # the server's structured tool result, sent back as a too
 - After this walkthrough you can read a server's published tool list and predict what the model will
   see, and you can trace a `tool_use` → transport → server → `tool_result` round-trip and name where it
   can fail.
-- Next: [L0906](L0606_lecture.ipynb) shows the *other* side of the wire — **building** the server whose
-  tools you just discovered (also shown, not run here). The offline [L0904 lab](L0604_lab_empty.ipynb)
+- Next: [L0906](L0906_lecture.ipynb) shows the *other* side of the wire — **building** the server whose
+  tools you just discovered (also shown, not run here). The offline [L0904 lab](L0904_lab_empty.ipynb)
   has you validate and translate the spec these handshakes exchange.
 
 [↑ Back to top](#connecting-to-an-existing-mcp-server-wire-shape-walkthrough)

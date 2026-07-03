@@ -8,14 +8,14 @@ estimated duration: 20
 
 > **Lesson:** L11 — Tracing: reading what your agent did.
 > **Roadmap:** [objectives.md](../../../../docs/origin/lesson_roadmaps/L11/objectives.md) (objective 5) · [demos_or_activities.md](../../../../docs/origin/lesson_roadmaps/L11/demos_or_activities.md) (Demo 6)
-> **Comes after:** `L0804_lecture` (you instrumented the loop and produced `RunResult.trace`). This lecture sends *that* trace to a real tool.
+> **Comes after:** `L1104_lecture` (you instrumented the loop and produced `RunResult.trace`). This lecture sends *that* trace to a real tool.
 > **Anchor model for the live demo: Claude Sonnet 4.6.** This step is **additive** — objectives 1–4 stand alone on the in-memory / `.to_jsonl()` trace. Langfuse is the "now see it in the real tool" payoff, not a hard dependency.
 
 ## section 1. Why a real tool at all
 
 ### slide 1.1 You already built the minimal version
 
-- text: in `L0804_lecture` you emitted a structured trace by hand — `TraceEvent` spans with `run_type`, `name`, `inputs`, `usage`, timings, all sharing one `trace_id`.
+- text: in `L1104_lecture` you emitted a structured trace by hand — `TraceEvent` spans with `run_type`, `name`, `inputs`, `usage`, timings, all sharing one `trace_id`.
 - text: real teams don't read `.jsonl` by eye at scale. They send traces to a **managed observability backend** and read them in a dashboard: a timeline of spans, token usage and cost, latency, inputs/outputs, errors.
 - text: the point of building it by hand *first*: when you open the dashboard, none of it is magic — the timeline, the token counts, the errors are the **exact fields you emitted**.
 
@@ -74,13 +74,13 @@ estimated duration: 20
 ### slide 4.1 Locate a failure (objective 2), now point-and-click
 
 - text: filter the project to the failing run, expand the offending observation, read its `inputs` and `error`.
-- text: it's the *same reading* you did on the `.jsonl` in `L0803_lab` — wrong arguments, a runaway's repeated calls, a tool error — only faster to find at scale.
+- text: it's the *same reading* you did on the `.jsonl` in `L1103_lab` — wrong arguments, a runaway's repeated calls, a tool error — only faster to find at scale.
 - text: the dashboard does not replace the skill; it accelerates a skill you already have. A student who never read a raw trace would treat the dashboard as a mystery.
 
 ### slide 4.2 Compare two runs (objective 4), now visual
 
 - text: open two runs of the same task side by side; compare token usage, latency, and the span timeline.
-- text: same comparison as `L0805_lab`'s diff helper — signal (a real behavior change) vs. noise (a few tokens, a few milliseconds) — now read off a waterfall instead of two printed lists.
+- text: same comparison as `L1105_lab`'s diff helper — signal (a real behavior change) vs. noise (a few tokens, a few milliseconds) — now read off a waterfall instead of two printed lists.
 
 [↑ Back to top](#l08-lecture-seeing-your-trace-in-langfuse)
 

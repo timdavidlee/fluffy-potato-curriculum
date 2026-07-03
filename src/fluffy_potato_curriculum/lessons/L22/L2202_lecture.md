@@ -9,8 +9,8 @@ estimated duration: 25
 > **Lesson:** L22. **Roadmap:** [objectives.md](../../../../docs/origin/lesson_roadmaps/L22/objectives.md).
 > This is the written reference lecture — **slides + discussion, no live build**. It establishes the
 > vocabulary and the core taxonomy the rest of the lesson leans on. The live JIT-loader build is the
-> demo notebook ([L2003_lecture.ipynb](L2003_lecture.ipynb)); the decision heuristic and the real
-> Agent Skills reveal are the closing lecture ([L2005_lecture.md](L2005_lecture.md)).
+> demo notebook ([L2203_lecture.ipynb](L2203_lecture.ipynb)); the decision heuristic and the real
+> Agent Skills reveal are the closing lecture ([L2205_lecture.md](L2205_lecture.md)).
 > **Anchor model: Claude Sonnet 4.6.**
 
 ## section 1. The problem skills solve
@@ -148,7 +148,7 @@ estimated duration: 25
 ### slide 5.2 What's next
 
 - Next you'll **build** the mechanism: a minimal JIT loader on the agent you already own
-  ([L2003_lecture.ipynb](L2003_lecture.ipynb)), and watch the body load only when the description
+  ([L2203_lecture.ipynb](L2203_lecture.ipynb)), and watch the body load only when the description
   fires.
 - Then you'll decide **where a capability belongs** and meet the **real** Agent Skills format
-  ([L2005_lecture.md](L2005_lecture.md)) — the production version of what you hand-built.
+  ([L2205_lecture.md](L2205_lecture.md)) — the production version of what you hand-built.

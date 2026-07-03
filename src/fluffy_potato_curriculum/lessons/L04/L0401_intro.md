@@ -9,10 +9,10 @@ estimated duration: 10
 > **Lesson:** L04 — Explicit graphs & workflows in LangGraph (deterministic DAGs).
 > **Roadmap:** see this lesson's [objectives.md](../../../../docs/origin/lesson_roadmaps/L04/objectives.md).
 > This is a short framing piece. Read it before the written reference lecture
-> ([L1102_lecture.md](L1102_lecture.md)) and the two teacher demo notebooks
-> (prompt chaining [L1103_lecture.ipynb](L1103_lecture.ipynb), routing + user-input branching
-> [L1105_lecture.ipynb](L1105_lecture.ipynb)), with the workflow-vs-agent wrap-up in
-> [L1107_lecture.md](L1107_lecture.md). Hands-on practice is in the L04 labs (L0404, L0406).
+> ([L0402_lecture.md](L0402_lecture.md)) and the two teacher demo notebooks
+> (prompt chaining [L0403_lecture.ipynb](L0403_lecture.ipynb), routing + user-input branching
+> [L0405_lecture.ipynb](L0405_lecture.ipynb)), with the workflow-vs-agent wrap-up in
+> [L0407_lecture.md](L0407_lecture.md). Hands-on practice is in the L04 labs (L0404, L0406).
 > **Anchor model: Claude Sonnet 4.6** for the heavy reasoning nodes, **Claude Haiku 4.5** for the
 > light nodes (classify / route / extract). L04 deliberately *mixes* models per node.
 

@@ -10,7 +10,7 @@ estimated duration: 22
 > **Roadmap:** [demos_or_activities.md](../../../../docs/origin/lesson_roadmaps/L22/demos_or_activities.md).
 > Closing lecture — **decision + reveal, diagram and discussion, no live build**. It applies the
 > heuristic from Demo 4 and then opens a real `SKILL.md` from *this repo* to show the production
-> version of the loader you hand-built in [L2003_lecture.ipynb](L2003_lecture.ipynb).
+> version of the loader you hand-built in [L2203_lecture.ipynb](L2203_lecture.ipynb).
 > **Anchor model: Claude Sonnet 4.6.**
 
 ## section 1. The decision: where should a capability live?

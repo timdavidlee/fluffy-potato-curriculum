@@ -4,8 +4,8 @@ Covers both L14 labs: **L1404** (build the shallow agent as a graph) and **L1406
 reducers). Both run **fully offline** — a deterministic `StubChat` stands in for `ChatAnthropic` and
 the **real** prebuilt `ToolNode` runs the **real** `common/tools.py` tools, so no API key is needed
 and every run is reproducible. The focus is the **graph mental model and the message-history
-reducer**, not model output. The lecture demos ([L1403](L1203_lecture.ipynb),
-[L1405](L1205_lecture.ipynb), [L1407](L1207_lecture.ipynb)) use the real `ChatAnthropic` client where
+reducer**, not model output. The lecture demos ([L1403](L1403_lecture.ipynb),
+[L1405](L1405_lecture.ipynb), [L1407](L1407_lecture.ipynb)) use the real `ChatAnthropic` client where
 they make live calls; the labs deliberately don't, so the wiring and state are the only variables.
 
 > Keep repeating the lesson's spine: **it's the same model → tool → model loop from L10, now drawn as
@@ -15,7 +15,7 @@ they make live calls; the labs deliberately don't, so the wiring and state are t
 
 ---
 
-## L1204_lab problem 1 — The typed state
+## L1404_lab problem 1 — The typed state
 
 COMMON GOTCHAS:
 - Forgetting the `add_messages` reducer — writing `messages: list[BaseMessage]` instead of
@@ -33,7 +33,7 @@ UNBLOCKERS: Point at the L1403/L1405 state schema — two fields, only `messages
 TIME: 3–5 min. STRETCH: ask *why* messages must append and step may overwrite (the
 `tool_use`/`tool_result` pairing invariant).
 
-## L1204_lab problem 2 — The agent node and the router
+## L1404_lab problem 2 — The agent node and the router
 
 COMMON GOTCHAS:
 - Returning the **whole state** instead of a partial update. A node returns only the fields it
@@ -52,7 +52,7 @@ UNBLOCKERS: Have them say each line's L10 equivalent aloud: `agent_node` = "call
 TIME: 6–10 min. STRETCH: ask what `handle_tool_errors=True` does (turns a tool exception into an
 error `ToolMessage` — L10's `is_error`).
 
-## L1204_lab problem 3 — Wire, compile, render
+## L1404_lab problem 3 — Wire, compile, render
 
 COMMON GOTCHAS:
 - Omitting the **back-edge** `add_edge("tools", "agent")`. Without it the graph runs the tools once
@@ -69,7 +69,7 @@ arrow, the wiring is right. Compare it to the L1403 diagram.
 
 TIME: 5–8 min. STRETCH: render `draw_mermaid_png()` for an image instead of the text.
 
-## L1204_lab problem 4 — Run the agent
+## L1404_lab problem 4 — Run the agent
 
 COMMON GOTCHAS:
 - Forgetting `step` (or `messages`) in the initial state — `invoke` needs both keys present
@@ -86,7 +86,7 @@ UNBLOCKERS: If the run hits a recursion error, the reducer or the route is wrong
 TIME: 4–6 min. STRETCH: invoke on the crash task (`flaky_fetch https://crash`) and watch the error
 `ToolMessage` flow back through the loop.
 
-## L1204_lab problem 5 — What makes it an agent? (written)
+## L1404_lab problem 5 — What makes it an agent? (written)
 
 COMMON GOTCHAS:
 - Answering "the conditional edge" for Q1. Close, but the precise answer is the **back-edge**
@@ -103,7 +103,7 @@ runaway.
 
 ---
 
-## L1206_lab problem 1 — Define the state
+## L1406_lab problem 1 — Define the state
 
 COMMON GOTCHAS:
 - Same as L1404 problem 1: forgetting `add_messages`. Here it matters even more — problem 3 *depends*
@@ -114,7 +114,7 @@ only write the schema, not the graph.
 
 TIME: 2–4 min.
 
-## L1206_lab problem 2 — Watch the history grow
+## L1406_lab problem 2 — Watch the history grow
 
 COMMON GOTCHAS:
 - Iterating but not distinguishing message types — the cleanest read prints `type(m).__name__` and,
@@ -127,7 +127,7 @@ back one cell.
 
 TIME: 4–6 min. STRETCH: print `m.tool_calls` fully to see the args the (stub) model chose.
 
-## L1206_lab problem 3 — Break it, then fix the reducer
+## L1406_lab problem 3 — Break it, then fix the reducer
 
 COMMON GOTCHAS:
 - Surprise that the **given** `BrokenState` cell raises `GraphRecursionError` — that's the point, and
@@ -145,7 +145,7 @@ graph form. Have them state the connection out loud.
 TIME: 5–8 min. STRETCH: lower `recursion_limit` to 2 and watch it trip even sooner; raise it and note
 it still never terminates.
 
-## L1206_lab problem 4 — State or dependency? (written)
+## L1406_lab problem 4 — State or dependency? (written)
 
 COMMON GOTCHAS:
 - Putting the **client** or the **tools** in state. They're dependencies wired in at build time

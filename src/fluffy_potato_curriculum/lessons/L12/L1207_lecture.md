@@ -7,7 +7,7 @@ estimated duration: 8
 ```
 
 > **Lesson:** L12 — Evaluation: first pass. **Roadmap:** [objectives.md](../../../../docs/origin/lesson_roadmaps/L12/objectives.md) (objective 5) · [demos_or_activities.md](../../../../docs/origin/lesson_roadmaps/L12/demos_or_activities.md) (bridge demo).
-> **Comes after:** `L0906_lecture` (you put a cost on an eval run and walked the scorer spectrum). This short closer makes the *practice* concrete: the harness you built is the thing you carry forward.
+> **Comes after:** `L1206_lecture` (you put a cost on an eval run and walked the scorer spectrum). This short closer makes the *practice* concrete: the harness you built is the thing you carry forward.
 
 ## section 1. The rule, stated once
 

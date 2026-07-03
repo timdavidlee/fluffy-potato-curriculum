@@ -9,11 +9,11 @@ estimated duration: 10
 > **Lesson:** L09 — MCP: packaging tools as a portable contract.
 > **Roadmap:** see this lesson's [objectives.md](../../../../docs/origin/lesson_roadmaps/L09/objectives.md).
 > This is a short framing piece. Read it before the written reference lecture
-> ([L0602_lecture.md](L0602_lecture.md)), the offline spec-translation demo
-> ([L0603_lecture.ipynb](L0603_lecture.ipynb)), the connect-to-a-server slide outline
-> ([L0605_lecture.md](L0605_lecture.md)), and the build-a-server walkthrough
-> ([L0606_lecture.ipynb](L0606_lecture.ipynb)).
-> **Anchor model throughout: Claude Sonnet 4.6** (same anchor as [L07](../L07/L0401_intro.md) / [L08](../L08/L0501_intro.md)).
+> ([L0902_lecture.md](L0902_lecture.md)), the offline spec-translation demo
+> ([L0903_lecture.ipynb](L0903_lecture.ipynb)), the connect-to-a-server slide outline
+> ([L0905_lecture.md](L0905_lecture.md)), and the build-a-server walkthrough
+> ([L0906_lecture.ipynb](L0906_lecture.ipynb)).
+> **Anchor model throughout: Claude Sonnet 4.6** (same anchor as [L07](../L07/L0701_intro.md) / [L08](../L08/L0801_intro.md)).
 
 ## Where this lesson sits
 
@@ -77,14 +77,14 @@ These terms recur whenever tools are packaged for reuse:
 The official Python **`mcp` package is not installed in this course environment**, and we do not add
 it. That has a deliberate consequence for how L09 is built:
 
-- The **offline** material — the spec-translation demo ([L0903](L0603_lecture.ipynb)) and all three
-  labs ([L0904](L0604_lab_empty.ipynb), [L0907](L0607_lab_empty.ipynb), and the validator lab) — uses
+- The **offline** material — the spec-translation demo ([L0903](L0903_lecture.ipynb)) and all three
+  labs ([L0904](L0904_lab_empty.ipynb), [L0907](L0907_lab_empty.ipynb), and the validator lab) — uses
   **only the Python standard library** (`json`, `dataclasses`). It runs here, deterministically, with
   no API key and no `mcp` package. These labs work directly with the *tool spec* — the JSON shape that
   crosses the wire — which is the part of MCP you most need to understand.
 - The material that genuinely needs a live MCP connection — **connecting to an existing server**
-  ([L0905](L0605_lecture.md), a slide outline) and **building your own server**
-  ([L0906](L0606_lecture.ipynb), a code walkthrough) — shows the real code but is **marked
+  ([L0905](L0905_lecture.md), a slide outline) and **building your own server**
+  ([L0906](L0906_lecture.ipynb), a code walkthrough) — shows the real code but is **marked
   NOT-RUNNABLE without the `mcp` package**. You read it to see the wire shape and the server skeleton;
   you do not execute it in this environment. (If your local environment installs `mcp`, the code is
   written to run — but that is outside the course's pinned env.)
@@ -99,6 +99,6 @@ The one sentence to leave L09 with:
 > that speaks the protocol can discover and call it — the design is unchanged; only the packaging and
 > the boundary are new.*
 
-Next: the written reference lecture in [L0602_lecture.md](L0602_lecture.md), then the offline
-spec-translation demo ([L0903](L0603_lecture.ipynb)) and the connect/build walkthroughs
-([L0905](L0605_lecture.md) / [L0906](L0606_lecture.ipynb)).
+Next: the written reference lecture in [L0902_lecture.md](L0902_lecture.md), then the offline
+spec-translation demo ([L0903](L0903_lecture.ipynb)) and the connect/build walkthroughs
+([L0905](L0905_lecture.md) / [L0906](L0906_lecture.ipynb)).

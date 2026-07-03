@@ -9,16 +9,16 @@ estimated duration: 10
 > **Lesson:** L10 — Hand-rolled agent loop.
 > **Roadmap:** see this lesson's [objectives.md](../../../../docs/origin/lesson_roadmaps/L10/objectives.md).
 > This is a short framing piece. Read it before the written reference lecture
-> ([L0702_lecture.md](L0702_lecture.md)), the stub-model demo notebook
-> ([L0703_lecture.ipynb](L0703_lecture.ipynb)), the two hands-on labs
-> ([L1004](L0704_lab_empty.ipynb), [L1005](L0705_lab_empty.ipynb)), and the one live multi-step demo
-> ([L0706_lecture.ipynb](L0706_lecture.ipynb)).
+> ([L1002_lecture.md](L1002_lecture.md)), the stub-model demo notebook
+> ([L1003_lecture.ipynb](L1003_lecture.ipynb)), the two hands-on labs
+> ([L1004](L1004_lab_empty.ipynb), [L1005](L1005_lab_empty.ipynb)), and the one live multi-step demo
+> ([L1006_lecture.ipynb](L1006_lecture.ipynb)).
 > **Anchor model for the live demo: Claude Sonnet 4.6.**
 
 ## Where this lesson sits
 
 By L10 you have seen the *mechanics* of tool calling — wiring a single tool and tracing one
-round-trip ([L07](../L07/L0401_intro.md)) — and the *design* of good tools, including what a tool
+round-trip ([L07](../L07/L0701_intro.md)) — and the *design* of good tools, including what a tool
 should return when it can't do its job ([L08](../L08/objectives.md)). What you have **not** built is
 the *outer loop* that turns one tool-call round-trip into something that resembles an agent.
 
@@ -39,7 +39,7 @@ If you remember nothing else from L10, remember this: **an agent is a loop, not 
 
 1. The **model** is a stateless function call. You send it the whole conversation plus the tool
    definitions; it emits one response. It does not remember the last turn, and it does not run your
-   tools — that framing is straight from [L07](../L07/L0401_intro.md).
+   tools — that framing is straight from [L07](../L07/L0701_intro.md).
 2. The **loop** is what makes it an agent. The loop calls the model, executes any tool the model
    requested, appends the result, and calls the model *again* — over and over — until the model
    stops asking for tools or a safety cap fires.
@@ -76,14 +76,14 @@ final text turn). With a scripted model:
 - you can script a runaway (the model "never stops") and watch the `max_steps` cap *catch* it;
 - you can script a tool that raises and watch the loop turn the exception into a `tool_result`.
 
-That is how the demo ([L1003](L0703_lecture.ipynb)) and both labs ([L1004](L0704_lab_empty.ipynb),
-[L1005](L0705_lab_empty.ipynb)) work — **offline and verifiable**. Exactly **one** notebook
-([L1006](L0706_lecture.ipynb)) swaps the stub for the real Anthropic SDK and runs a genuine
+That is how the demo ([L1003](L1003_lecture.ipynb)) and both labs ([L1004](L1004_lab_empty.ipynb),
+[L1005](L1005_lab_empty.ipynb)) work — **offline and verifiable**. Exactly **one** notebook
+([L1006](L1006_lecture.ipynb)) swaps the stub for the real Anthropic SDK and runs a genuine
 multi-step loop, so you see the same code drive a live model.
 
 ## A note on the code you'll see
 
-The same wrinkle from [L07](../L07/L0401_intro.md) applies. The course's `potato_llm` seam is
+The same wrinkle from [L07](../L07/L0701_intro.md) applies. The course's `potato_llm` seam is
 **text-only** — its `Message` carries a string and cannot represent `tool_use` / `tool_result`
 blocks. The agent loop is *built on* those blocks, so the **live** demo reaches under the seam and
 calls the raw Anthropic SDK directly (the key still loads through the config seam,
@@ -97,6 +97,6 @@ The one sentence to leave L10 with:
 > result back, repeat — until the model stops asking or a cap you chose fires; and when a tool
 > breaks, the loop turns the break into a message, not a crash.*
 
-Next: the written reference lecture in [L0702_lecture.md](L0702_lecture.md), then the stub-model demo
-([L1003](L0703_lecture.ipynb)), the labs ([L1004](L0704_lab_empty.ipynb),
-[L1005](L0705_lab_empty.ipynb)), and the live multi-step run ([L1006](L0706_lecture.ipynb)).
+Next: the written reference lecture in [L1002_lecture.md](L1002_lecture.md), then the stub-model demo
+([L1003](L1003_lecture.ipynb)), the labs ([L1004](L1004_lab_empty.ipynb),
+[L1005](L1005_lab_empty.ipynb)), and the live multi-step run ([L1006](L1006_lecture.ipynb)).

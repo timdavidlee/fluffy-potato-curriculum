@@ -16,7 +16,7 @@ General setup gotchas:
 
 ---
 
-## L0903_lab problem 1
+## L1203_lab problem 1
 
 **Task:** write the `answer_correct` outcome scorer (reference answer is a substring of `final_text`).
 
@@ -35,7 +35,7 @@ UNBLOCKERS:
 TIME: ~4 min. STRETCH: add a `comment=` that records what it was looking for, then print the
 report and read the comment off `report.sample_results[0].results[0]`.
 
-## L0903_lab problem 2
+## L1203_lab problem 2
 
 **Task:** write the `expected_tools` trajectory scorer using `tool_trajectory(run)`.
 
@@ -54,7 +54,7 @@ UNBLOCKERS:
 TIME: ~4 min. STRETCH: switch to `tool_calls(run)` and assert on the **arguments** too, not just the
 names (this is the L11 "arguments are where the truth is" point).
 
-## L0903_lab problem 3
+## L1203_lab problem 3
 
 **Task:** write `no_runaway` (a trajectory check) and a regression case — red on `atlantis_runaway`,
 green on `atlantis_fixed`.
@@ -77,7 +77,7 @@ UNBLOCKERS:
 TIME: ~8 min (the hardest problem in this lab). STRETCH: add a `comment` reporting the termination
 cause and the number of tool calls, so a failing run explains itself.
 
-## L0903_lab problem 4
+## L1203_lab problem 4
 
 **Task:** loosen the brittle check (`answer_correct_loose`, normalize commas/spaces) and answer the
 written question (a quality only a judge/human can score).
@@ -95,12 +95,12 @@ UNBLOCKERS:
 - "Why did the correct run go red? Look at the punctuation in the answer." (the commas)
 - "What could you *never* express as a substring rule, no matter how clever?" → leads to the judge.
 
-TIME: ~6 min. STRETCH: this is exactly the quality `L0906_lecture` builds an LLM-judge for — point
+TIME: ~6 min. STRETCH: this is exactly the quality `L1206_lecture` builds an LLM-judge for — point
 finishers there.
 
 ---
 
-## L0905_lab problem 1
+## L1205_lab problem 1
 
 **Task:** run the weak model at `samples=5` and read the `no_runaway` pass *rate* (a fraction).
 
@@ -120,7 +120,7 @@ UNBLOCKERS:
 TIME: ~5 min. STRETCH: re-run with `samples=20` and watch the rate stabilize; discuss the
 cost/confidence trade (the lead-in to `L1206`).
 
-## L0905_lab problem 2
+## L1205_lab problem 2
 
 **Task:** build strong and weak reports and `compare(before, after)` to flag regressions.
 
@@ -139,7 +139,7 @@ UNBLOCKERS:
 TIME: ~6 min. STRETCH: frame it as a *prompt edit* instead of a model swap — build two strong-ish
 run_cases that differ slightly and compare them; same machinery, the regression-guard framing.
 
-## L0905_lab problem 3
+## L1205_lab problem 3
 
 **Task:** print both tables and write why a single run can't be trusted.
 

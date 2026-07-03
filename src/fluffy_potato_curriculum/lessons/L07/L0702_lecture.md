@@ -9,8 +9,8 @@ estimated duration: 75
 > **Lesson:** L07. **Roadmap:** [objectives.md](../../../../docs/origin/lesson_roadmaps/L07/objectives.md).
 > This is the written reference lecture — thorough on purpose, so a student who missed the verbal
 > delivery can rebuild the lesson from the page. The live demos are split one per beat
-> ([L0703](L0403_lecture.ipynb) a tool call is tokens, [L0704](L0404_lecture.ipynb) one wired
-> round-trip, [L0706](L0406_lecture.ipynb) trace the round-trip, [L0708](L0408_lecture.ipynb)
+> ([L0703](L0703_lecture.ipynb) a tool call is tokens, [L0704](L0704_lecture.ipynb) one wired
+> round-trip, [L0706](L0706_lecture.ipynb) trace the round-trip, [L0708](L0708_lecture.ipynb)
 > three outcomes); hands-on practice is in the L07 labs (L0705 / L0707 / L0709).
 > **Anchor model throughout: Claude Sonnet 4.6** (Haiku 4.5 is the smaller-model contrast in Demo 4).
 

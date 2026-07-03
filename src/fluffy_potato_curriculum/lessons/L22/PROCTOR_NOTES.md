@@ -9,7 +9,7 @@ notebook asks for a key, they've drifted off the given scaffolding; send them ba
 
 ---
 
-## L2004_lab problem 1
+## L2204_lab problem 1
 
 **Goal:** author an `escalation` skill with a *discriminating* description.
 
@@ -25,7 +25,7 @@ UNBLOCKERS: point back to the `refund-policy` skill in the setup cell as a shape
 
 TIME: ~5 min. STRETCH: have them write a *second* skill and check the two descriptions don't overlap.
 
-## L2004_lab problem 2
+## L2204_lab problem 2
 
 **Goal:** measure always-on vs. JIT context cost.
 
@@ -38,7 +38,7 @@ COMMON GOTCHAS:
 TIME: ~5 min. STRETCH: add three more stub skills and watch the always-on number climb while the
 idle/JIT numbers barely move — that gap *is* the payoff.
 
-## L2004_lab problem 3
+## L2204_lab problem 3
 
 **Goal:** run a triggering task and see the body load just in time.
 
@@ -51,7 +51,7 @@ COMMON GOTCHAS:
 
 TIME: ~5 min.
 
-## L2004_lab problem 4
+## L2204_lab problem 4
 
 **Goal:** show a vague description causes a silent miss.
 
@@ -64,7 +64,7 @@ COMMON GOTCHAS:
 TIME: ~5 min. STRETCH: ask what a *too-broad* description would do instead (loads on everything,
 defeating the savings) — the opposite failure mode.
 
-## L2004_lab problem 5
+## L2204_lab problem 5
 
 **Goal (written):** argue skill vs. system prompt using measured cost.
 
@@ -79,7 +79,7 @@ TIME: ~5 min.
 
 ---
 
-## L2006_lab problem 1
+## L2206_lab problem 1
 
 **Goal:** classify five capabilities as tool / skill / system prompt.
 
@@ -94,7 +94,7 @@ COMMON GOTCHAS:
 
 TIME: ~8 min.
 
-## L2006_lab problem 2
+## L2206_lab problem 2
 
 **Goal (written):** explain composition — a skill orchestrating tools.
 
@@ -105,7 +105,7 @@ COMMON GOTCHAS:
 
 TIME: ~5 min.
 
-## L2006_lab problem 3
+## L2206_lab problem 3
 
 **Goal:** inspect a real `SKILL.md` and map it to the hand-built `Skill`.
 
@@ -121,7 +121,7 @@ COMMON GOTCHAS:
 TIME: ~7 min. STRETCH: open `.claude/skills/generate-materials-from-roadmap/SKILL.md` — the skill
 that generated *this very lesson* — and read its description as a trigger.
 
-## L2006_lab problem 4
+## L2206_lab problem 4
 
 **Goal (written):** decide where a capability from their own agent lives.
 
@@ -132,7 +132,7 @@ COMMON GOTCHAS:
 
 TIME: ~5 min.
 
-## L2006_lab problem 5
+## L2206_lab problem 5
 
 **Goal (written):** name the "instructions in the system prompt" anti-pattern.
 

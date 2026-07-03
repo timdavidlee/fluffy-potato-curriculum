@@ -9,8 +9,8 @@ estimated duration: 80
 > **Lesson:** L08. **Roadmap:** [objectives.md](../../../../docs/origin/lesson_roadmaps/L08/objectives.md).
 > This is the written reference lecture — thorough on purpose, so a student who missed the verbal
 > delivery can rebuild the lesson from the page. The live demos are split one per concept
-> ([L0803](L0503_lecture.ipynb) tool-or-no-tool, [L0805](L0505_lecture.ipynb) the description,
-> [L0807](L0507_lecture.ipynb) schemas + validation errors, [L0809](L0509_lecture.ipynb) errors &
+> ([L0803](L0803_lecture.ipynb) tool-or-no-tool, [L0805](L0805_lecture.ipynb) the description,
+> [L0807](L0807_lecture.ipynb) schemas + validation errors, [L0809](L0809_lecture.ipynb) errors &
 > side effects); hands-on practice is in the L08 labs (L0804 / L0806 / L0808 / L0810).
 > **Anchor model throughout: Claude Sonnet 4.6** (one Haiku 4.5 contrast in L0805).
 
@@ -46,10 +46,10 @@ estimated duration: 80
 
 | Decision | The mental model | Demo / lab |
 | --- | --- | --- |
-| Tool, or no tool? | adding a tool is architecture, not convenience | [L0803](L0503_lecture.ipynb) / L0804 |
-| The description is the tool | same name + schema, different description → different behavior | [L0805](L0505_lecture.ipynb) / L0806 |
-| Schemas are a contract | a tight schema converts ambiguity into recoverable errors | [L0807](L0507_lecture.ipynb) / L0808 |
-| Errors are the interface | an error is a prompt for the model's next turn | [L0809](L0509_lecture.ipynb) / L0810 |
+| Tool, or no tool? | adding a tool is architecture, not convenience | [L0803](L0803_lecture.ipynb) / L0804 |
+| The description is the tool | same name + schema, different description → different behavior | [L0805](L0805_lecture.ipynb) / L0806 |
+| Schemas are a contract | a tight schema converts ambiguity into recoverable errors | [L0807](L0807_lecture.ipynb) / L0808 |
+| Errors are the interface | an error is a prompt for the model's next turn | [L0809](L0809_lecture.ipynb) / L0810 |
 
 [↑ Back to top](#designing-good-tools-name-schema-and-error-as-interface)
 
@@ -86,8 +86,8 @@ estimated duration: 80
 - **The round-trip costs more than the marginal accuracy.** If the tool buys a tiny accuracy gain at
   the price of a full extra call + latency, skip it.
 - The discipline: **run the task model-alone first**, see where it actually fails, and add a tool only
-  where the failure is real. [Demo 1](L0503_lecture.ipynb) does exactly this across three tasks; the
-  [L0804 lab](L0504_lab_empty.ipynb) has you classify a table of tasks and defend each call.
+  where the failure is real. [Demo 1](L0803_lecture.ipynb) does exactly this across three tasks; the
+  [L0804 lab](L0804_lab_empty.ipynb) has you classify a table of tasks and defend each call.
 
 ### slide 2.4 The worked test
 
@@ -117,7 +117,7 @@ estimated duration: 80
 - It is the model's **only training signal at inference time** for tool selection. Treat it like the
   system prompt of a tiny sub-policy: it has to land its point in a few sentences.
 - A weak description is the single most common cause of an unused or a misused tool.
-  [Demo 2](L0505_lecture.ipynb) makes this concrete — same name, same schema, three descriptions,
+  [Demo 2](L0805_lecture.ipynb) makes this concrete — same name, same schema, three descriptions,
   three very different behaviors.
 
 ### slide 3.3 What a good description must answer
@@ -175,7 +175,7 @@ estimated duration: 80
   **not** catch *false* arguments — a syntactically valid but fabricated `priya@example.com` passes
   email-format validation even if no such user exists.
 - This is exactly why **errors** (section 6) matter as a second line of defense: the schema rejects bad
-  *shape*; the tool's runtime errors reject bad *truth*. [Demo 3](L0507_lecture.ipynb) shows the model
+  *shape*; the tool's runtime errors reject bad *truth*. [Demo 3](L0807_lecture.ipynb) shows the model
   guessing a well-formed-but-fake value that passes validation and only fails at lookup.
 
 ### slide 4.4 The two extremes to avoid
@@ -211,7 +211,7 @@ estimated duration: 80
 - If "no user found" returns the same shape as "lookup crashed", the model can't tell whether to retry
   (it might be transient) or to report (it's final). Conflating them produces undefined behavior.
 - A clean `{"found": false}` is a *final, unrecoverable* signal — the model reports back or asks for a
-  better key, and does **not** retry. [Demo 4](L0509_lecture.ipynb) shows this path explicitly.
+  better key, and does **not** retry. [Demo 4](L0809_lecture.ipynb) shows this path explicitly.
 
 [↑ Back to top](#designing-good-tools-name-schema-and-error-as-interface)
 
@@ -247,7 +247,7 @@ estimated duration: 80
   The model knows *which* field, *why* it was rejected, and *how* to fix it.
 - diagram: the same failing call, two error returns side by side — a greyed-out stack trace ("model:
   ¯\\_(ツ)_/¯") vs a structured `{error, field, message}` ("model: oh, I'll pass a UUID").
-- The [L0808 lab](L0508_lab_empty.ipynb) has you take raw stack traces and rewrite each into an
+- The [L0808 lab](L0808_lab_empty.ipynb) has you take raw stack traces and rewrite each into an
   informative `{error, field, message}` payload — pure Python, no model needed.
 
 [↑ Back to top](#designing-good-tools-name-schema-and-error-as-interface)
@@ -279,7 +279,7 @@ estimated duration: 80
 
 - A side effect that isn't named in the description is a side effect the model **can't reason about —
   and therefore can't avoid.** Naming it isn't paranoia; it's part of the contract.
-- [Demo 4](L0509_lecture.ipynb) shows a `lookup_user_by_email` that *also silently creates* a user:
+- [Demo 4](L0809_lecture.ipynb) shows a `lookup_user_by_email` that *also silently creates* a user:
   the model fires it, a record is created it never intended, because the description hid the effect.
   Add one sentence — *"if the user does not exist, this tool creates one"* — and the model pauses to
   ask first.

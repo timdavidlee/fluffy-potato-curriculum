@@ -8,7 +8,7 @@ estimated duration: 12
 
 > **Lesson:** L04. **Roadmap:** Demo 4 in [demos_or_activities.md](../../../../docs/origin/lesson_roadmaps/L04/demos_or_activities.md).
 > This is the closing lecture — mostly **diagram + discussion**, no live build. It reuses one of the
-> compiled workflows from the demos ([L0403](L1103_lecture.ipynb) / [L0405](L1105_lecture.ipynb)) and
+> compiled workflows from the demos ([L0403](L0403_lecture.ipynb) / [L0405](L0405_lecture.ipynb)) and
 > *names* the one change that makes an agent. Building the agent is **L14's** job.
 > **Anchor:** the workflow-vs-agent contrast, stated verbatim so it carries into L14.
 
