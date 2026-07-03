@@ -5,6 +5,7 @@ const state = {
   tracks: [],
   lessons: [], // all LessonSummary, numeric order
   currentTrack: null,
+  query: "", // lesson filter text (matches id or title)
   openLesson: null, // lesson_id currently expanded
   activeItem: null, // `${lesson_id}/${item_id}`
 };
@@ -44,12 +45,40 @@ function renderTrackPicker() {
   };
 }
 
+function matchesQuery(lesson) {
+  const q = state.query.trim().toLowerCase();
+  if (!q) return true;
+  return (
+    lesson.lesson_id.toLowerCase().includes(q) ||
+    lesson.title.toLowerCase().includes(q)
+  );
+}
+
 function renderLessonList() {
   const nav = document.getElementById("lesson-list");
   nav.innerHTML = "";
-  for (const lesson of lessonsForTrack(state.currentTrack)) {
+  const lessons = lessonsForTrack(state.currentTrack).filter(matchesQuery);
+  if (lessons.length === 0) {
+    const empty = document.createElement("p");
+    empty.className = "empty-note";
+    empty.textContent = state.query
+      ? `No lessons match “${state.query}”.`
+      : "No lessons in this track.";
+    nav.appendChild(empty);
+    return;
+  }
+  for (const lesson of lessons) {
     nav.appendChild(renderLesson(lesson));
   }
+}
+
+// mini ⊆ full, so a lesson in the mini track is the notable case; everything
+// else is full-only. Show whichever applies as a coloured pill.
+function trackBadge(lesson) {
+  const inMini = lesson.tracks.includes("mini");
+  const cls = inMini ? "track-badge track-mini" : "track-badge track-full";
+  const label = inMini ? "mini" : "full";
+  return `<span class="${cls}">${label}</span>`;
 }
 
 function renderLesson(lesson) {
@@ -61,6 +90,7 @@ function renderLesson(lesson) {
   toggle.innerHTML =
     `<span class="lesson-num">${lesson.lesson_id}</span>` +
     `<span class="lesson-title">${escapeHtml(lesson.title)}</span>` +
+    trackBadge(lesson) +
     `<span class="lesson-count">${lesson.item_count}</span>`;
   toggle.onclick = () => {
     state.openLesson = state.openLesson === lesson.lesson_id ? null : lesson.lesson_id;
@@ -137,6 +167,11 @@ async function init() {
     state.tracks = tracks;
     state.lessons = lessons;
     state.currentTrack = tracks.length ? tracks[0].name : null;
+    const search = document.getElementById("lesson-search");
+    search.oninput = () => {
+      state.query = search.value;
+      renderLessonList();
+    };
     renderTrackPicker();
     renderLessonList();
   } catch (err) {
