@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "lesson-ui",
+      "runtimeExecutable": "uv",
+      "runtimeArgs": ["run", "python", "-m", "fluffy_potato_curriculum.local_ui"],
+      "port": 8000
+    }
+  ]
+}
