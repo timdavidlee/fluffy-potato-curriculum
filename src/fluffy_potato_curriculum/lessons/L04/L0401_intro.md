@@ -1,76 +1,73 @@
-# Workflows before agents: you wire the flow, the model works inside the nodes
+# Sequential chaining: wire several nodes into a fixed pipeline
 
 ```yaml
-title: "Workflows before agents: you wire the flow, the model works inside the nodes"
-keywords: langgraph, workflow, agent, dag, directed acyclic graph, stategraph, node, edge, conditional edge, state, reducer, prompt chaining, routing, control flow as data, chatanthropic
+title: "Sequential chaining: wire several nodes into a fixed pipeline"
+keywords: langgraph, workflow, dag, directed acyclic graph, stategraph, node, edge, state, reducer, prompt chaining, control flow as data, chatanthropic, mixed models
 estimated duration: 10
 ```
 
-> **Lesson:** L04 — Explicit graphs & workflows in LangGraph (deterministic DAGs).
+> **Lesson:** L04 — Directed graphs: sequential chaining.
 > **Roadmap:** see this lesson's [objectives.md](../../../../docs/origin/lesson_roadmaps/L04/objectives.md).
 > This is a short framing piece. Read it before the written reference lecture
-> ([L0402_lecture.md](L0402_lecture.md)) and the two teacher demo notebooks
-> (prompt chaining [L0403_lecture.ipynb](L0403_lecture.ipynb), routing + user-input branching
-> [L0405_lecture.ipynb](L0405_lecture.ipynb)), with the workflow-vs-agent wrap-up in
-> [L0407_lecture.md](L0407_lecture.md). Hands-on practice is in the L04 labs (L0404, L0406).
+> ([L0402_lecture.md](L0402_lecture.md)) and the demo notebook
+> ([L0403_lecture.ipynb](L0403_lecture.ipynb)). Hands-on practice is in the L04 lab (L0404).
 > **Anchor model: Claude Sonnet 4.6** for the heavy reasoning nodes, **Claude Haiku 4.5** for the
-> light nodes (classify / route / extract). L04 deliberately *mixes* models per node.
+> light nodes (extract / summarize). L04 deliberately *mixes* models per node.
 
 ## Where this lesson sits
 
-This is the course's **first LangGraph lesson**, and it deliberately does *not* build an agent.
-Up to here you have written control flow as plain Python: a single call (L01–L06), a single tool
-round-trip (L07–L08), and in L10 a hand-rolled **model → tool → model loop** whose path your own
-Python `while`/`if` decided. L04 introduces LangGraph by building a **workflow** — a fixed,
-**directed acyclic graph (DAG)** of explicit nodes where *you* wire the path and the model never
-decides what runs next. L14 then takes the *same* primitives and adds the one thing that turns a
-workflow into an agent: a cycle.
+[L03](../L03/objectives.md) wrapped a *single* LLM call as a typed node. L04 wires **several**
+nodes into a fixed, **directed acyclic graph (DAG)** — a **workflow**, where *you* wire the path
+and the model never decides what runs next. [L05](../L05/objectives.md) then adds a **conditional**
+edge (routing) on top of the same primitives; L14 later adds the one thing that turns a workflow
+into an agent: a cycle.
 
-That ordering is the whole point. "Learn a graph framework" and "let the model drive its own
-process" are **two** hard ideas. Teaching the deterministic workflow first means that when L14
-hands the model control of the path, you will see *exactly* what changed — an acyclic graph gained
-a back-edge — instead of meeting graphs and agency fused into one intimidating thing.
+Up to here you have written control flow as plain Python: a single call (L01–L02), one wrapped
+node (L03). Continuing from L03, the model still lives *inside* the nodes — classify, draft,
+summarize — but now *several* nodes are wired together, and *what runs next* is decided by edges
+you laid out, not by the model.
 
-## The one idea, said five ways
+## The one idea, said a few ways
 
-If you remember nothing else from L04, remember this: **in a workflow, the model lives *inside*
-the nodes; the developer owns the edges.** The model still does the smart per-step work — classify
-a ticket, draft a reply, summarize — but *what runs next* is decided by code you wrote, not by the
-model. Said five ways, because it is the line between this lesson and the next:
+If you remember nothing else from L04, remember this: **several nodes, wired in a fixed order, is
+a pipeline you can inspect as data.** Said a few ways:
 
-1. A **workflow** runs through predefined paths *you* laid out. An **agent** lets the *model*
-   direct its own process — choosing tools and looping until it decides it's done. (This is the
-   industry distinction from Anthropic's *Building Effective Agents*.)
-2. LangGraph expresses **both**. A graph is just wired nodes; it is an *agent* only when the
-   **model** drives the path. L04's graphs are **workflows**.
-3. A **conditional edge is not the model deciding.** In L04 a routing function branches on
-   **state you set** — derived data, a model *classification label*, or **direct user input**.
-   In L14 it branches on whether the model asked for a tool. Same mechanism, different decider.
-4. **Determinism is a feature, not a limitation.** A workflow takes the same path on the same
-   input: predictable, cheaper, lower-latency, and trivially testable. Most production "AI
-   features" are workflows, not agents.
-5. **The workflow → agent line is a single back-edge.** Everything you build here carries into
-   L14 unchanged; the only addition is a conditional edge that loops back to the model.
+1. A **workflow** runs through predefined paths *you* laid out. An **agent** (L14) lets the *model*
+   direct its own process. (The industry distinction from Anthropic's *Building Effective Agents*.)
+2. **Prompt chaining** decomposes one task into a fixed sequence of focused steps — each a
+   separate, small model call, not one mega-prompt doing everything.
+3. **Each node may bind its own model.** Because a node is an independent call, a graph can mix a
+   cheap model (Haiku) for light steps and a capable model (Sonnet) for heavy reasoning.
+4. **A graph turns control flow into inspectable data.** Nodes and edges can be listed and drawn —
+   unlike `if`/`while` buried in Python.
+5. **Determinism is a feature.** A workflow takes the same path on the same input: predictable,
+   cheaper, and trivially testable.
 
 ## Vocabulary this lesson lands
 
-You will leave L04 able to define each of these — and they all reappear, unchanged, in L14:
+Building on L03's vocabulary (graph, node, state, entry point/END, compile/invoke, pure function
+over state), L04 adds:
 
-- **Graph** — a task expressed as nodes connected by edges, compiled into a runnable.
-- **Node** — a typed function that reads state and returns a state update; may call the model
-  (`ChatAnthropic`) internally, and **each node may bind its own model**.
-- **Edge** — a fixed transition (`A → B`, always).
-- **Conditional edge** — a routing function reads **state** and returns the next node's name.
-- **State** — the shared, typed object threaded through every node.
-- **Reducer** — the rule that merges a node's returned update into state per field.
-- **DAG (directed acyclic graph)** — a graph with no back-edges; the defining shape of a workflow.
-- **Workflow vs. agent** — workflow = developer wires the (acyclic) path; agent = the model drives
-  the (cyclic) path. The lesson's headline contrast.
+- **Edge** — a fixed transition, `A → B`, taken every time: `add_edge("parse", "draft")`.
+- **Reducer** — the rule that merges a node's returned update into state, *per field*. The default
+  reducer **overwrites**; an `Annotated[list, add]` field **appends** instead. L03 needed no
+  reducer (one node, nothing to merge); L04 is where it first matters.
+- **DAG (directed acyclic graph)** — a graph with **no back-edges**: every edge moves forward to
+  `END`. The absence of a back-edge is exactly what makes this a *workflow*, not an agent.
+- **Prompt chaining** — a fixed chain of nodes where each step's output feeds the next.
 
-## A note on the client: first framework, native client
+Terms deliberately **not** introduced here — they are L05's: **conditional edge** (a routing
+function chosen at runtime) and the deciders that can feed one (a model label, direct user input).
 
-L01–L12 talked to the model through the hand-rolled `potato_llm` seam, so swapping providers was a
-one-line change. From L04 on, the course **reaches for a framework**, and frameworks bring their
-own client abstraction. So inside graph nodes we call LangChain's **`ChatAnthropic`** directly,
-not `potato_llm`. The API key still loads through the same `common/config.py` seam — only the
-*client* is the framework's now. Watch for that departure called out in the first demo.
+## A note on the client: continuing the framework, tracing still ahead
+
+Since [L03](../L03/objectives.md), nodes call the native LangChain **`ChatAnthropic`** client, not
+the hand-rolled `potato_llm` seam from L01–L02 — no new departure here, just more of it.
+
+L04's demo also gives you a first, optional **taste** of watching a workflow run in Langfuse — but
+the full tracing skill (reading a structured trace, comparing runs, diagnosing failures) is
+**L11's** job, still several lessons away. If Langfuse isn't configured, the demo runs exactly the
+same; you just won't see the spans.
+
+The single sentence to leave L04 with: **"You just wired several steps together — next lesson, one
+of those edges gets to choose."**

@@ -6,27 +6,29 @@ keywords: workflow, agent, back-edge, cycle, dag, langgraph, when to use which, 
 estimated duration: 12
 ```
 
-> **Lesson:** L04. **Roadmap:** Demo 4 in [demos_or_activities.md](../../../../docs/origin/lesson_roadmaps/L04/demos_or_activities.md).
-> This is the closing lecture — mostly **diagram + discussion**, no live build. It reuses one of the
-> compiled workflows from the demos ([L0403](L0403_lecture.ipynb) / [L0405](L0405_lecture.ipynb)) and
-> *names* the one change that makes an agent. Building the agent is **L14's** job.
+> **Lesson:** L05. **Roadmap:** Demo 4 in [demos_or_activities.md](../../../../docs/origin/lesson_roadmaps/L05/demos_or_activities.md).
+> This is the closing lecture — mostly **diagram + discussion**, no live build. It recaps the
+> compiled workflows from L04's and this lesson's demos ([L04's Demo 1](../L04/L0403_lecture.ipynb)
+> / [this lesson's Demo](L0503_lecture.ipynb)) and *names* the one change that makes an agent.
+> Building the agent is **L14's** job.
 > **Anchor:** the workflow-vs-agent contrast, stated verbatim so it carries into L14.
 
 ## section 1. Recap — what a workflow is
 
 ### slide 1.1 Everything you built was acyclic
 
-- Across the demos and labs you built three graphs — a prompt chain, a model-classified router, and
-  a user-input router. **Every one was a DAG**: trace any path with your finger and every arrow
-  goes forward; it always reaches `END`.
-- diagram: the L0403 chain `parse → draft → policy_check → END` with a finger-trace arrow showing
+- Across [L04](../L04/objectives.md)'s and this lesson's demos and labs you built three graphs — a
+  prompt chain (L04), a model-classified router (L05), and a user-input router (L05). **Every one
+  was a DAG**: trace any path with your finger and every arrow goes forward; it always reaches
+  `END`.
+- diagram: L04's chain `parse → draft → policy_check → END` with a finger-trace arrow showing
   "forward only, always terminates."
 - The model did real work *inside* the nodes (parse, classify, draft), but **the developer wired
   every edge.** That is the definition of a workflow.
 
 ### slide 1.2 The primitives you now own
 
-- table: the L04 primitives — and the note that **L14 reuses every one of them unchanged.**
+- table: the L04 + L05 primitives — and the note that **L14 reuses every one of them unchanged.**
 
 | Primitive | What it is | Reused in L14? |
 | --- | --- | --- |
@@ -56,13 +58,13 @@ estimated duration: 12
   — only there the `while`/`if` was plain Python, and in L14 it's a graph edge.
 - diagram: side by side — L10's `while` loop pseudocode and L14's cyclic graph — captioned "same
   loop, now expressed as a graph."
-- So L14 is not a new world: it's **L04's primitives + L10's loop**, written as one back-edge.
+- So L14 is not a new world: it's **L04/L05's primitives + L10's loop**, written as one back-edge.
 
 ### slide 2.3 A conditional edge is still not "the model is an agent" by itself
 
-- Be precise: in L04 a conditional edge branched on **state the developer set** (a label, a user
-  choice). It is an **agent** only when the conditional edge branches on **the model's own decision
-  to keep going** *and* that edge **loops**.
+- Be precise: a conditional edge in this course has so far **always** branched on **state the
+  developer set** (L05's classifier label, or direct user input). It is an **agent** only when the
+  conditional edge branches on **the model's own decision to keep going** *and* that edge **loops**.
 - If a student says "but the classifier was the model deciding" — no: the model produced a *label
   in state*; the developer's routing function read that label and chose the edge. The model never
   chose the edge, and **it never looped.**
