@@ -43,7 +43,9 @@ estimated duration: 110
 ### slide 1.3 What L02 does not teach
 
 - **Not chain-of-thought.** Scratchpad / `<thinking>` reasoning is L06. L02 teaches the
-  structured-*answer* half; L06 teaches the *thinking* half. They compose later.
+  structured-*answer* half and *shows* the `<thinking>`/`<answer>` channel split (slide 3.6 —
+  mini-essential, since the mini skips L06); L06 teaches the *thinking* half: what to reason about
+  and when it helps.
 - **Not tool calling.** Forcing schema-conformant output via the tool-use protocol is L07. Here we
   ask for JSON *by instruction only* and parse defensively.
 - **Not orchestration.** Chaining several single-step tasks into a pipeline is L03–L05. Section 5's
@@ -164,6 +166,17 @@ estimated duration: 110
 - Keep input and output *shapes consistent*: a labeled, structured request yields cleaner structured
   output than the same request phrased in flowing English. Consistency reduces the model's degrees
   of freedom — and therefore the parse failures.
+
+### slide 3.6 The thinking/answer channel split (mini-essential)
+
+- An assistant reply can carry **more than the answer**: a `<thinking>…</thinking>` scratchpad
+  *then* a structured `<answer>{…}</answer>`. This is just structured output with a reasoning block
+  in front — extract the `<answer>` (a tag-match), then reuse the same defensive parser from slide 3.4.
+- **L02 owns the answer channel; L06 owns the thinking channel.** *What* to put inside the
+  `<thinking>` block — and when reasoning helps vs. hurts — is L06's job. Here we only show that the
+  two **compose**: the parser handles the answer whether or not a thinking block precedes it.
+- **Mini-track note:** the mini course skips L06, so this is your one look at the thinking channel —
+  enough to recognize the `<thinking>`/`<answer>` shape and parse it. The reasoning craft waits for L06.
 
 [↑ Back to top](#prompting-fundamentals-roles-structured-output-few-shot)
 

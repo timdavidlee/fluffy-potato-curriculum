@@ -14,7 +14,7 @@ Each demo is a self-contained block with:
 - **What to highlight** — the moment(s) where the teacher should slow down and call out the takeaway out loud.
 - **If the demo misbehaves** — graceful fallback for when the model surprises you (because it will).
 
-The four demos map one-to-one to the four learning objectives in [objectives.md](objectives.md). Run them in order on the first delivery — Demo 3 (few-shot) reuses parsing scaffolding from Demo 2 (structured output) and roles framing from Demo 1; Demo 4 (the single-step task catalog) reuses the defensive parser from Demo 2 and the classification framing from Demo 3, and shows all three levers pointed at five everyday task shapes.
+The four demos map one-to-one to the four learning objectives in [objectives.md](objectives.md). Run them in order on the first delivery — Demo 3 (few-shot) reuses parsing scaffolding from Demo 2 (structured output) and roles framing from Demo 1; Demo 4 (the single-step task catalog) reuses the defensive parser from Demo 2 and the classification framing from Demo 3, and shows all three levers pointed at five everyday task shapes. Demo 5 (the thinking/answer channel split) is a short **mini-essential** beat that rides along inside the structured-output demo notebook (L0205 §4).
 
 L02 follows L01 ([objectives](../L01/objectives.md), [demos](../L01/demos_or_activities.md)) directly. Students are warm on tokens, context windows, sampling, and cost. Reuse the L01 wrapper that prints `input_tokens`, `output_tokens`, latency, and per-call cost — every L02 demo benefits from showing those numbers without ceremony, and reinforcing the L01 framing that *every prompt is a budget decision*.
 
@@ -196,11 +196,33 @@ A small multi-turn script for the second half of the demo: a 4-turn conversation
 - If ranking returns rewritten candidate text instead of ids, that *is* the teachable moment — show the validator failing to match, then reframe the prompt to "return the ids in order."
 - Time-box each shape to ~2–3 minutes; this is a *survey*, not five deep dives. Short on time? Cut ranking or the mixed-schema extraction variant first.
 
-## Optional bridge demo — toward chain-of-thought (L06)
+## Demo 5 — The thinking/answer channel split (Subgoal 2; mini-essential)
 
-If time allows, run one final demo that previews L06. Take Demo 2's structured-output prompt and add a `<thinking>...</thinking>` block before the JSON. Don't *teach* chain-of-thought — just show that the same structured-output discipline (Subgoal 2) gracefully accommodates a thinking block, and the parser pulls the JSON out as before. Say out loud: "L06 is about what to put inside that thinking block, and when it's worth the extra tokens."
+**Goal:** show that a structured `<answer>` composes with a `<thinking>` scratchpad in front of it — the same defensive-parsing discipline from Demo 2 pulls the answer out whether or not the model reasons first. This is L02's one exposure to the *thinking channel*.
 
-<!-- *NEED INPUT*: include this bridge demo, or save it as the opener for L06? Mirrors the equivalent open question in [L01 demos](../L01/demos_or_activities.md). -->
+**Full course:** run it as a short bridge to L06 — *"L06 is about what to put inside that thinking block, and when it's worth the extra tokens."*
+
+**Mini course (no L06): this demo is not optional.** With L06 cut, this is the only place mini students meet the `<thinking>`/`<answer>` shape. Teach it as a small taught beat: the model reasons in `<thinking>`, commits to a structured `<answer>`, and your parser extracts the answer (a tag-match, then the Demo 2 JSON parser).
+
+**Live script:**
+
+1. Take Demo 2's extraction prompt and append: *"First reason inside `<thinking>...</thinking>`, then give the JSON inside `<answer>...</answer>`."*
+2. Run it on the *ambiguous* email from Demo 2. Show the model reasoning about which intent fits, then emitting the JSON in the `<answer>` block.
+3. Extract the `<answer>...</answer>` block with a small regex, then run **the same** `parse_json_object` + `validate_record` on it. Show the parsed dict.
+4. Say out loud: **L02 owns the answer channel; L06 owns the thinking channel.** The two compose; nothing about the parser changed.
+
+**What to highlight:**
+
+- Structured output and a thinking block **compose** — the `<thinking>` text is just assistant output *before* the answer.
+- The parser is unchanged: extract the `<answer>` tag, then the Demo 2 parser. Defensive parsing carries straight over.
+- Boundary: *what* to reason about, and when reasoning helps vs. hurts, is **L06** — not taught here.
+
+**If the demo misbehaves:**
+
+- If the model skips the tags and returns bare JSON, the tag-extract falls back to the whole reply and the parser still works — name that as the graceful fallback.
+- If the thinking block contains braces that would confuse a naive `{...}` regex, that is exactly why the `<answer>...</answer>` tag-extract comes first — a more robust habit than grabbing the first brace.
+
+> Implemented as **section 4 of the L0205 structured-output demo** (it extends Demo 2's notebook rather than adding a separate item).
 
 ## Pacing notes for the teacher
 
@@ -216,4 +238,4 @@ If time allows, run one final demo that previews L06. Take Demo 2's structured-o
 - <!-- *NEED INPUT*: should Demo 1 demo the "model overrides the system message under user pressure" failure mode explicitly, or treat that as a security/safety topic out of scope for this course? Mirrored from [objectives.md](objectives.md). -->
 - <!-- *NEED INPUT*: confirm the triage example in Demo 1 is appropriate for the audience, or swap for a customer-support / code-review framing. The structural point is the same. -->
 - <!-- *NEED INPUT*: are the demos run in a Jupyter notebook the teacher projects, or in a slide-embedded REPL, or via a custom demo runner script? Mirrored from [L01 demos](../L01/demos_or_activities.md). -->
-- <!-- *NEED INPUT*: include the optional L06 bridge demo here, or save it as the opener for L06? -->
+- <!-- RESOLVED: the thinking/answer bridge is now **Demo 5** (mini-essential), implemented as section 4 of the L0205 demo — kept here because the mini cut drops L06 and needs a home for the thinking channel. The full course still uses it as a short L06 bridge. -->
