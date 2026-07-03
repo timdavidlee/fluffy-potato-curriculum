@@ -47,8 +47,9 @@ injects them. No JS build step.
 - **Syntax highlighting is server-side via Pygments.** Markdown fences go through the
   `codehilite` extension; notebook code cells (always Python) are highlighted directly. Both
   emit a `.highlight` wrapper so one block of token CSS in `static/style.css` styles both. The
-  theme CSS is generated from Pygments' `friendly` style — regenerate with
-  `HtmlFormatter(style=...).get_style_defs("#item-html .highlight")` if you change it.
+  token CSS is generated from Pygments' `one-dark` style (the viewer chrome is a dark theme) —
+  regenerate with `HtmlFormatter(style=...).get_style_defs("#item-html .highlight")` if you
+  change it.
 - Tests live in `tests/local_ui/` and use FastAPI's `TestClient` fully offline. Its
   httpx-backed methods read as partially-typed under pyright strict, so the calls are
   isolated behind `tests/local_ui/_api.py`.
