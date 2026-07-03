@@ -245,7 +245,7 @@ If time allows, take Demo 4's reusable preamble and Demo 5's multi-turn script a
 
 ## Pacing notes for the teacher
 
-- **Per-demo time:** 8–12 minutes including discussion. Seven demos (1, 2, 3, 3.5, 3.6, 4, 5) plus the optional bridge run ~75–90 minutes. <!-- *NEED INPUT*: confirm against the lesson-time budget; the added prediction/scale/preamble framing lengthens L01 versus the original four-demo plan — consider splitting into two lecture blocks. -->
+- **Per-demo time:** 8–12 minutes including discussion. Seven demos (1, 2, 3, 3.5, 3.6, 4, 5) plus the optional bridge run ~75–90 minutes. <!-- RESOLVED: L01 stays a single ~75–90 min lecture item (a "mega" lesson), not split into two blocks. -->
 - **The chain is the lesson.** If you're short on time, compress *within* demos, but don't drop one — each hands the next its premise. Dropping Demo 4 (preambles) in particular breaks the "why budgeting" payoff.
 - **Variance budget:** API outputs vary run-to-run (Demo 3.6 makes this explicit). Budget one re-run per API demo. The GPT-2 demos (1, 3.5, 3.6-first-half) are deterministic offline — they won't surprise you.
 - **Resist tangents.** "What about embeddings / prompt caching / multimodal tokens?" → name each as a "we'll get there" callback (embeddings → L20, caching → L19, multimodal → out of scope) and don't detour.
