@@ -14,176 +14,247 @@ Each demo is a self-contained block with:
 - **What to highlight** — the moment(s) where the teacher should slow down and call out the takeaway out loud.
 - **If the demo misbehaves** — graceful fallback for when the model surprises you (because it will).
 
-The four demos map one-to-one to the four learning objectives in [objectives.md](objectives.md). Run them in order on the first delivery — Demo 4 (cost) only lands cleanly once Demos 1–3 have made tokens, windows, and sampling concrete.
+**The demos form one continuous chain, not four independent set-pieces.** Run them in order — each demo hands the next its premise. The chain is:
 
-L01 is the very first lesson of the course. Students arrive cold. Spend a few extra minutes before Demo 1 on the "what is a Claude API call, mechanically" framing — even a 60-second whiteboard sketch of "your code → HTTP → model → response" pays for itself across all four demos.
+> next-word prediction (Demo 1) → the pieces are sub-word *tokens* (Demo 2) → what tokenization does to real strings (Demo 3) → scale sharpens the prediction (Demo 3.5) → temperature reshapes the same distribution (Demo 3.6) → front-loading + reusable preambles (Demo 4) → you re-send and re-pay that overhead every call: window + cost (Demo 5).
+
+The budgeting demo (Demo 5) only lands cleanly once Demos 1–4 have made the student *feel* how much overhead accumulates. That is the whole point of the reordering: budgeting is the bill, not a new topic.
+
+L01 is the very first lesson of the course. Students arrive cold. Spend a few minutes before Demo 1 on the "what is an API call, mechanically" framing — a 60-second whiteboard sketch of "your code → HTTP → model → response" pays for itself across every demo.
 
 ## Pre-flight (once, at the top of the lesson)
 
 The teacher should have, before the first demo starts:
 
-- A working REPL or notebook with the project's Anthropic SDK setup (per the project's `uv` env). Both async and sync clients are fine; the demos use sync calls for clarity.
-- An API key with a small spend cap (the cost demo runs real calls; a $5 cap is more than enough for a class delivery).
-- A small wrapper that prints, after every call: `input_tokens`, `output_tokens`, wall-clock time, and the running per-call cost. This wrapper is the through-line for all four demos and **especially** Demo 4. <!-- *NEED INPUT*: standardize this wrapper as part of the L01 lab repo so the teacher and students share it — name and location TBD. -->
-- A tokenizer available locally for the side-by-side comparison in Demo 1: Anthropic's token-counting endpoint (or `tiktoken` for an OpenAI-family contrast). <!-- *NEED INPUT*: do we use Anthropic's count-tokens endpoint exclusively, or include `tiktoken` as a "tokenizers are a *family* of choices" beat? Mirrored from [objectives.md](objectives.md). -->
-- A way to project token IDs alongside the source string. Demo 1 hinges on the student *seeing* the boundaries. A simple "decode each token ID separately and join with `|`" output is enough.
-- The four demo prompts and inputs pre-loaded as variables or cells so each demo is a *single keystroke* to run. Live-typing prompts during demos eats time and breaks pacing.
+- A working notebook with the project's `uv` env. Both async and sync clients are fine; the demos use sync calls for clarity.
+- An API key with a small spend cap (Demo 5 runs real calls; a $5 cap is more than enough for a class delivery).
+- **The local model ladder for Demo 3.5** loaded and cached ahead of time: `gpt2` (124M), `gpt2-medium` (355M), `gpt2-large` (774M) via HuggingFace `transformers`. First load downloads weights — do it before class, not live. These run on CPU; no GPU or API key needed.
+- A small wrapper that prints, after every *API* call: `input_tokens`, `output_tokens`, wall-clock time, and running per-call cost. This wrapper is the through-line for Demo 5 especially. <!-- *NEED INPUT*: standardize this wrapper in the L01 lab package so teacher and students share it — name/location TBD. -->
+- A tokenizer available locally: `tiktoken` (offline, deterministic) for the counts on screen, with Anthropic's count-tokens endpoint shown once for the anchor model's own numbers.
+- A way to project token IDs alongside the source string — a "decode each token separately and join with `|`" output is enough. Demos 2 and 3 hinge on the student *seeing* the boundaries.
+- All demo prompts/inputs pre-loaded as variables or cells so each demo is a single keystroke to run. Live-typing during demos eats time and breaks the contrast the lesson depends on.
 
-> Why pre-loaded prompts: L01 lives or dies on contrast — same string, different tokenizer; same prompt, different temperature; same call, different cost depending on conversation length. If the teacher mistypes a prompt mid-demo, the contrast breaks and the lesson lands as "the API is unpredictable" instead of "this primitive caused this change."
+> Why pre-loaded: L01 lives or dies on contrast — same string / different tokenizer; same prompt / different model; same distribution / different temperature; same call / different cost as history grows. A mistype mid-demo breaks the contrast and the lesson lands as "the API is unpredictable" instead of "this primitive caused this change."
 
-## Demo 1 — Tokens are not characters, words, or syllables (Subgoal 1)
+## Demo 1 — An LLM is a next-word predictor (Objective 1)
 
-**Goal:** show that the tokenizer's view of a string is materially different from a human's. Land the framing from [objectives.md](objectives.md): *"a token is whatever the model's tokenizer says it is."*
-
-**Pre-flight:**
-
-Pick four short strings designed to break human intuition in different directions:
-
-1. **Plain English:** `"The quick brown fox jumps over the lazy dog."` — the baseline. Tokens roughly track words.
-2. **Code:** `"def f(x): return x ** 2"` — punctuation and operators get their own tokens; `**` may or may not be one token; `def` and `return` are usually whole tokens.
-3. **JSON:** `'{"user_id": 12345, "events": ["click", "scroll"]}'` — quotes, braces, colons, commas all consume tokens; numbers tokenize unpredictably.
-4. **Non-Latin script:** a short phrase in Japanese, Arabic, or Hindi (something the teacher can read aloud or romanize). Tokens-per-character ratio explodes for most non-Latin scripts in BPE tokenizers.
-
-Use Anthropic's count-tokens endpoint against **Claude Sonnet 4.6** (the course's anchor model) for the canonical numbers. The teacher should run the four strings through the endpoint once before class and update the on-screen counts to match. <!-- *NEED INPUT*: optionally also show `tiktoken`'s differing counts on the same strings as a "tokenizers disagree across vendors" beat — keep or drop? -->
-
-**Live script:**
-
-1. Put all four strings on screen. Ask the room (rhetorically — no participation): "Which of these is the longest in tokens?" Take a beat for the audience to commit silently to a guess.
-2. Run the tokenizer on each string. Show the integer token IDs *and* the decoded boundaries side-by-side (e.g. `The| quick| brown| fox| jumps| over| the| lazy| dog|.`).
-3. Print the token counts in a small table next to the strings. Highlight the surprises:
-   - Code is denser-than-expected.
-   - JSON is *much* denser-than-expected — every brace and quote is a token.
-   - Non-Latin script is often 3–5x more tokens-per-character than English.
-4. Show the rule of thumb (≈4 chars per token for English) on the English example, then point at the JSON and non-Latin examples and say: "this rule of thumb is wrong by a factor of 3 here."
-
-**What to highlight:**
-
-- The model never sees characters. It sees integers. The decoded "boundaries" are a visualization for *us* — the model sees `[464, 2068, 7586, ...]`.
-- Tokenizers are *learned*, not designed. They reflect what was common in training data, which is why English is dense and JSON is sparse.
-- Every later cost and context-window number in L01 depends on getting this right. If the student leaves with a "1 token = 1 word" model, every back-of-envelope estimate will be off by 2–10x on the strings agents actually consume.
-
-**If the demo misbehaves:**
-
-- If the token counts come out unsurprising (rare, but possible if the chosen strings are too tame), pull up a longer JSON blob — a full event payload, say — and show the count climb visibly. The contrast is the point.
-- If the tokenizer endpoint is slow or rate-limited, fall back to a pre-recorded screenshot of the same demo. The lesson does not require the call to be live — it requires the *contrast* to be visible.
-
-## Demo 2 — The context window is one shared budget (Subgoal 2)
-
-**Goal:** show that input, system message, prior turns, and output all draw from the same window — and what happens when you push past the edge.
+**Goal:** install the one mental model the whole lesson hangs off — the model reads the text so far, produces a distribution over the next token, samples one, appends it, and repeats.
 
 **Pre-flight:**
 
-- A "window meter" visual: a horizontal bar showing the model's context window (e.g. 200,000 tokens), with a labeled segment for system message, conversation history, current input, and reserved output. This can be a slide, a tiny matplotlib plot, or a printed `█████████░░░░░░` bar.
-- Three prepared inputs:
-  1. **Tiny call:** a one-line system message, a one-line user prompt. Should fit easily.
-  2. **Conversation-history call:** the same prompt, but with 20 prior fake assistant/user turns of ~500 tokens each prepended. Still fits, but the bar visibly fills.
-  3. **Overflow call:** the same prompt, but with a deliberately oversized blob (e.g. a 250k-token concatenation of public-domain text) prepended. Will be rejected by the API.
-- The Anthropic SDK's error-message output ready to read from. Don't catch and prettify it — the raw error is the lesson.
-
-Anchor model is **Claude Sonnet 4.6**, 200k-token standard context window. Size the bar visual to 200k.
+- The `gpt2` (small) model from the Demo 3.5 ladder, loaded locally. GPT-2 is perfect here because you can read its raw next-token probabilities directly — no API, no key, fully offline and deterministic.
+- One seed string with an obvious continuation: `"The capital of France is"`.
 
 **Live script:**
 
-1. Start with the tiny call. Show the response and the window-meter bar barely moving.
-2. Run the conversation-history call. Show the bar visibly filling with the "history" segment dominating. Note the input cost going up — this previews Demo 4.
-3. Run the overflow call. Let the API reject it. Read the raw error message aloud. Point out the specific token count in the error vs. the model's window limit.
-4. Without re-running, walk the room through the three failure modes from [objectives.md](objectives.md):
-   - **Hard rejection** — what they just saw.
-   - **Silent truncation** — some clients/wrappers (or some agent frameworks they'll use later) will quietly drop the oldest turns. Name this as a *footgun*: the call succeeds but the model has forgotten things you assumed it remembered.
-   - **Quality degradation** near the long-context tail — even when a call fits, models can struggle to attend to material in the middle of a very long context. Foreshadow that this motivates the techniques in L19 (context management) and L21 (RAG).
+1. Show the seed string. Ask the room (rhetorically): "what's the next word?" Everyone thinks *Paris*.
+2. Run one forward pass of `gpt2` and print the top-10 next-token probabilities. `Paris` is high but not alone — ` the`, ` a`, ` located` all have mass. **The model didn't 'know' Paris; it ranked it.**
+3. Sample one token, append it, and run again. Do this 5–6 times so the room watches a sentence *assemble* one token at a time. Narrate: "this loop is the entire show — everything else today is a consequence of it."
+4. State the load-bearing consequence out loud: **each forward pass sees only the text you give it. Between calls there is no memory.** Write it on the board; you will point back to it in Demos 4 and 5.
 
 **What to highlight:**
 
-- The window is shared. Every byte of system message, every prior turn, every tool definition (relevant from L07 onward), and every output token competes for the same budget.
-- The illusion of "the model remembers our conversation" is the client re-sending history. Demo 4 will make the cost of that illusion visible.
-- "Bigger window" does not mean "use it all." More tokens = more cost, more latency, and (often) lower quality near the tail. Foreshadow L13 (model power) and L16.
+- "Generation" is not retrieval and not reasoning-from-a-store — it is this loop run hundreds of times.
+- The output is a *distribution*, not an answer. That word — distribution — is what Demo 3.6 (temperature) reshapes.
+- No memory between calls. This is the single most consequential fact in the lesson; everything about preambles, windows, and cost follows from it.
 
 **If the demo misbehaves:**
 
-- If the API does not reject the overflow call as expected (window sizes change; vendor behavior changes), fall back to the SDK's pre-flight token-count endpoint and *show* the count exceeding the documented limit. The point is "there is a hard ceiling," not "the API call must fail today."
-- If the conversation-history call is too fast to feel meaningful, narrate the wrapper output: input tokens, latency, cost. The numbers are the demo.
+- If GPT-2's top token is something odd (it is a small, old model), lean in: "this is a *weak* predictor — hold that thought, Demo 3.5 is about exactly this." The weakness sets up the scale demo.
 
-## Demo 3 — Temperature is a knob, not a switch (Subgoal 3)
+## Demo 2 — The pieces are sub-word tokens, not words (Objective 2, part 1: *why* sub-word)
 
-**Goal:** show the same prompt producing different outputs at different temperatures — and show that temperature 0 reduces variance but does not eliminate it.
+**Goal:** show that the "next piece" the model predicts is a *token*, and motivate *why* the unit is sub-word rather than words or characters.
 
 **Pre-flight:**
 
-- A single prompt with multiple plausible answers. Avoid "what is 2+2" (no variance space) and avoid "write a poem" (variance is too noisy to talk about). A good middle ground: *"Suggest a name for a coffee shop on a rainy street in Seattle. Just the name — one or two words."*
-- The wrapper from pre-flight, configured to print the chosen output token IDs (not just the decoded text) so students can see when two "different" answers actually tokenized similarly.
-- A tiny diagram of "model produces a probability distribution over the next token; sampler picks one." This can be a hand-drawn bar chart on a slide. Show the *same* distribution before and after temperature scaling: temperature 0 sharpens to a single tall bar; temperature 1 flattens.
-
-Anchor model is **Claude Sonnet 4.6**. At temperature 0, Sonnet 4.6 is reliably low-variance on this prompt; at temperature 1 it spreads across many distinct names. The teacher should dry-run both temperatures once before class to confirm the behavior on the day.
+- `tiktoken` loaded. Three contrast strings: a common word (`"running"`), a rare/spelled-out one (`"antidisestablishmentarianism"`), and an invented one (`"flibbertigibbeting"`).
 
 **Live script:**
 
-1. Show the diagram first. Don't run a single API call until the room understands what the sampler is choosing from. *This is the conceptual core of Subgoal 3 and the only demo where the slide comes before the call.*
-2. Run the prompt at `temperature=0`. Run it 5 times in quick succession (a small loop is fine). Show the outputs — likely identical, or nearly so.
-3. Run the prompt at `temperature=1`. Run it 5 times. Show the outputs — likely all different.
-4. Run the prompt at `temperature=0` *again*, 10 more times. Look for one or two outputs that differ. If you find one, that is the demo's punchline: temperature 0 is *low* variance, not *zero* variance.
-5. Mention `top_p` and `top_k` briefly — name them, describe each in one sentence, and say "we won't tune these in this course but you'll see them in API docs and you should not be surprised by them."
+1. Recall Demo 1: the model predicts the next *piece*. What is a piece? Tokenize `"running"` → often a single token. Tokenize the long and invented words → several sub-word pieces (`fli|bber|ti|gib|beting`-style).
+2. Pose the design question out loud: *why not just use whole words?* Answer on the board: an unbounded vocabulary — every name, typo, and new word would need its own entry, and you'd still miss tomorrow's words. *Why not characters?* Sequences get long and each step carries little signal. **Sub-word is the compromise: a fixed vocabulary whose pieces compose to spell anything.**
+3. Show that a piece is really just an integer ID (`[16, 5143]`), and the decoded boundaries are a visualization for humans — the model sees integers.
 
 **What to highlight:**
 
-- Temperature acts on the distribution *before* sampling. It does not change what the model "knows" — it changes how aggressively the sampler commits to the most-likely token.
-- Temperature 0 is the right default for classification, extraction, structured output, and tool-routing (foreshadow L07). Temperature 1-ish is for brainstorming, creative writing, and deliberate exploration.
-- Reproducibility is a *separate* problem from temperature. Even at temperature 0, floating-point math, server-side batching, and tie-breaking can cause output to vary across runs. Set the expectation now so future evals don't shock anyone.
+- The unit is chosen, not natural: it trades a fixed vocabulary against the ability to spell any string.
+- Common strings get short encodings; rare strings pay in pieces. That asymmetry *is* the setup for Demo 3.
 
 **If the demo misbehaves:**
 
-- If temperature 0 produces visibly identical output across all 15 runs (lucky day, or strongly-conditioned prompt), say so out loud and point at the diagram: "this is what 'sharp distribution' looks like in practice — but the *next* prompt might surprise us." Do not fake a variance result.
-- If temperature 1 produces only one or two distinct answers (under-conditioned prompt), swap to a more open-ended backup prompt (e.g. "give me a one-sentence story opener about a fox") to see clearer spread.
+- If a chosen word tokenizes more tamely than expected across tokenizers, swap in a longer invented word — the fragmentation is the point.
 
-## Demo 4 — Cost is per token, both directions, every call (Subgoal 4)
+## Demo 3 — What tokenization does to names, code, and non-English (Objective 2, part 2)
 
-**Goal:** show real dollar amounts for real calls, and show how multi-turn conversations re-bill the entire history. Land the framing from [objectives.md](objectives.md): *"every prompt you write is a budget decision."*
+**Goal:** show that the strings agents actually consume — proper names, code, JSON, non-Latin scripts — fragment in ways that defeat eyeball estimates. This is where token counts stop being intuitive, which is what makes budgeting (Demo 5) bite.
 
 **Pre-flight:**
 
-- The latest published per-token pricing for **Claude Sonnet 4.6** (the course's anchor model), on a slide. Input rate and output rate as separate numbers. The teacher must pull current numbers from Anthropic's pricing page on the day of delivery — pricing changes and a stale slide undermines every cost claim that follows.
-- The wrapper from pre-flight, with the per-call cost calculation already wired in. Display the running session cost in a corner.
-- A tiny multi-turn conversation script: 5 user/assistant turns, each ~200 tokens. Run as a real conversation against the API.
-- The same script, but instrumented to print the *cumulative input tokens* sent on each turn (so students see the staircase: turn 1 sends 200, turn 2 sends ~400, turn 3 sends ~600, etc.).
+Four short strings that break intuition in different directions:
+
+1. **Proper names / novel words:** `"Nnamdi Azikiwe deployed Kubernetes to Reykjavík"` — real names, a product name, and a non-English place name all fragment.
+2. **Code:** `"def f(x): return x ** 2"` — operators and punctuation get their own tokens.
+3. **JSON:** `'{"user_id": 12345, "events": ["click", "scroll"]}'` — every brace, quote, colon, comma is a token; numbers tokenize unpredictably.
+4. **Non-Latin script:** a short phrase in Japanese, Arabic, or Hindi. Tokens-per-character explodes for most non-Latin scripts in BPE tokenizers.
+
+Show `tiktoken` counts on screen; run Anthropic's count-tokens endpoint on **Claude Sonnet 4.6** once so students see the anchor model's own numbers differ.
 
 **Live script:**
 
-1. Run a single call (use Demo 3's coffee-shop prompt — already familiar). Show the wrapper output: `input_tokens=20, output_tokens=3, cost=$0.0001`. Read the cost aloud and say "yes, that is one ten-thousandth of a dollar."
-2. Run a longer prompt (paste in a paragraph of context, ask for a short answer). Show input tokens up, output tokens flat, cost up.
-3. Now flip it: short prompt, ask for a 500-word answer. Show input tokens flat, output tokens up *a lot*, cost up *a lot* — typically more than the long-input case, because output tokens cost ~3–5x more.
-4. Run the multi-turn conversation script. Print the cumulative input tokens at each turn. Show the staircase. Compute the total session cost.
-5. Order-of-magnitude: take the per-turn cost, multiply by 10 (a typical agent run length, foreshadowing L10), then by 100 (a typical iteration count during development), then by 1000 (a small production deployment running once a minute for ~16 hours). Read the final number aloud. This is the punchline — students should leave the room with a felt sense for what an agent budget looks like.
-6. Briefly mention prompt caching exists as a way to push back on the staircase cost in step 4. <!-- *NEED INPUT*: introduce prompt caching here as a one-line foreshadow, or strictly defer to L19 (context management)? Mirrored from [objectives.md](objectives.md). -->
+1. Put all four strings on screen. Ask (rhetorically): "which is longest in tokens?" Let the room commit to a guess.
+2. Tokenize each; show integer IDs *and* decoded boundaries side-by-side (`Nn|am|di| Az|iki|we|...`). The proper-name fragmentation is visceral — a name a human reads as one word is 3–5 tokens.
+3. Show the counts in a small table. Highlight: names/rare words fragment, code is dense, JSON is *much* denser than expected, non-Latin is 3–5× English per character.
+4. Apply the ≈4-chars-per-token rule to the English baseline, then point at the JSON and non-Latin examples: "this rule is wrong by 3× here."
 
 **What to highlight:**
 
-- Output tokens cost more than input tokens. Long prompt + short answer is often cheaper than short prompt + long answer. This flips most students' intuition.
-- The conversation history staircase is the single biggest cost surprise students will encounter on their own. Naming it now prevents a surprise bill in the lab.
-- The order-of-magnitude jump from "one call costs ~nothing" to "an agent in dev iteration costs real money" is the moment cost becomes a design concern, not an accounting concern.
-- Bridge: the cost-awareness mindset installed here is what makes L19 (context management), L13 (model power), and prompt-caching design moves *land* later. Without L01, those lessons feel like premature optimization.
+- Tokenizers are *learned*, not designed — they fragment whatever was rare in training data. That is *why* the rule of thumb is only a rule of thumb.
+- Every cost and window number later in the lesson rides on this. A "1 token = 1 word" mental model makes every budget estimate wrong by 2–10× on the inputs agents consume.
 
 **If the demo misbehaves:**
 
-- If the API is rate-limited or fails partway through the multi-turn script, walk through the pre-printed numbers. The math is the demo, not the live call.
-- If pricing has changed since the slide was prepared, *say so out loud* and update the number live. Do not let a student catch a pricing mismatch unflagged — it undermines every cost claim in the rest of the course.
+- If counts come out tame, pull up a longer JSON event payload — the count climbs visibly. Contrast is the point.
+- If the count-tokens endpoint is slow, fall back to a pre-recorded screenshot; the lesson needs the *contrast* visible, not the call live.
+
+## Demo 3.5 — A bigger model is a sharper predictor (Objective 3, model-scale beat)
+
+**Goal:** show, mechanistically, that a more capable model concentrates more probability on the sensible next token — *not* how to choose a model (that is L13).
+
+**Pre-flight:**
+
+- The local ladder loaded: `gpt2` (124M) → `gpt2-medium` (355M) → `gpt2-large` (774M). Same seed string from Demo 1 (`"The capital of France is"`), plus one harder seed where the small model visibly flounders (e.g. `"The mitochondria is the powerhouse of the"`).
+
+**Live script:**
+
+1. Reuse Demo 1's seed. Run all three models on the *same* string and print each one's top-5 next-token probabilities side by side.
+2. Read the trend aloud: as the model grows, probability mass **concentrates** on the right continuation (`Paris` climbs from, say, 0.31 → 0.55 → 0.71) and the long tail of noise thins out.
+3. Run the harder seed. The small model spreads its bets or picks something wrong; the large model commits correctly. Same loop, better predictor.
+4. Draw the boundary explicitly: "more capable = sharper distribution. *Which* model or provider you'd actually pick for a given capability — a vision model for OCR, a strong reasoner for planning, a cheap fast model for execution, trading capability against cost and latency — is a real decision we make in **L13**. Today we're only establishing *that* a more capable model sharpens prediction."
+
+**What to highlight:**
+
+- Model quality is not vague "smartness" — it is where the probability mass goes.
+- This is one of two levers on prediction quality. The other — the context *you* provide — is Demo 4, and it is the lever the student actually controls.
+
+**If the demo misbehaves:**
+
+- The ladder is deterministic offline, so it should be stable. If a seed doesn't separate the models cleanly, switch to the prepared harder seed. Keep a screenshot of a clean run as backup.
+
+## Demo 3.6 — Temperature reshapes the same distribution (Objective 5; PRD subgoal: temperature and sampling)
+
+**Goal:** show that temperature is a knob on the distribution *before* sampling — and that temperature 0 reduces variance without eliminating it.
+
+**Pre-flight:**
+
+- Reuse the *same* GPT-2 next-token distribution from Demo 3.5 — the payoff of the ordering is that "distribution" is already on screen, so temperature has something concrete to act on. Compute the softmax at temperature 0.5, 1.0, and 2.0 and show the bars sharpen/flatten.
+- Then an API prompt with several plausible answers for the live half: *"Suggest a name for a coffee shop on a rainy street in Seattle. Just the name — one or two words."* Anchor model **Claude Sonnet 4.6**; dry-run both temperatures before class.
+
+**Live script:**
+
+1. Start on the GPT-2 distribution from Demo 3.5. Reshape it live: temperature < 1 sharpens toward the top token; temperature > 1 flattens toward uniform. *This is the conceptual core — the slide (distribution) comes before the API call.*
+2. Switch to the anchor model. Run the coffee-shop prompt 5× at `temperature=0` — outputs likely identical.
+3. Run 5× at `temperature=1` — outputs likely all different.
+4. Run `temperature=0` 10 more times, hunting for one that differs. If you find it, that's the punchline: **temperature 0 is *low* variance, not *zero* variance.**
+5. Name `top_p` and `top_k` in one sentence each: "we won't tune these here, but you'll see them in the docs — don't be surprised."
+
+**What to highlight:**
+
+- Temperature acts on the distribution before sampling; it doesn't change what the model "knows," only how aggressively the sampler commits to the top token.
+- Temperature 0 → classification, extraction, structured output, tool-routing (foreshadow L07). Temperature ~1 → brainstorming, creative, deliberate exploration.
+- Reproducibility is a *separate* problem from temperature — floating-point, batching, and tie-breaking cause variance even at 0. Set the expectation now so future evals don't shock anyone.
+
+**If the demo misbehaves:**
+
+- If temperature 0 is visibly identical across all 15 runs, say so and point at the sharpened distribution: "that's what a sharp distribution looks like — the next prompt might surprise us." Don't fake a variance result.
+- If temperature 1 gives only one or two distinct answers, swap to a more open-ended backup prompt.
+
+## Demo 4 — Front-loading and reusable preambles (Objective 3 front-loading + Objective 4)
+
+**Goal:** show that *what you put in front* steers the whole continuation, and that the natural move — reusing a preamble across calls — quietly accumulates overhead.
+
+**Pre-flight:**
+
+- Anchor model **Claude Sonnet 4.6**. Two versions of the same task:
+  1. **Bare:** `"Summarize this."` + a short passage.
+  2. **Front-loaded:** a preamble — role, audience, format constraints, one worked example — then the *same* passage and instruction.
+- A reusable `PREAMBLE` string you'll send on multiple calls, with the wrapper printing input tokens each time.
+
+**Live script:**
+
+1. Run the bare version; show a generic result. Run the front-loaded version; show a sharper, on-format result. Same model, same passage — the *front-loaded context* did the work. Tie back to Demo 3.5: model scale is one lever, provided context is the other, and this one is yours.
+2. Now reuse that `PREAMBLE` across three different passages. Point at the wrapper: **every call re-sends the preamble's ~N input tokens.** The preamble that made the output good is overhead on every call.
+3. Foreshadow explicitly: "this reusable block is an informal *system prompt* — L02 makes it a formal role. But notice what we've built: overhead we now carry every single time." Hand directly to Demo 5.
+
+**What to highlight:**
+
+- Front-loading is the controllable lever on prediction quality (contrast with model scale in 3.5).
+- No memory (Demo 1) means the preamble isn't stored server-side — it rides along on every request, counted and billed each time.
+- This is the emotional setup for budgeting: the student has just seen *why* they'd add overhead. Demo 5 shows the bill.
+
+**If the demo misbehaves:**
+
+- If the bare vs. front-loaded difference is subtle, use a task with a strict format (JSON with specific keys, or a fixed 3-bullet shape) where the preamble's effect is unmistakable.
+
+## Demo 5 — Carrying the overhead: context window and cost (Objectives 6 & 7; PRD subgoals: context windows, cost)
+
+**Goal:** land the payoff — because you re-send the preamble plus the whole history every call (no memory), those tokens hit two budgets at once: **space** (the 200k window) and **money** (per-token, both directions). This is where "tokens" becomes "budgeting," and by now it should feel inevitable.
+
+**Pre-flight:**
+
+- A **window meter** visual: a horizontal bar for the 200k window, segmented for system/preamble, conversation history, current input, and reserved output.
+- Prepared inputs: (1) a tiny call; (2) the same call with the Demo 4 preamble + 20 prior turns prepended, so the bar visibly fills; (3) an overflow call with a ~250k-token blob prepended, which the API rejects. Have the raw SDK error ready to read — don't prettify it.
+- Latest **Claude Sonnet 4.6** per-token pricing (input and output rates as separate numbers), pulled the day of delivery. The wrapper with per-call cost wired in, showing running session cost.
+- A 5-turn conversation script (~200 tokens/turn) instrumented to print *cumulative input tokens* per turn (the staircase: 200 → 400 → 600 → 800 → 1000), each turn *also* carrying the preamble from Demo 4.
+
+**Live script:**
+
+*Space (window):*
+
+1. Tiny call — bar barely moves.
+2. Preamble + history call — bar visibly fills; the "history" and "preamble" segments dominate. Note input cost climbing (previews the money half).
+3. Overflow call — let the API reject it; read the raw error; point at the token count vs. the 200k limit.
+4. Walk the three failure modes without re-running: **hard rejection** (just seen), **silent truncation** (some frameworks quietly drop oldest turns — a footgun), **quality degradation** near the long-context tail (foreshadow L19/L21).
+
+*Money (cost):*
+
+5. Single call — show `input_tokens`, `output_tokens`, `cost`. Read the tiny number aloud.
+6. Long input / short output, then short input / long output — show output tokens cost *more* (~3–5×), flipping intuition.
+7. Run the multi-turn script. Print cumulative input per turn — the staircase — with the preamble riding along every turn. Compute total session cost.
+8. Order-of-magnitude ladder: per-turn cost ×10 (agent run, foreshadow L10) ×100 (dev iteration) ×1000 (small deployment). Read the final number aloud — the punchline.
+9. Tie the bow: "every token you front-loaded to predict better, you just paid for on every call, in both budgets. *That* is why every prompt is a budget decision." <!-- *NEED INPUT*: one-line prompt-caching foreshadow here, or defer strictly to L19? -->
+
+**What to highlight:**
+
+- The window is shared: system/preamble, every prior turn, tool definitions (L07+), and output all compete for one 200k budget.
+- The "model remembers" illusion is the client re-sending history *and preamble* — now the student has watched the cost of that illusion accumulate across the whole lesson.
+- Output tokens cost more than input; long prompt + short answer often beats the reverse.
+- The order-of-magnitude jump from "one call ≈ nothing" to "a dev iteration loop costs real money" is when cost becomes a design concern, not an accounting one.
+
+**If the demo misbehaves:**
+
+- If the API doesn't reject the overflow (window/vendor behavior changes), fall back to the pre-flight count-tokens endpoint and *show* the count exceeding 200k. The point is "there is a hard ceiling," not "the call must fail today."
+- If rate-limited mid-script, walk the pre-printed numbers — the math is the demo, not the live call.
+- If pricing changed since the slide, *say so out loud* and update live. An unflagged pricing mismatch undermines every cost claim in the course.
 
 ## Optional bridge demo — toward prompting fundamentals (L02)
 
-If time allows, run one final mini-demo to set up L02. Take Demo 4's multi-turn conversation script and show how the same call would be structured if we used the system/user/assistant role separation that L02 will introduce. Don't *teach* role design — just point at the structure and say: "L02 makes this contract explicit, and shows why pushing instructions into the system message vs. the user message changes results." The point is to seed the role concept while it can ride on the still-warm context-window-and-cost intuition from Demo 4.
+If time allows, take Demo 4's reusable preamble and Demo 5's multi-turn script and show how the same call looks with explicit system/user/assistant role separation. Don't *teach* role design — just point at the structure: "L02 makes this preamble a formal contract and shows why instructions in the system vs. user message change results." It seeds the role concept while the preamble-and-cost intuition is still warm.
 
 <!-- *NEED INPUT*: include this bridge demo, or save it as the opener for L02? -->
 
 ## Pacing notes for the teacher
 
-- **Per-demo time:** 10–15 minutes including the post-demo discussion. Four demos plus the optional bridge fits in a 60–75 minute block, matching the duration estimate in [objectives.md](objectives.md). <!-- *NEED INPUT*: confirm against the lesson-time budget once duration is pinned in objectives.md's open questions. -->
-- **Variance budget:** model outputs vary run-to-run (Demo 3 makes this explicit, but it applies to all four). Budget at least one re-run per demo. If a demo lands cleanly the first time, don't re-run for the sake of it — use the time to extend the discussion.
-- **Resist live-coding tangents.** Students may ask "what about embedding tokens?" or "what about prompt caching?" or "what about images and multimodal tokens?" — name each as a "we'll get there" callback (embeddings → L20, caching → L19, multimodal → out of scope for this course unless the PRD changes) and *do not detour*. L01 is foundational; depth lives in later lessons.
-- **The audience watches, doesn't participate.** Resist the temptation to ask "what do you think will happen?" — that is a lab pattern, not a demo pattern. Hands-on tokenization, temperature sweeps, and cost estimation are for the L01 labs.
+- **Per-demo time:** 8–12 minutes including discussion. Seven demos (1, 2, 3, 3.5, 3.6, 4, 5) plus the optional bridge run ~75–90 minutes. <!-- *NEED INPUT*: confirm against the lesson-time budget; the added prediction/scale/preamble framing lengthens L01 versus the original four-demo plan — consider splitting into two lecture blocks. -->
+- **The chain is the lesson.** If you're short on time, compress *within* demos, but don't drop one — each hands the next its premise. Dropping Demo 4 (preambles) in particular breaks the "why budgeting" payoff.
+- **Variance budget:** API outputs vary run-to-run (Demo 3.6 makes this explicit). Budget one re-run per API demo. The GPT-2 demos (1, 3.5, 3.6-first-half) are deterministic offline — they won't surprise you.
+- **Resist tangents.** "What about embeddings / prompt caching / multimodal tokens?" → name each as a "we'll get there" callback (embeddings → L20, caching → L19, multimodal → out of scope) and don't detour.
+- **Audience watches, doesn't participate.** Hands-on tokenization, temperature sweeps, and cost estimation are for the labs.
 
 ## Open authoring questions
 
-- <!-- *NEED INPUT*: do we use the Anthropic SDK exclusively from L01, or briefly show `tiktoken` / a tokenizer comparison so students see that tokenization is a *family* of choices? Mirrored from [objectives.md](objectives.md). -->
-- <!-- *NEED INPUT*: is prompt caching introduced here (as a one-line foreshadow in Demo 4), or strictly deferred to L19 (context management)? Mirrored from [objectives.md](objectives.md). -->
-- <!-- *NEED INPUT*: should "rate limits" (RPM/TPM, retry/backoff) be demoed here alongside cost, or deferred until students hit them in L10? Mirrored from [objectives.md](objectives.md). -->
-- <!-- *NEED INPUT*: are the demos run in a Jupyter notebook the teacher projects, or in a slide-embedded REPL, or via a custom demo runner script? Affects how prompts are pre-loaded. -->
-- <!-- *NEED INPUT*: a pointer/link to where the demo wrapper (token + cost + latency printer) lives as code — not yet decided. -->
+- <!-- *NEED INPUT*: confirm the local GPT-2 ladder (transformers+torch) is acceptable as a lesson dependency for Demos 1/3.5/3.6, versus an API-tier quality comparison that needs no new deps but can't show the raw distribution. Mirrored from [objectives.md](objectives.md). -->
+- <!-- *NEED INPUT*: is prompt caching introduced here (a one-line foreshadow in Demo 5), or strictly deferred to L19? Mirrored from [objectives.md](objectives.md). -->
+- <!-- *NEED INPUT*: should "rate limits" (RPM/TPM, retry/backoff) be demoed here alongside cost, or deferred until students hit them in L10? -->
+- <!-- *NEED INPUT*: are the demos run in a projected Jupyter notebook, a slide-embedded REPL, or a custom runner? Affects how prompts/models are pre-loaded. -->
 - <!-- *NEED INPUT*: include the optional L02 bridge demo here, or save it as the opener for L02? -->
