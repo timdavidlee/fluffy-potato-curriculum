@@ -9,9 +9,9 @@ estimated duration: 80
 > **Lesson:** L14. **Roadmap:** [objectives.md](../../../../docs/origin/lesson_roadmaps/L14/objectives.md).
 > This is the written reference lecture — thorough on purpose, so a student who missed the live
 > delivery can rebuild the lesson from the page. The live demos are notebooks
-> ([L1403](L1203_lecture.ipynb) build the agent, [L1405](L1205_lecture.ipynb) state & reducers,
-> [L1407](L1207_lecture.ipynb) eval carry-over + tracing); the bridge to L15 is
-> [L1408](L1208_lecture.md); hands-on practice is in the L14 labs (L1404, L1406).
+> ([L1403](L1403_lecture.ipynb) build the agent, [L1405](L1405_lecture.ipynb) state & reducers,
+> [L1407](L1407_lecture.ipynb) eval carry-over + tracing); the bridge to L15 is
+> [L1408](L1408_lecture.md); hands-on practice is in the L14 labs (L1404, L1406).
 > **Anchor model: Claude Sonnet 4.6** — a single model throughout, so the *only* variable versus
 > the L10 hand-rolled loop is the graph shape.
 
@@ -205,7 +205,7 @@ app = builder.compile()
   reach — **hits LangGraph's recursion limit** and raises `GraphRecursionError`. *The L10
   invariant bug, in graph form.*
 - Restore `add_messages` and it works again. (You'll do exactly this break/restore in
-  [L1405](L1205_lecture.ipynb) and the L1406 lab.)
+  [L1405](L1405_lecture.ipynb) and the L1406 lab.)
 
 ### slide 4.4 What belongs in state — and what doesn't
 
@@ -247,7 +247,7 @@ app = create_agent("anthropic:claude-sonnet-4-6", tools)   # the whole shallow a
 ```
 
 - That one-liner is also the lead-in to **L15**: it is the **ReAct** pattern — *a pattern over*
-  these primitives, not a new mechanism (see [L1408](L1208_lecture.md)).
+  these primitives, not a new mechanism (see [L1408](L1408_lecture.md)).
 
 ### slide 5.3 The step cap didn't go away — and tool errors still need handling
 
@@ -319,4 +319,4 @@ def to_run_result(final_state) -> RunResult:
 - **Reason about graph state** — messages-as-state, the `add_messages` reducer that preserves the
   L10 pairing invariant, and the state-vs-dependency boundary (objective 3).
 - Next: **L15** surveys the *patterns* these primitives compose into — and frames `create_agent` as
-  **ReAct, a pattern over what you just built**. See [L1408](L1208_lecture.md).
+  **ReAct, a pattern over what you just built**. See [L1408](L1408_lecture.md).

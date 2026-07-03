@@ -9,9 +9,9 @@ estimated duration: 75
 > **Lesson:** L10. **Roadmap:** [objectives.md](../../../../docs/origin/lesson_roadmaps/L10/objectives.md).
 > This is the written reference lecture — thorough on purpose, so a student who missed the verbal
 > delivery can rebuild the lesson from the page. The runnable companion is the stub-model demo
-> ([L0703_lecture.ipynb](L0703_lecture.ipynb)); the live multi-step run is
-> ([L0706_lecture.ipynb](L0706_lecture.ipynb)); hands-on practice is the two L10 labs
-> ([L1004](L0704_lab_empty.ipynb) loop + termination, [L1005](L0705_lab_empty.ipynb) tool failures).
+> ([L1003_lecture.ipynb](L1003_lecture.ipynb)); the live multi-step run is
+> ([L1006_lecture.ipynb](L1006_lecture.ipynb)); hands-on practice is the two L10 labs
+> ([L1004](L1004_lab_empty.ipynb) loop + termination, [L1005](L1005_lab_empty.ipynb) tool failures).
 > **Anchor model for the live demo: Claude Sonnet 4.6.**
 
 ## section 1. The lesson in one claim
@@ -19,7 +19,7 @@ estimated duration: 75
 ### slide 1.1 An agent is a loop, not a model
 
 - The model is a **stateless function call**: send it the conversation plus the tool definitions, get
-  back one response, done. It does not remember the last turn ([L07](L0701_intro.md) called this out).
+  back one response, done. It does not remember the last turn ([L07](L1001_intro.md) called this out).
 - An **agent** is the *loop* wrapped around that function call. The loop is the only thing that turns
   a single round-trip into multi-step behaviour.
 - Said as a chant: **the model proposes; the loop drives.** Everything in this lecture is about how
@@ -31,7 +31,7 @@ estimated duration: 75
 
 | Lesson | What it built | What L10 reuses |
 | --- | --- | --- |
-| [L07](L0701_intro.md) | one tool-call round-trip; the `tool_use` / `tool_result` protocol | the exact protocol, now repeated in a loop |
+| [L07](L1001_intro.md) | one tool-call round-trip; the `tool_use` / `tool_result` protocol | the exact protocol, now repeated in a loop |
 | [L08](../L08/objectives.md) | tool design; what a tool *returns* on failure | the error-as-data idea, now propagated by the loop |
 | **L10** | the model→tool→model **loop**: termination + loop-level failure handling | — |
 | L11 (next) | tracing what the loop did | the loop becomes the thing you instrument |

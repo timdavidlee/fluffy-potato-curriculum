@@ -24,7 +24,7 @@ Times are rough and assume a semi-technical student with basic Python who comple
 > L08 assumes the L07 mechanics work. If a student is shaky on the tool-call round-trip, redirect to
 > the L07 lab before this lesson — L08 does **not** re-teach the protocol.
 
-## L0504_lab problem 1 — Decide tool-or-not for each task
+## L0804_lab problem 1 — Decide tool-or-not for each task
 
 - **Common gotchas:** picking *more than one* signal per task (the lab wants the single dominant one);
   flipping T6 to a tool ("summarize" feels tool-ish, but the model does it well unaided — it's a
@@ -37,7 +37,7 @@ Times are rough and assume a semi-technical student with basic Python who comple
 - **Note:** there is real judgment room on borderline tasks; what matters is that the chosen *signal*
   matches the chosen *decision* (Problem 2 checks exactly that).
 
-## L0504_lab problem 2 — Check your signals are valid
+## L0804_lab problem 2 — Check your signals are valid
 
 - **Common gotchas:** checking the signal against the *wrong* family (a `tool: True` decision whose
   signal is from `NO_TOOL` should fail); hard-coding `True` instead of looking the key up.
@@ -47,7 +47,7 @@ Times are rough and assume a semi-technical student with basic Python who comple
 - **Key point:** this is a *consistency* check, not a correctness oracle — it catches a tool decision
   paired with a no-tool reason, which is the most common slip.
 
-## L0504_lab problem 3 — Defend each call in one sentence
+## L0804_lab problem 3 — Defend each call in one sentence
 
 - **Common gotchas:** writing prose by hand instead of pulling the signal's description text;
   forgetting the `Tool:` / `No tool:` prefix.
@@ -55,7 +55,7 @@ Times are rough and assume a semi-technical student with basic Python who comple
   {...}.\"`." The one-sentence defense *is* the deliverable — naming *why* is the skill.
 - **Time:** ~5 min.
 
-## L0504_lab problem 4 — Why is 'more tools' usually worse? (written)
+## L0804_lab problem 4 — Why is 'more tools' usually worse? (written)
 
 - **Common gotchas:** "more tools = more capable" — the exact confusion the lecture corrects.
 - **Unblockers:** expected: each extra tool eats system-prompt tokens (L01 context cost), dilutes the
@@ -63,7 +63,7 @@ Times are rough and assume a semi-technical student with basic Python who comple
   5-tool set the model can navigate beats a 20-tool grab bag.
 - **Time:** ~4 min.
 
-## L0506_lab problem 1 — Rewrite the description for the model
+## L0806_lab problem 1 — Rewrite the description for the model
 
 - **Common gotchas:** writing a code-comment-style description ("sets the priority field") instead of
   one for the model's selection step; omitting the *when NOT to call* clause; not stating the return
@@ -74,7 +74,7 @@ Times are rough and assume a semi-technical student with basic Python who comple
 - **Time:** ~8 min.
 - **Key point:** the audience is the model, not a human reading the source.
 
-## L0506_lab problem 2 — Tighten the parameter schema
+## L0806_lab problem 2 — Tighten the parameter schema
 
 - **Common gotchas:** leaving `level` optional (it should be required); using a free string for `level`
   instead of an `enum`; dropping the per-field descriptions (the rule of thumb: each carries an example
@@ -83,7 +83,7 @@ Times are rough and assume a semi-technical student with basic Python who comple
   every property gets a `description`."
 - **Time:** ~7 min.
 
-## L0506_lab problem 3 — Validate sample arguments against your schema
+## L0806_lab problem 3 — Validate sample arguments against your schema
 
 - **Common gotchas:** forgetting that `bool` is a subclass of `int` in Python (so `True` would pass an
   `integer` check unless guarded); checking enum on fields that have none (use `if \"enum\" in spec`);
@@ -94,7 +94,7 @@ Times are rough and assume a semi-technical student with basic Python who comple
 - **Key point:** this tiny validator is the *shape* line of defense — it does not (and can't) check
   whether a well-formed value is *true* (L0808/L0809's job).
 
-## L0506_lab problem 5 — Why an enum over a free string? (written)
+## L0806_lab problem 5 — Why an enum over a free string? (written)
 
 - **Common gotchas:** "it's just type-checking" — misses that the enum also *teaches* the model the
   value space.
@@ -104,7 +104,7 @@ Times are rough and assume a semi-technical student with basic Python who comple
   into Problem 2's discussion — keep the numbering as printed.)
 - **Time:** ~4 min.
 
-## L0508_lab problem 1 — Rewrite the traceback as a structured error
+## L0808_lab problem 1 — Rewrite the traceback as a structured error
 
 - **Common gotchas:** echoing the traceback text into `message` instead of writing an *actionable*
   sentence; forgetting the `field` key; using `error=\"error\"` instead of the class `\"validation\"`.
@@ -113,7 +113,7 @@ Times are rough and assume a semi-technical student with basic Python who comple
 - **Time:** ~7 min.
 - **Key point:** the error is a *prompt for the next turn*, not a debugger dump.
 
-## L0508_lab problem 2 — Rewrite the missing-field error
+## L0808_lab problem 2 — Rewrite the missing-field error
 
 - **Common gotchas:** classifying a missing required field as `unrecoverable` (it's `validation` — the
   model can supply the field); leaving out the example email.
@@ -121,7 +121,7 @@ Times are rough and assume a semi-technical student with basic Python who comple
   to supply."
 - **Time:** ~5 min.
 
-## L0508_lab problem 3 — Classify each error into one of three classes
+## L0808_lab problem 3 — Classify each error into one of three classes
 
 - **Common gotchas:** marking `no_such_user` / `forbidden` as recoverable (they are *final* —
   unrecoverable, stop retrying); marking `timeout` / `rate_limited` as validation (they're transient
@@ -131,14 +131,14 @@ Times are rough and assume a semi-technical student with basic Python who comple
   rate_limited/timeout=recoverable, no_such_user/forbidden=unrecoverable.
 - **Time:** ~7 min.
 
-## L0508_lab problem 4 — Which class should the model retry? (written)
+## L0808_lab problem 4 — Which class should the model retry? (written)
 
 - **Unblockers:** expected: validation → retry *with a fix* (correct the named field); recoverable →
   retry *as-is* (the same call may succeed, ideally with runtime backoff); unrecoverable → *stop and
   report* / route around — retrying just burns budget. The error *shape* is what lets the model pick.
 - **Time:** ~4 min.
 
-## L0510_lab problem 1 — Tag each tool safe-or-unsafe to retry
+## L0810_lab problem 1 — Tag each tool safe-or-unsafe to retry
 
 - **Common gotchas:** marking `upsert_contact` unsafe (it has a *stable key*, so a repeat is
   idempotent — safe); marking `add_numbers` unsafe (pure computation, no side effect); treating
@@ -147,7 +147,7 @@ Times are rough and assume a semi-technical student with basic Python who comple
   unsafe." From the lecture's safe-vs-not table.
 - **Time:** ~6 min.
 
-## L0510_lab problem 2 — Recommend a mitigation for each unsafe tool
+## L0810_lab problem 2 — Recommend a mitigation for each unsafe tool
 
 - **Common gotchas:** giving a mitigation to a *safe* tool (should be `none_needed`); inventing a
   mitigation outside the three named ones.
@@ -157,7 +157,7 @@ Times are rough and assume a semi-technical student with basic Python who comple
 - **Time:** ~5 min.
 - **Note:** there is judgment room — accept any of the three so long as it's defensible for that tool.
 
-## L0510_lab problem 3 — Show a duplicate slips through without a key
+## L0810_lab problem 3 — Show a duplicate slips through without a key
 
 - **Common gotchas:** returning `None` instead of `len(sent)`; resetting the log between the two calls
   (then it never shows the duplicate); deduping inside `send_email` (that would *be* a mitigation — the
@@ -166,7 +166,7 @@ Times are rough and assume a semi-technical student with basic Python who comple
   expect length 2." This mirrors the L0809 demo's OUTBOX growing to two entries.
 - **Time:** ~5 min.
 
-## L0510_lab problem 4 — Write the side-effect sentence (written)
+## L0810_lab problem 4 — Write the side-effect sentence (written)
 
 - **Common gotchas:** describing *what the tool returns* instead of *the side effect*; burying the
   create in soft language ("may update records") instead of stating it plainly.

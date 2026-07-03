@@ -8,12 +8,12 @@ estimated duration: 10
 
 > **Lesson:** L12 — Evaluation: first pass.
 > **Roadmap:** [objectives.md](../../../../docs/origin/lesson_roadmaps/L12/objectives.md) · [demos_or_activities.md](../../../../docs/origin/lesson_roadmaps/L12/demos_or_activities.md)
-> **Read in order:** this intro → `L0902_lecture` (build the harness: case / scorer / runner) → `L0903_lab` → `L0904_lecture` (non-determinism → pass rate, and a model A/B) → `L0905_lab` → `L0906_lecture` (eval cost + the scorer spectrum) → `L0907_lecture` (carry it forward).
+> **Read in order:** this intro → `L1202_lecture` (build the harness: case / scorer / runner) → `L1203_lab` → `L1204_lecture` (non-determinism → pass rate, and a model A/B) → `L1205_lab` → `L1206_lecture` (eval cost + the scorer spectrum) → `L1207_lecture` (carry it forward).
 > **Anchor model: Claude Sonnet 4.6**, with **Haiku 4.5 as the contrast** in the model A/B. Every notebook runs **offline with no API key** (the scripted `FakeModel` from L11); the live Sonnet-vs-Haiku A/B and the live LLM-judge are clearly-marked optional cells.
 
 ## Where this lesson sits
 
-In [L11](../L11/L0801_intro.md) you learned to *read* what your agent did: you instrumented the L10 loop so `run(...)` returns a `RunResult` carrying a **trace** — an ordered list of `TraceEvent` spans — and you read that trace to reconstruct a run, locate a failure, and eyeball-diff two runs of the same task. L11's framing was **"produce the record."** L12 is the turn from *observation* to *judgment*:
+In [L11](../L11/L1101_intro.md) you learned to *read* what your agent did: you instrumented the L10 loop so `run(...)` returns a `RunResult` carrying a **trace** — an ordered list of `TraceEvent` spans — and you read that trace to reconstruct a run, locate a failure, and eyeball-diff two runs of the same task. L11's framing was **"produce the record."** L12 is the turn from *observation* to *judgment*:
 
 > **L11 produces the record; L12 judges it.** Tracing tells you *what happened* on one run. Evaluation tells you *whether it was good* — and, crucially, whether it is *still* good after you change something.
 

@@ -9,8 +9,8 @@ estimated duration: 80
 > **Lesson:** L06. **Roadmap:** [objectives.md](../../../../docs/origin/lesson_roadmaps/L06/objectives.md).
 > This is the written reference lecture — thorough on purpose, so a student who missed the verbal
 > delivery can rebuild the lesson from the page. The live demos are split one per technique
-> ([L0603](L0303_lecture.ipynb) CoT, [L0605](L0305_lecture.ipynb) scratchpad,
-> [L0607](L0307_lecture.ipynb) self-critique, [L0609](L0309_lecture.ipynb) when-it-hurts); hands-on
+> ([L0603](L0603_lecture.ipynb) CoT, [L0605](L0605_lecture.ipynb) scratchpad,
+> [L0607](L0607_lecture.ipynb) self-critique, [L0609](L0609_lecture.ipynb) when-it-hurts); hands-on
 > practice is in the L06 labs (L0604 / L0606 / L0608 / L0610).
 > **Anchor model throughout: Claude Sonnet 4.6.**
 
@@ -87,7 +87,7 @@ estimated duration: 80
 - The discipline: run the **same input** with and without the CoT scaffold, and read off what
   changed — accuracy, structure, latency, token count. The contrast is the evidence.
 - This with/against comparison is exactly what the L0604 lab has you build, and what
-  [Demo 1](L0303_lecture.ipynb) shows live.
+  [Demo 1](L0603_lecture.ipynb) shows live.
 
 [↑ Back to top](#teaching-an-llm-to-think-chain-of-thought-scratchpads-and-self-critique)
 

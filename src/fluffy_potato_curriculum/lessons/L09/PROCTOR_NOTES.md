@@ -11,19 +11,19 @@ Times are rough and assume a semi-technical student with basic Python who comple
 > without a live server.
 >
 > Two L09 lecture artifacts **show code that needs `mcp`** and are deliberately **not runnable** in
-> this env: the connect walkthrough ([L0605_lecture.md](L0605_lecture.md), a slide outline) and the
-> build-a-server walkthrough ([L0606_lecture.ipynb](L0606_lecture.ipynb), shown but not executed). Do
+> this env: the connect walkthrough ([L0905_lecture.md](L0905_lecture.md), a slide outline) and the
+> build-a-server walkthrough ([L0906_lecture.ipynb](L0906_lecture.ipynb), shown but not executed). Do
 > **not** ask students to run those — they read them for the wire shape and the server skeleton. The
-> runnable offline counterpart is the [L0903 demo](L0603_lecture.ipynb).
+> runnable offline counterpart is the [L0903 demo](L0903_lecture.ipynb).
 >
 > **The single most repeated correction this lesson:** *MCP changes packaging and transport, not tool
 > design.* Every L08 principle (name, description, schema, error shape) is unchanged. If a student
-> thinks MCP makes design easier or harder, redirect to the [L0902 lecture](L0602_lecture.md) slide 1.5.
+> thinks MCP makes design easier or harder, redirect to the [L0902 lecture](L0902_lecture.md) slide 1.5.
 >
 > The labs map to the L09 subgoals: **L0904** → describe the spec / connect-discover mechanics by
 > translating and validating a tool spec; **L0907** → decide when MCP is worth the overhead.
 
-## L0604_lab problem 1 — Translate inline -> MCP tool spec
+## L0904_lab problem 1 — Translate inline -> MCP tool spec
 
 - **Common gotchas:** rewriting or "improving" the schema contents instead of carrying them over
   unchanged (the whole point is that they *don't* change); using snake_case `inputschema` or leaving it
@@ -34,17 +34,17 @@ Times are rough and assume a semi-technical student with basic Python who comple
 - **Key point:** the translation is a key rename. That it's *this trivial* is the lesson — the design
   surface is identical across packagings.
 
-## L0604_lab problem 2 — Prove the design surface survives
+## L0904_lab problem 2 — Prove the design surface survives
 
 - **Common gotchas:** comparing `json.dumps` strings (key order can differ) instead of the dict objects;
   asserting against the wrong key on one side.
 - **Unblockers:** "Three asserts: `mcp_spec['inputSchema'] == BOOK_MEETING_INLINE['input_schema']`, and
   the same for `name` and `description`. Dict `==` is fine — no need to stringify."
 - **Time:** ~4 min.
-- **Key point:** this is the [lecture](L0602_lecture.md) slide 2.2 claim, checked mechanically rather
+- **Key point:** this is the [lecture](L0902_lecture.md) slide 2.2 claim, checked mechanically rather
   than asserted in prose.
 
-## L0604_lab problem 3 — Round-trip back to inline
+## L0904_lab problem 3 — Round-trip back to inline
 
 - **Common gotchas:** not reversing the rename (returning `inputSchema` again); reordering keys and then
   expecting `==` to fail (dict equality ignores order, so this still passes — reassure the student).
@@ -54,7 +54,7 @@ Times are rough and assume a semi-technical student with basic Python who comple
 - **Key point:** lossless *both* directions is *why* the tool is portable — a client can consume a
   discovered spec or publish an inline one with no information loss.
 
-## L0604_lab problem 4 — Validate a discovered spec
+## L0904_lab problem 4 — Validate a discovered spec
 
 - **Common gotchas:** using truthiness on a missing key and hitting `KeyError` (use `.get(...)`);
   checking only the name and forgetting the `inputSchema['type'] == 'object'` rule; returning a bare
@@ -68,7 +68,7 @@ Times are rough and assume a semi-technical student with basic Python who comple
   validating the structure before trusting it is the cross-process analogue of L07's
   "the application validates."
 
-## L0604_lab problem 5 — Why is the description load-bearing? (written)
+## L0904_lab problem 5 — Why is the description load-bearing? (written)
 
 - **Common gotchas:** "it documents the tool for developers" — backwards; the description is for the
   *model's* selection step, and for an MCP server it is published to *every* connecting client.
@@ -79,7 +79,7 @@ Times are rough and assume a semi-technical student with basic Python who comple
   taxes every client.
 - **Time:** ~4 min.
 
-## L0607_lab problem 1 — The cost/benefit ledger (written)
+## L0907_lab problem 1 — The cost/benefit ledger (written)
 
 - **Common gotchas:** listing benefits as costs or vice versa; conflating "extra process" and
   "transport" into one item (they're distinct operational costs).
@@ -87,12 +87,12 @@ Times are rough and assume a semi-technical student with basic Python who comple
   to keep healthy; a versioning surface (server vs client); a wider debugging surface (failure on
   either side); a deployment story. Benefits (the four): portability (one server, many clients);
   separation of concerns (tool author ≠ agent author); discoverability (clients introspect); a security
-  boundary (own credentials/permissions). See [lecture](L0602_lecture.md) slide 5.2.
+  boundary (own credentials/permissions). See [lecture](L0902_lecture.md) slide 5.2.
 - **Time:** ~5 min.
 - **Key point:** the asymmetry — costs are immediate and roughly fixed; benefits compound with the
   number of consumers. That asymmetry *is* the decision rule for the next problems.
 
-## L0607_lab problem 2 — Encode the decision
+## L0907_lab problem 2 — Encode the decision
 
 - **Common gotchas:** wrong rule order (checking the consumer count before isolation, so a one-consumer
   secrets tool wrongly returns inline); using `<` instead of `<=` for the single-consumer guard;
@@ -103,9 +103,9 @@ Times are rough and assume a semi-technical student with basic Python who comple
   cross-process split can buy, regardless of consumer count).
 - **Time:** ~8 min.
 - **Key point:** the decision keys on the **number of consumers** more than anything else, with
-  isolation and latency as overrides. This is the [lecture](L0602_lecture.md) section 5 logic in code.
+  isolation and latency as overrides. This is the [lecture](L0902_lecture.md) section 5 logic in code.
 
-## L0607_lab problem 3 — Build the decision table
+## L0907_lab problem 3 — Build the decision table
 
 - **Common gotchas:** an f-string formatting slip with the boolean columns (cast to `str` before
   width-aligning); re-deriving the verdict by hand instead of calling `recommend(s)`.
@@ -113,7 +113,7 @@ Times are rough and assume a semi-technical student with basic Python who comple
   call your function." Expected verdicts down the table: inline, MCP, inline, MCP.
 - **Time:** ~5 min.
 
-## L0607_lab problem 4 — The gradient: a tool gains a consumer (written)
+## L0907_lab problem 4 — The gradient: a tool gains a consumer (written)
 
 - **Common gotchas:** treating the original `inline` verdict as permanent; not connecting the flip to
   the consumer-count rule from Problem 2.
@@ -123,7 +123,7 @@ Times are rough and assume a semi-technical student with basic Python who comple
   reuse appears (lecture slide 5.4). The decision is revisited, not locked.
 - **Time:** ~4 min.
 
-## L0607_lab problem 5 — Push back on premature MCP (written)
+## L0907_lab problem 5 — Push back on premature MCP (written)
 
 - **Common gotchas:** agreeing with the teammate because MCP "sounds professional" — exactly the trap
   the lecture warns against.

@@ -9,13 +9,13 @@ estimated duration: 10
 > **Lesson:** L08 — Designing good tools.
 > **Roadmap:** see this lesson's [objectives.md](../../../../docs/origin/lesson_roadmaps/L08/objectives.md).
 > This is a short framing piece. Read it before the written reference lecture
-> ([L0502_lecture.md](L0502_lecture.md)) and the four teacher demo notebooks
-> (tool-or-no-tool [L0503_lecture.ipynb](L0503_lecture.ipynb), the description-is-the-tool
-> [L0505_lecture.ipynb](L0505_lecture.ipynb), schemas-as-a-teaching-tool
-> [L0507_lecture.ipynb](L0507_lecture.ipynb), errors-and-side-effects
-> [L0509_lecture.ipynb](L0509_lecture.ipynb)).
+> ([L0802_lecture.md](L0802_lecture.md)) and the four teacher demo notebooks
+> (tool-or-no-tool [L0803_lecture.ipynb](L0803_lecture.ipynb), the description-is-the-tool
+> [L0805_lecture.ipynb](L0805_lecture.ipynb), schemas-as-a-teaching-tool
+> [L0807_lecture.ipynb](L0807_lecture.ipynb), errors-and-side-effects
+> [L0809_lecture.ipynb](L0809_lecture.ipynb)).
 > **Anchor model throughout: Claude Sonnet 4.6**, with one Haiku 4.5 contrast in
-> [L0805](L0505_lecture.ipynb) to show the design gap widens on a smaller model.
+> [L0805](L0805_lecture.ipynb) to show the design gap widens on a smaller model.
 
 ## Where this lesson sits
 
@@ -41,24 +41,24 @@ Every design choice in L08 follows from that one sentence.
 L07 gave you the wiring. L08 gives you four design decisions you make *every time* you add a tool.
 Each maps to one learning objective and one demo + lab pair.
 
-- **Tool, or no tool?** ([Demo 1](L0503_lecture.ipynb) / [L0804 lab](L0504_lab_empty.ipynb)) — adding
+- **Tool, or no tool?** ([Demo 1](L0803_lecture.ipynb) / [L0804 lab](L0804_lab_empty.ipynb)) — adding
   a tool is an architectural decision, not a convenience. A tool is warranted when the answer depends
   on data the model can't have memorized, requires precise computation it's bad at, has a side effect
   outside the conversation, or must be verified against ground truth. When the model already knows the
   answer cold, a tool is pure overhead — and a wrong-tool option to pick by mistake.
-- **The description is the tool.** ([Demo 2](L0505_lecture.ipynb) / [L0806 lab](L0506_lab_empty.ipynb))
+- **The description is the tool.** ([Demo 2](L0805_lecture.ipynb) / [L0806 lab](L0806_lab_empty.ipynb))
   — same name, same schema, *different description* → dramatically different model behavior. The
   description is the model's only training signal at inference time for *when* to reach for the tool
   and *when not to*. It is the single most important field, and the most common cause of an unused or
   misused tool.
-- **Schemas are a contract, not a suggestion.** ([Demo 3](L0507_lecture.ipynb) /
-  [L0808 lab](L0508_lab_empty.ipynb)) — the model is a *fuzzy* producer of structured output
+- **Schemas are a contract, not a suggestion.** ([Demo 3](L0807_lecture.ipynb) /
+  [L0808 lab](L0808_lab_empty.ipynb)) — the model is a *fuzzy* producer of structured output
   (back-reference [L02](../L02/L0201_intro.md)). A tight schema — required fields, enums, narrow types,
   per-field descriptions — converts ambiguity into validation errors the model can correct on the next
   turn. A loose schema pushes that ambiguity into the tool implementation, which then fails in ad-hoc
   ways the model can't anticipate.
-- **Errors are part of the interface.** ([Demo 4](L0509_lecture.ipynb) /
-  [L0810 lab](L0510_lab_empty.ipynb)) — the model treats a tool error as *new context*, not as an
+- **Errors are part of the interface.** ([Demo 4](L0809_lecture.ipynb) /
+  [L0810 lab](L0810_lab_empty.ipynb)) — the model treats a tool error as *new context*, not as an
   exception. A well-shaped error (`{"error": "validation", "field": "user_id", "message": "must be a
   UUID"}`) teaches the model to fix its call; a bare stack trace teaches it nothing and it guesses.
   This is also where idempotency and side effects live: the model *will* retry on its own when a
@@ -97,7 +97,7 @@ Each demo lands one sentence. If you remember nothing else, remember these:
 The `potato_llm` client you have used since L02 is deliberately **text-only** — its `Message` carries
 plain text, not tool-use or tool-result blocks. L08's demos register tools and observe the model
 *choose* and *call* them, so the demo notebooks drop down to the **raw Anthropic SDK**
-(`client.messages.create(..., tools=[...])`), exactly as [L07](../L07/L0401_intro.md) introduced. The
+(`client.messages.create(..., tools=[...])`), exactly as [L07](../L07/L0701_intro.md) introduced. The
 API key still loads through the same config seam (`require_anthropic_key()`) — we change the *client*,
 not where secrets come from. The **labs** stay pure-Python and offline wherever the concept allows
 (designing a schema, rewriting an error, classifying a task) so you can practice the *design* without
@@ -118,5 +118,5 @@ The one sentence to leave L08 with:
 > *You can now design a tool a model can choose and use correctly on first read — and recognize when
 > the best tool is no tool at all.*
 
-Next: the written reference lecture in [L0502_lecture.md](L0502_lecture.md), then the live demos
+Next: the written reference lecture in [L0802_lecture.md](L0802_lecture.md), then the live demos
 (L0803 / L0805 / L0807 / L0809) and the hands-on labs (L0804 / L0806 / L0808 / L0810).

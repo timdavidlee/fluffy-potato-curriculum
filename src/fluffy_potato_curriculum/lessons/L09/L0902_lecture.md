@@ -9,9 +9,9 @@ estimated duration: 80
 > **Lesson:** L09. **Roadmap:** [objectives.md](../../../../docs/origin/lesson_roadmaps/L09/objectives.md).
 > This is the written reference lecture — thorough on purpose, so a student who missed the verbal
 > delivery can rebuild the lesson from the page. The offline spec-translation demo is
-> [L0903](L0603_lecture.ipynb); connecting to an existing server is the slide outline
-> [L0905](L0605_lecture.md); building your own server is the code walkthrough
-> [L0906](L0606_lecture.ipynb). Hands-on practice is in the L09 labs (L0904 / L0907, plus the validator
+> [L0903](L0903_lecture.ipynb); connecting to an existing server is the slide outline
+> [L0905](L0905_lecture.md); building your own server is the code walkthrough
+> [L0906](L0906_lecture.ipynb). Hands-on practice is in the L09 labs (L0904 / L0907, plus the validator
 > lab). **Anchor model throughout: Claude Sonnet 4.6.**
 >
 > **Environment note:** the Python `mcp` package is **not installed** in this course env. Everything in
@@ -110,8 +110,8 @@ estimated duration: 80
 - diagram: two JSON blocks side by side for the same `book_meeting` tool — left labeled "L07 inline
   definition (`input_schema`)", right labeled "MCP tool spec (`inputSchema`)" — with every line
   identical except the one renamed key, which is highlighted.
-- The offline demo [L0903](L0603_lecture.ipynb) does this translation in code, both directions, and
-  asserts the JSON Schema survives the move byte-for-byte. The [L0904 lab](L0604_lab_empty.ipynb) has
+- The offline demo [L0903](L0903_lecture.ipynb) does this translation in code, both directions, and
+  asserts the JSON Schema survives the move byte-for-byte. The [L0904 lab](L0904_lab_empty.ipynb) has
   you validate and translate a spec yourself — pure Python, no `mcp` package, no model.
 
 ### slide 2.3 The published tool list is an external API
@@ -174,7 +174,7 @@ estimated duration: 80
 
 - The model's view is **identical to L07**. MCP is invisible to it — it lives entirely in steps 2–4,
   which are the *client's* job and the *operator's* config. The slide-outline lecture
-  [L0905](L0605_lecture.md) walks the real connection code (shown, not run here).
+  [L0905](L0905_lecture.md) walks the real connection code (shown, not run here).
 
 ### slide 3.4 New failure modes live on the wire
 
@@ -205,7 +205,7 @@ estimated duration: 80
 - Common confusion to retire: *"an MCP server is a microservice."* It *can* be deployed like one over
   HTTP/SSE, but it can equally be a 50-line Python script launched as a stdio child process. Don't let
   the protocol's shape inflate the implementation in your head — **start small.**
-- The build walkthrough [L0906](L0606_lecture.ipynb) shows the full skeleton for `book_meeting`
+- The build walkthrough [L0906](L0906_lecture.ipynb) shows the full skeleton for `book_meeting`
   (reused from [L08](../L08/objectives.md)) — shown as code, **not run here** (no `mcp` package).
 
 ### slide 4.2 The diff: design identical, packaging changed
@@ -295,7 +295,7 @@ estimated duration: 80
   **inline is the right default until reuse appears.** Complexity that buys nothing is just complexity.
 - Think about *near-future* consumers when you decide — but don't pay the tax now for hypothetical
   reuse that never arrives. The break-even is "one" for a tool you *know* will be reused and "many" for
-  a one-off. The [L0907 lab](L0607_lab_empty.ipynb) has you encode this ledger as a small decision
+  a one-off. The [L0907 lab](L0907_lab_empty.ipynb) has you encode this ledger as a small decision
   function and run it over example tools — pure Python, no `mcp` package.
 
 ### slide 5.5 A word on security and credentials

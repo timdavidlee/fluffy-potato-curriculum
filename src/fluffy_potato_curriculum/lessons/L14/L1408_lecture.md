@@ -8,7 +8,7 @@ estimated duration: 8
 
 > **Lesson:** L14. **Roadmap:** the optional forward-pointer in [demos_or_activities.md](../../../../docs/origin/lesson_roadmaps/L14/demos_or_activities.md).
 > A short closing lecture — **diagram + discussion, no live build**. It reuses the compiled agent
-> from the demos ([L1403](L1203_lecture.ipynb)) and *names* what comes next. Building the patterns is
+> from the demos ([L1403](L1403_lecture.ipynb)) and *names* what comes next. Building the patterns is
 > **L15's** job; don't teach them here.
 
 ## section 1. Recap — what you built
@@ -40,7 +40,7 @@ estimated duration: 8
 
 ### slide 2.1 The one-liner you revealed is named: ReAct
 
-- In [L1403](L1203_lecture.ipynb) you hand-built the graph, then revealed
+- In [L1403](L1403_lecture.ipynb) you hand-built the graph, then revealed
   `create_agent("anthropic:claude-sonnet-4-6", tools)` — *the same graph, wrapped*.
 - That whole-graph one-liner is the **ReAct** pattern: **reason** (the model decides) →
   **act** (call a tool) → observe → repeat. It is a **pattern over the primitives you just built**,

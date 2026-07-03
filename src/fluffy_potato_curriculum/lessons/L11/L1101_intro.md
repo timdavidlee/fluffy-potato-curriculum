@@ -8,12 +8,12 @@ estimated duration: 10
 
 > **Lesson:** L11 — Tracing: reading what your agent did.
 > **Roadmap:** [objectives.md](../../../../docs/origin/lesson_roadmaps/L11/objectives.md) · [demos_or_activities.md](../../../../docs/origin/lesson_roadmaps/L11/demos_or_activities.md)
-> **Read in order:** this intro → `L0802_lecture` (read a trace, locate a failure) → `L0803_lab` → `L0804_lecture` (instrument the loop, compare two runs) → `L0805_lab` → `L0806_lecture` (see it in Langfuse).
+> **Read in order:** this intro → `L1102_lecture` (read a trace, locate a failure) → `L1103_lab` → `L1104_lecture` (instrument the loop, compare two runs) → `L1105_lab` → `L1106_lecture` (see it in Langfuse).
 > **Anchor model for the live demo: Claude Sonnet 4.6.** The reading demos and both labs run **offline with no API key** (a scripted `FakeModel`); only the live instrument/export steps call a real model.
 
 ## Where this lesson sits
 
-In [L10](../L10/L0701_intro.md) you built an agent from nothing: a **model → tool → model loop** in plain Python that calls the model, runs any tool the model asks for, hands the result back, and repeats until the model stops — `run(...)` returning a `RunResult` with the `final_text`, the number of `iterations`, and *why* it stopped (`termination`: `"natural"` or `"max_steps"`). That loop already *did* something on every run. But unless you were watching the console live, that "something" vanished the moment the run ended.
+In [L10](../L10/L1001_intro.md) you built an agent from nothing: a **model → tool → model loop** in plain Python that calls the model, runs any tool the model asks for, hands the result back, and repeats until the model stops — `run(...)` returning a `RunResult` with the `final_text`, the number of `iterations`, and *why* it stopped (`termination`: `"natural"` or `"max_steps"`). That loop already *did* something on every run. But unless you were watching the console live, that "something" vanished the moment the run ended.
 
 L11 is the turning point where the agent stops being only something you *build* and becomes something you *observe*. The whole lesson rests on one sentence:
 

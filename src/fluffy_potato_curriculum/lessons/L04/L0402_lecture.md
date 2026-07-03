@@ -9,8 +9,8 @@ estimated duration: 75
 > **Lesson:** L04. **Roadmap:** [objectives.md](../../../../docs/origin/lesson_roadmaps/L04/objectives.md).
 > This is the written reference lecture — thorough on purpose, so a student who missed the live
 > delivery can rebuild the lesson from the page. The live demos are notebooks
-> ([L0403](L1103_lecture.ipynb) prompt chaining, [L0405](L1105_lecture.ipynb) routing + user-input
-> branching), the workflow-vs-agent wrap-up is [L0407](L1107_lecture.md), and hands-on practice is
+> ([L0403](L0403_lecture.ipynb) prompt chaining, [L0405](L0405_lecture.ipynb) routing + user-input
+> branching), the workflow-vs-agent wrap-up is [L0407](L0407_lecture.md), and hands-on practice is
 > in the L04 labs (L0404, L0406).
 > **Anchor model: Claude Sonnet 4.6** (heavy nodes), **Claude Haiku 4.5** (light nodes) — L04
 > deliberately mixes models per node.
@@ -264,4 +264,4 @@ builder.add_conditional_edges("start", route_by_user, {...})
   needs to decide its own path.
 - Name the common failure mode out loud: **reaching for an agent when a workflow would do** — more
   cost, less predictability, harder to debug. Choosing the simplest shape that solves the task *is*
-  the engineering skill. The full treatment is in [L1107_lecture.md](L1107_lecture.md).
+  the engineering skill. The full treatment is in [L0407_lecture.md](L0407_lecture.md).

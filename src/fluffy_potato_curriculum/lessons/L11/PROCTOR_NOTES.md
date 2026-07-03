@@ -19,7 +19,7 @@ General unblockers that apply across the lesson:
 
 ---
 
-## L0803_lab problem 1
+## L1103_lab problem 1
 
 **Narrate the good run** — loop over the trace printing `span.one_line()`, then answer which span
 is the natural-termination point.
@@ -33,7 +33,7 @@ is the natural-termination point.
 - STRETCH: Reconstruct the `RunResult` summary (`final_text`, `iterations`, `termination`) from the
   trace alone, then assert it matches the real `RunResult` — proving the summary is derivable.
 
-## L0803_lab problem 2
+## L1103_lab problem 2
 
 **Find the runaway** — detect the repeated tool call and assert `termination == "max_steps"`.
 
@@ -46,7 +46,7 @@ is the natural-termination point.
 - STRETCH: Generalize to "flag any tool call that repeats with identical args ≥ 3 times" — the seed
   of a loop-detection check, and a natural L12 eval case.
 
-## L0803_lab problem 3
+## L1103_lab problem 3
 
 **Spot the wrong argument** — read the `lookup` span's `inputs["city"]` and assert the looked-up
 city was not `"Tokyo"`; explain why a success flag wouldn't catch it.
@@ -60,7 +60,7 @@ city was not `"Tokyo"`; explain why a success flag wouldn't catch it.
 - STRETCH: Write the assertion as a reusable check ("the answer about city X must have looked up
   city X") and note it's an outcome-vs-trajectory check — foreshadowing L12.
 
-## L0803_lab problem 4
+## L1103_lab problem 4
 
 **Classify the signatures** — fill a markdown table mapping each failure trace to its signature name
 and the field that reveals it.
@@ -78,7 +78,7 @@ and the field that reveals it.
 
 ---
 
-## L0805_lab problem 1
+## L1105_lab problem 1
 
 **Trajectory from a trace** — write `tool_trajectory(trace) -> list[tuple[str, dict]]` returning
 each tool span's `(name, inputs)`; assert it equals the expected sequence for the good run.
@@ -92,7 +92,7 @@ each tool span's `(name, inputs)`; assert it equals the expected sequence for th
 - STRETCH: Return inputs as a hashable, comparable form so two trajectories can be `==`-compared
   directly (sets/tuples) — useful for Problem 2's diff.
 
-## L0805_lab problem 2
+## L1105_lab problem 2
 
 **Write `diff_traces(a, b)`** — compare two traces' tool trajectory, termination, and total tokens,
 and report the differences.
@@ -107,7 +107,7 @@ and report the differences.
 - STRETCH: Add a per-span latency delta (`end_time - start_time`) and discuss why it's almost always
   noise on this offline model — real latency only shows up against a live model.
 
-## L0805_lab problem 3
+## L1105_lab problem 3
 
 **Signal vs noise (written)** — apply `diff_traces` to the A/B pair and explain which difference is
 signal and which would be noise, and why one run can't prove a fix.
@@ -123,7 +123,7 @@ signal and which would be noise, and why one run can't prove a fix.
 - STRETCH: Have them sketch how they'd turn this one comparison into a repeatable check run many
   times — they're describing L12's eval harness before it's taught.
 
-## L0805_lab problem 4
+## L1105_lab problem 4
 
 **A trace is data** — round-trip the good trace through `to_jsonl`/`from_jsonl` (or
 `write_jsonl`/`read_jsonl` to a `tmp` path) and assert equality.

@@ -4,7 +4,7 @@ Covers both L04 labs: **L0404** (prompt chaining) and **L0406** (routing + user-
 optional eval). Both run **fully offline** — a deterministic `StubChat` stands in for
 `ChatAnthropic`, so no API key is needed and every run is reproducible. The focus is **graph wiring**
 (state, nodes, edges, conditional routing), not model output. The lecture demos
-([L0403](L1103_lecture.ipynb), [L0405](L1105_lecture.ipynb)) use the real `ChatAnthropic` client; the
+([L0403](L0403_lecture.ipynb), [L0405](L0405_lecture.ipynb)) use the real `ChatAnthropic` client; the
 labs deliberately don't, so the wiring is the only variable.
 
 > Keep repeating the lesson's spine: **in a workflow you wire the flow; the model lives inside the
@@ -13,7 +13,7 @@ labs deliberately don't, so the wiring is the only variable.
 
 ---
 
-## L1104_lab problem 1 — The typed state
+## L0404_lab problem 1 — The typed state
 
 COMMON GOTCHAS:
 - Forgetting the `add` reducer on `steps` — writing `steps: list[str]` instead of
@@ -28,7 +28,7 @@ is annotated. A `TypedDict` is just a class with typed attributes and no body lo
 
 TIME: 3–5 min. STRETCH: ask what reducer message history would need (append) — that's the L14 link.
 
-## L1104_lab problem 2 — The three nodes
+## L0404_lab problem 2 — The three nodes
 
 COMMON GOTCHAS:
 - Returning the **whole state** instead of a partial update. A node returns only the fields it
@@ -45,7 +45,7 @@ return an `OK:` verdict (it's keyword-driven on purpose).
 TIME: 8–12 min. STRETCH: have them make `policy_check` a *plain Python* check (no model) — a node
 need not call a model at all.
 
-## L1104_lab problem 3 — Wire, compile, render
+## L0404_lab problem 3 — Wire, compile, render
 
 COMMON GOTCHAS:
 - Mixing up `add_node("name", fn)` (string name + function) and `add_edge("a", "b")` (two string
@@ -60,7 +60,7 @@ in the lecture (section 2.1). The `draw_mermaid()` output is the fastest check t
 TIME: 6–10 min. STRETCH: render `draw_mermaid_png()` if a renderer is available, else the Mermaid
 text is fine.
 
-## L1104_lab problem 4 — Run the workflow
+## L0404_lab problem 4 — Run the workflow
 
 COMMON GOTCHAS:
 - Forgetting `steps: []` in the initial state. With the `add` reducer, omitting the starting list
@@ -74,7 +74,7 @@ UNBLOCKERS: If the path isn't all three names, send them back to problem 1 (redu
 
 TIME: 3–5 min. STRETCH: invoke on a different ticket and confirm the path is unchanged.
 
-## L1104_lab problem 5 — From stub to real model (written)
+## L0404_lab problem 5 — From stub to real model (written)
 
 EXPECTED ANSWER: Change only the **client construction** — `haiku = StubChat(HAIKU)` →
 `haiku = ChatAnthropic(model=HAIKU, api_key=require_anthropic_key())` (same for `sonnet`). The
@@ -88,7 +88,7 @@ TIME: 3–5 min.
 
 ---
 
-## L1106_lab problem 1 — Routing state + classify node
+## L0406_lab problem 1 — Routing state + classify node
 
 COMMON GOTCHAS:
 - `RouteState` needs **both** `category` (set by the model) and `user_choice` (set by the user in
@@ -103,7 +103,7 @@ category words.
 
 TIME: 6–10 min. STRETCH: ask why `classify` is on the *cheap* model — it only needs a one-word label.
 
-## L1106_lab problem 2 — The branch nodes
+## L0406_lab problem 2 — The branch nodes
 
 COMMON GOTCHAS:
 - Three near-identical functions invite copy-paste bugs (e.g. the `technical` node returning
@@ -116,7 +116,7 @@ explicit functions are clearer and equally correct.
 TIME: 6–8 min. STRETCH: give one branch its own distinct prompt and confirm the trace still shows one
 branch span.
 
-## L1106_lab problem 3 — The conditional edge
+## L0406_lab problem 3 — The conditional edge
 
 COMMON GOTCHAS:
 - The biggest conceptual miss: thinking `route` "asks the model." It does **not** — it returns
@@ -132,7 +132,7 @@ to all three branches, all converging on `END`.
 TIME: 8–12 min. STRETCH: what happens if `route` returns a key not in the mapping? (It raises — a
 nudge toward validating model output, an L02/L12 theme.)
 
-## L1106_lab problem 4 — Run and prove determinism
+## L0406_lab problem 4 — Run and prove determinism
 
 COMMON GOTCHAS:
 - Same `steps: []` seeding gotcha as L0404 problem 4.
@@ -145,7 +145,7 @@ dicts and don't append to a global list.
 TIME: 4–6 min. STRETCH: ask how they'd *measure* path stability over many tickets — leads into
 problem 6.
 
-## L1106_lab problem 5 — Same graph, user-input branch
+## L0406_lab problem 5 — Same graph, user-input branch
 
 COMMON GOTCHAS:
 - Confusing this with "the agent asks the user." Re-draw it: `user_choice` is **already in the
@@ -163,7 +163,7 @@ or read the wrong field.
 TIME: 8–12 min. STRETCH: combine — route on the user's choice, then read state inside the branch — to
 feel "user owns the edge, model works inside the node."
 
-## L1106_lab problem 6 (optional) — Evaluate the classifier
+## L0406_lab problem 6 (optional) — Evaluate the classifier
 
 COMMON GOTCHAS:
 - Calling `classify` with a bare string instead of a state dict — it takes `{"ticket": ..., "steps":
@@ -180,7 +180,7 @@ set rides forward onto the L14 agent.
 TIME: 5–8 min. STRETCH: add two more cases; or change the classifier to check technical keywords
 first and watch which cases flip — eval as a feedback loop.
 
-## L1106_lab problem 7 — Workflow vs. agent (written)
+## L0406_lab problem 7 — Workflow vs. agent (written)
 
 EXPECTED ANSWER: Add a **conditional edge that loops back to the model** (a back-edge / cycle) so the
 **model** decides whether to keep going (call a tool) or stop. That single back-edge converts the

@@ -9,10 +9,10 @@ estimated duration: 10
 > **Lesson:** L06 — Teaching an LLM to think via prompting.
 > **Roadmap:** see this lesson's [objectives.md](../../../../docs/origin/lesson_roadmaps/L06/objectives.md).
 > This is a short framing piece. Read it before the written reference lecture
-> ([L0302_lecture.md](L0302_lecture.md)) and the four teacher demo notebooks
-> (CoT [L0303_lecture.ipynb](L0303_lecture.ipynb), scratchpad [L0305_lecture.ipynb](L0305_lecture.ipynb),
-> self-critique [L0307_lecture.ipynb](L0307_lecture.ipynb), when-reasoning-hurts
-> [L0309_lecture.ipynb](L0309_lecture.ipynb)).
+> ([L0602_lecture.md](L0602_lecture.md)) and the four teacher demo notebooks
+> (CoT [L0603_lecture.ipynb](L0603_lecture.ipynb), scratchpad [L0605_lecture.ipynb](L0605_lecture.ipynb),
+> self-critique [L0607_lecture.ipynb](L0607_lecture.ipynb), when-reasoning-hurts
+> [L0609_lecture.ipynb](L0609_lecture.ipynb)).
 > **Anchor model throughout: Claude Sonnet 4.6.**
 
 ## Where this lesson sits
@@ -93,5 +93,5 @@ The one sentence to leave L06 with:
 > *You can now make the model think before it answers — and, just as importantly, decide when it
 > shouldn't bother.*
 
-Next: the written reference lecture in [L0302_lecture.md](L0302_lecture.md), then the live demos
+Next: the written reference lecture in [L0602_lecture.md](L0602_lecture.md), then the live demos
 (L0603 / L0605 / L0607 / L0609) and the hands-on labs (L0604 / L0606 / L0608 / L0610).
