@@ -1,61 +1,59 @@
-# Explicit graphs & workflows in LangGraph: you wire the flow
+# Directed graphs: sequential chaining — wire several nodes into a fixed pipeline
 
 ```yaml
-title: "Explicit graphs & workflows in LangGraph: you wire the flow"
-keywords: langgraph, stategraph, workflow, agent, dag, node, edge, conditional edge, state, reducer, prompt chaining, routing, user-input branching, per-node model, mixed models, control flow as data, determinism, chatanthropic, langfuse
-estimated duration: 75
+title: "Directed graphs: sequential chaining — wire several nodes into a fixed pipeline"
+keywords: langgraph, stategraph, workflow, dag, node, edge, state, reducer, prompt chaining, per-node model, mixed models, control flow as data, determinism, chatanthropic
+estimated duration: 55
 ```
 
 > **Lesson:** L04. **Roadmap:** [objectives.md](../../../../docs/origin/lesson_roadmaps/L04/objectives.md).
 > This is the written reference lecture — thorough on purpose, so a student who missed the live
-> delivery can rebuild the lesson from the page. The live demos are notebooks
-> ([L0403](L0403_lecture.ipynb) prompt chaining, [L0405](L0405_lecture.ipynb) routing + user-input
-> branching), the workflow-vs-agent wrap-up is [L0407](L0407_lecture.md), and hands-on practice is
-> in the L04 labs (L0404, L0406).
+> delivery can rebuild the lesson from the page. The live demo is
+> [L0403_lecture.ipynb](L0403_lecture.ipynb) (prompt chaining), and hands-on practice is in the
+> L04 lab (L0404). [L05](../L05/objectives.md) picks these same primitives up and adds a
+> conditional edge.
 > **Anchor model: Claude Sonnet 4.6** (heavy nodes), **Claude Haiku 4.5** (light nodes) — L04
 > deliberately mixes models per node.
 
 ## section 1. The lesson in one claim
 
-### slide 1.1 First a framework, and deliberately not an agent
+### slide 1.1 One node becomes several, wired in order
 
-- This is the course's **first LangGraph lesson**, and it builds a **workflow**, not an agent.
-- From L01–L10 your control flow was plain Python: a single call, a single tool round-trip, and
-  in [L10](../L10/objectives.md) a hand-rolled **model → tool → model loop** whose path your
-  `while`/`if` decided.
-- L04 turns that control flow into a **graph**: explicit nodes wired by edges *you* lay out. The
-  model lives *inside* the nodes; it never decides what runs next.
-- L14 reuses every primitive from this lesson and adds exactly one thing — a back-edge — to make
-  an agent. Learning the workflow first means L14 is one small step, not a new world.
+- [L03](../L03/objectives.md) built a `StateGraph` at its smallest: one typed node. L04 wires
+  **several** such nodes into a fixed sequence — a **workflow**, not an agent.
+- From L01–L02 your control flow was plain Python: a single call, then in L03 one wrapped node.
+  L04 turns a *sequence* of steps into a **graph**: explicit nodes wired by edges *you* lay out.
+  The model lives *inside* the nodes; it never decides what runs next.
+- [L05](../L05/objectives.md) adds a **conditional** edge on the same primitives; L14 later reuses
+  everything here and adds exactly one more thing — a back-edge — to make an agent.
 
-### slide 1.2 Workflow vs. agent — the headline distinction
+### slide 1.2 Workflow vs. agent — the headline distinction (first pass)
 
-- This is the industry distinction from Anthropic's *Building Effective Agents*, and we reuse it
-  verbatim into L14.
-- table: the one difference that separates a workflow from an agent.
+- This is the industry distinction from Anthropic's *Building Effective Agents*, and it carries
+  unchanged into L05 and L14.
 
-| | **Workflow** (L04) | **Agent** (L14) |
+| | **Workflow** (L04–L05) | **Agent** (L14) |
 | --- | --- | --- |
 | Who decides the path? | the **developer** (fixed/derived logic) | the **model** |
 | Graph shape | **acyclic** (DAG) — always reaches `END` | **cyclic** — loops model → tools → model |
-| Where the model works | *inside* nodes (classify, draft) | inside nodes **and** chooses the path |
+| Where the model works | *inside* nodes (extract, draft) | inside nodes **and** chooses the path |
 | Predictability | same input → same path | varies; the model may loop |
 
 - The model is involved in **both**. Agency is about who controls the *path*, not whether a model
-  is called somewhere.
+  is called somewhere. L04 builds the **simplest** workflow shape — no branches at all yet.
 
-### slide 1.3 The sentence to carry all lesson
+### slide 1.3 The sentence to carry through the lesson
 
 - **In a workflow, the model lives inside the nodes; the developer owns the edges.**
-- Say it whenever a branch appears. Every conditional edge in L04 is decided by *code you wrote*,
-  reading *state you set* — never by the model deciding to call a tool. That last case is L14.
+- Every edge in L04 is **fixed** — `A → B`, always. There is nothing to branch on yet; that arrives
+  in L05.
 
-## section 2. The StateGraph primitives (vocabulary)
+## section 2. The StateGraph primitives (vocabulary, continued from L03)
 
 ### slide 2.1 The five-line build
 
 - Every graph in this lesson is built with the same `StateGraph` recipe. Memorize the shape:
-- diagram: a flow `StateGraph(State) → add_node ×N → set_entry_point → add_edge / add_conditional_edges → compile() → invoke(input)`.
+- diagram: a flow `StateGraph(State) → add_node ×N → set_entry_point → add_edge → compile() → invoke(input)`.
 
 ```python
 from langgraph.graph import StateGraph, END
@@ -70,13 +68,15 @@ app = builder.compile()                  # 5. compile to a runnable
 result = app.invoke({"ticket": "..."})   #    invoke on an input
 ```
 
-### slide 2.2 Node — a typed function that returns an update
+- L03 built exactly this recipe with **one** node and one edge straight to `END`. L04 is the same
+  recipe with **several** nodes and edges *between* them — new wiring, no new primitive.
+
+### slide 2.2 Node — a typed function that returns an update (recap)
 
 - A **node** is a plain function: it reads the state and returns a **partial update** (a dict of
   just the fields it changed), *not* the whole state. LangGraph merges the update for you.
-- A node does **one unit of work** and hands back an update — nothing more.
-- A node *may* call the model (`ChatAnthropic`), or it may be plain Python. "Has a model in it"
-  is not what makes something a node.
+- A node does **one unit of work** and hands back an update — nothing more. This is unchanged from
+  L03; what's new is that *several* nodes now share one state object.
 
 ```python
 def parse(state: TicketState) -> dict[str, object]:
@@ -87,10 +87,11 @@ def parse(state: TicketState) -> dict[str, object]:
 
 ### slide 2.3 State and reducer — the data that flows between nodes
 
-- **State** is a typed object (a `TypedDict`) threaded through every node. It carries the data
-  that flows between steps: the raw input, intermediate results, the final answer.
+- **State** is a typed object (a `TypedDict`) threaded through every node. L03's state had two
+  fields and one node touching them; L04's state is threaded through **several** nodes in turn.
 - A **reducer** is the rule that merges a node's returned update into state, *per field*. The
-  default reducer **overwrites**; an `Annotated[list, add]` field **appends** instead.
+  default reducer **overwrites**; an `Annotated[list, add]` field **appends** instead. This is
+  L04's first genuinely new primitive — L03 never needed one (one node, nothing to merge).
 - diagram: a `TicketState` box with fields `ticket: str`, `parsed: str`, `draft: str`,
   `steps: Annotated[list[str], add]` — the last one tagged "append reducer".
 - This is the **same** state/reducer machinery L14 reuses for an agent's *message history* — you
@@ -98,23 +99,21 @@ def parse(state: TicketState) -> dict[str, object]:
 
 ### slide 2.4 What belongs in state — and what doesn't
 
-- **In state:** data that flows between nodes — the extracted fields, the classification label,
-  intermediate drafts.
+- **In state:** data that flows between nodes — the extracted fields, intermediate drafts.
 - **Not in state:** the model client and configuration. Those are **dependencies wired in at
   build time**, not data that flows. A `ChatAnthropic` client is constructed once and closed over
   by the node, not threaded through `invoke`.
 
-### slide 2.5 Edge, conditional edge, entry point, END
+### slide 2.5 Edge, entry point, END, DAG
 
-- **Edge** — a fixed transition, `A → B`, taken every time: `add_edge("parse", "draft")`.
-- **Conditional edge** — a runtime choice: a routing function reads **state** and returns the
-  *name* of the next node: `add_conditional_edges("classify", route_fn, {...})`.
+- **Edge** — a fixed transition, `A → B`, taken every time: `add_edge("parse", "draft")`. Every
+  edge in L04 is this kind; L05 adds a second kind (the conditional edge).
 - **Entry point** — where execution starts (`set_entry_point`).
 - **END** — the sentinel where execution stops; every path in a workflow reaches it.
 - **DAG (directed acyclic graph)** — a graph with **no back-edges**: every edge moves forward to
   `END`. The absence of a back-edge is exactly what makes this a *workflow*, not an agent.
 
-## section 3. Pattern one — prompt chaining
+## section 3. The pattern — prompt chaining
 
 ### slide 3.1 Decompose a task into a fixed sequence
 
@@ -139,129 +138,66 @@ def parse(state: TicketState) -> dict[str, object]:
 | failures are localized to one node | |
 
 - Name it honestly: for a *strictly linear* three-step task the graph is near break-even. Its real
-  payoff shows up with **branching, visualization, shared state, and built-in tracing** (next).
+  payoff shows up with **branching** ([L05](../L05/objectives.md), next), shared state, and tracing
+  ([L11](../L11/objectives.md), later).
 
-## section 4. Pattern two — routing (and who gets to decide)
+## section 4. Each node can bind its own model
 
-### slide 4.1 Classify, then branch
-
-- **Routing**: an entry **classifier** node labels the input, and a **conditional edge** sends it
-  down one of several specialized branches that converge to an exit.
-- Example: a ticket is classified **billing / technical / general**; each branch has its own
-  focused prompt; all three converge to `END`.
-- diagram: `classify` fanning out via a dashed conditional edge to `billing` / `technical` /
-  `general`, all three arrows converging into `END`.
-
-### slide 4.2 A conditional edge is NOT the model deciding
-
-- The routing function reads `state["category"]` — a **label the developer's code put in state** —
-  and returns the matching branch name. The classification *result* picks the branch.
-- Re-run the same ticket and it takes the **same path**: deterministic.
-- This is the critical L04-vs-L14 point: in L04 the routing function branches on **state you set**.
-  In L14 it branches on whether the **model asked for a tool**. *Same mechanism, different
-  decider* — say which it is every time.
-
-```python
-def route(state: TicketState) -> str:
-    # branches on a label already in state — not on the model choosing a tool
-    return state["category"]   # "billing" | "technical" | "general"
-
-builder.add_conditional_edges("classify", route,
-    {"billing": "billing", "technical": "technical", "general": "general"})
-```
-
-### slide 4.3 A branch can be decided by data, a model label, or the user
-
-- A conditional edge can route on **derived data**, on a **model classification**, or on **direct
-  user input** — none of which is the model driving a *loop*.
-- **User-input branching** is the purest "you wire the flow": the routing function reads a value
-  the *user* supplied (a menu choice, a form field) — **no model in the routing decision at all**.
-
-```python
-def route_by_user(state: TicketState) -> str:
-    # the USER picked the path; no model call in this decision
-    return state["user_choice"]   # supplied in the initial state
-
-builder.add_conditional_edges("start", route_by_user, {...})
-```
-
-- **Same graph shape, different decider.** Model-classified routing and user-input routing are
-  *both* workflows, because the developer wired every branch. Most real "AI workflows" mix the two:
-  route on the user's choice first, then run a model-driven *node* inside the chosen branch —
-  **user owns the edge, model works inside the node**.
-- Forward pointer (one line, don't teach it): the *interactive* version — a graph that **pauses to
-  ask** the user and resumes on their answer — needs LangGraph's `interrupt` + a checkpointer and
-  is **L17's** territory. In L04 the user input arrives in the **initial state**, so the graph runs
-  straight through.
-
-## section 5. Each node can bind its own model
-
-### slide 5.1 The mechanism: a node is an independent call
+### slide 4.1 The mechanism: a node is an independent call
 
 - Because each node is its *own* model call, each can construct its own
   `ChatAnthropic(model=...)`. A graph can **mix models per node**.
-- Use a **cheap, fast model** (Claude **Haiku 4.5**) for light steps — classify, route, extract a
-  field — and a **capable model** (Claude **Sonnet 4.6**) for heavy reasoning — draft, analyze.
-- diagram: the routing graph with each node tagged by model — `classify` = Haiku, `billing` /
-  `technical` / `general` = Sonnet.
+- Use a **cheap, fast model** (Claude **Haiku 4.5**) for light steps — extract a field, summarize —
+  and a **capable model** (Claude **Sonnet 4.6**) for heavy reasoning — draft, analyze.
+- diagram: the chaining graph with each node tagged by model — `parse` = Haiku, `draft` /
+  `policy_check` = Sonnet.
 
-### slide 5.2 Mechanism here; the decision framework is L13's
+### slide 4.2 Mechanism here; the decision framework is L13's
 
 - L04 shows only **that** you can mix and **how** (per-node `ChatAnthropic(model=...)`), with a
-  light cost/latency aside read off the trace: the label step is cheap, the reasoning step is where
-  the spend goes.
+  light cost/latency aside: the extraction step is cheap, the reasoning step is where the spend
+  goes.
 - The full *which-model* decision framework — capability vs. latency vs. cost axes, budgets,
-  "small model for routing, capable for reasoning" — is **L13's** job (Choosing model power). The
-  two reinforce; they do not re-teach each other.
+  "small model for routing, capable for reasoning" — is **[L13's](../L13/objectives.md)** job
+  (Choosing model power). The two reinforce; they do not re-teach each other. [L05](../L05/objectives.md)
+  reuses this same mechanism for its classifier node.
 
-## section 6. Why a graph: control flow as data, and determinism
+## section 5. Why a graph: control flow as data, and determinism
 
-### slide 6.1 A graph turns control flow into inspectable data
+### slide 5.1 A graph turns control flow into inspectable data
 
-- Nodes and edges can be **listed, drawn, traced, and reasoned about** — unlike `if`/`while`
-  buried in Python.
+- Nodes and edges can be **listed, drawn, and reasoned about** — unlike `if`/`while` buried in
+  Python.
 - LangGraph renders the compiled graph for you: `app.get_graph().draw_mermaid()` (text) or
-  `draw_mermaid_png()` (image). The picture *is* the control flow.
-- diagram: side by side — a block of imperative `if/elif` Python vs. the rendered graph diagram —
+  `draw_mermaid_png()` (image). The picture *is* the control flow, and needs no API key.
+- diagram: side by side — a block of imperative sequential Python vs. the rendered graph diagram —
   captioned "same logic; the graph is data you can inspect."
 
-### slide 6.2 Tracing: watch the workflow run
+### slide 5.2 A first taste of tracing (not a prerequisite)
 
-- Run the graph with a **Langfuse callback** and the spans land in the *same* self-hosted Langfuse
-  instance you met in [L11](../L11/objectives.md) — "watch the workflow run" reuses an L11 skill.
-- A prompt-chaining run shows a **linear chain** of generation spans; a routing run shows the
-  **one chosen branch**. The trace confirms the path was developer-determined.
-- Each span shows its **own model and cost** — that is where the per-node model mixing becomes
-  tangible.
+- The demo shows an **optional** taste of routing spans to Langfuse, the same self-hosted instance
+  **[L11](../L11/objectives.md)** will teach in full — reading a structured trace, comparing runs,
+  diagnosing failures from a trace alone is entirely L11's job, several lessons away.
+- If Langfuse isn't configured, the workflow runs exactly the same; you simply won't see the
+  spans. Nothing in L04 depends on tracing being set up.
 
-### slide 6.3 Determinism is a feature, not a limitation
+### slide 5.3 Determinism is a feature, not a limitation
 
 - A workflow takes the **same path** on the same input: predictable, cheaper, lower-latency, and
   **trivially testable**.
-- That testability is half the reason to prefer workflows: a tiny eval set over the classifier
-  node (the [L12](../L12/objectives.md) discipline, same input → same path) is cheap and honest.
-  The L04 routing lab includes an optional eval beat.
+- That testability is half the reason to prefer workflows: a tiny eval set (the
+  [L12](../L12/objectives.md) discipline, same input → same path) is cheap and honest.
 - Note the model *inside* a node is still non-deterministic — a draft's wording varies. The
   **path** is what's stable, and the path is the lesson.
 
-## section 7. Workflow vs. agent — the single back-edge (preview of L0407)
+## section 6. Bridge to L05
 
-### slide 7.1 The line is one edge
+### slide 6.1 One more primitive, then the workflow-vs-agent close
 
-- Everything you built here — `StateGraph`, nodes, edges, typed state, reducers, compile/invoke,
-  the Langfuse hookup — carries into L14 **unchanged**.
-- L14 adds exactly one thing: a **conditional edge that loops back to the model**, handing the
-  model control of the path. That single back-edge converts the acyclic workflow into the cyclic,
-  model-driven agent (the same loop you hand-rolled in L10).
-- diagram: the L04 acyclic chain, then the same graph with one new dashed edge curving from the
-  model node back into the loop — labeled "the only thing L14 adds."
-
-### slide 7.2 When to use which
-
-- Prefer a **workflow** when the task has a **known shape**: predictable, cheaper, lower-latency,
-  far easier to test and trace.
-- Reach for an **agent** only when the steps **can't be known in advance** and the model genuinely
-  needs to decide its own path.
-- Name the common failure mode out loud: **reaching for an agent when a workflow would do** — more
-  cost, less predictability, harder to debug. Choosing the simplest shape that solves the task *is*
-  the engineering skill. The full treatment is in [L0407_lecture.md](L0407_lecture.md).
+- Everything you built here — `StateGraph`, nodes, fixed edges, typed state, reducers,
+  compile/invoke — carries into [L05](../L05/objectives.md) **unchanged**. L05 adds exactly one
+  new primitive: the **conditional edge**, a routing function chosen at runtime instead of a fixed
+  `A → B`.
+- L05 is also where the full **workflow vs. agent** contrast closes out, once you've seen both a
+  fixed chain (this lesson) and a routed branch (L05) — the two things that make "developer wires
+  every path" concrete before L14 hands the model that control.
