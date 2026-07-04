@@ -7,6 +7,12 @@ energy on *judgment* ("where does this capability live?") more than on code volu
 Both labs run **fully offline** on the scripted `FakeModel` — no API key, no network. If a student's
 notebook asks for a key, they've drifted off the given scaffolding; send them back to the setup cell.
 
+The L2204 loader (`run_skill_loader`, given in setup) is the **L11 `create_agent` shallow agent** with
+a single `load_skill` tool and the skill catalog as its system prompt — the same object students built
+in L11, so there is no new loop to explain. The per-turn `context_tokens` are reconstructed from the
+agent's returned `messages` (the L11 run-inspection idiom); the jump on the load turn is the skill body
+arriving just in time.
+
 ---
 
 ## L2204_lab problem 1
@@ -107,7 +113,7 @@ TIME: ~5 min.
 
 ## L2206_lab problem 3
 
-**Goal:** inspect a real `SKILL.md` and map it to the hand-built `Skill`.
+**Goal:** inspect a real `SKILL.md` and map it to the `Skill` catalog they built.
 
 COMMON GOTCHAS:
 - `parse_skill_md` splits on `---`; it assumes standard YAML frontmatter. It works on the shipped

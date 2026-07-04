@@ -10,7 +10,7 @@ estimated duration: 8
 > **Roadmap:** see this lesson's [objectives.md](../../../../docs/origin/lesson_roadmaps/L22/objectives.md)
 > and [demos_or_activities.md](../../../../docs/origin/lesson_roadmaps/L22/demos_or_activities.md).
 > This is a short framing piece. Read it first, then the written reference lecture on the
-> taxonomy ([L2202_lecture.md](L2202_lecture.md)), the hand-rolled JIT-loader demo notebook
+> taxonomy ([L2202_lecture.md](L2202_lecture.md)), the `create_agent` JIT-loader demo notebook
 > ([L2203_lecture.ipynb](L2203_lecture.ipynb)), and the closing decision + real-Agent-Skills
 > lecture ([L2205_lecture.md](L2205_lecture.md)). Hands-on practice is in the L22 labs
 > (L2204, L2206).
@@ -53,12 +53,14 @@ The one-line discriminator you'll drill this whole lesson:
 
 ## Concept first, then the real thing
 
-This lesson follows the course's spine — **hand-roll it, then meet the product** — exactly like L12
-(you built a trace before Langfuse) and L11 (you built the loop before LangGraph):
+This lesson follows the course's spine — **build the mechanism yourself, then meet the product** —
+exactly like L12 (you built a trace before Langfuse) and L11 (you built the loop before LangGraph):
 
-1. First you build a **minimal just-in-time skill loader** on the agent you already own. The agent
-   sees a list of skill *names + descriptions*; only when it picks one does the full instruction
-   file get read into context. You *feel* the mechanism.
+1. First you build a **minimal just-in-time skill loader** on the agent you already own — your L11
+   `create_agent` shallow agent, handed a catalog of skill *names + descriptions* and a single
+   `load_skill` tool. Only when it picks a skill does the full instruction file get read into
+   context. The loop is a `create_agent` freebie; the skill mechanism is the new part you build.
+   You *feel* the mechanism.
 2. Then you meet the real thing — **Anthropic Agent Skills**, the same `SKILL.md`-shaped format
    this very curriculum is authored with (look under `.claude/skills/`). You recognize it as the
    production version of what you just built — familiar, not magic.
