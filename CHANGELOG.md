@@ -1,3 +1,9 @@
+## v0.9.1 (2026-07-04)
+
+### Refactor
+
+- **L01**: drive L01 client calls through the async achat seam
+
 ## v0.9.0 (2026-07-04)
 
 ### Feat
