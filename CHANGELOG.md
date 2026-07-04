@@ -1,3 +1,9 @@
+## v0.5.0 (2026-07-04)
+
+### Feat
+
+- **L23**: add script-centric and shared example skills
+
 ## v0.4.0 (2026-07-04)
 
 ### Feat
