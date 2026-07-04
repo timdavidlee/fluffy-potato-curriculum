@@ -89,9 +89,11 @@ Python).
 
 - **Environment note:** **live** Claude calls — `ANTHROPIC_API_KEY` required; outputs vary run to
   run. Low temperature stays tight, high spreads. Remind students to clear outputs before committing.
-- **Common gotchas:** not returning the list; forgetting `.text` on the response.
-- **Unblockers:** a list comprehension calling
-  `client.chat([Message.user(COFFEE)], max_tokens=16, temperature=temperature).text.strip()` n times.
+- **Common gotchas:** not returning the list; forgetting to `await` (`achat` returns a coroutine,
+  not a reply); forgetting `.text` on the response.
+- **Unblockers:** `sample_n` is `async def`; inside it, `await
+  client.achat([Message.user(COFFEE)], max_tokens=16, temperature=temperature)` n times, then take
+  `.text.strip()` on each. Call it from a cell with `await sample_n(...)`.
 - **Time:** ~7 min.
 
 ## L0108_lab problem 3 — Pick a temperature per task
