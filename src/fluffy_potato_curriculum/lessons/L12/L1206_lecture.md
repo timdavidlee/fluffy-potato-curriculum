@@ -8,7 +8,7 @@ estimated duration: 20
 
 > **Lesson:** L12 — What an agent generates: state, logs, traces & extracts.
 > **Roadmap:** [objectives.md](../../../../docs/origin/lesson_roadmaps/L12/objectives.md) (objectives 5–6) · [demos_or_activities.md](../../../../docs/origin/lesson_roadmaps/L12/demos_or_activities.md) (Demos 6–7)
-> **Comes after:** `L1204_lecture` (you instrumented the loop and produced `RunResult.trace`). This lecture sends *that* trace to a real tool — then closes the lesson by drawing the line between observability and the data your agent produces.
+> **Comes after:** `L1204_lecture` (you instrumented the graph and produced `RunResult.trace`). This lecture sends *that* trace to a real tool — then closes the lesson by drawing the line between observability and the data your agent produces.
 > **Anchor model for the live demo: Claude Sonnet 4.6.** This step is **additive** — objectives 1–4 stand alone on the in-memory / `.to_jsonl()` trace. Langfuse is the "now see it in the real tool" payoff, not a hard dependency.
 
 ## section 1. Why a real tool at all
@@ -24,7 +24,7 @@ estimated duration: 20
 - text: **Langfuse** is an open-source (MIT) LLM observability platform. The cohort runs **one shared instructor instance** — you get a base URL + project keys, no per-student signup, no seat cost.
 - text: it ingests **OpenTelemetry** spans. That is *why* `TraceEvent` was shaped the way it was in `common/tracing.py` — an approximate OTel/Langfuse shape — so exporting is a natural step, not a rewrite.
 - text: keys load through `common/config.py` (the pydantic-settings seam), **never hard-coded** — the same stance as every other live call in the course.
-- diagram: a box "your instrumented `agent_loop.run(...)`" with an arrow labeled "export (langfuse SDK / OTLP)" pointing to a box "shared Langfuse dashboard"; a second arrow from "L11 LangGraph agent" pointing at the *same* dashboard, to foreshadow that later traces land here too.
+- diagram: a box "your instrumented `agent_graph.run(...)`" with an arrow labeled "export (langfuse SDK / OTLP)" pointing to a box "shared Langfuse dashboard"; a second arrow from "L11 LangGraph agent" pointing at the *same* dashboard, to foreshadow that later traces land here too.
 
 [↑ Back to top](#l12-lecture-seeing-your-trace-in-langfuse)
 
@@ -40,7 +40,7 @@ estimated duration: 20
 | one run (all spans share a `trace_id`) | a **trace** | the `trace_id` is the grouping key |
 | one span (`TraceEvent`) | an **observation** | one row in the trace's timeline |
 | an `llm` span (`run_type="llm"`) | a **GENERATION** | carries model, token `usage`, and cost |
-| a `tool` / `chain` span | a **SPAN** | a tool call or the loop step |
+| a `tool` / `chain` span | a **SPAN** | a tool call or the run's framing |
 | `usage.input_tokens` / `output_tokens` | token usage + **cost** | Langfuse multiplies tokens by model price |
 | `start_time` / `end_time` | latency on the timeline | the span's width in the waterfall |
 | `error` | the observation's error badge | red, expandable |
