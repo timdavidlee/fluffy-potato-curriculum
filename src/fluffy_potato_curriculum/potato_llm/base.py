@@ -98,5 +98,23 @@ class PotatoLLMClient(Protocol):
         max_tokens: int = 1024,
         temperature: float = 1.0,
     ) -> ChatResponse:
-        """Send a conversation, get one assistant reply back."""
+        """Send a conversation, get one assistant reply back (blocking)."""
+        ...
+
+    async def achat(
+        self,
+        messages: list[Message],
+        *,
+        max_tokens: int = 1024,
+        temperature: float = 1.0,
+    ) -> ChatResponse:
+        """The `await`-able twin of `chat` — same call, non-blocking.
+
+        Every client exposes **both**: a sync `chat` and an async `achat`, the same
+        pairing you'll meet on a LangChain model (`.invoke` / `.ainvoke`). The
+        course defaults to the async one — awaiting the model call is what lets many
+        calls run concurrently (`asyncio.gather`) instead of one-at-a-time — see the
+        K05 prework's "why async for agents". Reach for sync `chat` only in a plain
+        script with nothing else to overlap.
+        """
         ...

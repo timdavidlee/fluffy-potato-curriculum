@@ -1,4 +1,10 @@
-from fluffy_potato_curriculum.common.agent_graph import build_agent, run, trace_graph
+from fluffy_potato_curriculum.common.agent_graph import (
+    arun,
+    atrace_graph,
+    build_agent,
+    run,
+    trace_graph,
+)
 from fluffy_potato_curriculum.common.fake_model import (
     FakeModel,
     text_reply,
@@ -108,3 +114,33 @@ def test_trace_graph_accepts_a_prebuilt_compiled_graph() -> None:
 def test_trace_serializes_to_jsonl_and_back() -> None:
     result = run(_chaining_model(), TOOLS, "q", max_steps=8)
     assert from_jsonl(to_jsonl(result.trace)) == result.trace
+
+
+async def test_arun_terminates_naturally_when_model_stops_calling_tools() -> None:
+    result = await arun(_chaining_model(), TOOLS, "q", max_steps=8)
+    assert result.termination == "natural"
+
+
+async def test_arun_hits_max_steps_on_a_runaway() -> None:
+    result = await arun(_runaway_model(), TOOLS, "q", max_steps=3)
+    assert result.termination == "max_steps"
+
+
+async def test_arun_tool_span_names_follow_the_trajectory() -> None:
+    result = await arun(_chaining_model(), TOOLS, "q", max_steps=8)
+    tool_names = [event.name for event in result.trace if event.run_type == "tool"]
+    assert tool_names == ["calculator", "lookup"]
+
+
+async def test_atrace_graph_drives_a_prebuilt_compiled_graph() -> None:
+    graph = build_agent(_chaining_model(), TOOLS)
+    result = await atrace_graph(graph, "q", max_steps=8)
+    assert result.termination == "natural"
+
+
+async def test_arun_emits_the_same_span_sequence_as_run() -> None:
+    # `astream` drives the same compiled graph as `stream`, so the async producer
+    # emits the identical ordered chain/llm/tool spans.
+    sync_types = [event.run_type for event in run(_chaining_model(), TOOLS, "q", max_steps=8).trace]
+    async_result = await arun(_chaining_model(), TOOLS, "q", max_steps=8)
+    assert [event.run_type for event in async_result.trace] == sync_types

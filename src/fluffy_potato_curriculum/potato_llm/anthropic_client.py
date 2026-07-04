@@ -50,13 +50,32 @@ def extract_text(message: AnthropicMessage) -> str:
     return "".join(block.text for block in message.content if isinstance(block, TextBlock))
 
 
+def to_chat_response(response: AnthropicMessage) -> ChatResponse:
+    """Normalize a raw Anthropic response into our provider-agnostic `ChatResponse`.
+
+    Shared by the sync and async call paths so both return the identical shape —
+    the mapping (text blocks joined, usage renamed) lives in one place."""
+    return ChatResponse(
+        text=extract_text(response),
+        model=response.model,
+        usage=Usage(
+            input_tokens=response.usage.input_tokens,
+            output_tokens=response.usage.output_tokens,
+        ),
+        raw=response,
+    )
+
+
 class AnthropicClient:
     """Talk to Claude through the `PotatoLLMClient` seam.
 
-    Pass `client=` to inject a pre-built (or fake) SDK client; otherwise one is
-    constructed from `api_key`, falling back to the configured `ANTHROPIC_API_KEY`
-    (see `common.config`). Constructing a real client with no key available raises
-    a clear error rather than failing later mid-call.
+    Holds **both** a sync and an async Anthropic SDK client, so it can serve `chat`
+    (blocking) and `achat` (awaitable) off the same configuration. Pass `client=`
+    and/or `async_client=` to inject pre-built (or fake) SDK clients — a test that
+    only exercises one path need only inject that one. Whenever a real client has to
+    be constructed, the key is resolved from `api_key`, falling back to the
+    configured `ANTHROPIC_API_KEY` (see `common.config`); a missing key raises a
+    clear error up front rather than failing later mid-call.
     """
 
     def __init__(
@@ -65,12 +84,36 @@ class AnthropicClient:
         model: str = DEFAULT_MODEL,
         api_key: str | None = None,
         client: anthropic.Anthropic | None = None,
+        async_client: anthropic.AsyncAnthropic | None = None,
     ) -> None:
         self._model = model
-        if client is not None:
-            self._client = client
-        else:
-            self._client = anthropic.Anthropic(api_key=api_key or require_anthropic_key())
+        self._api_key = api_key
+        self._client = client
+        self._async_client = async_client
+        # Fail fast on the *real* path: if the caller injected neither client they
+        # mean to talk to a live model, so resolve the key now (a clear error up
+        # front, not mid-call) and build both SDK clients. If a (fake) client was
+        # injected we stay lazy — a test that drives only `chat` or only `achat`
+        # shouldn't need a key or the other real client (see `_sync`/`_async`).
+        if client is None and async_client is None:
+            resolved_key = api_key or require_anthropic_key()
+            self._api_key = resolved_key
+            self._client = anthropic.Anthropic(api_key=resolved_key)
+            self._async_client = anthropic.AsyncAnthropic(api_key=resolved_key)
+
+    def _sync(self) -> anthropic.Anthropic:
+        """The sync SDK client, built (and key-resolved) on first use if injected as None."""
+        if self._client is None:
+            self._client = anthropic.Anthropic(api_key=self._api_key or require_anthropic_key())
+        return self._client
+
+    def _async(self) -> anthropic.AsyncAnthropic:
+        """The async SDK client, built (and key-resolved) on first use if injected as None."""
+        if self._async_client is None:
+            self._async_client = anthropic.AsyncAnthropic(
+                api_key=self._api_key or require_anthropic_key()
+            )
+        return self._async_client
 
     @property
     def model(self) -> str:
@@ -83,19 +126,28 @@ class AnthropicClient:
         max_tokens: int = 1024,
         temperature: float = 1.0,
     ) -> ChatResponse:
-        response = self._client.messages.create(
+        response = self._sync().messages.create(
             model=self._model,
             max_tokens=max_tokens,
             temperature=temperature,
             system=extract_system(messages),
             messages=to_anthropic_messages(messages),
         )
-        return ChatResponse(
-            text=extract_text(response),
-            model=response.model,
-            usage=Usage(
-                input_tokens=response.usage.input_tokens,
-                output_tokens=response.usage.output_tokens,
-            ),
-            raw=response,
+        return to_chat_response(response)
+
+    async def achat(
+        self,
+        messages: list[Message],
+        *,
+        max_tokens: int = 1024,
+        temperature: float = 1.0,
+    ) -> ChatResponse:
+        """`await`-able twin of `chat`: the async SDK client, same request/response."""
+        response = await self._async().messages.create(
+            model=self._model,
+            max_tokens=max_tokens,
+            temperature=temperature,
+            system=extract_system(messages),
+            messages=to_anthropic_messages(messages),
         )
+        return to_chat_response(response)

@@ -53,3 +53,20 @@ def test_fake_model_repeats_last_reply_when_script_is_exhausted() -> None:
     model = FakeModel([last])
     model.invoke([])
     assert model.invoke([]) is last
+
+
+async def test_ainvoke_returns_scripted_replies_in_order() -> None:
+    first = text_reply("a")
+    second = text_reply("b")
+    model = FakeModel([first, second])
+    assert [await model.ainvoke([]), await model.ainvoke([])] == [first, second]
+
+
+async def test_ainvoke_shares_the_call_counter_with_invoke() -> None:
+    # A script drives sync and async runs identically: invoke then ainvoke advances
+    # through the script, it does not restart it.
+    first = text_reply("a")
+    second = text_reply("b")
+    model = FakeModel([first, second])
+    model.invoke([])
+    assert await model.ainvoke([]) is second

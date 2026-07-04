@@ -102,3 +102,43 @@ def test_chat_wires_request_and_normalizes_response() -> None:
         {"role": "system", "content": "be brief"},
         {"role": "user", "content": "hello"},
     ]
+
+
+class _FakeAsyncCompletions:
+    def __init__(self, completion: _FakeCompletion) -> None:
+        self._completion = completion
+        self.last_kwargs: dict[str, object] = {}
+
+    async def create(self, **kwargs: object) -> _FakeCompletion:
+        self.last_kwargs = kwargs
+        return self._completion
+
+
+class _FakeAsyncChat:
+    def __init__(self, completion: _FakeCompletion) -> None:
+        self.completions = _FakeAsyncCompletions(completion)
+
+
+class _FakeAsyncOpenAI:
+    def __init__(self, completion: _FakeCompletion) -> None:
+        self.chat = _FakeAsyncChat(completion)
+
+
+async def test_achat_wires_request_and_normalizes_response() -> None:
+    fake = _FakeAsyncOpenAI(
+        _FakeCompletion(content="hi there", usage=_FakeUsage(prompt_tokens=5, completion_tokens=6))
+    )
+    client = OpenAIClient(model="gpt-test", async_client=cast(openai.AsyncOpenAI, fake))
+
+    resp = await client.achat([Message.system("be brief"), Message.user("hello")])
+
+    assert resp.text == "hi there"
+    assert resp.model == "gpt-test"
+    assert resp.usage.input_tokens == 5
+    assert resp.usage.output_tokens == 6
+
+    sent = fake.chat.completions.last_kwargs
+    assert sent["messages"] == [
+        {"role": "system", "content": "be brief"},
+        {"role": "user", "content": "hello"},
+    ]

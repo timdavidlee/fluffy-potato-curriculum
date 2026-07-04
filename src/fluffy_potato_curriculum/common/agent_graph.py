@@ -41,6 +41,7 @@ from typing import Annotated, Any, TypedDict, cast
 
 from langchain_core.messages import AIMessage, BaseMessage, HumanMessage, ToolMessage
 from langchain_core.messages.tool import ToolCall
+from langchain_core.runnables import RunnableLambda
 from langgraph.errors import GraphRecursionError
 from langgraph.graph import END, StateGraph
 from langgraph.graph.message import add_messages
@@ -84,10 +85,23 @@ def build_agent(
     crashing the run (L10, rule 3).
     """
     tool_list = list(tools.values())
+    bound = model.bind_tools(tool_list)
 
     def agent_node(state: AgentState) -> dict[str, list[BaseMessage]]:
         """Call the tool-bound model on the conversation; return its one reply to append."""
-        reply = model.bind_tools(tool_list).invoke(state["messages"])
+        reply = bound.invoke(state["messages"])
+        return {"messages": [reply]}
+
+    async def aagent_node(state: AgentState) -> dict[str, list[BaseMessage]]:
+        """The awaitable twin of ``agent_node``: ``await bound.ainvoke(...)``.
+
+        Giving the node both a sync and an async body (below, via ``RunnableLambda``)
+        is what lets the *same* compiled graph be driven by ``graph.stream`` (which
+        calls the node's sync ``invoke``) or ``graph.astream`` (which awaits its
+        ``ainvoke``) — so one ``build_agent`` backs both :func:`trace_graph` and
+        :func:`atrace_graph`.
+        """
+        reply = await bound.ainvoke(state["messages"])
         return {"messages": [reply]}
 
     def route(state: AgentState) -> str:
@@ -98,7 +112,10 @@ def build_agent(
         return END
 
     builder = StateGraph(AgentState)
-    builder.add_node("agent", agent_node)
+    # A dual-mode node: `agent_node` serves sync `.stream`, `aagent_node` serves
+    # async `.astream`. The prebuilt `ToolNode` is already dual-mode (it runs sync
+    # tools in a thread under `.astream`), so the whole graph runs either way.
+    builder.add_node("agent", RunnableLambda(agent_node, afunc=aagent_node))
     builder.add_node("tools", ToolNode(tool_list, handle_tool_errors=handle_tool_errors))
     builder.set_entry_point("agent")
     # The conditional exit (route) and the plain back-edge -- the only two edges.
@@ -254,6 +271,80 @@ def trace_graph(
     )
 
 
+async def atrace_graph(
+    graph: CompiledStateGraph[AgentState, Any, Any, Any],
+    user_msg: str,
+    *,
+    max_steps: int = 8,
+) -> RunResult:
+    """The ``await``-able twin of :func:`trace_graph` — same spans, streamed with
+    ``graph.astream``.
+
+    Line-for-line :func:`trace_graph` with the one change that makes it async:
+    ``async for chunk in graph.astream(...)`` instead of ``for chunk in
+    graph.stream(...)``. ``astream`` awaits the ``agent`` node's ``ainvoke`` (the
+    run's only real I/O), so a caller can overlap several graph runs with
+    ``asyncio.gather``; each ``{node: update}`` chunk maps to the identical span,
+    so the returned :class:`RunResult` is indistinguishable from the sync path's.
+    """
+    trace_id = _new_id()
+    events: list[TraceEvent] = []
+    pending: dict[str, ToolCall] = {}
+
+    final_text = ""
+    iterations = 0
+    termination = "natural"
+
+    wall_start = time.time()
+    last_t = wall_start
+    stream = graph.astream(
+        {"messages": [HumanMessage(content=user_msg)]},
+        {"recursion_limit": _recursion_limit(max_steps)},
+        stream_mode="updates",
+    )
+    try:
+        async for raw_chunk in stream:
+            chunk = cast(dict[str, dict[str, Any]], raw_chunk)
+            now = time.time()
+            for node_name, update in chunk.items():
+                messages = cast(list[BaseMessage], update.get("messages", []))
+                if node_name == "agent":
+                    reply = cast(AIMessage, messages[-1])
+                    iterations += 1
+                    pending = {call["id"] or "": call for call in reply.tool_calls}
+                    events.append(_llm_span(reply, trace_id, last_t, now))
+                    if not reply.tool_calls:
+                        final_text = text_of(reply)
+                elif node_name == "tools":
+                    for message in messages:
+                        tool_message = cast(ToolMessage, message)
+                        call = pending.get(tool_message.tool_call_id)
+                        events.append(_tool_span(tool_message, call, trace_id, last_t, now))
+            last_t = now
+    except GraphRecursionError:
+        termination = "max_steps"
+
+    events.insert(
+        0,
+        TraceEvent(
+            run_id=trace_id,
+            trace_id=trace_id,
+            run_type="chain",
+            name="agent_graph.run",
+            inputs={"user_msg": user_msg},
+            outputs={"termination": termination, "iterations": iterations},
+            start_time=wall_start,
+            end_time=time.time(),
+        ),
+    )
+    return RunResult(
+        final_text=final_text,
+        iterations=iterations,
+        termination=termination,
+        trace=events,
+    )
+
+
 def run(
     model: ChatModel,
     tools: Mapping[str, Callable[..., str]],
@@ -269,3 +360,15 @@ def run(
     """
     graph = build_agent(model, tools)
     return trace_graph(graph, user_msg, max_steps=max_steps)
+
+
+async def arun(
+    model: ChatModel,
+    tools: Mapping[str, Callable[..., str]],
+    user_msg: str,
+    max_steps: int = 8,
+) -> RunResult:
+    """The ``await``-able twin of :func:`run`: build the L10 graph and
+    :func:`atrace_graph` one run of it — a drop-in for :func:`agent_loop.arun`."""
+    graph = build_agent(model, tools)
+    return await atrace_graph(graph, user_msg, max_steps=max_steps)

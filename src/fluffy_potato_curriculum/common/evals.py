@@ -43,7 +43,7 @@ becomes a habit you carry forward.
 
 from __future__ import annotations
 
-from collections.abc import Callable, Sequence
+from collections.abc import Awaitable, Callable, Sequence
 from dataclasses import dataclass, field
 from typing import Any, Protocol
 
@@ -112,6 +112,10 @@ class Scorer(Protocol):
 # the same cases (e.g. one per model) is exactly the A/B in L13's headline demo.
 # (LangSmith calls this argument the *target* of ``evaluate()``.)
 RunCase = Callable[[EvalCase], RunResult]
+
+# The awaitable target: an ``async`` run producer (e.g. one backed by
+# ``agent_graph.arun``). :func:`aevaluate` awaits it per case.
+ARunCase = Callable[[EvalCase], Awaitable[RunResult]]
 
 
 # --- trace readers a trajectory scorer leans on -----------------------------
@@ -277,6 +281,59 @@ def evaluate(
             sample_results.append(sample)
         per_case[case.id] = case_samples
 
+    return _build_report(cases, per_case, sample_results, samples=samples)
+
+
+async def aevaluate(
+    arun_case: ARunCase,
+    cases: Sequence[EvalCase],
+    scorers: Sequence[Scorer],
+    *,
+    samples: int = 1,
+) -> EvalReport:
+    """The ``await``-able twin of :func:`evaluate` — same rollup, an async target.
+
+    Identical to :func:`evaluate` but ``await``s ``arun_case(case)`` to produce each
+    run, so the target can be an async producer (``agent_graph.arun`` /
+    ``agent_loop.arun``). Cases are awaited one at a time here to keep the report
+    deterministic and the mechanism readable; a caller wanting throughput can fan
+    the runs out with ``asyncio.gather`` and hand this the finished results. Scorers
+    stay synchronous — they read a finished run's trace, no I/O.
+    """
+    sample_results: list[SampleResult] = []
+    per_case: dict[str, list[SampleResult]] = {}
+
+    for case in cases:
+        case_samples: list[SampleResult] = []
+        for sample_index in range(samples):
+            result = await arun_case(case)
+            verdicts = [scorer(run=result, example=case) for scorer in scorers]
+            sample = SampleResult(
+                case_id=case.id,
+                sample_index=sample_index,
+                run=result,
+                results=verdicts,
+            )
+            case_samples.append(sample)
+            sample_results.append(sample)
+        per_case[case.id] = case_samples
+
+    return _build_report(cases, per_case, sample_results, samples=samples)
+
+
+def _build_report(
+    cases: Sequence[EvalCase],
+    per_case: dict[str, list[SampleResult]],
+    sample_results: list[SampleResult],
+    *,
+    samples: int,
+) -> EvalReport:
+    """Roll per-sample verdicts up into per-case pass counts and an :class:`EvalReport`.
+
+    The shared summary step for both :func:`evaluate` and :func:`aevaluate` — the
+    two differ only in how they *produce* each run (sync call vs. ``await``); once
+    the samples are scored, the rollup is identical, so it lives here once.
+    """
     # The scorer keys (the report's columns) are whatever the scorers actually
     # returned, in first-seen order — no need to probe the scorers ahead of time.
     scorer_keys = _ordered_keys(sample_results)

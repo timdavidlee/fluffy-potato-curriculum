@@ -40,14 +40,18 @@ that is the point of driving the model through LangChain."""
 
 
 class _BoundModel(Protocol):
-    """A tool-bound chat model: ``.invoke(messages)`` -> a message.
+    """A tool-bound chat model: ``.invoke(messages)`` (or ``.ainvoke``) -> a message.
 
     The message parameter is positional-only so both a real LangChain runnable
     (whose first arg is ``input``) and the teaching ``FakeModel`` (``messages``)
-    satisfy it structurally regardless of the name they give it.
+    satisfy it structurally regardless of the name they give it. Both a sync
+    ``invoke`` and an async ``ainvoke`` are declared — the same pair a real
+    LangChain runnable exposes — so ``run`` and ``arun`` can share one bound model.
     """
 
     def invoke(self, messages: list[BaseMessage], /) -> BaseMessage: ...
+
+    async def ainvoke(self, messages: list[BaseMessage], /) -> BaseMessage: ...
 
 
 class ChatModel(Protocol):
@@ -200,6 +204,104 @@ def run(
         messages.append(reply)
         for call in reply.tool_calls:
             # --- the tool dispatch: one `tool` span ---
+            tool_start = time.time()
+            result = dispatch(tools, call)
+            tool_end = time.time()
+            is_error = result.status == "error"
+            events.append(
+                TraceEvent(
+                    run_id=_new_id(),
+                    trace_id=trace_id,
+                    run_type="tool",
+                    name=call["name"],
+                    inputs=dict(call["args"]),
+                    outputs={"content": result.content},
+                    error=cast(str, result.content) if is_error else None,
+                    start_time=tool_start,
+                    end_time=tool_end,
+                )
+            )
+            messages.append(result)
+
+    # The framing `chain` span goes first so a reader sees the run summary up top.
+    events.insert(
+        0,
+        TraceEvent(
+            run_id=trace_id,
+            trace_id=trace_id,
+            run_type="chain",
+            name="agent_loop.run",
+            inputs={"user_msg": user_msg},
+            outputs={"termination": termination, "iterations": iterations},
+            start_time=chain_start,
+            end_time=time.time(),
+        ),
+    )
+    return RunResult(
+        final_text=final_text,
+        iterations=iterations,
+        termination=termination,
+        trace=events,
+    )
+
+
+async def arun(
+    model: ChatModel,
+    tools: Mapping[str, Callable[..., str]],
+    user_msg: str,
+    max_steps: int = 8,
+) -> RunResult:
+    """The ``await``-able twin of :func:`run` — same loop, same :class:`RunResult`.
+
+    Line-for-line :func:`run` with the one change that makes it async: the model
+    call is ``await bound.ainvoke(messages)`` instead of ``bound.invoke(messages)``.
+    That is the loop's only I/O boundary, so awaiting it is what lets a caller
+    overlap several agent runs (``asyncio.gather``) instead of blocking on each —
+    the "why async for agents" payoff from the K05 prework. Tool dispatch stays
+    synchronous: the teaching tools are pure, in-memory functions with nothing to
+    await (a real I/O-bound tool would be the place to make dispatch async too).
+    """
+    trace_id = _new_id()
+    events: list[TraceEvent] = []
+    bound = model.bind_tools(list(tools.values()))
+    messages: list[BaseMessage] = [HumanMessage(content=user_msg)]
+
+    final_text = ""
+    termination = "max_steps"
+    iterations = max_steps
+    chain_start = time.time()
+
+    for step in range(1, max_steps + 1):
+        # --- the model call: one `llm` span (now awaited) ---
+        llm_start = time.time()
+        reply = cast(AIMessage, await bound.ainvoke(messages))
+        llm_end = time.time()
+        events.append(
+            TraceEvent(
+                run_id=_new_id(),
+                trace_id=trace_id,
+                run_type="llm",
+                name="model.ainvoke",
+                inputs={"messages": len(messages)},
+                outputs={"tool_calls": [call["name"] for call in reply.tool_calls]},
+                usage=extract_usage(reply),
+                start_time=llm_start,
+                end_time=llm_end,
+            )
+        )
+
+        # No tool calls -> the model thinks it's done. NATURAL termination.
+        if not reply.tool_calls:
+            final_text = text_of(reply)
+            termination = "natural"
+            iterations = step
+            break
+
+        # Record the assistant turn, then answer EVERY tool call with a matching
+        # ToolMessage before the next model invocation.
+        messages.append(reply)
+        for call in reply.tool_calls:
+            # --- the tool dispatch: one `tool` span (pure tools, so still sync) ---
             tool_start = time.time()
             result = dispatch(tools, call)
             tool_end = time.time()

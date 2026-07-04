@@ -1,4 +1,4 @@
-from fluffy_potato_curriculum.common.agent_loop import dispatch, run
+from fluffy_potato_curriculum.common.agent_loop import arun, dispatch, run
 from fluffy_potato_curriculum.common.fake_model import (
     FakeModel,
     text_reply,
@@ -93,3 +93,26 @@ def test_final_text_is_the_last_llm_reply() -> None:
 def test_trace_serializes_to_jsonl_and_back() -> None:
     result = run(_chaining_model(), TOOLS, "q", max_steps=8)
     assert from_jsonl(to_jsonl(result.trace)) == result.trace
+
+
+async def test_arun_terminates_naturally_when_model_stops_calling_tools() -> None:
+    result = await arun(_chaining_model(), TOOLS, "q", max_steps=8)
+    assert result.termination == "natural"
+
+
+async def test_arun_hits_max_steps_on_a_runaway() -> None:
+    result = await arun(_runaway_model(), TOOLS, "q", max_steps=3)
+    assert result.termination == "max_steps"
+
+
+async def test_arun_final_text_is_the_last_llm_reply() -> None:
+    result = await arun(_chaining_model(), TOOLS, "q", max_steps=8)
+    assert result.final_text == "17*23 is 391, and Tokyo has 37,000,000 people."
+
+
+async def test_arun_emits_the_same_span_sequence_as_run() -> None:
+    # The async twin is the sync loop with `await ainvoke`, so it emits the same
+    # ordered chain/llm/tool spans (only the llm span's name differs by design).
+    sync_types = [event.run_type for event in run(_chaining_model(), TOOLS, "q", max_steps=8).trace]
+    async_result = await arun(_chaining_model(), TOOLS, "q", max_steps=8)
+    assert [event.run_type for event in async_result.trace] == sync_types
