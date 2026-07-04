@@ -1,6 +1,7 @@
 # 2026-07-04 — Audit: gotcha/anti-pattern roadmap beats vs. existing materials
 
-**Status: OPEN.** Follow-on to
+**Status: DONE (2026-07-04) — all 11 lessons audited; gap-ordered carry-over rolled up in the
+[Output](#output) section below.** Follow-on to
 [2026-07-01-mini-cut-gotcha-antipattern-demos.md](2026-07-01-mini-cut-gotcha-antipattern-demos.md)
 (stage-1 DONE). That pass added a gotcha/anti-pattern beat to each mini-cut lesson's
 **roadmap** (`demos_or_activities.md`) but deliberately did **not** touch stage-2 student
@@ -187,11 +188,35 @@ Roadmap beat lives in `docs/origin/lesson_roadmaps/<L>/demos_or_activities.md`.
       **Action:** add a "five eval anti-patterns" recap section to `L1307_lecture.md` (name + cure + point-back;
       fold in the brittle-scorer as the cross-cutting one). No new fixture needed. Near the *already-covered*
       end of the carry-over order.
-- [ ] **L22 — skills** (coda, names 4). Assets: `L2202/L2205_lecture.md`,
+- [x] **L22 — skills** (coda, names 4). Assets: `L2202/L2205_lecture.md`,
       `L2203_lecture.ipynb`, `L2204/L2206_lab_*`. `L2205_lecture.md` already has anti-pattern
-      content — check overlap with the promoted beat + the L23 handoff. **Finding:**
-- [ ] **L23 — skill patterns (REFERENCE/CONTROL)** — Demo 5 already in `L2304/L2305_lecture.ipynb`.
-      No action expected; use as the "what good looks like" bar for the others. **Finding:**
+      content — check overlap with the promoted beat + the L23 handoff.
+      **Finding: `add-coda` (expand existing `L2205 §3`) + FLAG a stale mini-cut handoff.** All four
+      anti-patterns are already *named*, but **split across two lectures**: description faults (#1 too-vague
+      → never loads, #2 too-broad → loads constantly) = `L2202` §4.2 "The failure modes of just-in-time
+      loading"; container faults = `L2205` §3 "The anti-patterns" (a real 3-row table: sys-prompt→skill,
+      tool→skill, skill→sys-prompt). **Overlap w/ promoted beat:** strong on container, but (a) not
+      consolidated as the coda's "two description / two container" four-item beat (the description faults sit
+      in a *different* lecture, `L2202`); (b) `L2205` §3's table lacks the coda's exact #3 direction — "a skill
+      that should be a **tool**" (deterministic op wrapped in `SKILL.md`); it only has the inverse tool→skill.
+      **L23 handoff: MISSING.** No L22 material references `L23` at all (the "composition" hits are L22's
+      *own* skill-orchestrates-tools content); the coda wants an explicit hand-off to L23 Demo 5's collision
+      beat. **⚠️ FLAG (drift beyond the coda):** `L2205` §5.2 says **"the mini cut ends here"** and forward-
+      points only to full-course L24/L19/L09 — but `tracks.toml` (l.55) has the mini cut as `… L22, L23, L50`,
+      so **L23 (composition capstone) and L50 follow L22 in the mini**. That line is stale (predates L23
+      joining the mini) and must be corrected. **Actions:** (a) expand `L2205` §3 into the four-item beat —
+      pull #1/#2 up from `L2202` §4.2, add the skill→tool direction — and add the L23 Demo 5 handoff; (b)
+      fix `L2205` §5.2's "mini cut ends here" to point to L23 then L50. No new fixture needed.
+- [x] **L23 — skill patterns (REFERENCE/CONTROL)** — Demo 5 already in `L2304/L2305_lecture.ipynb`.
+      No action expected; use as the "what good looks like" bar for the others.
+      **Finding: `covered` — CONFIRMED as the bar, no action.** `L2305_lecture.ipynb` is literally titled
+      "Three composition anti-patterns" and delivers all three in the Demo-5 template shape (name → show
+      it break → cure → tie to payoff): §2 over-chaining (5-skill toy chain vs collapsed 2-step seam), §3 a
+      shared "skill" that's really a tool (proves they're identical → loading as a skill buys nothing), §4
+      description collisions (run it: colliding pair loads the wrong skill → rewritten mutually-discriminating →
+      right, with an offline-default + optional-live path). `L2304` builds the dependency graph + "depth costs
+      loads" as the setup, and `example_skills/` ships the real `get_order` / `check_lesson_links` fixtures.
+      This is the template every other lesson's coda is measured against.
 
 ## Output
 
@@ -200,3 +225,48 @@ When the audit is complete, roll the per-lesson actions into the parent todo's "
 carry-over" line (or a fresh carry-over todo) so the actual edits can be scheduled. Order the
 carry-over work by gap size — L08 (new demo) likely first, the already-partially-covered coda
 lessons last.
+
+### Carry-over roll-up (gap-ordered — do top-to-bottom)
+
+Tags: `new-demo` (new material) > `add-coda`+flag (coda **and** a drift to reconcile) >
+`add-coda` (naming recap, no new fixture) > `add-coda (light)` / `covered` (near/already done).
+None of the codas need a new fixture — L08 is the only lesson requiring genuinely new assets.
+
+**A. New material (do first)**
+1. **L08 — `new-demo`** → build `L0811_lecture.ipynb` (Demo 5). Only genuinely new asset: the
+   ~8-tool **soup-registry fixture** + a live "What's Alex's email?" selection-degradation run on
+   Sonnet 4.6 → Haiku 4.5. Reuse existing Demo 2–4 bad-design variants for the other three; the
+   4-name recap is already in `L0802` §8.1/§4.4. Keep the fixture lesson-local.
+
+**B. Coda + a drift to reconcile (decide the drift as you go)**
+2. **L04 — `add-coda` (2 of 4) + flag** → once L04 stage-2 regenerates *sequential-only*, add a coda
+   naming just #2 (deterministic-DAG) + #3 (per-node model). Trim the still-pre-split
+   `L04/demos_or_activities.md` to match `objectives.md`. #1/#4 → **L05** (already spun off:
+   task `task_b39acfac`, "Add L05 gotcha coda", running).
+3. **L22 — `add-coda` (expand `L2205` §3) + flag** → expand §3 into the 4-item beat (pull #1/#2 up
+   from `L2202` §4.2; add the skill→tool direction) + add the L23 Demo 5 handoff. **Separately fix**
+   `L2205` §5.2's stale "the mini cut ends here" (mini cut is `… L22, L23, L50` per `tracks.toml`) →
+   point to L23 then L50.
+
+**C. Straight naming coda (no new fixture)**
+4. **L01 — `add-coda`** → append recap section to end of `L0110_lecture.ipynb` (+ 1-line
+   `PROCTOR_NOTES.md` pointer).
+5. **L10 — `add-coda`** → new section in `L1002_lecture.md` after §5.3 (#3's cure = forward-link to
+   L19 only).
+6. **L12 — `add-coda`** → end of `L1204_lecture.ipynb` (preserve the L13 handoff line).
+7. **L13 — `add-coda`** → recap section in `L1307_lecture.md` (fold in the brittle-scorer as the
+   cross-cutting one).
+
+**D. Light / already covered (lowest priority — consolidate existing naming)**
+8. **L02 — `add-coda (light)`** → recap slide in `L0202_lecture.md` §6; explicitly name #4
+   (bloated always-on system prompt), which is currently only implicit.
+9. **L11 — `add-coda (light)`** → closing consolidation in `L1105_lecture.md` after §3.4.
+10. **L07 — `covered`** → optional light merge into `L0702` §6.1 (add a cure column + a
+    "schema rides in every request" row).
+11. **L23 — `covered`** → reference/control, the bar. No action.
+
+**Spun-off follow-up:** L05 gotcha coda — task `task_b39acfac` (running); also handles trimming
+L04's #1/#4 out so they aren't double-owned.
+
+**Summary:** 1 `new-demo` (L08) · 6 `add-coda` (L01/L04/L10/L12/L13/L22, two with a drift flag) ·
+2 `add-coda (light)` (L02/L11) · 2 `covered` (L07/L23) · 1 spun-off L05 coda.
