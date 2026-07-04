@@ -23,7 +23,7 @@ estimated duration: 8
 - text: a unit test pins a deterministic output once. An eval set is a *ratchet*: once a case passes, any later change that breaks it is a regression you catch **before** shipping — not one you rediscover in a trace weeks later.
 - text: the cost of *not* having it is asymmetric: writing the case is minutes; rediscovering the bug in production is hours plus the damage it did in between.
 
-[↑ Back to top](#l09-lecture-carry-the-eval-set-forward)
+[↑ Back to top](#l13-lecture-carry-the-eval-set-forward)
 
 ## section 2. The very next lessons
 
@@ -37,7 +37,7 @@ estimated duration: 8
 - text: *same cases, different implementation — did anything regress?* That is the cleanest possible demonstration of the ratchet, and it's already wired: L11's lab imports `common/evals.py`.
 - diagram: two boxes — "L13 hand-rolled loop" and "L11 LangGraph agent" — both feeding the *same* `evaluate(...)` runner, which emits one pass-rate table per implementation, side by side.
 
-[↑ Back to top](#l09-lecture-carry-the-eval-set-forward)
+[↑ Back to top](#l13-lecture-carry-the-eval-set-forward)
 
 ## section 3. Where this scales (and where it stops)
 
@@ -60,4 +60,4 @@ estimated duration: 8
 - text: the payoff of building the harness by hand first is the same as L12's: when you open the platform, the dataset items, scores, and experiments are the exact `EvalCase` / `EvalResult` / run structure you already wrote.
 - text: closing line: *"you built the minimal version by hand, so the real eval platform is just your harness, hosted — and every agent you build from here comes with an eval set."*
 
-[↑ Back to top](#l09-lecture-carry-the-eval-set-forward)
+[↑ Back to top](#l13-lecture-carry-the-eval-set-forward)
