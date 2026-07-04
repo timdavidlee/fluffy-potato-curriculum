@@ -157,6 +157,31 @@ The teacher should have, before the first demo starts:
 
 - If `create_agent` / the prebuilt import flakes on the day, skip the live run and show the one line on the slide next to the wiring. The point is the shape match, not a live race.
 
+## Common pitfalls coda — naming L10's three gotchas
+
+**Shape note:** a short **"common pitfalls" coda**, not a new live demo — L10 already *shows* the first two (Demos 2–3) and *implies* the third (Demo 1). Its job is to **name** them as portable gotchas, restate the cure in a line, and pin each back to where the room saw it. Budget ~5 minutes as a recap slide. Follows the [L23 Demo 5](../L23/demos_or_activities.md#demo-5--the-three-composition-anti-patterns-objective-5) template, like the [L01 coda](../L01/demos_or_activities.md#common-pitfalls-coda--naming-l01s-four-gotchas). Per the cross-cutting gotcha effort, the infinite-loop case stays **shown-with-a-cap**, never actually hung — exactly how Demo 2 already runs it.
+
+**Goal:** consolidate the loop demos into three named agent-loop gotchas a student will hit the first time they hand-roll (or misuse) a loop.
+
+**Pre-flight:**
+
+- Nothing new to load. One recap slide; Demo 2's turn-by-turn panel and Demo 3's error trace still on screen to point back at.
+
+**Live script (recap — point back, don't re-run):**
+
+1. **No termination guard (infinite loop).** ❌ A loop with no cap and no `END` branch — one confused model turn and it runs forever. Point back at Demo 2: `recursion_limit` caught the runaway, and natural termination is `route` returning `END` on empty `.tool_calls`. **Cure:** every agent gets an iteration cap on `invoke`; hitting it is a signal to investigate (hard task → raise it; misbehaving → fix prompt/tools/model), never noise to swallow.
+2. **Not handling tool failures.** ❌ Letting a raised exception escape `ToolNode` and crash the whole `invoke` (Demo 3, `handle_tool_errors=False`). **Cure:** `handle_tool_errors=True` converts the exception to a `ToolMessage(status="error")` and the back-edge hands it to the model to decide retry / swap / give up — and don't dump tracebacks at the model (token cost + stack-trace leak).
+3. **Unbounded context growth.** ❌ Forgetting that `add_messages` **appends every turn** (Demo 1) — the message list, plus the re-sent tool schemas (L07's "tokens twice over"), grow every loop, so a long run silently inflates cost and drifts toward the window limit. **Cure:** watch cumulative tokens across turns; trimming / summarizing the history is [L19](../L19/objectives.md) (context management, full course) — name it, don't build it here.
+
+**What to highlight:**
+
+- The first two are the loop's two failure axes L10 already stresses on purpose — *when does it stop?* (Demo 2) and *what happens when a tool breaks?* (Demo 3). The coda just gives them names.
+- #3 is the quiet one: nothing errors, the bill just climbs. It's the same no-memory / re-send cost from [L01](../L01/objectives.md) and [L07](../L07/objectives.md), now compounding once per loop iteration.
+
+**If a student pushes back:**
+
+- "Doesn't `recursion_limit` also fix context growth?" No — the cap bounds the *number* of turns, not the *size* of each turn's history. A short run on a huge context still overflows. Different budgets (L01's space vs. count).
+
 ## Optional bridge demo — toward tracing (L12)
 
 If time allows, run one final beat that previews L12: wrap the agent node so it appends a structured dict (`{"event": "model_call", "turn": i, "tool_calls": [...]}`) to a list on each visit. Show the list after a run. That's the simplest possible trace — one span per node.

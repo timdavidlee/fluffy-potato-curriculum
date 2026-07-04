@@ -118,6 +118,33 @@ The teacher should have, before the first demo starts:
 
 - Mostly discussion + one prompt swap, so little can flake. If the prompt swap doesn't visibly change behavior on the canonical task, use a prompt that changes the *format* of the final answer — the point is "same agent, new instruction," not a dramatic behavior shift.
 
+## Common pitfalls coda — naming L11's three gotchas
+
+**Shape note:** a short **"common pitfalls" coda**, not a new live demo — L11's three demos already *address* each of these. Its job is to **name** them as portable gotchas, restate the cure in a line, and pin each back to the demo that raised it. Budget ~5 minutes as a recap slide. Follows the [L23 Demo 5](../L23/demos_or_activities.md#demo-5--the-three-composition-anti-patterns-objective-5) template, like the [L01 coda](../L01/demos_or_activities.md#common-pitfalls-coda--naming-l01s-four-gotchas).
+
+> **Scope note (2026-07-04 reorder):** the cross-cutting gotcha tracker was written when *this* topic was numbered "L14" and assumed a **hand-assembled `StateGraph`** lesson, so it listed reducer/typing **state-mismanagement** gotchas. Those now belong to **[L15](../L15/objectives.md)** (which owns the hand-built graph); the current `create_agent`-first L11 keeps only the shallow-agent gotchas below.
+
+**Goal:** turn the "same loop, in one line" mental model into three named shallow-agent gotchas — the ways `create_agent` lulls you into forgetting the L10 machinery is still underneath.
+
+**Pre-flight:**
+
+- Nothing new to load. One recap slide; Demo 1's loop↔graph mapping and Demo 2's freebies list still on screen to point back at.
+
+**Live script (recap — point back, don't re-run):**
+
+1. **Assuming the one-liner can't run away (no termination).** ❌ Trusting a framework agent not to loop forever because "it's prebuilt." Point back at Demo 2: `create_agent` still carries a **step cap** (its recursion limit / `max_steps`) — the L10 termination problem didn't vanish, it moved behind the constructor. **Cure:** know where the cap lives and treat hitting it as a signal, exactly as in [L10](../L10/objectives.md).
+2. **Treating `create_agent` as magic you can't debug.** ❌ Not being able to map the one-liner back to agent → tools → back-edge, so a bad run is unexplainable. Point back at Demo 1: every piece has an L10 twin. **Cure:** debug the shallow agent *as the L10 loop it is* — read the returned `messages`, find the turn that went wrong; the framework hid the wiring, not the behavior.
+3. **Wrong altitude: one-liner vs. hand-built graph.** ❌ Hand-assembling a `StateGraph` when `create_agent` already fits (over-engineering — the L10 objective-4 mistake), *or* clinging to the one-liner after the flow outgrows a single tool-or-finish loop (under-engineering). Point back at Demo 3's ceiling discussion. **Cure:** stay on `create_agent` until the control flow stops being one loop (a second model per step, a non-tool branch, custom state) — then drop to an explicit graph. That door is [L15](../L15/objectives.md).
+
+**What to highlight:**
+
+- All three are the same trap: **the convenience hides the machinery, but the machinery is still there.** L11's bet is that, having built the L10 loop by hand, students read `create_agent` as "that, packaged" — these gotchas are what happens when they forget it.
+- #3 *is* the shallow-agent skill: knowing where the one-liner's ceiling is. Neither reflex — always hand-build, or never leave the one-liner — is right.
+
+**If a student pushes back:**
+
+- "So when do I ever hand-build the graph?" When you outgrow the single loop — that's L15, and Demo 3 named the exact triggers (second model, non-tool branch, custom state). Not before.
+
 ## Optional demo — toward L15 patterns
 
 If time allows, point forward without teaching it: the shallow agent `create_agent` gave you *is* a named pattern (**ReAct**) — reason, act, repeat. L15 drops below the one-liner to build that graph explicitly and surveys the others (plan-and-execute, supervisor, hierarchical, state-machine routing) and *when* to reach for each. Ask the open question L15 answers — *"what do you build when a single tool-calling loop isn't the right shape?"* — and stop there.

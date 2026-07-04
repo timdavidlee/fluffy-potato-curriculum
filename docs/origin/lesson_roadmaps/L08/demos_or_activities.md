@@ -14,7 +14,7 @@ Each demo is a self-contained block with:
 - **What to highlight** — the moment(s) where the teacher should slow down and call out the takeaway out loud.
 - **If the demo misbehaves** — graceful fallback for when the model surprises you (because it will).
 
-The demos are ordered to match the four learning objectives from [objectives.md](objectives.md). Demo 4 (idempotency / side effects) builds on Demo 3 (errors), so run the sequence in order on the first delivery of the lesson.
+The demos are ordered to match the four learning objectives from [objectives.md](objectives.md). Demo 4 (idempotency / side effects) builds on Demo 3 (errors), so run the sequence in order on the first delivery of the lesson. Demo 5 is an **anti-pattern capstone** that revisits all four objectives — the four ways a tool set silently makes the agent worse — and is the one demo with genuinely new live content (tool soup) rather than a good-vs-bad contrast.
 
 ## Pre-flight (once, at the top of the lesson)
 
@@ -161,6 +161,37 @@ The teacher should have, before the first demo starts:
 - If the model refuses to retry the flaky lookup at all (and just reports the error to the user), that's a fine outcome — name it as the *other* end of the design spectrum and discuss when each is preferable.
 - If the model on step 5 catches the duplicate-send risk and refuses to retry, lean into it: well-trained models sometimes get this right zero-shot, but you can't *rely* on that — design for the worst case.
 
+## Demo 5 — The four tool-design anti-patterns, named (Objectives 1–4)
+
+**Goal:** gather L08 into a named **rogues' gallery** — the four ways a tool set silently makes the agent *worse* — and add the one failure the earlier demos only foreshadowed: **tool soup**, where too many overlapping tools degrade selection. Tie each back to the payoff: a tool earns its place only when it makes the model *more* reliable than model-alone, not less. This is L08's anti-pattern capstone, in the shape of [L23 Demo 5](../L23/demos_or_activities.md#demo-5--the-three-composition-anti-patterns-objective-5).
+
+**Pre-flight:**
+
+- The good tools from Demos 1–4 still loaded.
+- **New for the live beat:** a "soup" registry of ~8 overlapping tools where several plausibly match one request — e.g. `lookup_user`, `find_user`, `get_customer`, `search_accounts`, `user_info`, `whois`, plus two unrelated distractors. Descriptions deliberately overlap so more than one is a plausible pick.
+- The bad-design variants from Demos 2–3 (sparse/misleading description; loose schema; opaque errors) ready to flip back in with one line.
+- One request several soup tools match: *"What's Alex's email?"*
+- The Haiku 4.5 client ready — selection degrades sooner on a smaller model.
+
+**Live script:**
+
+1. **Over-tooling (two faces).** First recall Demo 1, Task A: a tool for what the model already does alone is pure overhead *and* a wrong-tool option it can pick by mistake. Then run the **new** beat: register the 8-tool soup and pose *"What's Alex's email?"*. Watch the model dither, pick a different overlapping tool across runs, or chain two. **Name it: tool soup** — every added tool is another line in the always-on schema budget (L07's "tokens twice over") *and* another way selection can miss. **Cure:** the fewest tools that cover the job; merge overlaps; keep descriptions mutually distinct (callback to Demo 2; forward-point to [L22](../L22/objectives.md)/[L23](../L23/objectives.md) skill-description collisions).
+2. **Vague / misleading description (name it).** Flip Demo 2's sparse `"Looks up a user."` and the overstated variant back in. One line: the description is the model's only selection signal — vague → skipped or garbage args; overstated → confident calls for data the tool can't return. **Cure:** say *when to call* and *what comes back*; write for the model's selection step, not the human code reader.
+3. **Unhandled / opaque errors (name it).** Flip Demo 3's opaque `"error: bad input"` back in. One line: an error the model can't read becomes a blind retry loop. **Cure:** errors are part of the interface — name the field and the constraint; an error message is a *prompt* for the next turn.
+4. **The god-tool (name it).** Put Demo 3's loose `book_meeting(details: str)` beside the typed version. One line: one tool doing everything behind a free-form string hides wrongness and can't be validated. **Cure:** split by responsibility; give each a tight, typed schema.
+5. Close on the payoff: a tool set is a win only when it makes the model **more reliable and cheaper to reason about** than model-alone. These four are the ways it silently doesn't — the mirror image of Demos 1–4's good design.
+
+**What to highlight:**
+
+- Only **tool soup** is new live content; the other three are Demos 1–4's failures *named* so students carry them as a checklist. Naming is the deliverable here.
+- Two of the four scale forward almost verbatim: description collisions and "a tool that should be something else" are exactly [L22](../L22/objectives.md)/[L23](../L23/objectives.md)'s skill anti-patterns — say the link, don't re-teach.
+- The soup beat is sharpest on a **smaller model** — if Sonnet 4.6 selects cleanly despite the overlap, re-run on Haiku 4.5 (same model-class contrast as [L07 Demo 4](../L07/demos_or_activities.md#demo-4--three-outcomes-including-a-hallucinated-call-objective-2--3)).
+
+**If the demo misbehaves:**
+
+- If Sonnet picks a soup tool cleanly every time, add more overlapping tools (set size makes collisions bite) or switch to Haiku 4.5. The point is that selection robustness *degrades* with tool count and *rises* with model power.
+- If flipping registries live runs long, keep beats 2–4 as a pure recap slide and run only the tool-soup beat live — it's the one new failure worth the airtime.
+
 ## Optional bridge demo — toward MCP (L09)
 
 If time allows, run one final demo that previews L09: take one of the well-designed tools from Demos 2–4 and walk through how its name, description, schema, and error shape would translate one-to-one into an MCP server's tool spec. Don't teach the MCP wire format here; just show that the *design* survives the packaging change. The point is to set up L09's framing: MCP is about portability, not about redoing the design work.
@@ -169,7 +200,7 @@ If time allows, run one final demo that previews L09: take one of the well-desig
 
 ## Pacing notes for the teacher
 
-- **Per-demo time:** 10–15 minutes including post-demo discussion. Demo 4 is the longest (5 sub-steps). Four demos plus the optional bridge fits in a 60–80 minute block. <!-- *NEED INPUT*: confirm against the lesson-time budget once duration is pinned in [objectives.md](objectives.md)'s open questions. -->
+- **Per-demo time:** 10–15 minutes including post-demo discussion. Demo 4 is the longest (5 sub-steps); Demo 5 (anti-pattern capstone) runs ~10–12 minutes — the tool-soup beat live, the other three as a fast named recap. Five demos plus the optional bridge fits in a 70–95 minute block. <!-- *NEED INPUT*: confirm against the lesson-time budget once duration is pinned in [objectives.md](objectives.md)'s open questions. -->
 - **Variance budget:** model behavior varies run-to-run, especially in Demo 2 where the whole point is *distributional* behavior. Budget at least one re-run per demo, and on Demo 2 explicitly run each variant twice so the audience sees variance, not just a single result.
 - **The audience watches, doesn't participate.** Resist the temptation to ask "what would *you* call this tool?" — that is a lab pattern, not a demo pattern. Hands-on practice is for the L08 labs.
 - **Keep the same task across Demos 2–3 where possible.** Repetition of the same input across changing tool designs is what makes the contrast legible. Don't rotate problems for variety's sake.

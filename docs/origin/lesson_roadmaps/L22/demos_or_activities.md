@@ -133,6 +133,32 @@ The teacher should have, before the first demo:
 
 - If students push back on a classification (good — it's a judgment call), use the disagreement to surface the heuristic's edges rather than insisting on one answer.
 
+## Common pitfalls coda — naming L22's four anti-patterns
+
+**Shape note:** a short **"common pitfalls" coda** that promotes to a first-class beat the anti-patterns L22 already scatters across Demos 1–4 (Demo 4 step 4 names three in passing; Demos 2–3 show the description failures). Its job is to **name** them crisply and hand off to [L23 Demo 5](../L23/demos_or_activities.md#demo-5--the-three-composition-anti-patterns-objective-5), which extends the same rogues' gallery to *composition*. Budget ~5 minutes as a recap slide; follows that same template, like the [L01 coda](../L01/demos_or_activities.md#common-pitfalls-coda--naming-l01s-four-gotchas). This is the "ensure a demo BEAT exists" the cross-cutting gotcha effort asks of L22.
+
+**Goal:** leave students with four named skill anti-patterns — two about the *description*, two about the *container* — that they can catch in their own skills and that L23 then scales to a skill *system*.
+
+**Pre-flight:**
+
+- Nothing new to load. One recap slide; Demo 2's good/vague description pair and Demo 4's where-does-capability-live table still on screen to point back at.
+
+**Live script (recap — point back, don't re-run):**
+
+1. **Description too vague → never triggers.** ❌ "Helps with customer stuff" — the model silently fails to load the skill when it's needed. Point back at Demo 2's vague variant. **Cure:** the description states *when* it applies; it's a design artifact (L08's tool-naming craft), not a label.
+2. **Description too broad / colliding → triggers wrongly.** ❌ A description that fires on the wrong inputs, or overlaps another skill's so selection degrades across the set. Point back at Demo 2/3. **Cure:** discriminating, mutually-distinct descriptions — each says what it's for *and implicitly what it's not* (this becomes L23 Demo 5's collision beat).
+3. **Wrong container — a skill that should be a tool.** ❌ Wrapping a deterministic op with structured I/O in a `SKILL.md` the model *reads*, instead of a tool it *calls*. Point back at Demo 1/4. **Cure:** deterministic + structured I/O → tool; procedural know-how the model reads and follows → skill.
+4. **Wrong container — a skill or system-prompt that should be the other.** ❌ A one-line always-true rule made into a skill (just use the system prompt), or occasionally-needed instructions crammed into the system prompt (always-on cost — make it a skill). Point back at Demo 1 and Demo 4 step 4. **Cure:** always-true → system prompt; sometimes-needed → skill; called-deterministically → tool.
+
+**What to highlight:**
+
+- The four split cleanly: **the description decides *whether* the skill loads** (#1–#2); **the container decides *whether it should be a skill at all*** (#3–#4). Both are the L22 craft, inverted.
+- Every one scales to a *set* in L23: a vague description is one skill's miss; colliding descriptions and "a shared skill that's really a tool" are the same faults across a whole composed system (L23 Demo 5). Name the handoff — the mini cut goes straight there next.
+
+**If a student pushes back:**
+
+- "Isn't more in the system prompt just safer?" No — every line is paid on *every* call whether or not it's used (Demo 1's token readout). That always-on cost is exactly why anti-pattern #4 matters.
+
 ## Optional capstone demo — the real thing (Anthropic Agent Skills)
 
 If time allows, close the loop: open a real skill from this repo (`.claude/skills/author-lesson-roadmap/`) and show that it's the *same* shape students just hand-built — frontmatter `name` + `description`, a markdown instruction body, supporting structure — loaded just-in-time by Claude Code. Punchline: **the JIT loader you wrote in Demo 3 is what the Agent SDK / Claude Code does for real; the curriculum you're taking is itself built from skills.**

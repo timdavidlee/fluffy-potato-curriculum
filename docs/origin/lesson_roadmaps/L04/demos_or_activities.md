@@ -148,6 +148,32 @@ The teacher should have, before the first demo starts:
 
 - This demo is mostly diagram + discussion, so little can flake. If a student insists "but the classifier *is* the model deciding," reach back to Demo 2's highlight: the model produced a *label in state*; the developer's routing function read that label and chose the edge. The model didn't choose the edge — and it never loops.
 
+## Common pitfalls coda — naming L04's four gotchas
+
+**Shape note:** a short **"common pitfalls" coda**, not a new live demo — L04 already *touches* each of these across Demos 2–4. Its job is to **name** them as portable gotchas, restate the cure in a line, and pin each back to where the room saw it. Budget ~5 minutes as a recap slide. Follows the [L23 Demo 5](../L23/demos_or_activities.md#demo-5--the-three-composition-anti-patterns-objective-5) anti-pattern-beat template, like the [L01 coda](../L01/demos_or_activities.md#common-pitfalls-coda--naming-l01s-four-gotchas).
+
+**Goal:** turn the workflow-vs-agent and mixed-model beats into four named DAG gotchas a student can catch when they wire their own graph.
+
+**Pre-flight:**
+
+- Nothing new to load. One recap slide; the Demo 2 routing diagram and the Demo 4 back-edge sketch still on screen to point back at.
+
+**Live script (recap — point back, don't re-run):**
+
+1. **Workflow where an agent is needed — or the reverse.** ❌ Reaching for an agent when the task has a known shape (more cost, less predictability, harder to debug), or forcing a rigid DAG when the steps genuinely can't be known in advance. Point back at Demo 4. **Cure:** default to the simplest shape that fits; a back-edge (agency) is a deliberate choice, not a nicety.
+2. **Model-driven looping sneaking into a "deterministic" DAG.** ❌ Believing the workflow is fully deterministic — but the *path* is fixed while each node's model output still varies (Demo 2 / pacing notes), and quietly adding a back-edge turns your workflow into an agent (Demo 4) without you deciding to. **Cure:** keep it acyclic on purpose; if you need to loop on the model's output, you've crossed into [L10](../L10/objectives.md)/[L11](../L11/objectives.md) territory — name the crossing.
+3. **Wrong model per node (overpaying / underpowering).** ❌ Sonnet on the label step, or Haiku on the hard reasoning step. Point back at Demo 2's per-node binding. **Cure:** cheap model for classify/route/extract, capable model for reasoning — the *mechanism* is Demo 2; the *decision framework* is [L14](../L14/objectives.md) (full course).
+4. **Brittle branch conditions.** ❌ A routing function that assumes the classifier returns one of the expected labels and `KeyError`s (or silently mis-routes) when the model returns something off-menu. **Cure:** validate the label is in the allowed set (L02's enum-as-contract) and always wire a default / `END` branch.
+
+**What to highlight:**
+
+- The first two are the same fault from opposite sides: **confusing "the developer owns the path" (workflow) with "the model owns the path" (agent).** L04's whole spine is keeping that line sharp; the gotchas are where it blurs.
+- #3 and #4 point forward — model choice → L14, robust routing over model output → the eval discipline ([L13](../L13/objectives.md)). Name the link, **don't re-teach it here.**
+
+**If a student pushes back:**
+
+- "My DAG has a Sonnet node, isn't that agency?" No — a model *inside a node* isn't agency; agency is the model choosing the *path* (the back-edge). That distinction is the lesson (Demo 2/4 highlight).
+
 ## Optional demo — evaluate the workflow (carry L13 forward)
 
 If time allows, close by reinforcing L13's discipline on the cheapest possible target. A deterministic workflow is the *easiest* thing to evaluate — **same input → same path** — so a tiny eval set over the routing classifier is a natural, honest reinforcement of "evaluate everything you build."
