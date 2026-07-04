@@ -108,8 +108,9 @@ runs in a real observability dashboard. **Decision: self-hosted [Langfuse](https
   and the whole cohort points at it (base URL + per-project keys). No per-student signups, no seat
   costs. This is the deciding advantage over LangSmith, whose free tier is **1 seat / 5k traces**
   per account (no shared free workspace).
-- **Free cloud fallback** (Langfuse Cloud *Hobby*: 50k units/mo, 2 seats, 30-day retention, no card)
-  for solo/self-paced learners who don't want to run Docker.
+- **Free cloud option** (Langfuse Cloud *Hobby*: 50k units/mo, 2 seats, 30-day retention, no card)
+  as an alternative tracing target — see the Docker note below on why this is no longer a
+  "don't-want-Docker" escape hatch.
 - **Ingests OpenTelemetry (OTLP)** — the L11 hand-rolled `TraceEvent` schema is OTel-shaped on
   purpose, so exporting to Langfuse is a natural step, not a rewrite.
 - **Same instance serves L14** — the LangGraph agent's traces route to the *same* Langfuse via the
@@ -122,6 +123,18 @@ completes the L11 objectives on the in-memory/`.to_jsonl()` trace.
 
 **Infra to stand up (one shared instance):** Langfuse server + **PostgreSQL** + **ClickHouse**
 (via the official Docker Compose). The instructor hosts it; students get a URL and project keys.
+
+> **Docker is now a baseline, not a fallback (K-prework track).** This doc originally framed local
+> Docker as a "solo/self-paced fallback" for students who didn't want to run it. That is superseded
+> by the **`K06` prework unit**, which makes **Docker mandatory for every student** — the course's
+> local stack is multi-service (an application database + the agent service) and everyone brings it
+> up with `docker compose up -d` before `L01` (see
+> [docs/todos/2026-07-03-2211-k-prework-track.md](todos/2026-07-03-2211-k-prework-track.md)). So the
+> remaining choice is *only where tracing points*, not *whether Docker runs*: a student can point
+> tracing at the **shared instructor Langfuse** (lighter local stack — just the app DB + agent) or
+> **self-host Langfuse locally** (heavier — Langfuse + Postgres + ClickHouse in their own
+> `compose.yaml`). The Langfuse Cloud *Hobby* tier above is a third tracing target, not a way to
+> avoid Docker.
 
 > **Vendor note:** ClickHouse acquired Langfuse (Jan 2026); the core stays MIT-licensed with no new
 > pricing gates. Self-hosting only lacks enterprise extras (SCIM, audit logs, retention policies),
@@ -138,7 +151,7 @@ convenience.
 - <!-- *NEED INPUT*: does any lesson actually need OpenAI-format/multi-provider routing, or is the course Anthropic-only in practice? If Anthropic-only, OpenRouter's main advantage doesn't apply. -->
 - <!-- *NEED INPUT*: verify current OpenRouter BYOK surcharge % and Anthropic per-key spend-limit controls before committing to a number in planning. -->
 - <!-- *NEED INPUT*: who hosts the shared Langfuse instance and where (a small always-on VM with Docker Compose: Langfuse + Postgres + ClickHouse), and how per-student project keys are issued. -->
-- <!-- *NEED INPUT*: one shared instructor Langfuse instance vs. each student running a local Docker instance — recommendation is one shared instance for zero per-student setup, with local Docker as the solo/self-paced fallback. -->
+- <!-- *NEED INPUT*: one shared instructor Langfuse instance vs. each student self-hosting Langfuse locally — recommendation is one shared instance for zero per-student setup. NOTE: this is now only about *where tracing points*; Docker itself is mandatory for all students via the K06 prework unit (local app DB + agent service), so "local Docker as fallback" no longer applies — see the Docker baseline note in the Tracing section. -->
 - <!-- *NEED INPUT*: re-check Langfuse license/terms after the ClickHouse acquisition (Jan 2026) before a cohort relies on self-hosting. -->
 
 ## Related
