@@ -3,11 +3,13 @@
 Notes for whoever runs the L08 labs. One section per problem, keyed by lab id and problem number.
 Times are rough and assume a semi-technical student with basic Python who completed L01–L07.
 
-> Cross-cutting note: the four teacher demos (L0803 tool-or-no-tool / L0805 the description / L0807
-> schemas + validation errors / L0809 errors & side effects) make **live** Claude calls and need
+> Cross-cutting note: four of the five teacher demos (L0803 tool-or-no-tool / L0805 the description /
+> L0807 schemas + validation errors / L0809 errors & side effects) make **live** Claude calls and need
 > `ANTHROPIC_API_KEY` set (copy `.env.example` to `.env`). Dry-run them before class — model
 > behavior **varies**, and several demos (L0805's sparse-vs-rich, L0809's retry) are *distributional*,
-> so run the named variants twice. Clear any API-touching cell outputs before committing.
+> so run the named variants twice. Clear any API-touching cell outputs before committing. The fifth
+> demo, **L0811 (the anti-pattern capstone)**, is the exception: it runs **offline by default** on the
+> scripted `FakeModel`, so its deterministic outputs are safe to keep — see its section below.
 >
 > **All four L08 labs are OFFLINE / pure Python** — no API key required. L08 is about *design
 > judgment*, and you practice that by designing schemas, rewriting errors, and classifying tasks, not
@@ -22,6 +24,25 @@ Times are rough and assume a semi-technical student with basic Python who comple
 >
 > L08 assumes the L07 mechanics work. If a student is shaky on the tool-call round-trip, redirect to
 > the L07 lab before this lesson — L08 does **not** re-teach the protocol.
+
+## L0811 demo — the four tool-design anti-patterns, named (Demo 5)
+
+- **Runs OFFLINE by default.** Unlike the other four demos, L0811 drives the scripted `FakeModel`, so
+  restart-and-run-all passes with **no key** and the deterministic outputs can stay committed. Set
+  `ANTHROPIC_API_KEY` only to light up the one optional `if LIVE:` cell (the tool-soup selection on
+  real Sonnet 4.6, then Haiku 4.5).
+- **Only the tool-soup beat is new content.** Beats 2–4 (vague/misleading description, opaque errors,
+  the god-tool) are the L0805/L0807 bad-design variants *named* — a fast recap, not new material.
+  Naming the four as one portable checklist is the deliverable, so don't over-run the recap.
+- **Say the scripting caveat out loud.** The offline soup picks (run 1 `get_customer`, run 2
+  `user_info`, run 3 chains two) are decided in advance for reproducibility. On a live model the
+  unstable pick is genuinely non-deterministic, and a smaller/cheaper model (Haiku) degrades sooner
+  than Sonnet — the same model-class contrast as L07 Demo 4 and L0805's Haiku re-run.
+- **If you run live and Sonnet picks cleanly:** add more overlapping tools, or drop to Haiku 4.5. The
+  point is that selection robustness *degrades* with tool count and *rises* with model power.
+- **Reconciliation with the lecture:** the four names line up with `L0802` §8.1 (the student
+  confusions) and §4.4 (the two extremes / tool soup) — L0811 is where they're pulled into one named
+  set, tool-soup shown live. ~10–12 min.
 
 ## L0804_lab problem 1 — Decide tool-or-not for each task
 

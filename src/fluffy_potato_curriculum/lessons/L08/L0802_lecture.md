@@ -11,8 +11,10 @@ estimated duration: 80
 > delivery can rebuild the lesson from the page. The live demos are split one per concept
 > ([L0803](L0803_lecture.ipynb) tool-or-no-tool, [L0805](L0805_lecture.ipynb) the description,
 > [L0807](L0807_lecture.ipynb) schemas + validation errors, [L0809](L0809_lecture.ipynb) errors &
-> side effects); hands-on practice is in the L08 labs (L0804 / L0806 / L0808 / L0810).
-> **Anchor model throughout: Claude Sonnet 4.6** (one Haiku 4.5 contrast in L0805).
+> side effects), and a fifth **anti-pattern capstone** ([L0811](L0811_lecture.ipynb)) that names the
+> four failure modes together and runs the one new one — **tool soup** — live; hands-on practice is
+> in the L08 labs (L0804 / L0806 / L0808 / L0810).
+> **Anchor model throughout: Claude Sonnet 4.6** (a Haiku 4.5 contrast in L0805 and L0811).
 
 ## section 1. The lesson in one claim
 
@@ -302,6 +304,12 @@ estimated duration: 80
 | "Errors should be hidden from the model" | errors are how the model learns to recover within the conversation |
 | "A schema is just for type-checking" | it's also a teaching tool — shape + per-field descriptions guide the model |
 | "My tool worked once, so the design is fine" | one clean round-trip barely tests it; design pays off under pressure |
+
+- The five traps above are *student confusions*. Their design-side mirror is the **four tool-design
+  anti-patterns** the capstone demo names as one checklist ([L0811](L0811_lecture.ipynb)): over-tooling
+  / **tool soup**, vague-or-misleading description, opaque errors, and the god-tool (the loose-schema
+  extreme from §4.4). L0811 recaps the last three from Demos 2–4 and runs the one new failure — tool
+  soup — live.
 
 [↑ Back to top](#designing-good-tools-name-schema-and-error-as-interface)
 
