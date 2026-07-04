@@ -20,7 +20,7 @@ The demos are ordered to match the four learning objectives from [objectives.md]
 
 The teacher should have, before the first demo starts:
 
-- A working REPL or notebook with the project's Claude SDK setup (per the project's `uv` env), and a known-good single-tool round-trip from L07 in scrollback as a warm-up reference.
+- A working REPL or notebook with the project's LangChain chat-model setup (per the project's `uv` env), and a known-good single-tool round-trip from L07 in scrollback as a warm-up reference.
 - Two pre-defined inline Python tools that will be reused across all demos:
   - `calculator(expression: str) -> str` — evaluates a small arithmetic expression. Cheap, deterministic, easy to reason about.
   - `lookup(key: str) -> str` — returns a value from a tiny in-memory dict (e.g. mapping product names to prices, or city names to populations). Has a couple of keys present and a couple deliberately missing, so "key not found" is reachable.
@@ -28,7 +28,7 @@ The teacher should have, before the first demo starts:
   - `flaky_fetch(url: str) -> str` — has a flag the teacher flips to make it raise an exception, return a structured error, or return malformed output. <!-- *NEED INPUT*: confirm whether this is implemented as a single tool with a global flag, three distinct tools, or a tool whose behavior depends on the `url` argument. Recommendation: one tool keyed on the URL — `https://ok` returns a value, `https://error` returns a structured error, `https://crash` raises, `https://garbage` returns malformed JSON. Keeps the demo prompt natural. -->
 - A loop function `agent_loop.run(...)` that the teacher will *write live* in Demo 1 and *reuse unchanged* through Demos 2 and 3. Keep a "completed" version in a sibling file the teacher can paste in if live-coding falls behind. <!-- *NEED INPUT*: confirm naming with [objectives.md](objectives.md) open question on `agent_loop.run` API shape. Same name should be used in lectures, labs, and L11. -->
 - A small wrapper that prints, after each model call: iteration number, tool calls requested, tool results returned, cumulative input/output tokens, and wall-clock latency. This is the closest thing to a "trace" the lesson exposes; L11 replaces it with something structured. Foreshadow that.
-- A second model client configured for Demo 4's framework comparison. <!-- *NEED INPUT*: confirm which Claude model anchors L10's demos — the loop is model-agnostic but chaining depth varies. Mirrors the open question in [objectives.md](objectives.md). -->
+- A second model configured for Demo 4's framework comparison. <!-- *NEED INPUT*: confirm which Claude model anchors L10's demos — the loop is model-agnostic but chaining depth varies. Mirrors the open question in [objectives.md](objectives.md). -->
 
 > Why pre-defined tools: the lesson is about the *loop*, not about tool design. L08 already covered tool design. Re-litigating tool schemas mid-demo eats time and dilutes the message. Spend tool-design time only on `flaky_fetch` (Demo 3), where the failure modes *are* the point.
 
@@ -44,14 +44,14 @@ The teacher should have, before the first demo starts:
 
 **Live script:**
 
-1. Sketch the loop on the whiteboard before typing: *call model → got `tool_use`? execute, append `tool_result`, loop. Got plain text? return it.* Three lines of pseudocode.
-2. Live-code the loop in Python. Write the message list, the call, the `tool_use` detection, the tool dispatch, and the append-`tool_result` step. **Do not add an iteration cap yet.** That's Demo 2's punchline.
-3. Run the loop on the starter task. Walk through the printed iterations: model emits `tool_use` for `calculator`, tool runs, result appended, next call, model emits `tool_use` for `lookup`, tool runs, result appended, next call, model emits a final assistant message — natural termination.
-4. Re-run with a task that produces *two `tool_use` blocks in a single response*. <!-- *NEED INPUT*: confirm a task that reliably produces parallel tool calls on the target model — e.g. *"Look up the populations of Tokyo and Lagos and tell me which is larger."* If the chosen model splits these into sequential calls, swap to a task where the calls are clearly independent. --> Show the loop executing both tools and packaging both `tool_result`s into a single user-role message.
+1. Sketch the loop on the whiteboard before typing: *`bind_tools`, then invoke → reply's `.tool_calls` non-empty? run each, append a `ToolMessage` per call, loop. Empty (text only)? return it.* Three lines of pseudocode.
+2. Live-code the loop in Python. Write the message list, `model.bind_tools(...)`, the `.invoke(messages)` call, the `.tool_calls` check, the tool dispatch, and the append-`ToolMessage` step. **Do not add an iteration cap yet.** That's Demo 2's punchline.
+3. Run the loop on the starter task. Walk through the printed iterations: reply's `.tool_calls` has `calculator`, tool runs, `ToolMessage` appended, next `.invoke`, reply's `.tool_calls` has `lookup`, tool runs, `ToolMessage` appended, next `.invoke`, reply is an `AIMessage` with empty `.tool_calls` — natural termination.
+4. Re-run with a task that produces *two entries in `.tool_calls` in a single reply*. <!-- *NEED INPUT*: confirm a task that reliably produces parallel tool calls on the target model — e.g. *"Look up the populations of Tokyo and Lagos and tell me which is larger."* If the chosen model splits these into sequential calls, swap to a task where the calls are clearly independent. --> Show the loop executing both tools and appending one `ToolMessage` per call before the next `.invoke`.
 
 **What to highlight:**
 
-- The message-history invariant. After every assistant response with `tool_use`, the *next* user message must contain a `tool_result` for *every* `tool_use` block, in order. Show what happens if you skip one (the API rejects the request). This is the lesson's most-bug-prone moment in real code — call it out by name.
+- The message-history invariant. After appending an assistant `AIMessage` with `.tool_calls`, you must append a `ToolMessage` (paired by `tool_call_id`) for *every* entry, in order, before the next `.invoke`. Show what happens if you skip one — an unanswered `tool_call` leaves the conversation malformed and the next request is rejected. This is the lesson's most-bug-prone moment in real code — call it out by name.
 - The model is *not* aware of the loop. From its perspective, every call is one round-trip. The loop lives entirely in the surrounding Python.
 - The same loop will run MCP-exposed tools from L09 unchanged — the dispatch function is the only thing that differs.
 
@@ -59,7 +59,7 @@ The teacher should have, before the first demo starts:
 
 - If live-coding falls behind, paste the prepared completed version and walk through it line by line. Don't sacrifice the runs — the runs are where the loop becomes concrete.
 - If the model answers from prior knowledge without calling the tools, tighten the system prompt (*"You may only answer using the tools provided"*) and rerun.
-- If the model emits `tool_use` and a final-answer text in the same response, that's a real protocol nuance worth a brief aside — the loop should still execute the tool *and* keep going; the text is interim narration.
+- If the reply carries both `.tool_calls` and final-answer text in the same `AIMessage`, that's a real protocol nuance worth a brief aside — the loop should still execute the tool *and* keep going; the text is interim narration.
 
 ## Demo 2 — Termination conditions, three ways (Objective 2)
 
@@ -73,7 +73,7 @@ The teacher should have, before the first demo starts:
 
 **Live script:**
 
-1. Re-run Demo 1's starter task with `iteration_cap=20`. It naturally terminates in 3–4 iterations. Read out the termination cause: *"natural — model emitted no `tool_use`."*
+1. Re-run Demo 1's starter task with `iteration_cap=20`. It naturally terminates in 3–4 iterations. Read out the termination cause: *"natural — reply's `.tool_calls` was empty."*
 2. Run the looping task with `iteration_cap=20`. Watch the model call the same tool 8+ times. Cap fires. Read out the termination cause: *"iteration cap hit — non-natural termination."*
 3. Show the *same* looping task with `iteration_cap=3`. Cap fires faster. Discuss: the cap caught the bug, but smaller caps cost less when things go wrong.
 4. Sketch (don't implement live) two more termination conditions:
@@ -83,7 +83,7 @@ The teacher should have, before the first demo starts:
 **What to highlight:**
 
 - The iteration cap *is* the safety net. Hitting it is always a signal worth investigating — either the task is genuinely too hard (need a higher cap) or the agent is misbehaving (need to fix the prompt, the tools, or the model). Either way, treat cap-hits as alerts, not noise.
-- "Natural termination" is one specific signal — the model returned plain text. Make sure students hear that phrase tied to *no `tool_use` block in the response.* That's the only condition that means "the model thinks it's done."
+- "Natural termination" is one specific signal — the reply is an `AIMessage` with empty `.tool_calls` (text only). Make sure students hear that phrase tied to *empty `.tool_calls` in the reply.* That's the only condition that means "the model thinks it's done."
 - A loop with no cap is not "minimal" — it's broken. Even a hand-rolled toy needs a cap.
 
 **If the demo misbehaves:**
@@ -93,29 +93,29 @@ The teacher should have, before the first demo starts:
 
 ## Demo 3 — Tool failure as a message, not an exception (Objective 3)
 
-**Goal:** show all three failure modes from [objectives.md](objectives.md) flowing back through the loop as `tool_result`s, and watch the model recover. Land that *the loop's job is mostly translating exceptions into well-formed messages.*
+**Goal:** show all three failure modes from [objectives.md](objectives.md) flowing back through the loop as `ToolMessage`s, and watch the model recover. Land that *the loop's job is mostly translating exceptions into well-formed messages.*
 
 **Pre-flight:**
 
-- The Demo 1 loop with one addition: a `try/except` wrapper around the tool dispatch that converts any uncaught exception to a `tool_result` with `is_error: true` and the exception's `repr()` as content. **Do not write this addition yet** — it's the live-code beat.
+- The Demo 1 loop with one addition: a `try/except` wrapper around the tool dispatch that converts any uncaught exception to a `ToolMessage(content=repr(exc), tool_call_id=..., status="error")`. **Do not write this addition yet** — it's the live-code beat.
 - The `flaky_fetch` tool with the four URL behaviors from pre-flight.
 - A small task on the slide: *"Fetch the value at https://ok and tell me what it is. If that fails, try https://crash, then https://error, then give up gracefully."* — chosen so the model walks through every failure mode in one run, with explicit recovery instructions in the prompt so the demo doesn't depend on the model improvising. <!-- *NEED INPUT*: confirm the prompt is explicit enough that the model will walk all four URLs without deciding to abort early. Adjust the system prompt if the model gives up after the first failure. -->
 
 **Live script:**
 
 1. Run the loop on the failure task *without* the `try/except` wrapper. The first call to `https://crash` raises; the loop crashes. Walk through the traceback. Punchline: *the agent died because one tool had a bug.*
-2. Live-add the `try/except` → `tool_result(is_error=True, content=repr(exc))` conversion. Five lines.
+2. Live-add the `try/except` → `ToolMessage(content=repr(exc), tool_call_id=..., status="error")` conversion. Five lines.
 3. Re-run the same task. Watch the model:
    - call `https://ok` → success → continue.
-   - call `https://crash` → exception → loop converts to `is_error: true` → model receives the error, sees it can't recover that URL, tries the next.
-   - call `https://error` → tool returns a structured error result (`{"error": "..."}`) — show that this case needs *no* loop changes, because the tool followed the L08 pattern of returning errors as data.
+   - call `https://crash` → exception → loop converts to a `ToolMessage(status="error")` → model receives the error, sees it can't recover that URL, tries the next.
+   - call `https://error` → tool returns a structured error result (`{"error": "..."}`) as its `ToolMessage` content — show that this case needs *no* loop changes, because the tool followed the L08 pattern of returning errors as data.
    - call `https://garbage` → tool returns malformed output — show what the model does with it. <!-- *NEED INPUT*: depending on the model's behavior, this may be the place to introduce a *minimum* output-shape check in the loop (e.g. ensure the result is a string), or to leave it for the lab. Pick one based on time budget. -->
-   - emit a final assistant message acknowledging the failures and giving up gracefully — natural termination.
-4. Quick aside: show what *not* to do. Re-run with the exception's full traceback as the `tool_result` content (instead of a short message). Note token cost, irrelevance to the model, and the stack-trace leak concern.
+   - emit a final `AIMessage` (empty `.tool_calls`) acknowledging the failures and giving up gracefully — natural termination.
+4. Quick aside: show what *not* to do. Re-run with the exception's full traceback as the `ToolMessage` content (instead of a short `repr(exc)`). Note token cost, irrelevance to the model, and the stack-trace leak concern.
 
 **What to highlight:**
 
-- The default move when a tool fails is to convert the failure into a `tool_result` and hand it back to the model. The model is often the best component to decide whether to retry, swap tools, or give up.
+- The default move when a tool fails is to convert the failure into a `ToolMessage` (`status="error"`) and hand it back to the model. The model is often the best component to decide whether to retry, swap tools, or give up.
 - Loop-level failure handling and tool-level failure handling are *different layers*. L08 taught the tool author what to *return* when something goes wrong; L10 teaches the loop what to do when the tool *can't even return* (raise, malformed, etc.).
 - Don't dump tracebacks at the model. A short, descriptive error string is better signal and cheaper.
 - Retries are a model-side decision in this design. The loop doesn't auto-retry. If you wanted auto-retry, you'd add it deliberately, with a budget, and you'd probably regret it on the first idempotency-violating tool.
@@ -131,7 +131,7 @@ The teacher should have, before the first demo starts:
 
 **Pre-flight:**
 
-- The Demo 1+2+3 loop, now with iteration cap and exception-to-`tool_result` conversion built in (~50 lines of Python).
+- The Demo 1+2+3 loop, now with iteration cap and exception-to-`ToolMessage(status="error")` conversion built in (~50 lines of Python).
 - A LangGraph "minimum viable" agent doing the same thing, pre-written. <!-- *NEED INPUT*: confirm whether L10 should preview LangGraph here at all, or stay strictly framework-free and defer the comparison to L13's opening. Recommendation: a 60-second preview here is high-value because it makes "hand-rolled" feel like a real choice, not a default. But the *lecture* should not teach LangGraph mechanics — that's L13's job. -->
 - The starter task from Demo 1, runnable against both implementations.
 
@@ -174,4 +174,4 @@ Don't teach trace analysis here — that's L11. Just show the *shape* of what's 
 - <!-- *NEED INPUT*: should Demo 4's LangGraph preview happen here, or be deferred entirely to L13? Recommendation in the demo above; final call is the author's. -->
 - <!-- *NEED INPUT*: should Demo 3 use one of L09's MCP-exposed tools as the failing tool, to reinforce "the loop runs both kinds"? Adds setup overhead; reinforces the L09 framing. Trade-off worth deciding. -->
 - <!-- *NEED INPUT*: a pointer/link to where the demo prompts and the `flaky_fetch` tool live as code (a `demos/` subdir? inline in a notebook?) — not yet decided. -->
-- <!-- *NEED INPUT*: are *parallel tool calls* (multiple `tool_use` blocks in one assistant response) shown in Demo 1 as planned, or deferred to the lab? Mirrors the same open question in [objectives.md](objectives.md). -->
+- <!-- *NEED INPUT*: are *parallel tool calls* (multiple `.tool_calls` entries in one assistant `AIMessage`) shown in Demo 1 as planned, or deferred to the lab? Mirrors the same open question in [objectives.md](objectives.md). -->

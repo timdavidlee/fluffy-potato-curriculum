@@ -1,4 +1,4 @@
-# 2026-07-03 — LangChain notebook migration (L07/L08 done; L22 + roadmaps remain)
+# 2026-07-03 — LangChain notebook migration (code done; L09/L11/L14 prose follow-up)
 
 **Decision (user):** the tool/agent lessons go **fully model-agnostic via LangChain** — the raw
 Anthropic SDK is retired from the curriculum's loop/tool code in favor of a LangChain chat model
@@ -28,19 +28,44 @@ Anthropic SDK is retired from the curriculum's loop/tool code in favor of a Lang
 - **L11** (Tracing): L1102, L1103, L1104, L1105 — verified migrated.
 - **L12** (Eval): L1202, L1203, L1204, L1205, L1206 — verified migrated.
 - **L14** (Shallow agent): L1407 — verified migrated.
+- **L22** (Skills): L2203 (JIT skill-loader demo) + L2204 lab pair migrated. `FakeModel` script
+  via `text_reply` / `tool_reply` / `tool_call`; `load_skill` is a typed closure whose schema
+  `bind_tools` infers; the loop is `model.bind_tools([load_skill])` → `.invoke([HumanMessage])` →
+  `AIMessage.tool_calls` → append the body. Token readouts unchanged (`FakeModel` deterministic);
+  gate green, empty lab cleared. (L2206 was already offline pure-Python — untouched.)
 
-## Pending — regenerate these notebooks (they still import removed symbols / call `.create(...)`)
+## Phase 4 — roadmaps + docs (done)
 
-`response` / `text_block` / `tool_use_block` (removed) → use `text_reply` / `tool_reply` /
-`tool_call`. Raw `client.messages.create(..., tools=[...])` / `tool_use` / `tool_result` blocks →
-`model.bind_tools(TOOL_LIST)` + `.invoke(messages)` → `AIMessage.tool_calls` + `ToolMessage`.
-`TOOL_SCHEMAS` (removed) → `TOOL_LIST`.
+- **L07/L08/L10 roadmaps** (`docs/origin/lesson_roadmaps/`) re-vocabularized to LangChain. L07/L10
+  carried the raw-protocol framing (`tool_use`/`tool_result` blocks, "the result goes in a
+  *user-role* message", hand-written `input_schema`); reframed to `AIMessage.tool_calls` →
+  `ToolMessage` (its own tool role, paired by `tool_call_id`), `bind_tools`-inferred schemas, and
+  the `HumanMessage → AIMessage(tool_calls) → ToolMessage → AIMessage(final)` round-trip. The
+  now-settled "which SDK" `*NEED INPUT*` markers were resolved to LangChain `ChatAnthropic`;
+  unrelated open questions (model class, duration, lab design, parallel-call scope) left as-is.
+  L08's roadmap only needed a light touch (no raw-protocol vocabulary there).
+- **`potato_llm/CLAUDE.md`** reframed — the hand-rolled seam is the **L01–L02 teaching artifact**;
+  LangChain `ChatAnthropic` is the through-line from L03 on (tools, the agent loop, tracing,
+  evals), not a parallel client that grows alongside it.
 
-- **L22** (Skills): L2203, L2204 (lab) — uses the loop/tools; align to the new API.
+**Retired code symbols fully removed.** No lesson notebook or roadmap still *calls* a retired
+symbol — verified zero hits for `tool_use_block` / `text_block(` / `client.messages.create(` /
+`TOOL_SCHEMAS` / `import anthropic` across `lessons/` and `lesson_roadmaps/`. The tool/agent
+teaching arc (L07, L08, L10, L11, L12, L14, L22) and the L07/L08/L10 roadmaps now use LangChain
+vocabulary throughout.
 
-## Also (Phase 4)
+## Follow-up (out of this migration's scope)
 
-- Update L07/L08/L10 roadmaps (`docs/origin/lesson_roadmaps/`) to drop the raw-SDK framing.
-  (L10 notebooks are already migrated, but its roadmap still describes `tool_use`/`tool_result`.)
-- Update `potato_llm/CLAUDE.md` — the seam is now L01–L02 only; the framework client (LangChain)
-  is the through-line from L03 on, including tools.
+`tool_use` / `tool_result` still appear as **conceptual / protocol prose** (not code) in a few
+downstream lessons that back-reference "the L10 pairing invariant":
+
+- **L09** (MCP) — `L0901_intro.md`, `L0902_lecture.md`, `L0905_lecture.md`. MCP genuinely returns a
+  `tool_result` block over the wire, but the "same `tool_use`/`tool_result` round-trip as L07"
+  back-references now read against L07's `AIMessage.tool_calls`/`ToolMessage` framing.
+- **L14** (LangGraph) — `L1401`–`L1406` prose calls the invariant "`tool_use`/`tool_result` pairing";
+  the *code* is already migrated (`ToolMessage(status="error")`), only the wording drifts.
+- **L11 & L14 roadmaps** — `objectives.md` / `demos_or_activities.md` describe the L10 loop in
+  `tool_use`/`tool_result` terms.
+
+A small consistency pass could align this prose to `AIMessage.tool_calls` → `ToolMessage` (noting
+that MCP's wire format legitimately uses `tool_result`). None of it is broken code.
