@@ -21,10 +21,23 @@ worktree left behind by the merge. Keep every message extremely concise.
    1–3 bullet body, no filler. If a PR already exists, reuse it.
 6. **Squash-merge.** `gh pr merge --squash --delete-branch`. Use an extremely concise squash
    commit title (the PR title) and a terse bullet body — no restating the diff.
-7. **Sync main.** Find the main checkout via `git worktree list` (the entry on the default
-   branch). If you're standing in it, `git switch main && git pull --ff-only`. If you're in a
-   separate worktree, don't `git switch main` (git forbids the default branch in a second
-   worktree) — sync it in place with `git -C <main-checkout> pull --ff-only`.
+7. **Wait for CI's version bump, then sync main.** The squash-merge triggers
+   [`.github/workflows/bump.yml`](../../.github/workflows/bump.yml), which — a few seconds *after*
+   the merge — pushes a `bump:` commit and a `vX.Y.Z` tag onto `main`. A pull fired immediately
+   after the merge races ahead of that push and misses the bump (it'd only arrive on some later
+   pull), so wait for the run first:
+   - Grab the merge commit SHA: `gh pr view <pr> --json mergeCommit -q .mergeCommit.oid`.
+   - Poll `gh run list --workflow=bump.yml --branch main --limit 5 --json databaseId,headSha,status`
+     until the run whose `headSha` equals that SHA appears, then block on it with
+     `gh run watch <databaseId> --exit-status`. The run always completes even when there's nothing
+     to release — `cz bump` treats "no eligible commits" as a no-op — so this never hangs waiting
+     for a bump that isn't coming.
+
+   Then pull so the local checkout picks up the `bump:` commit and its tag. Find the main checkout
+   via `git worktree list` (the entry on the default branch). If you're standing in it,
+   `git switch main && git pull --ff-only --tags`. If you're in a separate worktree, don't
+   `git switch main` (git forbids the default branch in a second worktree) — sync it in place with
+   `git -C <main-checkout> pull --ff-only --tags`.
 8. **Remove the current worktree.** Only if this session is in a `.claude/worktrees/<name>/`
    worktree. Prefer `ExitWorktree` with `action: "remove"` — it restores the working directory
    and deletes the worktree dir + branch. Because the merge was a squash, that call may refuse
@@ -37,8 +50,8 @@ worktree left behind by the merge. Keep every message extremely concise.
    with uncommitted changes aborts and is left alone. Skip any whose upstream is still live.
    Finish with `git worktree prune` to clear dangling admin entries.
 
-Report the merged PR number/URL, confirm `main` is up to date, and list which worktrees were
-removed. If any step fails (e.g. merge conflict, failing required checks, a dirty worktree that
+Report the merged PR number/URL, the new version/tag CI produced (or note there was no bump when
+nothing was release-worthy), confirm `main` is up to date, and list which worktrees were removed. If any step fails (e.g. merge conflict, failing required checks, a dirty worktree that
 won't remove cleanly), stop and surface the error rather than forcing past it.
 
 If `$ARGUMENTS` is provided, use it as the PR title / commit subject.
