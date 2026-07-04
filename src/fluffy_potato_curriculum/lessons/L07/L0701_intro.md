@@ -2,7 +2,7 @@
 
 ```yaml
 title: Tool calling: a tool call is also just tokens
-keywords: tool calling, tool use, tool_use, tool_result, tool definition, schema, round-trip, protocol, anthropic, claude
+keywords: tool calling, tool call, bind_tools, tool_calls, ToolMessage, tool definition, schema, round-trip, protocol, anthropic, claude
 estimated duration: 10
 ```
 
@@ -49,9 +49,9 @@ back. Said five ways, because it reshapes how you debug, secure, and scale every
 2. The tool **definition** is a contract about shape (like L06's `<thinking>` tags), not a
    guarantee about behavior. It does not force a call, validate arguments, or stop the model from
    inventing a tool that doesn't exist.
-3. A single tool-using exchange is **at minimum four messages**: `user → assistant(tool_use) →
-   user(tool_result) → assistant(final)`. Every tool call grows the history — that *is* the
-   protocol, not a side effect.
+3. A single tool-using exchange is **at minimum four messages**: `HumanMessage →
+   AIMessage(tool_calls) → ToolMessage → AIMessage(final)`. Every tool call grows the history —
+   that *is* the protocol, not a side effect.
 4. The model is **stateless across calls**. The tool definitions and the full history ride along
    in *every* request; the model does not "remember" the tool from last turn.
 5. Tools cost tokens **twice over**: the definition is re-sent on every request, and the result
@@ -64,12 +64,14 @@ These five terms recur all the way through L08–L20, so we pin them now:
 - **Tool** — a callable in your application (here, a plain Python function) that the model can
   *request* via the tool-call protocol.
 - **Tool definition / schema** — a structured description (name, natural-language description,
-  JSON-Schema input shape) you pass to the model alongside the prompt. It tells the model what
-  tools exist and how to invoke them.
-- **Tool call** (also *tool-use block*) — the block in a model response saying "I want to call
-  tool X with arguments Y." A request, not an execution.
-- **Tool result** (also *tool-result block*) — the block in the *next* user-side message carrying
-  the output of running the requested tool. It closes the loop and references the call's id.
+  JSON-Schema input shape) the model is given alongside the prompt. It tells the model what tools
+  exist and how to invoke them. You don't hand-write it in this course: `model.bind_tools([fn])`
+  **infers** the definition from a plain typed function — its name, its docstring, and its type
+  hints. A typed function *is* the schema.
+- **Tool call** — an entry in the model response's `.tool_calls` list saying "I want to call tool
+  X with arguments Y" (a `{name, args, id}` record). A request, not an execution.
+- **Tool result** — a `ToolMessage` carrying the output of running the requested tool. It closes
+  the loop and names the call's id (`tool_call_id`).
 - **Round-trip** — one full `model → tool-call → application runs tool → tool-result → model`
   exchange. L07 deals only with *single* round-trips; multi-step loops arrive in L10.
 
@@ -88,23 +90,27 @@ L07 is scoped tight on purpose, the same way L06 stayed prompt-only:
 
 ## A note on the code you'll see
 
-There is one wrinkle worth flagging up front. The course's `potato_llm` seam (the provider-agnostic
-client you used in L02–L06) is **text-only** — its `Message` carries a string and cannot represent
-tool-use or tool-result blocks. Because L07 is *about* those blocks, the L07 demos and the live labs
-reach **under** the seam and call the raw Anthropic SDK directly:
+L07 continues on the same framework client you met in **L03**: LangChain's `ChatAnthropic`. Unlike
+the text-only `potato_llm` seam from L01–L02, a LangChain chat model carries tool calls natively —
+so there is nothing to reach "under." You bind a plain Python function to the model and invoke it:
 
 ```python
-import anthropic
+from langchain_anthropic import ChatAnthropic
 from fluffy_potato_curriculum.common.config import require_anthropic_key
 
-client = anthropic.Anthropic(api_key=require_anthropic_key())
-resp = client.messages.create(model="claude-sonnet-4-6", max_tokens=512, tools=[...], messages=[...])
+def calculator(expression: str) -> str:
+    """Evaluate a simple arithmetic expression."""
+    ...
+
+model = ChatAnthropic(model="claude-sonnet-4-6", api_key=require_anthropic_key(), max_tokens=512)
+model_with_tools = model.bind_tools([calculator])   # the definition is inferred from the function
+reply = model_with_tools.invoke([...])               # reply.tool_calls holds any requested calls
 ```
 
-This is the one lesson that legitimately bypasses `potato_llm`. The key still loads through the
-config seam (`require_anthropic_key`) — we never hard-code it. Two of the labs are **offline pure
-Python** (no key needed): they hand you a *crafted* `tool_use` block to dispatch on and validate, so
-you can practice the mechanics deterministically.
+The key still loads through the config seam (`require_anthropic_key`) — we never hard-code it. Two
+of the labs are **offline pure Python** (no key needed): they hand you a *crafted* tool call (the
+`{name, args, id}` shape) to dispatch on and validate, so you can practice the mechanics
+deterministically.
 
 The one sentence to leave L07 with:
 

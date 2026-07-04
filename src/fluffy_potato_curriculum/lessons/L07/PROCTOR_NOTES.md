@@ -9,12 +9,12 @@ Times are rough and assume a semi-technical student with basic Python who comple
 > two labs stay **offline** (pure Python): **L0707** (trace a round-trip) and **L0709** (validate
 > tool calls). L0706 is also offline — it dissects a crafted transcript.
 >
-> **Why the raw Anthropic SDK and not `potato_llm` in L07?** The course's `potato_llm` seam is
-> text-only — its `Message` cannot carry `tool_use`/`tool_result` blocks, which are exactly what L07
-> teaches. So the L07 notebooks call the raw Anthropic SDK directly; the API key still loads through
-> `common.config` (`require_anthropic_key`), never hard-coded. This is the one lesson that reaches
-> under the seam. (Open design question for the course: extend `potato_llm` to model tool blocks, or
-> keep L07+ on the raw SDK — flagged for the curriculum author.)
+> **Which client?** L07 uses LangChain's `ChatAnthropic` — the same framework client from L03.
+> `model.bind_tools([calculator])` makes the plain function a tool (the definition is *inferred*
+> from the function's name, docstring, and type hints); the model's request comes back as
+> `AIMessage.tool_calls`, and the tool result goes back as a `ToolMessage`. The API key still loads
+> through `common.config` (`require_anthropic_key`), never hard-coded. There is no raw-SDK detour —
+> a LangChain chat model carries tool calls natively, so nothing "reaches under" the seam.
 >
 > Because the model varies run to run, a live run may not reproduce every effect the prose calls
 > out — especially Demo 4 / L0709's hallucinated call. Dry-run the demos before class and clear any
@@ -24,37 +24,35 @@ Times are rough and assume a semi-technical student with basic Python who comple
 
 ## L0705_lab problem 1 — Send the first turn and find the tool call
 
-- **Common gotchas:** forgetting `tools=[CALCULATOR_TOOL]` (so the model just answers in text and
-  there is no `tool_use` block to find); using `[0]` to grab the block instead of searching by type
-  (a response can lead with a `text` block before the `tool_use`); treating `tool_use.input` as a
-  JSON string (it is already a parsed dict).
-- **Unblockers:** "Call `client.messages.create(model=MODEL, max_tokens=400, tools=[CALCULATOR_TOOL],
-  messages=messages)`, then `next(b for b in resp.content if b.type == 'tool_use')`." If no
-  `tool_use` appears, the prompt may be too easy — `PROMPT` is large multiplication on purpose.
+- **Common gotchas:** invoking the bare `model` instead of `model_with_tools` (so the model just
+  answers in text and `.tool_calls` is empty); expecting the reply to *be* the tool call rather than
+  reading it off `.tool_calls`; treating `call["args"]` as a JSON string (it is already a parsed dict).
+- **Unblockers:** "Build `messages = [HumanMessage(PROMPT)]`, then `first = model_with_tools.invoke(messages)`,
+  then `call = first.tool_calls[0]`." If `.tool_calls` is empty, the prompt may be too easy —
+  `PROMPT` is large multiplication on purpose.
 - **Time:** ~7 min.
 - **Note:** needs `ANTHROPIC_API_KEY`.
 
 ## L0705_lab problem 2 — Dispatch: run the real function
 
-- **Common gotchas:** passing the whole `tool_use.input` dict to `calculator` instead of
-  `input["expression"]`; skipping the name check (fine for one tool, but the habit matters once there
-  are several).
-- **Unblockers:** "`assert tool_use.name == 'calculator'`, then `calculator(tool_use.input['expression'])`."
-  The result is a string — that's what the tool_result wants.
+- **Common gotchas:** passing the whole `call["args"]` dict to `calculator` instead of
+  `call["args"]["expression"]`; skipping the name check (fine for one tool, but the habit matters
+  once there are several).
+- **Unblockers:** "`assert call['name'] == 'calculator'`, then `calculator(call['args']['expression'])`."
+  The result is a string — that's what the `ToolMessage` wants.
 - **Time:** ~5 min.
 - **Key point:** *this* number is computed by the application; the number in the model's proposed
   args was just generated tokens.
 
 ## L0705_lab problem 3 — Continue: hand the result back
 
-- **Common gotchas:** putting the `tool_result` in an `assistant` message instead of a **user**
-  message; forgetting to first append the assistant's `tool_use` turn (the API needs the call before
-  its result); omitting `tool_use_id`, or using a different id than the one the model emitted;
-  dropping `tools=` on the second call.
-- **Unblockers:** "Append `{'role':'assistant','content': first.content}`, then a `user` message whose
-  content is `[{'type':'tool_result','tool_use_id': tool_use.id,'content': result}]`. Call
-  `messages.create` again *with tools* and join the `text` blocks." Final answer should be
-  **43,123,800** (6,150 × 7,012).
+- **Common gotchas:** forgetting to first append the assistant's turn (`first`, the `AIMessage`
+  carrying the tool call — the API needs the call before its result); building the tool result by
+  hand instead of using `ToolMessage`; omitting `tool_call_id`, or using a different id than the one
+  the model emitted; invoking the bare `model` on the second call (drops the tool definition).
+- **Unblockers:** "`messages.append(first)`, then `messages.append(ToolMessage(content=result,
+  tool_call_id=call['id']))`, then `final = model_with_tools.invoke(messages)` and read
+  `final.content`." Final answer should be **43,123,800** (6,150 × 7,012).
 - **Time:** ~10 min.
 
 ## L0705_lab problem 4 — Why re-send the tool definition? (written)
@@ -63,41 +61,43 @@ Times are rough and assume a semi-technical student with basic Python who comple
   nothing between calls.
 - **Unblockers:** expected: the model is **stateless across calls**, so the tool definition (and the
   whole history) is part of the prompt on *every* request; drop it and the model no longer knows the
-  tool exists. Tie to the L0706 demo's "tools cost tokens twice over."
+  tool exists. Keeping the same `model_with_tools` handle re-attaches the definition automatically.
+  Tie to the L0706 demo's "tools cost tokens twice over."
 - **Time:** ~3 min.
 
-## L0707_lab problem 1 — Summarize each message's blocks
+## L0707_lab problem 1 — Summarize what each message carries
 
-- **Common gotchas:** assuming every `content` is a list (message 1's is a plain string); indexing
-  into a string character by character.
-- **Unblockers:** "If `content` is a `str`, return `'text'`; otherwise join `b['type']` for each block."
-  Expected: `text`, `tool_use`, `tool_result`, `text` down the four messages.
+- **Common gotchas:** checking `.content` block structure instead of the message *type*; forgetting
+  that an `AIMessage` with an empty `.tool_calls` is plain text, not a tool call.
+- **Unblockers:** "An `AIMessage` with a non-empty `.tool_calls` → the tool names; a `ToolMessage` →
+  `'tool result'`; otherwise → `'text'`. Print `msg.type` alongside it." Expected types down the four
+  messages: `human`, `ai`, `tool`, `ai`.
 - **Time:** ~6 min.
 
 ## L0707_lab problem 2 — Match the result to the request by id
 
-- **Common gotchas:** comparing the wrong fields (`id` vs `tool_use_id` live on different blocks);
-  reaching into the wrong message index.
-- **Unblockers:** "Message 2's content[0] is the `tool_use` (its `id`); message 3's content[0] is the
-  `tool_result` (its `tool_use_id`). Return whether they're equal." Expect `True`.
+- **Common gotchas:** comparing the wrong fields (`tool_calls[0]["id"]` lives on the `AIMessage`,
+  `tool_call_id` on the `ToolMessage`); reaching into the wrong message index.
+- **Unblockers:** "Message 2 is the `AIMessage` — its call id is `t[1].tool_calls[0]['id']`; message 3
+  is the `ToolMessage` — its id is `t[2].tool_call_id`. Return whether they're equal." Expect `True`.
 - **Time:** ~5 min.
 - **Key point:** with one call in flight the id seems redundant; it becomes essential the moment two
   calls are outstanding (L10).
 
 ## L0707_lab problem 3 — Tell the three outcomes apart
 
-- **Common gotchas:** classifying by the *number* of blocks rather than their types; treating a
-  `tool_use` with empty `input` as `answered` (it's `malformed` — the call was attempted).
-- **Unblockers:** "No `tool_use` block → `answered`. A `tool_use` whose `input` lacks `expression` →
+- **Common gotchas:** classifying by `.content` rather than `.tool_calls`; treating a tool call with
+  empty `args` as `answered` (it's `malformed` — the call was attempted).
+- **Unblockers:** "Empty `.tool_calls` → `answered`. A tool call whose `args` lacks `expression` →
   `malformed`. Otherwise → `called`." Expected: A=called, B=answered, C=malformed.
 - **Time:** ~7 min.
 
 ## L0707_lab problem 4 — Why four messages? (written)
 
-- **Common gotchas:** counting three (forgetting the application's `tool_result` user turn) or
-  conflating the assistant's two turns.
-- **Unblockers:** expected: `user(question)` → `assistant(tool_use)` → `user(tool_result, produced by
-  the application)` → `assistant(final)`. Four is the minimum, not a fixed number.
+- **Common gotchas:** counting three (forgetting the application's `ToolMessage`) or conflating the
+  model's two `AIMessage` turns.
+- **Unblockers:** expected: `HumanMessage(question)` → `AIMessage(tool_calls)` → `ToolMessage(result,
+  produced by the application)` → `AIMessage(final)`. Four is the minimum, not a fixed number.
 - **Time:** ~4 min.
 
 ## L0709_lab problem 1 — Write the validator
@@ -105,9 +105,9 @@ Times are rough and assume a semi-technical student with basic Python who comple
 - **Common gotchas:** letting `calculator`'s `ValueError` propagate instead of catching it and
   returning a `REJECTED` string; checking `expression` truthiness instead of membership (an empty
   dict has no key); only handling one of the three failure classes.
-- **Unblockers:** "Three guards in order: unknown name → reject; `'expression' not in call.input` →
-  reject; else `try: calculator(...) except ValueError: reject`." The good call returns
-  `415668857`.
+- **Unblockers:** "Three guards in order: unknown `call['name']` → reject; `'expression' not in
+  call['args']` → reject; else `try: calculator(...) except ValueError: reject`." The good call
+  returns `415668857`.
 - **Time:** ~8 min.
 - **Key point:** this *is* the protocol's safety layer — the application validates, the model only
   proposes.

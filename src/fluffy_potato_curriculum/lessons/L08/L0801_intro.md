@@ -92,16 +92,17 @@ Each demo lands one sentence. If you remember nothing else, remember these:
   are shaky on the mechanics, redirect to the L07 lab before continuing. L08 is about *design
   judgment* on top of a protocol you already understand.
 
-## A note on the code seam
+## A note on the code
 
-The `potato_llm` client you have used since L02 is deliberately **text-only** — its `Message` carries
-plain text, not tool-use or tool-result blocks. L08's demos register tools and observe the model
-*choose* and *call* them, so the demo notebooks drop down to the **raw Anthropic SDK**
-(`client.messages.create(..., tools=[...])`), exactly as [L07](../L07/L0701_intro.md) introduced. The
-API key still loads through the same config seam (`require_anthropic_key()`) — we change the *client*,
-not where secrets come from. The **labs** stay pure-Python and offline wherever the concept allows
-(designing a schema, rewriting an error, classifying a task) so you can practice the *design* without
-spending a token.
+L08's demos use LangChain's `ChatAnthropic` — the framework client from L03, carried through
+[L07](../L07/L0701_intro.md). A tool is just a **plain typed Python function**: `model.bind_tools([fn])`
+infers the definition (name, description, parameter schema) from the function's name, docstring, and
+type hints, and the model's choice comes back in `AIMessage.tool_calls`. So "designing a tool" in L08
+means **designing the function** — its name, its docstring, and its typed signature (`Literal` enums,
+required parameters, `Annotated` descriptions). The API key still loads through the config seam
+(`require_anthropic_key()`) — never hard-coded. The **labs** stay pure-Python and offline wherever the
+concept allows (designing a schema, rewriting an error, classifying a task) so you can practice the
+*design* without spending a token.
 
 ## What L08 deliberately does *not* teach
 

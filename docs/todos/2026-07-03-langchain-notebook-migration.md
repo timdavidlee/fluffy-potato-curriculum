@@ -24,19 +24,22 @@ Anthropic SDK is retired from the curriculum's loop/tool code in favor of a Lang
 `model.bind_tools(TOOL_LIST)` + `.invoke(messages)` → `AIMessage.tool_calls` + `ToolMessage`.
 `TOOL_SCHEMAS` (removed) → `TOOL_LIST`.
 
-- **L07** (Tool calling) — **notebooks DONE**: all of L0703, L0704, L0705 (lab pair), L0706,
-  L0707 (lab pair), L0708, L0709 (lab pair) migrated to `ChatAnthropic().bind_tools([fn])` →
-  `AIMessage.tool_calls` → `ToolMessage`; the tool definition is now inferred from a typed
-  `Annotated` function (no hand-written JSON schema); "reach under the seam to the raw SDK"
-  framing dropped; empty-lab written answers still `_TODO_` but the matching solutions answers
-  are filled. Gate green (ruff format + check). Live restart-run-all still needs an
-  `ANTHROPIC_API_KEY` run before class (the four live lectures/lab were not executed here).
-  - **Still raw-SDK in L07 (follow-up):** `L0701_intro.md`, `L0702_lecture.md` (markdown lecture
-    outline + tables), and `PROCTOR_NOTES.md` still teach `tool_use`/`tool_result` /
-    `client.messages.create` and the `potato_llm` "under the seam" open question. These now
-    contradict the migrated notebooks — rewrite to the LangChain framing next.
-- **L08** (Designing good tools): L0803, L0805, L0807, L0809 — tools bound to a LangChain model.
-- **L22** (Skills): L2203, L2204 (lab) — uses the loop/tools; align to the new API.
+- **L07** (Tool calling) — **DONE** (notebooks in PR #38; markdown companions here). All 10
+  notebooks migrated to `ChatAnthropic().bind_tools([fn])` → `AIMessage.tool_calls` → `ToolMessage`;
+  tool definition inferred from a typed `Annotated` function (no hand-written JSON schema). The
+  markdown companions (`L0701_intro.md`, `L0702_lecture.md`, `PROCTOR_NOTES.md`) rewritten to the
+  LangChain framing — no `tool_use`/`tool_result`/`client.messages.create`/"under the seam" left.
+  Empty-lab written answers still `_TODO_` (solutions filled). Live restart-run-all still needs an
+  `ANTHROPIC_API_KEY` run before class.
+- **L08** (Designing good tools) — **DONE**. 4 lectures (L0803/L0805/L0807/L0809) migrated to
+  `bind_tools`/`AIMessage.tool_calls`/`ToolMessage` (`ToolMessage(status="error")` for the L0807
+  error path). L0806 schema-design lab pair recast around "the typed function *is* the schema":
+  `Literal` → enum, `Annotated` → per-field description, no-default → required, inspected via
+  `convert_to_openai_tool`. The other three lab pairs (L0804/L0808/L0810) were already pure-Python
+  design exercises — no model calls, left as-is. Markdown (`L0801_intro.md`, `PROCTOR_NOTES.md`)
+  rewritten; `L0802_lecture.md` was provider-agnostic already. L0806 solutions execute clean
+  offline; gate green (ruff format + check).
+- **L22** (Skills): L2203, L2204 (lab) — uses the loop/tools; align to the new API. **(remaining)**
 
 ## Also (Phase 4)
 
