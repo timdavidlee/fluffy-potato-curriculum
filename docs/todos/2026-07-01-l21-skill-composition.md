@@ -12,10 +12,10 @@ L23 docs for the authoritative set.
 > LangChain tools** (item 2).
 
 > **Headline:** none of these block taking L23 into stage 2 (`generate-materials-from-roadmap`). **Update
-> 2026-07-04:** the confirm-the-default batch (**#5, #10–15**) is now resolved and baked into the two L23
-> roadmap docs as dated `DECIDED (2026-07-04)` markers; #1–#4 and #6–#8 were already decided/delegated.
-> **The one item still open is #9 (build real example skills + mock API)** — deferred, and the only thing
-> left worth a human decision before stage 2.
+> 2026-07-04:** the confirm-the-default batch (**#5, #10–15**) was resolved and baked into the two L23
+> roadmap docs as dated `DECIDED (2026-07-04)` markers, and **#9 (build real example skills + mock API) is
+> now done** — the `example_skills/` pair is built, tested, and passing the gate. **All items are resolved
+> or delegated** (only #8's cross-lesson spinoff remains, tracked in its own note). L23 is stage-2-ready.
 
 ---
 
@@ -77,14 +77,23 @@ L23 docs for the authoritative set.
 
 ## 🟠 Example material — repo gaps (impacts stage-2 build)
 
-- [ ] **9. Build real example skills — DIRECTION SET, needs follow-up (2026-07-01).** The repo has **no
-      purely script-centric skill** and **no clean shared lower-level skill** today. **Decision so far:**
-      to illustrate the *benefit* of complex skills convincingly, we'll build a **mock API with a
-      genuinely complicated JSON contract** (nested/heterogeneous request+response) so the script-centric
-      "API/integration recipe" archetype has a real, non-toy payoff — a skill that wraps the messy contract
-      is clearly better than making the model reason through it each time. This is **deferred** — come back
-      to design the mock API + the example skill pair (`get_order`-style wrapper + a `check-lesson-links`
-      shared skill) before/at stage 2. *(demos_or_activities.md:54, :120, :183)*
+- [x] **9. Build real example skills — DONE (2026-07-04).** Built both archetype-gap examples as real,
+      runnable, offline artifacts under `src/fluffy_potato_curriculum/lessons/L23/example_skills/`
+      — **lesson-owned, deliberately kept out of the live `.claude/skills/` registry** (they're teaching
+      material, not curriculum-authoring tools; the roadmap's earlier `.claude/skills/` wording was
+      superseded by this location choice):
+      - **script-centric** `get_order/` — a mock orders API (`get_order_api.py`) with a genuinely
+        heterogeneous JSON contract (discriminated-union `payment`, per-item `options`, variable address
+        list, optional `tracking`/`note`s) + a thin `SKILL.md` wrapper. The messy contract is the
+        non-toy payoff: running the script beats re-deriving the shape each call.
+      - **shared lower-level** `check_lesson_links/` — a mechanical `extract_links.py` helper + a
+        `SKILL.md` that adds the *judgment* (broken ref vs. illustrative `L<NN>` forward-pointer vs.
+        not-yet-generated sibling), so it's a shared skill and **not** the "shared skill that's really a
+        tool" anti-pattern. Invoked by both operating skills (`A → C ← B`).
+      Both have mirrored tests (`tests/lessons/L23/…`) and pass `ruff` + `pyright --strict` + `pytest`
+      (26 tests). Bonus: `check_lesson_links`'s first live run found **three off-by-one broken links** in
+      `objectives.md` (`../../../` → `../../../../` for `.claude/rules/` and `src/…SYLLABUS.md`), now fixed.
+      *(resolved in demos_or_activities.md Demo 1 step 3, Demo 4 pre-flight, open questions; example_skills/README.md)*
 - [x] **10. Lean on the repo's own `.claude/skills/` — DECIDED (2026-07-04): heavily.** Worked examples are
       the real skills: `author-lesson-roadmap` → `generate-materials-from-roadmap` (sequential handoff),
       `.claude/rules/*.md` (rubric archetype), `sync-lesson-numbering` (shared-node cousin). *(resolved in
