@@ -1,10 +1,21 @@
-# L11 Proctor Notes — Tracing
+# L11 Proctor Notes — What an agent generates (state · logs · traces · extracts)
 
 Covers both labs in this lesson: **L1103** (read traces, locate failures) and **L1105**
 (instrument and compare traces). Both labs are **pure Python, offline — no API key needed**;
 they drive the shared `agent_loop.run` with a scripted `FakeModel`, so every trace is
 deterministic. If a student's trace looks different from the solution, suspect an edited setup
 cell, not "the model did something else" — there is no live model here.
+
+**The lesson is framed by a taxonomy but its labs are all tracing.** The intro and lectures open
+with the **map** (objective 6 / Demo 0): a run generates *state, logs, traces* (observability)
+and *extracts / new records* (data). The two conceptual beats — the opening map (in the intro and
+`L1102`) and the closing "extracts go to a store, not the trace" (in `L1106`, section 6) — are
+**lecture content, deliberately not lab problems**; objective 6 is taught, not exercised (a real
+persistence exercise is out of scope for the mini budget). Deliver them, but don't expect a TODO
+for them. The confusion to watch for during those beats: *"just save the agent's output in the
+trace."* The answer: a trace is observability (sampled, TTL'd, for debugging); the hard data a run
+produces is a deliverable and belongs in a **database or S3**. One line to leave them with:
+**observe the run in the trace; persist the product to the datastore.**
 
 General unblockers that apply across the lesson:
 

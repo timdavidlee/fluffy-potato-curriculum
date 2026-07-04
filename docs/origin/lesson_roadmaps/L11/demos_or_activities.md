@@ -1,4 +1,4 @@
-# L11: Teacher-led demos — Tracing: reading what your agent did
+# L11: Teacher-led demos — What an agent generates: state, logs, traces & extracts
 
 > Sibling doc: [objectives.md](objectives.md) (what the lesson aims for), parent design [CURRICULUM_PRD.md](../../CURRICULUM_PRD.md) (lesson-plan row L11).
 > Preceding lesson demos: [L10 demos_or_activities.md](../L10/demos_or_activities.md) (the loop these demos instrument). Following lesson: [L12 Evaluation: first pass](../L12/objectives.md) (consumes the trace this lesson produces).
@@ -15,7 +15,7 @@ Each demo is a self-contained block with:
 - **What to highlight** — the moment(s) where the teacher should slow down and call out the takeaway out loud.
 - **If the demo misbehaves** — graceful fallback for when the model surprises you (because it will; the loop is non-deterministic and that non-determinism is itself part of objective 4).
 
-The demos are ordered to follow the five learning objectives and the lesson's **concept-first, then tooled** spine: Demo 1 motivates *why* a structured trace beats a `print()` (the L10 bridge, now this lesson's opener) and produces the first tiny trace; Demo 2 *reads* a full trace and reconstructs the run (objective 1); Demo 3 *locates a failure* from the trace alone (objective 2); Demo 4 *instruments* the loop live to emit the full `TraceEvent` trace (objective 3); Demo 5 *compares two traces* of the same task (objective 4); Demo 6 *exports the same run to self-hosted Langfuse* and re-does objectives 2 and 4 in a real dashboard (objective 5). They build on each other — Demos 2, 3, and 5 read traces of the same loop Demo 4 instruments, so students see the artifact before they see how it is produced (concept first), then meet the real tool last (then tooled). Run them in order on first delivery.
+The demos are ordered to follow the learning objectives and the lesson's **concept-first, then tooled** spine, bracketed by the objective-6 taxonomy: **Demo 0** draws the opening map — *what a run generates, across two planes* (objective 6, the frame); Demo 1 motivates *why* a structured trace beats a `print()` (the L10 bridge, now this lesson's opener) and produces the first tiny trace; Demo 2 *reads* a full trace and reconstructs the run — including the **state** the trace carries (objective 1); Demo 3 *locates a failure* from the trace alone (objective 2); Demo 4 *instruments* the loop live to emit the full `TraceEvent` trace (objective 3); Demo 5 *compares two traces* of the same task (objective 4); Demo 6 *exports the same run to self-hosted Langfuse* and re-does objectives 2 and 4 in a real dashboard (objective 5); **Demo 7** closes the frame — *extracts go to a store, not the trace* (objective 6, conceptual). They build on each other — Demos 2, 3, and 5 read traces of the same loop Demo 4 instruments, so students see the artifact before they see how it is produced (concept first), then meet the real tool last (then tooled); Demos 0 and 7 are the conceptual bookends that place all this tracing work on the wider map. Run them in order on first delivery.
 
 > **A note on what L11 reuses from L10, and what is new.** L11 does **not** re-teach or re-derive the L10 loop — the model→tool→model control flow is assumed (see the L10 "Bridge to L11" and this lesson's objectives "L10 overlap" decision). What L11 adds is *observation*: a structured trace emitted at the loop's boundaries, read after the fact. Per the objectives' "inline-build vs. reference" decision, the **canonical reference copy** of the loop and tools is authored in the shared `common/` layer during L11's stage-2 pass — `common/agent_loop.py`, `common/tools.py`, and the new `common/tracing.py` (`TraceEvent`) — and L11 is the first lesson that *imports* them rather than hand-building them. The demos below therefore reference the loop and tools by name as a stable import, not as live-coded scratch (the one live-code beat is Demo 4's instrumentation wrapper).
 
@@ -43,6 +43,30 @@ The teacher should have, before the first demo starts:
 - For Demos 4–6 only: a live Sonnet 4.6 client (through `common/config.py`) and, for Demo 6, the cohort's **self-hosted Langfuse** base URL + project keys (also through `common/config.py`). Infra and fallback in [docs/classroom-llm-management.md](../../../classroom-llm-management.md). If Langfuse isn't reachable on the day, Demo 6 degrades to a screenshot walk-through (see that demo's misbehave note) — objectives 1–4 stand alone without it.
 
 > Why pre-capture the reading traces: objectives 1, 2, and 4 are *reading* skills. Reading is clearest on a fixed, known artifact the teacher has already studied — not on a live run that might take a different path mid-demo. Capture once before class, read live in class. The live model only appears in Demos 4–6, where *producing* and *exporting* a trace is the point.
+
+## Demo 0 — The map: what a run generates (Objective 6, the opening frame)
+
+**Goal:** in ~4 minutes, before any code, give the class the map the whole lesson hangs on: a single agent run generates several kinds of byproduct, and they belong on **two different planes**. Land the one boundary — *observability ≠ data* — so that when the lesson then spends most of its time on traces, students know exactly which corner of the map they're in.
+
+**Pre-flight:**
+
+- A whiteboard or one slide with two columns: **Observability plane** (State · Logs · Traces) and **Data plane** (Extracts / new records → DB / S3). No code needed.
+
+**Live script:**
+
+1. Ask: *"Your agent just finished a run. What did it leave behind?"* Collect answers, then sort them live into the two columns.
+2. Walk the **observability plane** as an increasing-permanence axis: **state** (the live message history the loop feeds the model — mutating, in-memory, gone at exit), **logs** (the `print()` play-by-play — streamed, human-readable), **traces** (the durable, structured, run-scoped record). Say the through-line: *"a trace is mostly state, captured durably over time — that's why reading a trace is reading what the model saw."* All three answer **"what did the run do?"** and are read by *you and the eval harness*.
+3. Walk the **data plane**: **extracts / new records** — the hard data the run produces as its deliverable (extracted fields, generated files, computed rows). This answers **"what did the run make?"** and is read by *downstream systems and users*.
+4. Draw the boundary and name the mistake: *"Don't cross the streams. Extracted business data goes to a database or S3 — not into your trace spans. And your trace store is not your system of record."* Preview that Demo 7 returns to this at the end; everything between here and there is the **traces** column.
+
+**What to highlight:**
+
+- The lesson's title lists four things, but its *weight* is on one column: **traces**. This map exists so tracing reads as one corner of a bigger picture, not an isolated topic.
+- The single boundary to remember: **observability (state/logs/traces) is for reading the run; data (extracts) is the product.** Different homes, retention, and consumers.
+
+**If the demo misbehaves:**
+
+- Purely conceptual — no model, no code. If the class fills the columns fast, move straight to Demo 1; if they conflate "the answer the agent returned" with "a trace," that confusion *is* the Demo 7 payoff — flag it and move on.
 
 ## Demo 1 — From `print()` to a structured event (Objective 3, opener; reinforces the L10 bridge)
 
@@ -209,9 +233,42 @@ The teacher should have, before the first demo starts:
 - If Langfuse is unreachable on the day, fall back to **pre-captured screenshots** of the trace timeline, a GENERATION observation, and a two-run comparison — narrate them against the live `TraceEvent` list students just produced. The mapping (trace=run, observation=span, GENERATION=llm) is the teachable content; the live click-through is a bonus, not the lesson.
 - If the export produces spans that don't render as expected (wrong observation type, missing usage), that's a real and useful aside about the *approximate* OTel mapping — show the mismatch, explain that exact field-name fidelity to one vendor is explicitly *not* required, only approximate OTel-ish structure.
 
+## Demo 7 — Extracts go to a store, not the trace (Objective 6, the closing boundary)
+
+**Goal:** close the loop opened in Demo 0. Now that students have *built* a trace, show — conceptually, in ~5 minutes — that the hard data an agent produces is a **different artifact on a different plane**, and belongs in a database or object store, **not** in the trace they just built. Land the rule: *observe the run in the trace; persist the product to the datastore.*
+
+**Pre-flight:**
+
+- The `RunResult.trace` from Demo 4 still on screen (the observability artifact).
+- One slide/snippet contrasting two side-by-side calls at a tool boundary — **no real DB/S3 client, no live persistence** (out of scope for the mini budget; say so):
+
+  ```python
+  # observability plane — what the agent DID (goes to the trace)
+  trace.append(TraceEvent(run_type="tool", name="extract_invoice", inputs=args, outputs=result))
+
+  # data plane — what the agent MADE (goes to a real store, NOT the trace)
+  save_record(result)   # -> a database row / document, or a file in S3
+  ```
+
+**Live script:**
+
+1. Point back at the Demo 4 trace: *"This is observability — sampled, TTL'd, keyed by `trace_id`, read by me and the eval harness. Useful for debugging; it is **not** where the invoice we just extracted should live."*
+2. Show the two-call sketch. Make the split explicit: the **same** extracted `result` is *referenced* in the trace (so you can debug how it was produced) and *persisted* via `save_record(...)` to its real home (so downstream systems can query it). The trace holds a pointer/summary; the datastore holds the record.
+3. Name the two failure modes of crossing the streams: (a) extracts written *only* into the trace → no queryable datastore, and the data vanishes when traces expire; (b) the trace store used *as* the database → can't serve, join, back up, or access-control the data. Neither tool is wrong; each is being used for the other's job.
+4. State the scope boundary out loud: *"Wiring an actual Postgres or S3 client is a data-engineering exercise — that's L20/L21 or a project, not today. Today's takeaway is the boundary itself."*
+
+**What to highlight:**
+
+- **Two planes, two homes.** Observability (state/logs/traces) answers *what did the run do?*; data (extracts) is *what the run made*. Don't put the product in the observability layer.
+- This is why the lesson is titled for all four artifacts but spends its hands-on time on the trace: the extract is real and important, but its *persistence* is a different lesson — here we only draw the line.
+
+**If the demo misbehaves:**
+
+- Purely conceptual — nothing to run. If time is tight, this compresses to a single sentence over the Demo 0 slide: *"extracts go to a DB or S3, never the trace."* Don't skip it entirely — it's the payoff of the Demo 0 frame and objective 6.
+
 ## Pacing notes for the teacher
 
-- **Per-demo time (targets the objectives' decided ~75–100 minute, one-lecture budget):** Demo 1 is short (3–5 min, it's a recap + one edit). Demo 2 is 10–15 min (the core reading skill — don't rush it). Demo 3 is 12–18 min (four signatures; the wrong-arguments one deserves the most time). Demo 4 is the long live-code beat, 15–20 min. Demo 5 is 10–15 min. Demo 6 is 10–15 min and is the trimmable one — drop to a 5-minute screenshot tour or cut entirely if time is tight, since objectives 1–4 stand alone. Total: ~60–90 min for all six, fitting the lecture block with discussion.
+- **Per-demo time (targets the objectives' decided ~75–100 minute, one-lecture budget):** Demo 0 is a ~4-min whiteboard frame (no code). Demo 1 is short (3–5 min, it's a recap + one edit). Demo 2 is 10–15 min (the core reading skill — don't rush it). Demo 3 is 12–18 min (four signatures; the wrong-arguments one deserves the most time). Demo 4 is the long live-code beat, 15–20 min. Demo 5 is 10–15 min. Demo 6 is 10–15 min and is the trimmable one — drop to a 5-minute screenshot tour or cut entirely if time is tight, since objectives 1–4 stand alone. Demo 7 is a ~5-min conceptual close (no code), compressible to one sentence but not skippable — it's the objective-6 payoff. Total: ~70–100 min for all eight, fitting the lecture block with discussion; the two conceptual bookends (Demos 0 and 7) add ~9 min and are the cheapest to compress under time pressure.
 - **If the lecture must split** (per the objectives' open question): break after Demo 3 — part one is "read a trace / locate a failure" (Demos 1–3, all reading pre-captured traces, no live model), part two is "instrument / compare / export" (Demos 4–6, the live + tooled half).
 - **Live-coding budget:** Demo 4's instrumentation wrapper is the *only* place to live-code. Demo 1 is a one-line edit; Demos 2, 3, 5 read fixed files; Demo 6 runs an export, not new logic. Do not re-derive the L10 loop anywhere — it's imported.
 - **Variance budget:** only Demos 4 and 6 touch a live model. Budget one re-run each. The reading demos (2, 3, 5) are deterministic by construction because they read pre-captured traces — that determinism is a deliberate teaching choice, not an accident.
