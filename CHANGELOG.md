@@ -1,3 +1,9 @@
+## v0.6.0 (2026-07-04)
+
+### Feat
+
+- **L13**: re-point eval materials onto the L10 graph producer (#73)
+
 ## v0.5.0 (2026-07-04)
 
 ### Feat
