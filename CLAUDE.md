@@ -78,11 +78,13 @@ Before committing, the bar is: `uv run ruff format && uv run ruff check && uv ru
 
 ## Git hooks
 
-A `prepare-commit-msg` hook in [.githooks/](./.githooks/) drafts a commit message via the `claude` CLI when you run `git commit` without `-m`. It silently no-ops when:
+Two hooks live in [.githooks/](./.githooks/):
 
-- a message source is already set (`-m`, `-F`, merge, squash, amend),
-- nothing is staged, or
-- the `claude` binary isn't on `$PATH`.
+- **`prepare-commit-msg`** drafts a commit message via the `claude` CLI when you run `git commit` without `-m`. It silently no-ops when:
+  - a message source is already set (`-m`, `-F`, merge, squash, amend),
+  - nothing is staged, or
+  - the `claude` binary isn't on `$PATH`.
+- **`commit-msg`** validates the final message against Conventional Commits with `uv run cz check` (so it stays compatible with `cz bump` / changelog generation). It skips silently when `uv` isn't available (a minimal checkout, or CI without dev deps), so it never blocks a commit in an environment that lacks the tool.
 
 Hooks live under version control but git only honors them after you point `core.hooksPath` at the directory. Run this once per clone:
 
