@@ -28,7 +28,7 @@ L03 does **not** prerequisite anything from L04 onward. In particular, it does n
 
 - Multiple nodes, edges, or any notion of "wiring things together" — that is L04's job, introduced here only as a one-line forward pointer.
 - Tool calling — that's L07; the node in this lesson only ever calls the model directly, never a tool.
-- The agent loop or any cyclic control flow — that's L10 (hand-rolled) and L11 (LangGraph); nothing in L03 loops.
+- The agent loop or any cyclic control flow — that's L10 (the cyclic ReAct graph) and L11 (the prebuilt shallow agent); nothing in L03 loops.
 - Real trace tooling — Langfuse arrives at L12. If students want to "watch the node run," this lesson uses LangGraph's own built-in invoke/stream output, not a tracing platform.
 - Any mixed-model decision framework — that's L14. If a cheap-vs-capable model contrast comes up at all in this lesson, it is a single forward-pointing sentence, not a taught idea.
 
@@ -50,7 +50,7 @@ By the end of L03, a student should be able to:
 3. **Run and inspect one node in isolation.** Concretely:
    - Use LangGraph's `StateGraph` builder at its smallest: declare the state schema, `add_node` for the single node, `set_entry_point`, wire the node straight to `END`, and `compile()` the graph into a runnable.
    - `invoke()` the compiled graph on a sample input and inspect the returned state — confirm the output field the node was supposed to populate is present and well-formed, and that the input field is still there unchanged.
-   - Use LangGraph's own **built-in run/stream output** (not a tracing platform) to watch the single node execute — e.g. `stream()` and observe the one step fire. Name explicitly that *real* trace tooling — reading a full run as a structured trace, comparing runs, diagnosing failures from a trace alone — is [L12](../L12/objectives.md)'s job; this lesson only needs "did my one node run, and what did it return."
+   - Use LangGraph's own **built-in run/stream output** (not a tracing platform) to watch the single node execute — `graph.stream(input, stream_mode="updates")`, which yields one chunk per node (`{node_name: state_update}`); observe the one step fire. This is the **same call, in the same `stream_mode`, that every later graph lesson reuses** — L04 to watch a sequence, L05 a branch, L10 the agent loop turning — so introduce it here as a habit, not a one-off. Name explicitly that *real* trace tooling — reading a full run as a structured trace, comparing runs, diagnosing failures from a trace alone — is [L12](../L12/objectives.md)'s job; this lesson only needs "did my one node run, and what did it return."
    - Recognize that running a **one-node graph** through `StateGraph` is deliberately more ceremony than just calling the function directly — and be able to say *why* it's still worth it: the ceremony (typed state, compile, invoke) is the same shape L04 will reuse for five nodes, ten nodes, a whole workflow. Paying the setup cost once, on the simplest possible graph, is the pedagogical point.
 
 4. **Understand *why* an explicit step is the unit you orchestrate.** Concretely:
