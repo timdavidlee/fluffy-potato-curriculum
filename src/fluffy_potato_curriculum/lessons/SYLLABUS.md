@@ -27,7 +27,7 @@ and `tracks.toml` in sync when lessons change.
 | L07 | Tool calling: how it works                                    |  ✅  |  ✅  |
 | L08 | Designing good tools                                          |  ✅  |  ✅  |
 | L09 | MCP: packaging tools as a portable contract                   |      |  ✅  |
-| L10 | Hand-rolled agent loop                                        |  ✅  |  ✅  |
+| L10 | Cyclic graphs: the ReAct agent loop                           |  ✅  |  ✅  |
 | L11 | What an agent generates: state, logs, traces & extracts       |  ✅  |  ✅  |
 | L12 | Evaluation: first pass                                        |  ✅  |  ✅  |
 | L13 | Choosing model power for the task                             |      |  ✅  |
