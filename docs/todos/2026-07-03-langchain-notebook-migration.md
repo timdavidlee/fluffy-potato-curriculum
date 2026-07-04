@@ -11,6 +11,11 @@ Anthropic SDK is retired from the curriculum's loop/tool code in favor of a Lang
   chat-model interface; `tests/common/` updated; gate green (pyright 0, pytest passing).
 - `common/CLAUDE.md`, `common/*.py` docstrings updated (incl. stale reorder lesson-refs the
   earlier renumber missed).
+- **L10** (Hand-rolled loop): L1003, L1004, L1005, L1006 — verified migrated (`bind_tools` /
+  `.tool_calls` / `ToolMessage`, no old symbols).
+- **L11** (Tracing): L1102, L1103, L1104, L1105 — verified migrated.
+- **L12** (Eval): L1202, L1203, L1204, L1205, L1206 — verified migrated.
+- **L14** (Shallow agent): L1407 — verified migrated.
 
 ## Pending — regenerate these notebooks (they still import removed symbols / call `.create(...)`)
 
@@ -19,21 +24,23 @@ Anthropic SDK is retired from the curriculum's loop/tool code in favor of a Lang
 `model.bind_tools(TOOL_LIST)` + `.invoke(messages)` → `AIMessage.tool_calls` + `ToolMessage`.
 `TOOL_SCHEMAS` (removed) → `TOOL_LIST`.
 
-- **L07** (Tool calling): L0703, L0704, L0705 (lab pair), L0708 — teach `.bind_tools()` +
-  `.tool_calls` instead of raw `tool_use`/`tool_result`. Drop the "reach under the seam to the raw
-  SDK" framing.
+- **L07** (Tool calling) — **notebooks DONE**: all of L0703, L0704, L0705 (lab pair), L0706,
+  L0707 (lab pair), L0708, L0709 (lab pair) migrated to `ChatAnthropic().bind_tools([fn])` →
+  `AIMessage.tool_calls` → `ToolMessage`; the tool definition is now inferred from a typed
+  `Annotated` function (no hand-written JSON schema); "reach under the seam to the raw SDK"
+  framing dropped; empty-lab written answers still `_TODO_` but the matching solutions answers
+  are filled. Gate green (ruff format + check). Live restart-run-all still needs an
+  `ANTHROPIC_API_KEY` run before class (the four live lectures/lab were not executed here).
+  - **Still raw-SDK in L07 (follow-up):** `L0701_intro.md`, `L0702_lecture.md` (markdown lecture
+    outline + tables), and `PROCTOR_NOTES.md` still teach `tool_use`/`tool_result` /
+    `client.messages.create` and the `potato_llm` "under the seam" open question. These now
+    contradict the migrated notebooks — rewrite to the LangChain framing next.
 - **L08** (Designing good tools): L0803, L0805, L0807, L0809 — tools bound to a LangChain model.
-- **L10** (Hand-rolled loop): L1003, L1004 (lab), L1005 (lab), L1006 — hand-roll the loop against
-  a LangChain chat model (`.invoke()` → check `.tool_calls` → append `ToolMessage`), not the SDK.
-- **L11** (Tracing): L1102, L1103 (lab), L1104, L1105 (lab) — trace the migrated `common/` loop;
-  swap `FakeModel(response([...]))` for `FakeModel([tool_reply(...), text_reply(...)])`.
-- **L12** (Eval): L1202, L1203 (lab), L1204, L1205 (lab), L1206 — same `FakeModel` API swap.
-- **L14** (Shallow agent): L1407 — imports `common/`; confirm it aligns (LangGraph already uses
-  `ChatAnthropic`, so this is likely light).
 - **L22** (Skills): L2203, L2204 (lab) — uses the loop/tools; align to the new API.
 
 ## Also (Phase 4)
 
 - Update L07/L08/L10 roadmaps (`docs/origin/lesson_roadmaps/`) to drop the raw-SDK framing.
+  (L10 notebooks are already migrated, but its roadmap still describes `tool_use`/`tool_result`.)
 - Update `potato_llm/CLAUDE.md` — the seam is now L01–L02 only; the framework client (LangChain)
   is the through-line from L03 on, including tools.
