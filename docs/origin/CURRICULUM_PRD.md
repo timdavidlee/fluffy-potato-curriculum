@@ -110,6 +110,24 @@ hinge where the graph first gains a cycle.
 | L24 | Multi-agent / subagent architecture (stretch)         | design a supervisor + workers pattern; explain when subagents help vs. hurt                               |
 | L25 | Evaluation revisited                                  | extend the L13 eval discipline to complex systems: evaluate a multi-step LangGraph agent (per-node vs. end-to-end metrics); evaluate retrieval quality for RAG (precision@k / recall@k); reason about LLM-as-judge — what it can and can't reliably score; evaluate a multi-agent system (subagent quality vs. orchestration quality); scale eval cost (sampling strategies, CI gating) |
 
+**Capstone — L50, agent mini-project walkthrough (mini track only, for now).** After the
+lesson arc there is a single **project-walkthrough capstone**: a proctor-led, end-to-end build
+of a small ("mini") tool-calling agent that consolidates the five course objectives at once —
+design a tool, wire the agent loop, trace it, and eval it. It is deliberately numbered **L50**,
+not L26, so the capstone sits at the very end with a **gap left open** (L26–L49) to slot future
+lessons *before* it without renumbering — the same "park it out of the way" move the `K`-prefix
+uses for prework. Its full row lives in the mini plan below.
+
+Format note: like the `K` prework, L50 is **not** the standard proctor-led lecture+lab shape —
+it is an end-to-end **walkthrough** of building one project. Its roadmap will live at
+`./lesson_roadmaps/L50/` once authored (not yet written — planned only, like L14–L25).
+
+<!-- *NEED INPUT*: L50 is currently registered as MINI-TRACK-ONLY per request, which breaks the
+otherwise-invariant "every mini lesson is also a full lesson" (mini ⊆ full). Decide whether the
+capstone should also join the `full` track (the natural home for a superset), or stay a
+mini-exclusive capstone. If it joins `full`, add "L50" to `[full].order` in tracks.toml and a row
+to the master table above. -->
+
 ## Condensed Mini Lesson Plan
 
 The above table is a master list, this should always be a reduced version of the above
@@ -120,11 +138,14 @@ anchored on the five course objectives (tool design, when-to-use-a-tool,
 shallow LangGraph agent, eval, tracing) and drops everything that doesn't
 directly serve them. The multi-agent stretch is the first thing out.
 
-**Kept (14 lessons, ~32 hrs at the full-course per-lesson rate):**
+**Kept (14 lessons + the L50 project capstone, ~32 hrs at the full-course per-lesson rate):**
 
 Skills (L22) and skill patterns & composition (L23) are included by explicit request on top of the
 five-objective core — the two kept lessons not anchored to a course objective; they push the cut
-past the ~20 hr floor. Together they make "compose skills into a system" the mini-cut capstone.
+past the ~20 hr floor. They make "compose skills into a system" the mini cut's last *taught*
+lesson; the mini course then **closes with the L50 agent mini-project walkthrough** — a hands-on,
+end-to-end build that consolidates the five objectives (see the master plan above for why it is
+numbered L50 and its walkthrough format).
 The early graph ramp (L03 single-node → L04 sequential → L05 conditional) is kept whole: it now
 precedes tools and the agent loop, so every later mini lesson builds on the node/graph model and
 none of the three can be dropped without breaking what follows. Chain-of-thought prompting (L06)
@@ -148,6 +169,7 @@ before L07 — this is why the mini grew from 11 to 14 lessons.
 | L13 | Evaluation: first pass                  | Covers the *evaluation* objective; pairs with tracing                        |
 | L22 | Skills: just-in-time capabilities       | Added by request; depends on tools + prompting, which the mini course keeps  |
 | L23 | Skill patterns & composition            | Added by request; the composition capstone — compose skills into a system    |
+| L50 | Agent mini-project: end-to-end walkthrough | Project capstone (mini track only, for now) — a proctor-led walkthrough building one small tool-calling agent end-to-end (tool → agent loop → trace → eval), consolidating the five course objectives; walkthrough format, not lecture+lab |
 
 **Cross-cutting thread — assistant message channels (narration / thinking / answer).**
 The three kinds of assistant output are all covered in the mini. Homes:
