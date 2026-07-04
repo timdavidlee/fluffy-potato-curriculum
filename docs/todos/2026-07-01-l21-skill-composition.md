@@ -11,10 +11,11 @@ L23 docs for the authoritative set.
 > was corrected this session from L22's hand-rolled loader to the **L04/L14 LangGraph agent + `list_skills`/`load_skill`
 > LangChain tools** (item 2).
 
-> **Headline:** none of these block taking L23 into stage 2 (`generate-materials-from-roadmap`). Every
-> item has an in-doc recommendation. The three worth a human decision before stage 2 are **#1 (wrap-up
-> doc location), #3 (teach the sharper cost model?), #9 (build real example skills?)**; the rest are
-> confirm-the-default.
+> **Headline:** none of these block taking L23 into stage 2 (`generate-materials-from-roadmap`). **Update
+> 2026-07-04:** the confirm-the-default batch (**#5, #10–15**) is now resolved and baked into the two L23
+> roadmap docs as dated `DECIDED (2026-07-04)` markers; #1–#4 and #6–#8 were already decided/delegated.
+> **The one item still open is #9 (build real example skills + mock API)** — deferred, and the only thing
+> left worth a human decision before stage 2.
 
 ---
 
@@ -45,8 +46,11 @@ L23 docs for the authoritative set.
       (Haiku 4.5 remains the cheap-contrast model). Collision demo (Demo 5) is model-dependent — if it
       won't misfire on Sonnet, make descriptions collide harder or note a smaller model fails sooner
       (fallback already in the doc). *(objectives.md; demos_or_activities.md Demo 5 + pacing notes)*
-- [ ] **5. Lecture duration / split.** Best guess **90–120 min**; optional split into "archetypes & authoring"
-      (Demos 1–2) and "composition, graph & anti-patterns" (Demos 3–5). *(objectives.md:116; demos_or_activities.md:174)*
+- [x] **5. Lecture duration / split — DECIDED (2026-07-04).** Target **~90–120 min**, single session by
+      default; **optional** split at the Demo 2/3 boundary into "archetypes & authoring" (Demos 1–2) and
+      "composition, graph & anti-patterns" (Demos 3–5). As an "added by request" mini-cut lesson it need not
+      carry retrospective weight (that's `MINI_WRAPUP.md`), so no padded ~2 hr session. *(resolved in
+      objectives.md "Open authoring questions" duration + depth bullets; demos_or_activities.md pacing notes)*
 
 ## 🟢 Scope of what's taught — in-doc recommendation, safe to batch-accept
 
@@ -81,32 +85,34 @@ L23 docs for the authoritative set.
       is clearly better than making the model reason through it each time. This is **deferred** — come back
       to design the mock API + the example skill pair (`get_order`-style wrapper + a `check-lesson-links`
       shared skill) before/at stage 2. *(demos_or_activities.md:54, :120, :183)*
-- [ ] **10. Lean on the repo's own `.claude/skills/`** as the worked examples: `author-lesson-roadmap` →
-      `generate-materials-from-roadmap` (real sequential handoff), `.claude/rules/*.md` (rubric archetype),
-      `sync-lesson-numbering` (shared-node cousin). Rec: heavily. *(objectives.md:118; demos_or_activities.md:182)*
-- [ ] **11. `.claude/rules/*.md` as the "rubric" archetype example** — they're referenced by CLAUDE.md, not
-      frontmatter-wrapped `SKILL.md` files. OK to present as the rubric worked example (packaging one as a
-      `SKILL.md` with a discriminating description is itself Demo 2's authoring exercise)? Rec: yes.
-      *(demos_or_activities.md:31)*
+- [x] **10. Lean on the repo's own `.claude/skills/` — DECIDED (2026-07-04): heavily.** Worked examples are
+      the real skills: `author-lesson-roadmap` → `generate-materials-from-roadmap` (sequential handoff),
+      `.claude/rules/*.md` (rubric archetype), `sync-lesson-numbering` (shared-node cousin). *(resolved in
+      objectives.md "Open authoring questions"; demos_or_activities.md open questions)*
+- [x] **11. `.claude/rules/*.md` as the "rubric" archetype example — DECIDED (2026-07-04): yes.** Present the
+      on-disk, principle-centric rules files as "rubric-style guidance" even though they're referenced by
+      CLAUDE.md rather than frontmatter-wrapped; packaging one as a `SKILL.md` with a discriminating
+      description is itself Demo 2's authoring exercise. *(resolved in demos_or_activities.md Demo 1 pre-flight)*
 
 ## 🔵 Lab continuity
 
-- [ ] **12. Grow the L22 skill.** Confirm the lab reuses each student's L22 skill as one node of the L23
-      system (a handoff or a shared sub-skill) — "grow your one skill into a small system," not a fresh
-      start. *(objectives.md:119; demos_or_activities.md:185)*
-- [ ] **13. Capstone deliverable = a skill *system*.** Confirm the deliverable is a small real skill system
-      (≥1 handoff and/or shared sub-skill) that students author, graph, and self-audit for the three
-      anti-patterns — not another single skill (that's what makes L23 a *composition* capstone distinct
-      from L22's *authoring* one). *(objectives.md:110)*
+- [x] **12. Grow the L22 skill — DECIDED (2026-07-04): yes.** The lab reuses each student's L22 skill as one
+      node of the L23 system (a handoff or a shared sub-skill) — "grow your one skill into a small system,"
+      not a fresh start. *(resolved in objectives.md "Open authoring questions"; demos_or_activities.md open questions)*
+- [x] **13. Capstone deliverable = a skill *system* — DECIDED (2026-07-04): yes.** The deliverable is a small
+      real skill system (≥1 handoff and/or shared sub-skill) that students author, graph, and self-audit for
+      the three anti-patterns — not another single skill (that's what makes L23 a *composition* capstone
+      distinct from L22's *authoring* one). *(resolved in objectives.md "Bridge / capstone")*
 
 ## ⚪ Overlap guardrails — confirm the boundary holds
 
-- [ ] **14. L22 boundary (reinforce, don't re-teach).** L22 owns single-skill authoring +
-      skill/tool/prompt taxonomy + description-as-trigger + JIT loading; L23 reuses these as callbacks and
-      builds on them (classify archetypes + compose many). The "shared skill that's really a tool"
-      anti-pattern is the one intentional re-invocation of L22's skill-vs-tool line.
-      *(objectives.md:36, :121; demos_or_activities.md:187)*
-- [ ] **15. L24 on-ramp (forward-point only).** L23 draws the skills↔agents analogy (handoff → subagent
-      pipeline; shared sub-skill → shared worker; dependency graph → supervisor/worker graph) but never
-      builds a multi-agent system, so L24 isn't pre-empted. When L24's roadmap is authored, it should reuse
-      L23's composition vocabulary. *(objectives.md:23, :112, :122; demos_or_activities.md:188)*
+- [x] **14. L22 boundary (reinforce, don't re-teach) — DECIDED (2026-07-04): boundary holds.** L22 owns
+      single-skill authoring + skill/tool/prompt taxonomy + description-as-trigger + JIT loading; L23 reuses
+      these as callbacks and builds on them (classify archetypes + compose many). The "shared skill that's
+      really a tool" anti-pattern is the one intentional re-invocation of L22's skill-vs-tool line. *(resolved
+      in objectives.md prerequisites + "Open authoring questions"; demos_or_activities.md open questions)*
+- [x] **15. L24 on-ramp (forward-point only) — DECIDED (2026-07-04): boundary holds.** L23 draws the
+      skills↔agents analogy (handoff → subagent pipeline; shared sub-skill → shared worker; dependency graph
+      → supervisor/worker graph) but never builds a multi-agent system, so L24 isn't pre-empted. When L24's
+      roadmap is authored it must reuse L23's composition vocabulary. *(resolved in objectives.md "Where this
+      lesson sits" + bridge + "Open authoring questions"; demos_or_activities.md open questions)*
