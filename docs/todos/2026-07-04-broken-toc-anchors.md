@@ -1,5 +1,12 @@
 # TODO — repair broken in-page TOC / back-to-top anchors (curriculum-wide)
 
+**Status: DONE** (2026-07-03). All 19 anchors across 11 files regenerated from their
+current heading slugs; a durable guard now enforces this — `tests/lessons/test_toc_anchors.py`
+walks every `lessons/**/*.{md,ipynb}` and asserts each same-doc `#anchor` resolves to a
+heading (faithful GitHub slugger, so double-hyphen `—`/` -- ` targets are not false positives).
+The repro in this note collapsed space runs and over-reported (262 hits); the guard mirrors
+GitHub's non-collapsing rule instead.
+
 Discovered 2026-07-04 while verifying the L11 reorder (PRs #44 / #47 / #49). The reorder
 fixed only the anchors it broke or touched (`L1206`, `L1307`, `L2206` — landed in #49);
 this note tracks the **pre-existing, unrelated** breakage across other lessons.
@@ -56,13 +63,13 @@ PY
 
 ## Fix approach (own pass; independent of the L11 reorder)
 
-- [ ] Regenerate every `](#…)` in-page anchor from its actual heading slug (mechanical:
+- [x] Regenerate every `](#…)` in-page anchor from its actual heading slug (mechanical:
       map each TOC/back-to-top link to the current heading's GitHub slug). Watch the
       GitHub slug rules for `—`/`--`, `:`, `+`, `()`.
-- [ ] Re-run the repro until it prints nothing.
-- [ ] Consider a small **guard** so this can't silently recur — e.g. a `pytest` that walks
-      `lessons/**/*.{md,ipynb}` and asserts every same-doc `#anchor` resolves to a heading
-      (mirror GitHub's slug algorithm). Cheapest durable fix.
-- [ ] `_empty`/`_solutions` pairs must stay in sync (fix both).
+- [x] Re-run the check until it prints nothing (used a *faithful* slugger, not the buggy
+      space-collapsing repro below).
+- [x] Added the durable **guard**: `tests/lessons/test_toc_anchors.py` (one parametrized
+      case per doc; strips fenced code; applies GitHub's `-1`/`-2` dedup).
+- [x] `_empty`/`_solutions` pairs kept in sync (both fixed — L02/L0210, L10/L1004, L13/L1303).
 
 Not blocking anything; low-risk, edits are navigation-only (no code/behavior change).
