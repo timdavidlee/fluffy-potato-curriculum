@@ -43,9 +43,10 @@ If you remember nothing else from L10, remember this: **an agent is a loop, not 
 2. The **loop** is what makes it an agent. The loop calls the model, executes any tool the model
    requested, appends the result, and calls the model *again* — over and over — until the model
    stops asking for tools or a safety cap fires.
-3. **Every framework you will meet later is a fancier version of this loop.** LangGraph
-   ([L04](../../CURRICULUM_PRD.md)) reframes the same model→tool→model skeleton as a graph; deep
-   agents add planning and memory around it. Hand-rolling it once demystifies all of them.
+3. **Every framework you will meet later is a fancier version of this loop.** The very next lesson
+   ([L11](../L11/L1101_intro.md)) rebuilds this same model→tool→model skeleton as a one-line LangGraph
+   agent with `create_agent`; deep agents add planning and memory around it. Hand-rolling it once
+   demystifies all of them.
 
 ## The three rules this lesson lands
 

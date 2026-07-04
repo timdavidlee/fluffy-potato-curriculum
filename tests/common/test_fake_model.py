@@ -28,6 +28,19 @@ def test_bind_tools_returns_the_model_itself() -> None:
     assert model.bind_tools([]) is model
 
 
+def test_bind_tools_tolerates_extra_kwargs() -> None:
+    # create_agent binds tools with tool_choice=...; FakeModel must accept the kwarg.
+    model = FakeModel([text_reply("x")])
+    assert model.bind_tools([], tool_choice="auto") is model
+
+
+def test_invoke_tolerates_extra_positional_and_keyword_args() -> None:
+    # A framework may call invoke(messages, config, **kwargs); FakeModel must ignore them.
+    reply = text_reply("scripted")
+    model = FakeModel([reply])
+    assert model.invoke([], {"configurable": {}}, tags=["x"]) is reply
+
+
 def test_fake_model_returns_scripted_replies_in_order() -> None:
     first = text_reply("a")
     second = text_reply("b")

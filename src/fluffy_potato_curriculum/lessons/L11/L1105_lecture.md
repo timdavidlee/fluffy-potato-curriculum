@@ -1,0 +1,115 @@
+# The config surface, and where the one-liner ends
+
+```yaml
+title: "The config surface, and where the one-liner ends"
+keywords: create_agent, config surface, model, tools, system prompt, recursion limit, shallow agent, StateGraph, L15, ceiling, over-engineering, ReAct, plan-and-execute, supervisor, when to drop to a graph
+estimated duration: 15
+```
+
+> **Lesson:** L11. **Roadmap:** [objectives.md](../../../../docs/origin/lesson_roadmaps/L11/objectives.md),
+> [demos_or_activities.md](../../../../docs/origin/lesson_roadmaps/L11/demos_or_activities.md) (Demo 3).
+> This is a **slide outline** for the closing demo. It runs after the build-and-run notebook
+> ([L1103_lecture.ipynb](L1103_lecture.ipynb)) and reuses that same `create_agent` agent — it
+> assumes the agent from Demo 2 is still in scope. It also closes the lab loop
+> ([L1104](L1104_lab_empty.ipynb)), whose last problem exercises the config surface below.
+> **Anchor model: Claude Sonnet 4.6.**
+
+## section 1. The three knobs a shallow agent uses
+
+### slide 1.1 Model, tools, system prompt — that's the surface
+
+- On the same agent from the build demo, walk the config surface a **shallow** agent actually uses:
+
+```python
+agent = create_agent(
+    model,                                 # 1. the model  (ChatAnthropic, Sonnet 4.6)
+    [calculator, lookup, flaky_fetch],     # 2. the tools  (a plain list of callables)
+    system_prompt="You are a precise assistant. Use the tools; do not answer from memory.",  # 3.
+)
+```
+
+- table: the three knobs and what each controls.
+
+| Knob | What it controls | L10 equivalent |
+| --- | --- | --- |
+| **model** | which chat model runs the `agent` node | the `model` you passed to `run(...)` |
+| **tools** | the callables the model may invoke | the `tools` dict the loop dispatched |
+| **system prompt** | the standing instruction prepended to the conversation | the system message you prepended by hand |
+
+- **That's it.** Three knobs. Everything else `create_agent` handles.
+
+### slide 1.2 Swap one knob, same agent
+
+- Change the **system prompt** once and re-run the *same* task: same agent, different instruction.
+- diagram: two runs of the identical `create_agent` call side by side — left prompt *"answer in one
+  sentence"*, right prompt *"show your reasoning step by step"* — same tools, same loop, different
+  final-answer shape.
+- The point is *"same agent, new instruction,"* not a dramatic behavior change. If a behavior swap
+  doesn't show, swap the *format* of the answer — that always lands.
+
+[↑ Back to top](#the-config-surface-and-where-the-one-liner-ends)
+
+## section 2. What you did NOT have to touch
+
+### slide 2.1 The loop and the state are managed for you
+
+- State plainly what a shallow agent *doesn't* configure and doesn't need to:
+  - **no `while` loop** — the run driver is the framework's;
+  - **no message-history bookkeeping** — the append after each tool call is automatic;
+  - **no reducer, no state schema** — the message list is threaded for you;
+  - **no manual step counter** — the recursion / step limit is built in.
+- Contrast with L10, where **all** of that was yours to write. That is the trade: you give up the
+  knobs, you get the boilerplate for free.
+
+### slide 2.2 The step cap is still there, just not yours to write
+
+- You didn't write a `max_steps` counter — but the cap still exists as the framework's
+  **recursion / step limit** (LangGraph's default is 25 steps; set `recursion_limit` in the run
+  config to change it).
+- A runaway agent still trips it, and tripping it is **still a signal worth investigating** — the
+  L10 lesson didn't go away, it moved inside the framework.
+
+[↑ Back to top](#the-config-surface-and-where-the-one-liner-ends)
+
+## section 3. The ceiling: when you'd drop below the one-liner
+
+### slide 3.1 The question that ends the one-liner
+
+- Ask it out loud: **"what would make you outgrow this one line?"**
+- text: the moment your control flow stops being a *single tool-or-finish loop*. Concretely:
+  - a **second model** for one step (a cheap router, an expensive planner);
+  - a **branch** that isn't just "tool or finish";
+  - a **custom node** (validate, summarize, call a sub-agent);
+  - **state beyond the message list** (a running budget, a scratchpad, a plan).
+- Any one of those is the signal: you have left the shallow single-loop shape.
+
+### slide 3.2 That's exactly the door into L15
+
+- diagram: a "ceiling" line. Below it, labeled *`create_agent` (shallow, single loop)*: model,
+  tools, prompt. Above it, labeled *explicit `StateGraph` (L15)*: custom nodes, branches, reducers,
+  state schema, and the named patterns (**ReAct, plan-and-execute, supervisor, …**).
+- When the control flow branches, you **drop to an explicit `StateGraph`** and wire nodes / edges /
+  reducers yourself. Building that graph — and the patterns on top of it — is
+  **[L15](../../CURRICULUM_PRD.md)**. L11 names the door; L15 opens it.
+
+### slide 3.3 Knowing where the ceiling is *is* the skill
+
+- Two opposite mistakes bracket the line:
+  - **Over-engineering:** reaching for a hand-built graph on a single loop — the L10-objective-4
+    mistake (a framework where 50 lines would do).
+  - **Under-engineering:** refusing to leave the one-liner when the flow genuinely branches.
+- L11 teaches the **shallow** side of that line: *use `create_agent` until the control flow stops
+  being a single loop.* L15 teaches the other side.
+
+### slide 3.4 Where you land
+
+- You can now build a shallow agent **two ways**: by hand (L10) and in one line (L11), and you know
+  they're the *same loop*.
+- The returned **message history** from your `create_agent` run is the raw material the next
+  lessons read as a **trace** ([L12](../L12/objectives.md)) and judge with an **eval set**
+  ([L13](../L13/objectives.md)).
+- The mental model you now hold — the shallow agent as *the ReAct pattern, prebuilt* — is the thing
+  **L15** builds on top of. Ask its opening question and stop there: *what do you build when a
+  single tool-calling loop isn't the right shape?*
+
+[↑ Back to top](#the-config-surface-and-where-the-one-liner-ends)
