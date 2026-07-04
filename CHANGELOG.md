@@ -1,3 +1,9 @@
+## v0.3.0 (2026-07-04)
+
+### Feat
+
+- **L13**: regenerate remaining eval materials, Langfuse-forward
+
 ## v0.2.0 (2026-07-03)
 
 ### Feat
