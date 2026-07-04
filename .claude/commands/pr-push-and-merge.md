@@ -1,10 +1,10 @@
 ---
-description: Commit current work to a PR branch, squash-merge it, and re-pull main
+description: Commit current work to a PR branch, squash-merge it, re-pull main, and prune merged worktrees
 model: sonnet
 ---
 
-Commit the current working changes onto a PR branch, merge the PR, and sync `main`. Keep every
-message extremely concise.
+Commit the current working changes onto a PR branch, merge the PR, sync `main`, and clean up any
+worktree left behind by the merge. Keep every message extremely concise.
 
 1. **Sanity-check.** `git status` and `git diff` to see what's staged/unstaged. If there's
    nothing to commit and no open PR, stop and say so.
@@ -21,9 +21,24 @@ message extremely concise.
    1–3 bullet body, no filler. If a PR already exists, reuse it.
 6. **Squash-merge.** `gh pr merge --squash --delete-branch`. Use an extremely concise squash
    commit title (the PR title) and a terse bullet body — no restating the diff.
-7. **Re-pull main.** `git switch main && git pull --ff-only`.
+7. **Sync main.** Find the main checkout via `git worktree list` (the entry on the default
+   branch). If you're standing in it, `git switch main && git pull --ff-only`. If you're in a
+   separate worktree, don't `git switch main` (git forbids the default branch in a second
+   worktree) — sync it in place with `git -C <main-checkout> pull --ff-only`.
+8. **Remove the current worktree.** Only if this session is in a `.claude/worktrees/<name>/`
+   worktree. Prefer `ExitWorktree` with `action: "remove"` — it restores the working directory
+   and deletes the worktree dir + branch. Because the merge was a squash, that call may refuse
+   over the just-merged commits; once you've confirmed the PR merged, re-invoke with
+   `discard_changes: true`. If the worktree wasn't created by this session's `EnterWorktree`,
+   fall back to `git worktree remove <path>` run from the main checkout — never `--force`.
+9. **Prune other merged worktrees.** `git fetch --prune`, then for each other
+   `.claude/worktrees/*` worktree whose branch shows `: gone]` in `git branch -vv` (its PR
+   branch was deleted on merge), `git worktree remove <path>` — never `--force`, so a worktree
+   with uncommitted changes aborts and is left alone. Skip any whose upstream is still live.
+   Finish with `git worktree prune` to clear dangling admin entries.
 
-Report the merged PR number/URL and confirm `main` is up to date. If any step fails (e.g. merge
-conflict, failing required checks), stop and surface the error rather than forcing past it.
+Report the merged PR number/URL, confirm `main` is up to date, and list which worktrees were
+removed. If any step fails (e.g. merge conflict, failing required checks, a dirty worktree that
+won't remove cleanly), stop and surface the error rather than forcing past it.
 
 If `$ARGUMENTS` is provided, use it as the PR title / commit subject.

@@ -18,7 +18,7 @@ Each demo is a self-contained block with:
 - **What to highlight** — the moment(s) where the teacher should slow down and say the takeaway out loud.
 - **If the demo misbehaves** — graceful fallback for when the model (or the platform) surprises you (it will).
 
-The demos are ordered to match the five learning objectives. **Demo 1** hand-builds the case→scorer→run concept in ~15 lines *and then* uploads the cases as a Langfuse **Dataset** — the "concept first, then tooled" move; **Demo 2** turns two real L12 trace failures into dataset items with code-based **regression scores** (outcome vs. trajectory); **Demo 3** runs the dataset as Langfuse **Experiments** against Sonnet and Haiku, introduces non-determinism → pass rate, and compares the two runs in the Langfuse UI so the cheaper model's pass rate drops on screen; **Demo 4** reads real token cost off a Langfuse experiment trace, walks the scorer cost/judgment spectrum, and turns on **Langfuse's managed LLM-as-judge**. The optional bridge demo carries the *dataset* forward to L04/L11 (objective 5). They build on each other — every demo reuses Demo 1's dataset and the same handful of cases, never a fresh one. Run them in order on first delivery.
+The demos are ordered to match the five learning objectives. **Demo 1** hand-builds the case→scorer→run concept in ~15 lines *and then* uploads the cases as a Langfuse **Dataset** — the "concept first, then tooled" move; **Demo 2** turns two real L12 trace failures into dataset items with code-based **regression scores** (outcome vs. trajectory); **Demo 3** runs the dataset as Langfuse **Experiments** against Sonnet and Haiku, introduces non-determinism → pass rate, and compares the two runs in the Langfuse UI so the cheaper model's pass rate drops on screen; **Demo 4** reads real token cost off a Langfuse experiment trace, walks the scorer cost/judgment spectrum, and turns on **Langfuse's managed LLM-as-judge**. The optional bridge demo carries the *dataset* forward to the next agent students build (objective 5). They build on each other — every demo reuses Demo 1's dataset and the same handful of cases, never a fresh one. Run them in order on first delivery.
 
 > **The spine of L13: reinforce, don't re-teach — and lean on the platform students already have.** L13 sits directly on top of [L12 (Tracing)](../L12/objectives.md). Students already know how to read a trace, eyeball-diff two runs, *and send runs to Langfuse* — L13 does **not** re-derive any of that. It *formalizes* it: the ad-hoc "did this run look right?" of L12 becomes "does my agent pass a fixed dataset I defined in advance?", scored and compared in the same Langfuse. When a demo reads a trace or opens Langfuse, recall the L12 move in one line and move on; the new material is the **dataset**, the **regression score**, the **experiment comparison**, the **cost model**, and the **managed LLM-judge**.
 
@@ -55,7 +55,7 @@ The teacher should have, before the first demo starts:
 
 **What to highlight:**
 
-- The three terms, said out loud and pointed at in both the 15-line code *and* the Langfuse UI: **case** = dataset item, **scorer** = score, **runner** = experiment. Fix them now — they reappear in every lab and in L11.
+- The three terms, said out loud and pointed at in both the 15-line code *and* the Langfuse UI: **case** = dataset item, **scorer** = score, **runner** = experiment. Fix them now — they reappear in every lab and every later agent lesson.
 - **Langfuse is not magic.** The 15-line sketch *is* what an experiment does; the platform makes it durable and comparable, not different. This is the same "concept first, then tooled" move as L12's trace → Langfuse.
 - **An eval set can score the answer, the path, or both** — the trajectory scorer reads the L12 trace, which is *why* L12 came first. Both are just scores in Langfuse.
 
@@ -127,7 +127,7 @@ The teacher should have, before the first demo starts:
 **Pre-flight:**
 
 - One of Demo 3's experiment runs open in Langfuse, with per-call `usage` token counts visible on the traces.
-- **A managed LLM-as-judge evaluator prepared in Langfuse** — a small judge scoring a `final_text` for a quality a cheap check can't express (e.g. "did the answer acknowledge the failure gracefully?"). Configure it before class; keep it minimal and clearly flagged as "the L25 version adds rubrics and bias checks." <!-- *NEED INPUT (stage-2)*: confirm the one judged quality and the judge prompt/evaluator config. Recommendation: judge the flaky_fetch task's "gave up gracefully" answer — a genuinely fuzzy quality no substring check captures — so the judge earns its place. -->
+- **A managed LLM-as-judge evaluator prepared in Langfuse** — a small judge scoring a `final_text` for a quality a cheap check can't express (e.g. "did the answer acknowledge the failure gracefully?"). Configure it before class; keep it minimal and clearly flagged as "a later at-scale eval lesson adds rubrics and bias checks." <!-- *NEED INPUT (stage-2)*: confirm the one judged quality and the judge prompt/evaluator config. Recommendation: judge the flaky_fetch task's "gave up gracefully" answer — a genuinely fuzzy quality no substring check captures — so the judge earns its place. -->
 
 **Live script:**
 
@@ -140,7 +140,7 @@ The teacher should have, before the first demo starts:
 **What to highlight:**
 
 - **An eval run is not free** — it's N cases × K samples × several model calls each, plus the judge's own calls. "More cases / more samples" is a deliberate cost/confidence trade, not "max it out."
-- **Every scorer trades cost for judgment.** Exact assertions are cheap and dumb; humans are expensive and wise; the LLM-as-judge sits in between with its *own* error modes — even as a one-toggle Langfuse evaluator. The L13 judge is a one-screen illustration; L25 unpacks what an LLM-judge can and can't reliably score.
+- **Every scorer trades cost for judgment.** Exact assertions are cheap and dumb; humans are expensive and wise; the LLM-as-judge sits in between with its *own* error modes — even as a one-toggle Langfuse evaluator. The L13 judge is a one-screen illustration; a later lesson unpacks what an LLM-judge can and can't reliably score.
 - The token numbers you're reading are the *same* fields L12 told you to trace and L01 taught you to cost — now sitting in Langfuse. The eval cost model is those two lessons cashing out.
 
 **If the demo misbehaves:**
@@ -153,10 +153,10 @@ The teacher should have, before the first demo starts:
 If time allows, close on the practice the PRD asks L13 to *establish*. Don't build anything new — make the handoff concrete:
 
 1. State the rule on a slide and say it out loud: **when you build or change an agent, you add to or run your eval dataset.** The L13 Langfuse dataset plus the `common/evals.py` types are the seed every later agent plugs into.
-2. Preview L11: the *same* Langfuse **dataset** built today will run as an experiment against the **LangGraph shallow agent** students build in L11 — *same dataset, different implementation, did anything regress?* — read directly in Langfuse's run comparison. Already settled by the shared-`common/` decision (L11's lab imports `common/evals.py` and reuses the dataset). (In the mini cut the very next lesson is [L04 (workflows/DAGs)](../L04/objectives.md), whose deterministic flow is itself trivially evaluable — a natural place to reinforce the habit even earlier.)
-3. Signpost L25 as "where this scales" — multi-step graphs, retrieval quality (precision@k / recall@k), LLM-as-judge done rigorously, multi-agent systems, all on the same Langfuse. L13 is a *first pass* on purpose; naming the boundary keeps the lesson honest and the scope small.
+2. Preview the ratchet: the *same* Langfuse **dataset** built today can be re-run as an experiment against a *different* implementation of the agent — *same dataset, different implementation, did anything regress?* — read directly in Langfuse's run comparison. That's why the eval types live in the shared `common/evals.py`: every agent students build next can import them and re-run this dataset. (In the mini cut the very next lesson is [L04 (workflows/DAGs)](../L04/objectives.md), whose deterministic flow is itself trivially evaluable — a natural place to reinforce the habit even earlier. Note that **L11 comes *before* L13** and proves its L10-equivalence by eyeball; the repeatable eval is L13's job, not L11's lab's.)
+3. Signpost a later at-scale evaluation lesson as "where this scales" — multi-step graphs, retrieval quality (precision@k / recall@k), LLM-as-judge done rigorously, multi-agent systems, all on the same Langfuse. L13 is a *first pass* on purpose; naming the boundary keeps the lesson honest and the scope small.
 
-Don't teach LangGraph or the L25 machinery here — just land that the dataset students just built is the thing they'll carry forward, the same way L12's hand-rolled trace mapped onto Langfuse.
+Don't teach LangGraph or the at-scale eval machinery here — just land that the dataset students just built is the thing they'll carry forward, the same way L12's hand-rolled trace mapped onto Langfuse.
 
 <!-- *NEED INPUT (stage-2)*: include this bridge demo as the L13 closer, or fold its "carry it forward" message into Demo 3's ratchet beat? Recommendation: keep it as a short explicit closer — objective 5 is a *practice* objective, and a named handoff lands it better than a buried aside. -->
 
