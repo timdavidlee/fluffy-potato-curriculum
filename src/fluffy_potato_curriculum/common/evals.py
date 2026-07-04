@@ -1,4 +1,4 @@
-"""A tiny, hand-rolled evaluation harness for the agent loop (the L13 artifact).
+"""Evaluation vocabulary for the agent loop, plus a bridge into Langfuse (L13).
 
 L12 taught you to *read* a run — its trace. L13 teaches you to *judge* it: stop
 asking "did this one run look right?" and start asking "do my agent's runs pass a
@@ -6,28 +6,38 @@ fixed set of cases I defined in advance, and do they *still* pass after I change
 something?" An **eval set** is that fixed set of cases plus the machinery to run
 and score them.
 
-The harness is deliberately small — three nouns and one verb you can read
-end-to-end:
+The vocabulary is three nouns you can read end-to-end:
 
 - **case** (:class:`EvalCase`) — one input the agent runs on, paired with what
   "good" means for it (an expected answer, an expected tool trajectory, or both).
 - **scorer** (:class:`Scorer`) — a function that turns one run into a verdict
   (:class:`EvalResult`): pass/fail, a number, plus a comment.
-- **runner** (:func:`evaluate`) — runs every case (optionally K times), applies
-  the scorers, and reports a per-case **pass rate**.
+- **runner** — runs every case (optionally K times), applies the scorers, and
+  reports a per-case **pass rate**.
+
+**Where the runner lives is the L13 story.** :func:`evaluate` is a ~15-line
+hand-rolled runner kept here as a *concept sketch* — read it once so nothing about
+the platform is magic — but it is **not** the L13 deliverable. The real runner is a
+**Langfuse Experiment**: L13 uploads the cases as a Langfuse **Dataset**
+(:func:`upload_dataset`), launches experiments over it with the Langfuse SDK
+(K samples per item, and a Sonnet-vs-Haiku A/B), and records each scorer's verdict
+as a Langfuse **score** (:func:`emit_score`). Datasets, repeated experiments, and a
+managed LLM-as-judge are exactly the tedium a platform removes, so L13 spends its
+minutes in Langfuse, not this loop.
 
 The names are a deliberate, approximate match to real eval platforms so they
-transfer: LangSmith calls a case an *Example* (``inputs`` / ``reference_outputs``),
-a scorer an *Evaluator* returning ``{key, score}``, and the runner ``evaluate()``;
-Langfuse calls a case a *dataset item* with an expected output and a *score*.
-Exact field-name fidelity to any one vendor is **not** the goal — recognizable
-structure is. This is a *first pass*; L25 scales the same discipline to multi-step
-graphs, retrieval quality, LLM-as-judge done properly, and multi-agent systems.
+transfer: a case is a Langfuse *dataset item* (``input`` / ``expected_output``) —
+LangSmith calls it an *Example* (``inputs`` / ``reference_outputs``); a scorer is a
+Langfuse *score* — LangSmith an *Evaluator* returning ``{key, score}``; the runner
+is a Langfuse *Experiment* — LangSmith's ``evaluate()``. Exact field-name fidelity
+to any one vendor is **not** the goal — recognizable structure is. This is a *first
+pass*; L25 scales the same discipline (on the same Langfuse) to multi-step graphs,
+retrieval quality, LLM-as-judge done properly, and multi-agent systems.
 
-Promoted to ``common/`` (alongside ``agent_loop.py`` and ``tracing.py``) so the
-LangGraph lessons import the *same* harness and run the *same* cases against a new
-implementation — that import is how "evaluate every agent you build" becomes a
-habit you carry forward.
+Promoted to ``common/`` (alongside ``agent_loop.py`` and ``tracing.py``) so a later
+LangGraph lesson can import the *same* types and bridge and run the *same* cases
+against a new implementation — that import is how "evaluate every agent you build"
+becomes a habit you carry forward.
 """
 
 from __future__ import annotations
@@ -354,3 +364,81 @@ def compare(before: EvalReport, after: EvalReport, *, min_rate: float = 1.0) -> 
                 fixes.append((summary.case_id, key))
 
     return Comparison(regressions=regressions, fixes=fixes)
+
+
+# --- the Langfuse bridge: cases become a dataset, verdicts become scores -----
+#
+# The concept sketch above (evaluate / compare) runs a dataset in-process so you
+# can see the mechanism. L13's real store and runner are Langfuse: upload the same
+# cases once as a Dataset, then launch experiments over it from the notebook with
+# the Langfuse SDK, emitting each scorer's verdict as a score. These two helpers are
+# the seam between the hand-rolled vocabulary and the platform — nothing more.
+
+
+class LangfuseClient(Protocol):
+    """The slice of the Langfuse SDK the bridge calls — a structural type.
+
+    The real ``langfuse.Langfuse`` client satisfies this, and so does an offline
+    fake in tests. Typing against the Protocol (not the concrete SDK) means
+    importing this module — and running the concept sketch — needs no Langfuse
+    install and no live instance; only the two bridge helpers touch the platform.
+    """
+
+    def create_dataset(self, *, name: str, description: str | None = None) -> object: ...
+
+    def create_dataset_item(
+        self, *, dataset_name: str, id: str, input: Any, expected_output: Any
+    ) -> object: ...
+
+    def create_score(
+        self,
+        *,
+        name: str,
+        value: float | str,
+        trace_id: str,
+        comment: str | None = None,
+        data_type: str | None = None,
+    ) -> None: ...
+
+
+def upload_dataset(
+    client: LangfuseClient,
+    cases: Sequence[EvalCase],
+    *,
+    name: str,
+    description: str | None = None,
+) -> None:
+    """Create a Langfuse dataset named ``name`` and add one item per case.
+
+    Each :class:`EvalCase` becomes a Langfuse **dataset item**: ``case.inputs`` maps
+    to the item's ``input``, ``case.reference_outputs`` to its ``expected_output``,
+    and ``case.id`` to the item id — so re-uploading *upserts* by id rather than
+    duplicating. This is the "case -> dataset item" mapping, made once and reused by
+    every experiment that runs over the dataset.
+    """
+    client.create_dataset(name=name, description=description)
+    for case in cases:
+        client.create_dataset_item(
+            dataset_name=name,
+            id=case.id,
+            input=case.inputs,
+            expected_output=case.reference_outputs,
+        )
+
+
+def emit_score(client: LangfuseClient, result: EvalResult, *, trace_id: str) -> None:
+    """Log one scorer's :class:`EvalResult` as a Langfuse score on a traced run.
+
+    Maps the verdict straight across: ``result.key`` becomes the score name,
+    ``result.score`` its value, ``result.comment`` its comment. A ``bool`` score is
+    tagged ``"BOOLEAN"`` and a numeric one ``"NUMERIC"`` so Langfuse aggregates it
+    correctly — a pass *rate* across an experiment's K samples. ``trace_id`` is the
+    id of the run's Langfuse trace, the same run L12's tracing produced.
+    """
+    client.create_score(
+        name=result.key,
+        value=result.score,
+        trace_id=trace_id,
+        comment=result.comment,
+        data_type="BOOLEAN" if isinstance(result.score, bool) else "NUMERIC",
+    )

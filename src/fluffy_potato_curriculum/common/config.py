@@ -41,9 +41,12 @@ class Settings(BaseSettings):
     anthropic_api_key: str | None = None
     openai_api_key: str | None = None
 
-    # Self-hosted Langfuse tracing (introduced in L12, reused by the LangGraph
-    # lessons L11 and L15+). All optional: when unset, tracing is simply skipped and
-    # the code runs unchanged — see `langfuse_configured()` and the L12 notebooks.
+    # Self-hosted Langfuse (introduced in L12 for tracing; L13 reuses the same
+    # instance for eval datasets, experiments, and scores). Optional at load time so
+    # the object always builds. Two access patterns sit on top of these fields:
+    # `langfuse_configured()` for the opt-in tracing paths (L04/L05/L12) that run
+    # unchanged when the keys are absent, and `require_langfuse()` for L13, whose
+    # notebooks *hard-require* a live instance (there is no offline eval fallback).
     langfuse_public_key: str | None = None
     langfuse_secret_key: str | None = None
     langfuse_host: str | None = None
@@ -67,6 +70,39 @@ def langfuse_configured() -> bool:
     return bool(
         settings.langfuse_public_key and settings.langfuse_secret_key and settings.langfuse_host
     )
+
+
+def require_langfuse() -> tuple[str, str, str]:
+    """Return the Langfuse ``(host, public_key, secret_key)``, or raise if unset.
+
+    L13's eval notebooks require a live, reachable Langfuse instance — datasets,
+    experiments, and scores all live on the platform, with no offline fallback — so
+    they call this at the top and fail fast with an actionable message when the
+    cohort instance isn't configured. This is the hard-requirement sibling of
+    :func:`langfuse_configured` (which the opt-in L04/L05/L12 tracing paths use to
+    *skip* Langfuse silently when it's absent).
+    """
+    settings = get_settings()
+    missing = [
+        name
+        for name, value in (
+            ("LANGFUSE_HOST", settings.langfuse_host),
+            ("LANGFUSE_PUBLIC_KEY", settings.langfuse_public_key),
+            ("LANGFUSE_SECRET_KEY", settings.langfuse_secret_key),
+        )
+        if not value
+    ]
+    if missing:
+        raise RuntimeError(
+            f"Langfuse is not configured: {', '.join(missing)} not set. L13's eval "
+            "notebooks require a live Langfuse instance. Add these to your environment "
+            "or to a `.env` file at the repo root (see `.env.example`) before running."
+        )
+    # The missing-list is empty, so all three are non-empty strings.
+    assert settings.langfuse_host is not None
+    assert settings.langfuse_public_key is not None
+    assert settings.langfuse_secret_key is not None
+    return settings.langfuse_host, settings.langfuse_public_key, settings.langfuse_secret_key
 
 
 def require_anthropic_key() -> str:
