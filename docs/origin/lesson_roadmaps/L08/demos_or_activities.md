@@ -20,9 +20,9 @@ The demos are ordered to match the four learning objectives from [objectives.md]
 
 The teacher should have, before the first demo starts:
 
-- A working REPL or notebook with the project's Claude SDK setup (per the project's `uv` env).
+- A working REPL or notebook with LangChain's `ChatAnthropic` client (the framework client carried through L03/L07), loaded via the `common.config` seam (per the project's `uv` env).
 - A small **demo harness** that wraps every model call to print: the model's tool-use request (name + arguments), the tool result (or error) handed back, the next model turn, and per-call `input_tokens` / `output_tokens` / wall-clock time. This is the same kind of wrapper used in [L06's demos](../L06/demos_or_activities.md), extended to also surface the tool call/result pair. Without this wrapper, the L08 demos read as "the model did something" instead of "the model picked *this* tool with *these* arguments because of *that* description."
-- All four demo tools below pre-implemented as Python functions, registered with the SDK, and ready to swap in/out by name. Each demo intentionally swaps the *same* tool's description, schema, or error shape — *not* the implementation — so the contrast lands cleanly.
+- All four demo tools below pre-implemented as typed Python functions and bound with `model.bind_tools([...])`, which infers each tool's JSON definition from the function's name, docstring, and type hints — ready to swap in/out by name. Each demo intentionally swaps the *same* tool's description, schema, or error shape — *not* the implementation — so the contrast lands cleanly.
 - A second tool registry pre-loaded with the **bad-design variants** (cryptic name, sparse description, loose schema, opaque errors). The teacher should be able to flip between "good" and "bad" registries with a single line.
 - A way to display the active tool's full schema (name, description, parameter list with descriptions) on screen alongside the model's output — so the audience sees what the model is reading when it decides to call the tool.
 
