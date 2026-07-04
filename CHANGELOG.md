@@ -1,3 +1,9 @@
+## v0.4.0 (2026-07-04)
+
+### Feat
+
+- **L12**: re-point tracing materials onto the L10 graph producer (#71)
+
 ## v0.3.0 (2026-07-04)
 
 ### Feat
