@@ -147,8 +147,9 @@ estimated duration: 25
 
 ### slide 5.2 What's next
 
-- Next you'll **build** the mechanism: a minimal JIT loader on the agent you already own
+- Next you'll **build** the mechanism on the agent you already own: your L11 `create_agent`
+  shallow agent, given one `load_skill` tool and the catalog as its system prompt
   ([L2203_lecture.ipynb](L2203_lecture.ipynb)), and watch the body load only when the description
   fires.
 - Then you'll decide **where a capability belongs** and meet the **real** Agent Skills format
-  ([L2205_lecture.md](L2205_lecture.md)) — the production version of what you hand-built.
+  ([L2205_lecture.md](L2205_lecture.md)) — the production version of what you built.

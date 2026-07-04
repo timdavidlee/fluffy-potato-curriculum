@@ -22,9 +22,9 @@ The demos are ordered to match the four learning objectives. Demo 1 lands the ta
 
 The teacher should have, before the first demo:
 
-- **The L11 shallow agent** (the LangGraph agent students built) running on Sonnet 4.6, with the shared tools from `common/tools.py` (`calculator`, `lookup`, `flaky_fetch`). Skills attach to *this* agent — the message is "add just-in-time capability to the agent you already built," not a new toy. <!-- *NEED INPUT*: confirm the demos host on the L11 shallow agent (vs. the L10 hand-rolled loop). Recommendation: L11, so the lesson reads as the capstone of the agent the students just finished. -->
-- **A context/token readout** — the L12 trace (or the shared Langfuse instance) showing tokens-per-call and what's in the context window, so "always-on vs. just-in-time" is *visible in numbers*, not asserted.
-- **A minimal hand-rolled JIT skill loader**: the agent is handed a registry of skills as `{name, description}` only; a `load_skill(name)` step reads the *full* markdown body into context, and the model is told to call it when a skill's description matches the task. The teacher writes the core of this live in Demo 3; keep a completed version in a sibling file to paste if live-coding falls behind. <!-- *NEED INPUT*: tooling — hand-rolled JIT loader for the concept (no new dep), then a real `.claude/skills/` `SKILL.md` for the "production" reveal (uses the already-present `claude` tooling). Mirrors the objectives open question; confirm no new runtime dep is needed. -->
+- **The L11 `create_agent` shallow agent** (the LangGraph agent students built) running on Sonnet 4.6. Skills attach to *this* agent — the message is "add just-in-time capability to the agent you already built," not a new toy. **(Resolved: host on the L11 `create_agent` agent, not the L10 hand-rolled loop — L11 already packaged the loop, so re-deriving one here would regress.)**
+- **A context/token readout** — reconstructed from the agent's returned `messages` (the L11 run-inspection idiom) with a `rough_tokens` (~4 chars/token) helper: the context size *before each model turn*, so "always-on vs. just-in-time" is *visible in numbers*, not asserted. Offline and deterministic; no Langfuse dependency in the mini cut.
+- **A minimal JIT skill loader built on `create_agent`**: the agent gets the skill catalog (`{name, description}` for every skill) as its **system prompt** and a single `load_skill(name)` **tool** that reads the *full* markdown body into context on demand. The loop/routing/bookkeeping are `create_agent` freebies (L11) — the only new pieces are the `load_skill` tool and the catalog prompt. The teacher writes those live in Demo 3; keep a completed version in a sibling file to paste if live-coding falls behind. **(Resolved: no new runtime dep — `langchain`/`langgraph` are already present from L11, and the whole demo runs offline on the scripted `FakeModel`, which already drives `create_agent`.)**
 - **Two prepared skills as markdown files** (Anthropic Agent Skills `SKILL.md` shape — YAML frontmatter `name` + `description`, markdown body, optional bundled script):
   - A **good** skill, e.g. `refund-policy` — description that clearly states *when* it applies, a body of step-by-step instructions, and a tiny supporting script (e.g. compute a refund amount) the skill tells the agent to run.
   - A **deliberately vague** copy of the same skill whose description is too generic to trigger reliably (used in Demo 2 to show the failure).
@@ -90,12 +90,12 @@ The teacher should have, before the first demo:
 **Pre-flight:**
 
 - Five skills registered (the refund one plus four more stubs with distinct descriptions).
-- The hand-rolled JIT loader (write its core live here).
+- The `create_agent` JIT loader (write its core live here): the catalog goes in the system prompt, `load_skill` is the one tool.
 
 **Live script:**
 
-1. Live-code the loader's core: the agent sees only `{name, description}` for all five skills. Read the context token count — five one-line descriptions, cheap.
-2. Pose a task matching one skill. Watch the model select it; the *body* loads into context for that turn only (token count jumps, then the contrast is clear); the *script* runs only when actually invoked. Narrate the three levels of disclosure: name+description → body → script.
+1. Live-code the loader's core: `create_agent(model, [load_skill], system_prompt=catalog)` — the agent sees only `{name, description}` for all five skills in its system prompt. Read the context token count — five one-line descriptions, cheap. Say out loud what you did *not* write: no loop, no routing, no message appends — those are the L11 `create_agent` freebies.
+2. Pose a task matching one skill. Run the agent and walk its returned `messages`: the model calls `load_skill`, the *body* enters context as a `ToolMessage` for that turn (the reconstructed per-turn token count jumps, then the contrast is clear). Narrate the three levels of disclosure: name+description → body → script.
 3. **The money slide:** put "5 skills, JIT-loaded" next to "5 tools, all schemas always-on" and compare the always-on context size. This is L07's tool-cost problem, solved.
 4. Name the costs you *do* pay: an extra model turn to load, and the risk the model fails to load a skill it needed (Demo 2's failure mode).
 
@@ -137,7 +137,7 @@ The teacher should have, before the first demo:
 
 If time allows, close the loop: open a real skill from this repo (`.claude/skills/author-lesson-roadmap/`) and show that it's the *same* shape students just hand-built — frontmatter `name` + `description`, a markdown instruction body, supporting structure — loaded just-in-time by Claude Code. Punchline: **the JIT loader you wrote in Demo 3 is what the Agent SDK / Claude Code does for real; the curriculum you're taking is itself built from skills.**
 
-Don't teach the SDK's mechanics — just land that the hand-rolled concept and the production product are the same idea, the way L12's hand-rolled trace mapped to Langfuse and L11's loop mapped to LangGraph.
+Don't teach the SDK's mechanics — just land that the loader you built and the production product are the same idea, the way L12's hand-rolled trace mapped to Langfuse and L11's hand-rolled loop mapped to LangGraph's `create_agent`.
 
 <!-- *NEED INPUT*: include this capstone demo as the mini-cut closer, or hold the real-Agent-Skills reveal for a lab? Recommendation: include it — it's the satisfying "you built the real thing" capstone moment for the final mini-cut lesson. -->
 
@@ -154,9 +154,9 @@ For the full-course track only (L24 follows): one line and a sketch — a *subag
 
 ## Open authoring questions
 
-- <!-- *NEED INPUT*: tooling — hand-rolled JIT loader for the concept, then a real `.claude/skills/` `SKILL.md` for the production reveal. Confirm no new runtime dep is needed (the real-skills demo uses the already-present `claude` tooling). Mirrors the objectives open question. -->
+- **Tooling (resolved): LangGraph-native.** Build the JIT loader on the L11 `create_agent` shallow agent (`load_skill` tool + catalog system prompt), then reveal a real `.claude/skills/` `SKILL.md` as the production form. No new runtime dep (`langchain`/`langgraph` already present from L11); runs offline on the scripted `FakeModel`. See [objectives.md](objectives.md) open-questions for the full rationale.
 - <!-- *NEED INPUT*: exact `SKILL.md` format (frontmatter name+description + markdown body + optional bundled scripts, matching `.claude/skills/`), and whether the demo skill ships a runnable supporting script or is instructions-only. Mirrors the objectives open question. -->
-- <!-- *NEED INPUT*: confirm the demos host on the L11 shallow agent with the shared `common/tools.py` tools, for continuity with the rest of the mini cut. -->
-- <!-- *NEED INPUT*: how to make the token-savings payoff vivid — read real counts off the L12 trace / Langfuse, or a prepared side-by-side slide? Recommendation: live trace numbers, with a slide as fallback. -->
+- **Host agent (resolved): the L11 `create_agent` shallow agent.** The demo skills use their own small support-desk surface via `load_skill` rather than reusing `calculator`/`lookup`/`flaky_fetch` — the continuity is the *same `create_agent` object*, not the specific tool set.
+- **Token-savings payoff (resolved):** reconstruct per-turn context size from the agent's returned `messages` (offline, `rough_tokens`), backed by the money-slide estimate. No Langfuse in the mini cut.
 - <!-- *NEED INPUT*: depth/duration target for this capstone lesson (full ~2hr vs. lighter), since it is the one mini-cut lesson "added by request" and not anchored to a core course objective. Mirrors the objectives open question. -->
 - <!-- *NEED INPUT*: include the optional capstone (real Agent Skills) in the lecture, or move it to a lab? Recommendation: include it as the closer. -->
