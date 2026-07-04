@@ -13,11 +13,15 @@ membership there, not by where it lives on disk.
   stack. The gate to start `L01` is K06's "does the stack come up?" check. See the design
   todo [`docs/todos/2026-07-03-2211-k-prework-track.md`](../../../docs/todos/2026-07-03-2211-k-prework-track.md).
 - **Full** — the master 25-lesson plan.
-- **Mini** — the condensed ~32 hr cut (14 lessons): the five-objective core
-  (tool design, when-to-use-a-tool, shallow LangGraph agent, eval, tracing)
-  plus the early graph ramp (L03–L05, foundational for everything after),
-  chain-of-thought prompting (L06), and Skills (L22) and skill patterns &
-  composition (L23) by explicit request. Every mini lesson is also a full lesson.
+- **Mini** — the condensed ~32 hr cut (14 lessons + the L50 project capstone): the
+  five-objective core (tool design, when-to-use-a-tool, shallow LangGraph agent,
+  eval, tracing) plus the early graph ramp (L03–L05, foundational for everything
+  after), chain-of-thought prompting (L06), and Skills (L22) and skill patterns &
+  composition (L23) by explicit request. It **closes with L50, the agent
+  mini-project walkthrough** — a hands-on, end-to-end capstone build. Every mini
+  lesson is also a full lesson **except L50**, which is a mini-only capstone for now
+  (a deliberate, flagged exception to mini ⊆ full — see the `<need input>` note in
+  the PRD on whether to promote it to `full`).
 
 See [docs/origin/CURRICULUM_PRD.md](../../../docs/origin/CURRICULUM_PRD.md) for
 the full rationale (master table + "Condensed Mini Lesson Plan"). Keep that PRD
@@ -68,13 +72,18 @@ Prework order: K01 → K02 → K03 → K04 → K05 → K06.
 | L23 | Skill patterns & composition                                  |  ✅  |  ✅  |
 | L24 | Multi-agent / subagent architecture (stretch)                 |      |  ✅  |
 | L25 | Evaluation revisited                                          |      |  ✅  |
+| L50 | Agent mini-project: end-to-end walkthrough (capstone)         |  ✅  |      |
 
-Mini teaching order: L01 → L02 → L03 → L04 → L05 → L06 → L07 → L08 → L10 → L11 → L12 → L13 → L22 → L23.
+L50 is the mini-track project capstone — a proctor-led, end-to-end walkthrough (not lecture+lab),
+numbered L50 so it parks at the end with room to slot future lessons before it. Mini-only for now;
+see the PRD note on whether it also joins `full`.
+
+Mini teaching order: L01 → L02 → L03 → L04 → L05 → L06 → L07 → L08 → L10 → L11 → L12 → L13 → L22 → L23 → L50.
 
 ## Course wrap-ups
 
 Each track closes with a wrap-up doc (what was covered · takeaways · where to go next) — these,
 not any lesson, own the "end of the course" framing:
 
-- [MINI_WRAPUP.md](MINI_WRAPUP.md) — closes the mini cut (read after L23).
+- [MINI_WRAPUP.md](MINI_WRAPUP.md) — closes the mini cut (read after the L50 capstone).
 - [FULL_WRAPUP.md](FULL_WRAPUP.md) — closes the full course (read after L25).
