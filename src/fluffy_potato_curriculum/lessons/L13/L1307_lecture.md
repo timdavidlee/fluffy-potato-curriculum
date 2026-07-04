@@ -2,7 +2,7 @@
 
 ```yaml
 title: "L13 lecture: Carry the eval set forward"
-keywords: evaluation, practice, ratchet, carry forward, langgraph, L04, L11, L25, llm-as-judge, langfuse datasets
+keywords: evaluation, practice, ratchet, carry forward, langgraph, L04, L11, llm-as-judge, langfuse datasets
 estimated duration: 8
 ```
 
@@ -34,7 +34,7 @@ estimated duration: 8
 ### slide 2.2 L11 (shallow agents) — the ratchet's headline demonstration
 
 - text: in **L11** you rebuild the agent as a LangGraph graph. The handoff is the *practice*, not a file: bring the **same `EvalCase`s** you wrote today and run them against the new implementation.
-- text: *same cases, different implementation — did anything regress?* That is the cleanest possible demonstration of the ratchet, and it's already wired: L11's lab imports `common/evals.py`.
+- text: *same cases, different implementation — did anything regress?* That is the cleanest possible demonstration of the ratchet — you run the same cases against the L11 agent you build, reusing the `common/evals.py` types. (L11 itself comes *before* L13 and checks its L10-equivalence by eye; the repeatable eval is what you add here and carry forward — L11's own lab doesn't run it.)
 - diagram: two boxes — "L13 hand-rolled loop" and "L11 LangGraph agent" — both feeding the *same* `evaluate(...)` runner, which emits one pass-rate table per implementation, side by side.
 
 [↑ Back to top](#l13-lecture-carry-the-eval-set-forward)
@@ -44,9 +44,9 @@ estimated duration: 8
 ### slide 3.1 L13 is a first pass, on purpose
 
 - text: a tiny readable harness over the hand-rolled loop is *enough* to establish the habit. Naming the boundary keeps the lesson honest and the scope small.
-- table: what L13 deliberately leaves to L25.
+- table: what L13 deliberately leaves to a later, at-scale evaluation lesson.
 
-| L13 (first pass) | L25 (evaluation revisited) |
+| L13 (first pass) | later: evaluation at scale |
 | --- | --- |
 | one hand-rolled loop | multi-step LangGraph graphs: per-node vs. end-to-end metrics |
 | outcome + trajectory checks | retrieval quality for RAG (precision@k / recall@k) |
@@ -56,7 +56,7 @@ estimated duration: 8
 
 ### slide 3.2 The tooling forward pointer
 
-- text: the same self-hosted **Langfuse** you met in L12 has a *datasets / experiments* feature that stores eval runs and scores — the platform version of the `evaluate()` you hand-built. L13 name-drops it; L25 uses it.
+- text: the same self-hosted **Langfuse** you met in L12 has a *datasets / experiments* feature that stores eval runs and scores — the platform version of the `evaluate()` you hand-built. L13 name-drops it; a later at-scale eval lesson uses it.
 - text: the payoff of building the harness by hand first is the same as L12's: when you open the platform, the dataset items, scores, and experiments are the exact `EvalCase` / `EvalResult` / run structure you already wrote.
 - text: closing line: *"you built the minimal version by hand, so the real eval platform is just your harness, hosted — and every agent you build from here comes with an eval set."*
 
