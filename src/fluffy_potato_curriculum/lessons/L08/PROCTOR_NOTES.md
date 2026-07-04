@@ -14,12 +14,11 @@ Times are rough and assume a semi-technical student with basic Python who comple
 > by spending tokens. The labs map to the four subgoals: **L0804** → tool-or-no-tool; **L0806** →
 > name + schema design; **L0808** → error shapes; **L0810** → idempotency + side effects.
 >
-> **Why the demos use the raw Anthropic SDK and not `potato_llm`:** the course's `potato_llm` seam is
-> text-only — its `Message` cannot carry `tool_use`/`tool_result` blocks, which L08's demos need in
-> order to watch the model *choose* and *call* tools. So the L08 demo notebooks call the raw SDK
-> directly (the key still loads through `common.config`), exactly as L07 does. The labs don't touch
-> the SDK at all. (Open course question, same as L07: extend `potato_llm` to model tool blocks, or
-> keep L07+ demos on the raw SDK.)
+> **Which client:** L08's demos use LangChain's `ChatAnthropic` (the framework client from L03/L07).
+> A tool is a plain typed function — `model.bind_tools([fn])` infers the definition from its name,
+> docstring, and type hints; the model's choice comes back in `AIMessage.tool_calls`, and results go
+> back as a `ToolMessage`. The key still loads through `common.config` (`require_anthropic_key`). The
+> labs don't call a model at all — they're pure-Python design exercises.
 >
 > L08 assumes the L07 mechanics work. If a student is shaky on the tool-call round-trip, redirect to
 > the L07 lab before this lesson — L08 does **not** re-teach the protocol.
@@ -74,14 +73,19 @@ Times are rough and assume a semi-technical student with basic Python who comple
 - **Time:** ~8 min.
 - **Key point:** the audience is the model, not a human reading the source.
 
-## L0806_lab problem 2 — Tighten the parameter schema
+## L0806_lab problem 2 — Type the function (and read its inferred schema)
 
-- **Common gotchas:** leaving `level` optional (it should be required); using a free string for `level`
-  instead of an `enum`; dropping the per-field descriptions (the rule of thumb: each carries an example
-  or a constraint).
-- **Unblockers:** "`required` = both fields; `level` gets `\"enum\": [\"low\", \"medium\", \"high\"]`;
-  every property gets a `description`."
+- **Common gotchas:** giving `level` a default (that makes it *optional* — both fields should be
+  required, so no defaults); typing `level` as a plain `str` instead of `Literal["low","medium","high"]`
+  (the `Literal` is what becomes the enum); dropping the `Annotated` per-field descriptions (rule of
+  thumb: each carries an example or a constraint); forgetting `set_priority.__doc__ = RICH_DESCRIPTION`.
+- **Unblockers:** "Both params `Annotated[..., 'desc']` with no defaults; `level`'s type is
+  `Literal['low','medium','high']`; then `TIGHT_SCHEMA = inferred_schema(set_priority)['parameters']`."
+  The printed schema should show `required: [ticket_id, level]`, a `level.enum`, and a `description` on
+  each property.
 - **Time:** ~7 min.
+- **Key point:** they never hand-write JSON — `bind_tools` infers it. A good schema is a well-typed
+  function.
 
 ## L0806_lab problem 3 — Validate sample arguments against your schema
 
