@@ -92,5 +92,8 @@ name = "cz_conventional_commits"
 version = "0.3.0"
 version_files = ["pyproject.toml:^version"]
 tag_format = "v$version"
+# Create annotated (not lightweight) tags so CI's `git push --follow-tags`
+# actually ships them — lightweight tags are silently skipped by --follow-tags.
+annotated_tag = true
 update_changelog_on_bump = true
 major_version_zero = true
