@@ -23,7 +23,12 @@ Purpose is to practice using concepts and langgraph frameworks to deliver a smal
 The minimum bar every project must meet:
 
 - exercises at least one concept from that week's lessons
-- at least a shallow agent implementation
+- at least a shallow agent implementation (or StateGraph)
+- A dataset sized for the build: a few hundred examples for application
+  development, plus another few hundred held out as a hold-out set. The
+  hold-out set should contain cases that relate to the brief but were **not**
+  present in the development set — this tests the agent's robustness to
+  unseen inputs.
 - A runnable artifact (notebook or script) reproducible from a single
   command.
 - A short README following the structure below.
