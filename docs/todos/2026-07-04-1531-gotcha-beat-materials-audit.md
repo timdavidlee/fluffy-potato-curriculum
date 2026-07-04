@@ -97,7 +97,25 @@ Roadmap beat lives in `docs/origin/lesson_roadmaps/<L>/demos_or_activities.md`.
 - [ ] **L08 — designing tools** (FULL Demo 5, incl. new live "tool-soup"). Assets:
       `L0802_lecture.md` (already mentions anti-patterns), `L0803/L0805/L0807/L0809_lecture.ipynb`,
       `L08*_lab_*`. Highest-value target — the roadmap grew a genuinely new demo, so check
-      whether a lecture notebook needs the live tool-soup beat added. **Finding:**
+      whether a lecture notebook needs the live tool-soup beat added.
+      **Finding: `new-demo` → new `L0811_lecture.ipynb` (Demo 5). Top carry-over priority.** The
+      materials stop at Demo 4 — there is **no Demo 5 notebook** (item numbering ends at the `L0810`
+      lab). BUT the scope is smaller than "a whole new demo": per the roadmap, only the **tool-soup**
+      beat is new live content; the other three anti-patterns are Demos 1–4's failures *named*, and
+      those are **already delivered**. Naming recap already present: `L0802_lecture.md` §8.1 "The five
+      traps" names over-tooling ("more tools = more capable → the opposite"), vague-description, and
+      opaque-errors; §4.4 "two extremes to avoid" covers the god-tool/loose-schema. The **flip-back
+      bad-design fixtures** Demo 5 reuses all exist already: sparse/misleading description in `L0805`
+      (Demo 2), loose schema + opaque errors in `L0807`/`L0809` (Demos 3–4). **The one true gap = the
+      live tool-soup beat:** no ~8-overlapping-tool registry (`lookup_user`/`find_user`/`get_customer`/
+      `search_accounts`/`user_info`/`whois` + 2 distractors) exists anywhere, and no live
+      selection-degradation run. **Action:** build `L0811_lecture.ipynb` = (1) the **new soup-registry
+      fixture** + the live "What's Alex's email?" selection-degradation run on Sonnet 4.6 → Haiku 4.5
+      (the only genuinely new asset), (2) flip back the *existing* Demo 2–4 bad-design variants to name
+      the other three, (3) close on the payoff — in the L23 Demo 5 shape. **Assumptions to support:**
+      Haiku 4.5 client (course cheap-contrast model, available) and a capped/re-runnable live selection
+      (variance budget, mirror L07 Demo 4). Soup registry is L08-specific teaching material → keep it in
+      the lesson (like L23's `example_skills/`), don't promote to `common/`.
 - [ ] **L10 — agent loop** (coda, names 3). Assets: `L1002_lecture.md`, `L1003/L1006_lecture.ipynb`,
       `L1004/L1005_lab_*`. Confirm the infinite-loop beat stays capped (never actually hangs).
       **Finding:**
