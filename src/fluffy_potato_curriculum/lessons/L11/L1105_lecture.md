@@ -32,8 +32,8 @@ agent = create_agent(
 
 | Knob | What it controls | L10 equivalent |
 | --- | --- | --- |
-| **model** | which chat model runs the `agent` node | the `model` you passed to `run(...)` |
-| **tools** | the callables the model may invoke | the `tools` dict the loop dispatched |
+| **model** | which chat model runs the `agent` node | the `model` you bound in the `agent` node |
+| **tools** | the callables the model may invoke | the `TOOLS` list your `ToolNode` ran |
 | **system prompt** | the standing instruction prepended to the conversation | the system message you prepended by hand |
 
 - **That's it.** Three knobs. Everything else `create_agent` handles.
@@ -51,21 +51,21 @@ agent = create_agent(
 
 ## section 2. What you did NOT have to touch
 
-### slide 2.1 The loop and the state are managed for you
+### slide 2.1 The graph and the state are managed for you
 
 - State plainly what a shallow agent *doesn't* configure and doesn't need to:
-  - **no `while` loop** — the run driver is the framework's;
-  - **no message-history bookkeeping** — the append after each tool call is automatic;
-  - **no reducer, no state schema** — the message list is threaded for you;
-  - **no manual step counter** — the recursion / step limit is built in.
-- Contrast with L10, where **all** of that was yours to write. That is the trade: you give up the
+  - **no graph to wire** — the `agent` node, the `ToolNode`, and the `tools → agent` back-edge are the framework's;
+  - **no `route` to write** — the conditional exit is the prebuilt `tools_condition`;
+  - **no `add_messages` reducer, no state schema** — the message list is threaded for you (`MessagesState`);
+  - **no message-history bookkeeping** — the `ToolMessage` append after each tool call is automatic.
+- Contrast with L10, where **all** of that was yours to wire. That is the trade: you give up the
   knobs, you get the boilerplate for free.
 
-### slide 2.2 The step cap is still there, just not yours to write
+### slide 2.2 The step cap is still there, just a default now
 
-- You didn't write a `max_steps` counter — but the cap still exists as the framework's
-  **recursion / step limit** (LangGraph's default is 25 steps; set `recursion_limit` in the run
-  config to change it).
+- In L10 you set `recursion_limit` on `invoke` yourself; here you don't have to — the cap still
+  exists as the framework's **recursion / step limit** (LangGraph's default is 25 steps; set
+  `recursion_limit` in the run config to change it).
 - A runaway agent still trips it, and tripping it is **still a signal worth investigating** — the
   L10 lesson didn't go away, it moved inside the framework.
 

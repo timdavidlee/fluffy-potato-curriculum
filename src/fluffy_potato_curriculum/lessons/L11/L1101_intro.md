@@ -17,13 +17,14 @@ estimated duration: 10
 
 ## Where this lesson sits
 
-In [L10](../L10/L1001_intro.md) you built an agent from nothing: a **model → tool → model**
-loop in plain Python. You wrote the `while`, the `if reply.tool_calls` branch, the
-`messages.append(...)` bookkeeping, the `max_steps` cap, and the tool dispatch — every piece by
-hand. The one sentence you left L10 with was:
+In [L10](../L10/L1001_intro.md) you built an agent from nothing: a **model → tool → model** loop,
+wired by hand as a cyclic **`StateGraph`**. You wrote the `agent` node, the `route` conditional
+edge, the `ToolNode`, the `add_messages` reducer, and the `tools → agent` **back-edge** — every
+piece by hand. The one sentence you left L10 with was:
 
-> *An agent is a loop around a stateless model: call the model, run the tool it asked for, feed
-> the result back, repeat — until the model stops asking or a cap you chose fires.*
+> *An agent is a cyclic graph around a stateless model: an `agent` node calls the model, a `route`
+> edge asks "any tool calls?", a `tools` node runs them, and a back-edge loops around — until
+> `route` returns `END` or `recursion_limit` fires.*
 
 L11 cashes in the punchline L10's last demo previewed: **"every framework you'll meet is a
 fancier version of the loop you wrote."** Here is that fancier version. LangChain's
@@ -37,8 +38,9 @@ agent = create_agent(model, [calculator, lookup, flaky_fetch], system_prompt=...
 ```
 
 That single line is the whole lesson. The control flow does not change — it is still model → tool
-→ model until termination. What changes is **who writes the loop**: the run driver, the tool-call
-routing, the message-history bookkeeping, and the step cap are now the framework's job, not yours.
+→ model until termination. What changes is **who wires the graph**: the nodes and back-edge, the
+tool-call routing, the message-history bookkeeping, and the step cap are now the framework's job,
+not yours.
 
 ## What "shallow" means
 
@@ -66,10 +68,11 @@ L10 loop, packaged.**
    finish). That **back-edge is the cycle**, and *the cycle is the agent* — it is the one thing
    that turned the acyclic workflows of [L04](../L04/objectives.md)/[L05](../L05/objectives.md)
    into an agent.
-3. **The framework gives you the boring parts for free.** The run-driver loop (L10's `while`), the
-   routing (L10's `if reply.tool_calls`), the message append (L10's manual `messages.append`), a
-   recursion/step limit (L10's `max_steps`), and tool execution (L10's dispatch) — all supplied.
-   That convenience *is* the value proposition.
+3. **The framework gives you the boring parts for free.** The graph wiring (L10's `StateGraph` +
+   `tools → agent` back-edge), the routing (L10's hand-written `route`, now the prebuilt
+   `tools_condition`), the message accumulation (L10's `add_messages` reducer), a recursion/step
+   limit (L10's `recursion_limit`), and tool execution (L10's `ToolNode`) — all supplied. That
+   convenience *is* the value proposition.
 
 ## A note on the client you'll see
 
@@ -89,8 +92,8 @@ present. Swap the model object, keep the agent — the same interchangeability y
 ## Where the one-liner ends
 
 `create_agent`'s config surface for a shallow agent is small and worth memorizing: the **model**,
-the **tools**, and the **system prompt**. That's it — the message-history state and the loop are
-managed for you (no reducer, no `while`, no state schema). The last thing L11 teaches is *when the
+the **tools**, and the **system prompt**. That's it — the message-history state and the graph are
+managed for you (no `add_messages` reducer to declare, no nodes or edges to wire). The last thing L11 teaches is *when the
 one-liner stops being enough*: the moment your control flow stops being a single loop and you need a
 second model for one step, a branch that isn't just tool-or-finish, a custom node, or state beyond
 the message list. That is exactly when you drop below `create_agent` to an explicit `StateGraph` —

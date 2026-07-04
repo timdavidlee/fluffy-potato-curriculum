@@ -1,120 +1,140 @@
 # L10 Proctor Notes
 
 Notes for whoever runs the L10 labs. One section per problem, keyed by lab id and problem number.
-Times are rough and assume a semi-technical student with basic Python who completed L01–L08.
+Times are rough and assume a semi-technical student with basic Python who completed L01–L09.
 
 > **Both L10 labs are OFFLINE — no API key needed.** They drive a *scripted stub model* (`FakeModel`),
-> so termination, the `max_steps` cap, and tool-failure handling are fully deterministic and run the
+> so the cycle, the `recursion_limit`, and tool-failure handling are fully deterministic and run the
 > same way every time. The only **live** notebook in L10 is the [L1006](L1006_lecture.ipynb) demo
 > (a real LangChain chat model, `ANTHROPIC_API_KEY` required) — that's a teacher demo, not a lab.
 >
-> **Why a stub model?** L10 is about LOOP CONTROL FLOW (iterate model→tool→model until done;
-> termination; the cap; failure handling). Scripting the model is the cleanest way to exercise that
-> offline and reproducibly — the same mocking stance as the project's tests. The `FakeModel` mimics a
-> LangChain chat model (`.bind_tools()` then `.invoke()` → a scripted `AIMessage`), so the loop code
-> students write is identical to the live version in L1006.
+> **Why a stub model?** L10 is about GRAPH CONTROL FLOW (the model→tool→model cycle; termination; the
+> cap; failure handling). Scripting the model is the cleanest way to exercise that offline and
+> reproducibly — the same mocking stance as the project's tests. The `FakeModel` mimics a LangChain
+> chat model (`.bind_tools()` then `.invoke()` → a scripted `AIMessage`), and the prebuilt `ToolNode`
+> runs the *real* tools against those scripted calls, so the graph students wire is identical to the
+> live version in L1006.
 >
-> **Model-agnostic through LangChain.** From L03 on, the course drives every model through a LangChain
-> chat model, not the raw Anthropic SDK — the loop only touches `.bind_tools()` / `.invoke()` /
-> `AIMessage.tool_calls` / `ToolMessage`, so the same code runs against `ChatAnthropic`, `ChatOpenAI`,
-> or the offline `FakeModel`. L1006 builds a real model with `init_chat_model("anthropic:…")`; the key
-> loads through `common.config` (`get_settings().anthropic_api_key`), never hard-coded.
+> **New in L10 vs. L04/L05: the back-edge.** Students have built forward-only graphs (L04 `StateGraph`,
+> L05 conditional edge). The one new primitive is `add_edge("tools", "agent")` — the edge that loops
+> back and makes the graph a **cycle**. If a student is shaky on the L05 conditional edge or the L07
+> single tool round-trip, redirect there first; the agent is just a conditional edge that loops.
 >
-> The labs map to the L10 subgoals: **L1004** → build the model→tool→model loop + reason about
-> termination; **L1005** → handle tool failures at the loop level.
+> **Two `add_messages` gotchas to pre-empt (they bite the whole cohort):**
+> 1. The state's `messages` field **must** use `Annotated[list, add_messages]`. Without the reducer,
+>    each node *overwrites* the list (L04 behavior) and the conversation never accumulates — the graph
+>    breaks in confusing ways.
+> 2. `add_messages` de-duplicates messages **by id**. That is why the L1004 runaway scripts *distinct*
+>    `lookup` turns (`r0`, `r1`, …): repeating the *same* `AIMessage` object would be de-duped and the
+>    loop would not actually run away. Call this out at P4.
+>
+> The labs map to the L10 objectives: **L1004** → wire the ReAct graph + reason about termination;
+> **L1005** → handle tool failures at the graph level with `ToolNode(handle_tool_errors=...)`.
 
-## L1004_lab problem 1 — Detect natural termination
+## L1004_lab problem 1 — Write `route` (the conditional edge)
 
-- **Common gotchas:** checking a `stop_reason`/`response_metadata` string instead of the tool calls
-  (the lesson wants students to see that *no tool call* is the real signal); a reply can carry text
-  **and** tool calls at once — any tool call means "not done," regardless of the text.
-- **Unblockers:** "Return `not reply.tool_calls`." Natural termination means the reply carried no
-  tool call at all.
+- **Common gotchas:** checking a `stop_reason`/`response_metadata` string instead of `.tool_calls`
+  (the lesson wants students to see that *no tool call* is the real signal); forgetting that a reply
+  can carry text **and** tool calls at once — any tool call means "go to tools," regardless of the
+  text; returning the string `"end"` instead of the imported `END` sentinel.
+- **Unblockers:** "Look at `state["messages"][-1]`; if it's an `AIMessage` with `.tool_calls`, return
+  `"tools"`, else return `END`." This *is* an L05 conditional-edge function — remind them they wrote
+  one in L05.
 - **Time:** ~5 min.
-- **Key point:** natural termination is the *only* condition that means "the model thinks it's done."
-  Every other stop is something *you* imposed.
+- **Key point:** termination is a **branch of `route`**, not a special mechanism. `END` is one of the
+  two things `route` can return.
 
-## L1004_lab problem 2 — Write run_loop
+## L1004_lab problem 2 — Wire the graph: `build_agent`
 
-- **Common gotchas:** **(the big one)** breaking the message-history invariant — appending the
-  `ToolMessage`s without first appending the assistant `AIMessage` reply, or dropping one. Stress the
-  order: append the `reply` (the `AIMessage`), then one `ToolMessage` per `reply.tool_calls`, then
-  loop. Other gotchas: returning after the *first* tool call instead of running *all* of them;
-  forgetting the `max_steps` fall-through `return`; off-by-one on the cap (`range(1, max_steps + 1)`
-  gives exactly `max_steps` iterations).
-- **Unblockers:** walk the four bullets in the prompt in order. If stuck, point them at the L1003 demo
-  cell — the structure is identical. The loop is ~15 lines; if theirs is much longer they're probably
-  re-deriving `dispatch` (it's given).
+- **Common gotchas:** **(the big one)** forgetting the **back-edge** `add_edge("tools", "agent")` — the
+  graph then runs `agent → tools` once and stops, an L04 pipeline, not an agent. Other gotchas:
+  returning the reply from `agent_node` as a bare `AIMessage` instead of `{"messages": [reply]}` (the
+  node must return a state update dict); passing the tools dict/among nodes wrong — `ToolNode(TOOLS)`
+  takes the *list*; forgetting `set_entry_point("agent")`; mismatched routing map keys (the dict must
+  map `"tools" → "tools"` and `END → END`).
+- **Unblockers:** walk the six wiring steps in the prompt in order. If stuck, point them at the L1003
+  demo's `build_agent` cell — the structure is identical. The confirmation cell prints the nodes and
+  checks `("tools", "agent")` is an edge; if the back-edge check is `False`, they dropped the
+  `add_edge`.
 - **Time:** ~15 min. This is the heart of the lab.
-- **Key point:** the loop is the agent. The model is a stateless function call; the loop is the part
-  that makes it iterate.
+- **Key point:** the graph *is* the loop — two nodes, a conditional exit, and the back-edge. The
+  cycle is the agent.
 
 ## L1004_lab problem 3 — Drive it: natural termination
 
-- **Common gotchas:** passing `happy_script` directly to `run_loop` instead of wrapping it in
-  `FakeModel(...)`; expecting a different iteration count (it's exactly 3 — two tool turns + one text
-  turn).
-- **Unblockers:** "`model = FakeModel(happy_script)`, then `run_loop(model, TOOLS, '...', max_steps=10)`."
-  The `assert` at the end pins `termination == 'natural'` and `iterations == 3`.
+- **Common gotchas:** passing `happy_script` directly to `build_agent` instead of wrapping it in
+  `FakeModel(...)`; invoking with a bare string instead of `{"messages": [HumanMessage(...)]}`;
+  expecting a different tool order (it's exactly `calculator` then `lookup`, then a text turn).
+- **Unblockers:** "`graph = build_agent(FakeModel(happy_script))`, then
+  `graph.invoke({"messages": [HumanMessage(content=...)]})`." The asserts pin the tool sequence to
+  `['calculator', 'lookup']` and the last message to a plain-text `AIMessage` (no tool calls).
+- **Time:** ~5 min.
+- **Key point:** natural termination = `route` returned `END` because the last reply had no tool
+  calls. It's the only stop that means "the model thinks it's done."
+
+## L1004_lab problem 4 — The `recursion_limit` catches a runaway
+
+- **Common gotchas:** scripting a **single** repeated `tool_reply` object and being surprised the
+  runaway *self-terminates* — that's the `add_messages` id de-dup gotcha; the runaway needs *distinct*
+  turns (`r0`, `r1`, …), which is exactly why the prompt uses a comprehension. Passing `recursion_limit`
+  as a positional arg instead of in the config dict (`invoke(state, {"recursion_limit": 6})`).
+  Expecting the error to be a plain `RuntimeError` — it's a `GraphRecursionError` (from
+  `langgraph.errors`).
+- **Unblockers:** "Comprehension of ~8 distinct `lookup` turns; `invoke(state, {"recursion_limit": 6})`
+  inside `try/except GraphRecursionError` → `raised = True`." The assert pins `raised`.
+- **Time:** ~5 min.
+- **Key point:** a cyclic graph with no cap is a runaway waiting to happen. Hitting the cap is an
+  **alert** worth investigating, not normal operation.
+
+## L1004_lab problem 5 — The message-history invariant (written)
+
+- **Common gotchas:** naming only one of the two prebuilt pieces; confusing the reducer (state) with
+  the node (`ToolNode`); answering "the model handles it" — it does not, the *graph* does.
+- **Unblockers:** expected: after an `AIMessage` with two tool calls, both must be answered by a
+  matching `ToolMessage` (paired by `tool_call_id`) appended before the next model call. The two
+  pieces: the **`add_messages` reducer** (each node appends) and the prebuilt **`ToolNode`** (one
+  `ToolMessage` per call). In a hand loop this pairing is the #1 bug.
 - **Time:** ~4 min.
 
-## L1004_lab problem 4 — The max_steps cap catches a runaway
+## L1005_lab problem 1 — `handle_tool_errors=False`: one bad tool crashes the agent
 
-- **Common gotchas:** confusion about *why* the stub loops forever — explain that `FakeModel` reuses
-  its last script line when it runs out, simulating a model that won't stop. Some students expect the
-  cap value and the iteration count to differ; they're equal here (cap fires *after* `max_steps`
-  iterations).
-- **Unblockers:** "One-line script of a single `lookup` tool call (`tool_reply(tool_call(...))`);
-  `FakeModel` repeats it; the cap at 5 stops the loop." Expect `termination == 'max_steps'`,
-  `iterations == 5`.
-- **Time:** ~4 min.
-- **Key point:** a loop with no cap is broken, not minimal. Hitting the cap is an **alert** worth
-  investigating, not normal operation.
+- **Common gotchas:** building the graph with the default (`handle_tool_errors=True`) and being
+  confused when nothing crashes — the whole point is to pass `False` here; scripting a tool that
+  *returns an error as data* (`https://error`) instead of one that **raises** (`https://crash`) — only
+  a raise escapes; forgetting to wrap the crash script in `FakeModel`.
+- **Unblockers:** "`build_agent(FakeModel(crash_script), handle_tool_errors=False)`, then `invoke`
+  inside `try/except RuntimeError` and set `escaped = True`." The assert pins `escaped`.
+- **Time:** ~7 min.
+- **Key point:** with error handling off, one buggy tool kills the whole `invoke`. That's the
+  motivation for the `True` case in Problem 2.
 
-## L1004_lab problem 5 — Multiple tool calls in one reply (written)
+## L1005_lab problem 2 — `handle_tool_errors=True`: the crash becomes a message
 
-- **Common gotchas:** answering "run the first one" — no, run **all** of them; or forgetting that
-  each tool call needs its own `ToolMessage`.
-- **Unblockers:** expected: when a reply carries multiple tool calls, the loop must execute *every*
-  one and append *one `ToolMessage` per call* (all before the next model call) — otherwise the
-  message-history invariant is violated and the next request is rejected.
-- **Time:** ~3 min.
+- **Common gotchas:** the run still crashing means they left `handle_tool_errors=False` — check the
+  `build_agent` call; expecting the error `ToolMessage` to have `status="success"` — a *raised*
+  exception becomes `status="error"`; some students look for the error text to match exactly (it's
+  `ToolNode`'s wrapper string, e.g. `"Error: RuntimeError(...)"` — they should check `status`, not
+  content).
+- **Unblockers:** "Same crash call, then a retry (`https://ok`), then a text reply;
+  `handle_tool_errors=True`; assert there's a `ToolMessage` with `status == 'error'` and the last
+  message is a plain-text `AIMessage`." The back-edge is what hands the error back to the model.
+- **Time:** ~7 min.
+- **Key point:** `ToolNode(handle_tool_errors=True)` turns a raise into a `ToolMessage(status="error")`
+  the back-edge feeds the model — crash becomes recoverable, one argument.
 
-## L1005_lab problem 1 — Write dispatch: turn a raise into a ToolMessage
+## L1005_lab problem 3 — error-as-data needs no graph change
 
-- **Common gotchas:** letting the exception propagate (the whole point is to *catch* it); catching
-  only one exception type — use a broad `except Exception` here on purpose, because the loop must
-  survive *any* tool bug; putting a full traceback in `content` instead of `repr(exc)`; forgetting
-  `status="error"` on the failure branches; checking the tool name against the dict's *values*
-  instead of `tools.get(call["name"])`.
-- **Unblockers:** "Three branches: `fn is None` → error `ToolMessage`; `try: fn(**call["args"])` →
-  success `ToolMessage`; `except Exception as exc` → error `ToolMessage` with `repr(exc)`." The good
-  `lookup('Paris')` call returns a `status="success"` `ToolMessage` with content `'11000000'`.
-- **Time:** ~10 min.
-- **Key point:** this is the loop's safety layer. L08 taught the tool author what to *return*; this is
-  what the loop does when the tool can't even return.
-
-## L1005_lab problem 2 — The three failure modes, one by one
-
-- **Common gotchas:** the loop crashing here means Problem 1's `dispatch` is letting an exception
-  escape — send them back. Expecting the unknown-tool case to raise (it shouldn't; `tools.get` returns
-  `None` and `dispatch` handles it).
-- **Unblockers:** "Loop over `bad_calls`, print `dispatch(TOOLS, call)`, assert each has
-  `status == 'error'`." All three are errors: `KeyError` (missing city), `ValueError` (bad
-  expression), unknown tool name.
-- **Time:** ~5 min.
-
-## L1005_lab problem 3 — Watch the model recover (no crash)
-
-- **Common gotchas:** expecting the run to crash on the first (failing) `lookup` — it doesn't, because
-  `dispatch` converted the `KeyError` into a `status="error"` `ToolMessage`; the scripted model then
-  "recovers." Some students forget to wrap the script in `FakeModel`.
-- **Unblockers:** "`FakeModel(recover_script)`, then `run_loop(..., max_steps=10)`; assert
-  `termination == 'natural'`." The loop reaches the final text turn because the failure became a
-  message, not a crash.
-- **Time:** ~5 min.
-- **Key point:** the loop *enabled* recovery by handing the error back; the model decided what to do
-  with it.
+- **Common gotchas:** expecting `https://error` to *raise* or produce a `status="error"` message — it
+  does neither; the call **succeeds** (`status="success"`) and the *content* is the error string
+  (the L08 pattern). This is the key distinction from Problem 2 and the most common point of
+  confusion — draw it out: *raise* → graph must catch it; *error-as-data* → nothing to catch, it
+  just flows back.
+- **Unblockers:** "Script `https://error` then `https://ok`; `handle_tool_errors=True`; the first
+  `ToolMessage` has `status == 'success'` because no exception was raised." The assert pins that
+  status.
+- **Time:** ~6 min.
+- **Key point:** L08's "errors as values" tools need **no** graph change — the graph only has to
+  handle the tool that *can't even return*.
 
 ## L1005_lab problem 4 — Why not dump the traceback? (written)
 
@@ -122,10 +142,10 @@ Times are rough and assume a semi-technical student with basic Python who comple
   noise for the model.
 - **Unblockers:** expected (any two): tracebacks are **token-expensive**; they are **noise** the model
   can't act on (it can't read your stack frames); they **leak** internal details (file paths, library
-  internals). `repr(exc)` — a class name plus a one-line message — is the right amount of signal.
+  internals). A short class-name-plus-one-line message is the right amount of signal.
 - **Time:** ~3 min.
 
-## L1005_lab problem 5 — Should the loop auto-retry? (written)
+## L1005_lab problem 5 — Should the graph auto-retry? (written)
 
 - **Common gotchas:** "always retry, retries are free" — wrong on both counts.
 - **Unblockers:** expected: not all failures are alike — a `404 not found` will never succeed on

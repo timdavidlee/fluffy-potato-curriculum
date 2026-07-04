@@ -8,11 +8,12 @@ messages*, not model output. The build-and-run lecture demo ([L1103](L1103_lectu
 optional live section that uses the real `ChatAnthropic` client (Sonnet 4.6); the lab deliberately
 stays offline so `create_agent` is the only variable.
 
-> Keep repeating the lesson's spine: **`create_agent` is the L10 loop, packaged.** Model → tool →
-> model until termination is unchanged from L10; the one call just writes the loop, routing, message
+> Keep repeating the lesson's spine: **`create_agent` is the L10 graph, packaged.** Model → tool →
+> model until termination is unchanged from L10; the one call just wires the graph, routing, message
 > bookkeeping, and step cap for the student. If a student thinks the framework is doing something
-> *fundamentally different* from their L10 loop, slow down and map it back — the returned `messages`
-> list is the same sequence they appended by hand in L10.
+> *fundamentally different* from the graph they wired in L10, slow down and map it back (the L1102
+> table) — the returned `messages` list is the same sequence their L10 graph produced, via the
+> `add_messages` reducer and `ToolNode`.
 
 ## Environment notes (whole lab)
 
@@ -23,8 +24,9 @@ stays offline so `create_agent` is the only variable.
   student pastes an *older* `FakeModel` they hand-wrote, they'll hit
   `TypeError: bind_tools() got an unexpected keyword argument 'tool_choice'`. Redirect them to import
   `FakeModel` from `common`, not reuse an L10 copy.
-- **`create_agent` re-raises uncaught tool exceptions by default.** Unlike the L10 loop (which caught
-  every exception into an error `ToolMessage`), the prebuilt tool node re-raises a raised Python
+- **`create_agent` re-raises uncaught tool exceptions by default.** Unlike the L10 graph's
+  `ToolNode(handle_tool_errors=True)` (which caught every exception into an error `ToolMessage`),
+  `create_agent`'s default tool node re-raises a raised Python
   exception. The lab only ever drives tools that *succeed* or *return an error as data*, so this
   won't bite — but if a curious student scripts `flaky_fetch("https://crash")` and the notebook
   blows up with `RuntimeError: connection reset by peer`, that's expected: configuring tool-error
@@ -73,12 +75,13 @@ COMMON GOTCHAS:
 UNBLOCKERS:
 - Have them print `result["messages"]` first with `describe` and *look* at the shape before building
   the list comprehension. Seeing the `AIMessage -> tool call` lines makes the comprehension obvious.
-- Expected result: `['calculator', 'lookup']` — the same sequence L10's hand-rolled loop produced.
+- Expected result: `['calculator', 'lookup']` — the same sequence the L10 graph you wired by hand produced.
 
 APPROX TIME: 5-8 min.
 
-STRETCH: have them compare this `messages` list to the one their L10 loop built — same user /
-assistant-with-tool-calls / tool-result / assistant shape, none of it written by hand this time.
+STRETCH: have them compare this `messages` list to the one their L10 graph built — same user /
+assistant-with-tool-calls / tool-result / assistant shape; here the `add_messages` reducer and
+`ToolNode` wrote it, not the student.
 
 ---
 
@@ -98,7 +101,7 @@ APPROX TIME: 2-3 min.
 
 STRETCH: ask *how the code would know* the run terminated naturally vs. hit the step cap. (Natural =
 last message is a text `AIMessage`; a capped run would raise a recursion error instead — the
-framework's `max_steps`.)
+framework's `recursion_limit`.)
 
 ---
 
@@ -149,16 +152,17 @@ sees the tools you bind; a good segue to "the tool list is the capability surfac
 ## L1104_lab problem 6 — What did `create_agent` write for you? (written)
 
 COMMON GOTCHAS:
-- Vague answers ("it makes it easier"). Push for a *specific* L10 line: the `while` driver, the
-  `if reply.tool_calls` routing, the `messages.append(...)` bookkeeping, the `max_steps`/recursion
-  cap, or the tool dispatch.
+- Vague answers ("it makes it easier"). Push for a *specific* L10 piece: the `StateGraph` wiring +
+  `tools → agent` back-edge, the `route` conditional edge (now `tools_condition`), the `add_messages`
+  reducer, the `recursion_limit` cap, or the `ToolNode`.
 - Naming a freebie but not what breaks without it. The prompt asks for one concrete failure mode.
 
 UNBLOCKERS:
 - Point back to the freebies table in the [L1103 demo](L1103_lecture.ipynb) (section 7) — each row is
   a freebie paired with the exact L10 twin.
-- A good answer names two distinct pieces and, for one, a concrete break (e.g. "without the message
-  append, the next model call is malformed — the L10 message-history invariant").
+- A good answer names two distinct pieces and, for one, a concrete break (e.g. "without the
+  `ToolNode`'s `ToolMessage` pairing or the `add_messages` reducer, the next model call is malformed
+  — the L10 message-history invariant").
 
 APPROX TIME: 4-6 min.
 
