@@ -90,11 +90,18 @@ class FakeModel:
     scripted: list[AIMessage]
     calls: int = field(default=0)
 
-    def bind_tools(self, tools: Sequence[Any]) -> FakeModel:
-        """Match the chat-model interface; the script, not the tools, drives replies."""
+    def bind_tools(self, tools: Sequence[Any], **kwargs: Any) -> FakeModel:
+        """Match the chat-model interface; the script, not the tools, drives replies.
+
+        Extra keyword arguments are accepted and ignored so richer callers work
+        too: LangChain's ``create_agent`` binds tools with ``tool_choice=...`` (and
+        other model settings), so ``bind_tools`` must tolerate those kwargs for the
+        scripted model to drive a ``create_agent`` graph offline (see L11)."""
         return self
 
-    def invoke(self, messages: Sequence[BaseMessage]) -> AIMessage:
+    def invoke(self, messages: Sequence[BaseMessage], *args: Any, **kwargs: Any) -> AIMessage:
+        """Return the next scripted reply, ignoring the messages (and any runnable
+        ``config`` / kwargs a framework passes) — the script alone drives replies."""
         index = min(self.calls, len(self.scripted) - 1)
         self.calls += 1
         return self.scripted[index]

@@ -1,160 +1,166 @@
 # L11 Proctor Notes
 
-Covers both L11 labs: **L1104** (build the shallow agent as a graph) and **L1106** (graph state and
-reducers). Both run **fully offline** — a deterministic `StubChat` stands in for `ChatAnthropic` and
-the **real** prebuilt `ToolNode` runs the **real** `common/tools.py` tools, so no API key is needed
-and every run is reproducible. The focus is the **graph mental model and the message-history
-reducer**, not model output. The lecture demos ([L1103](L1103_lecture.ipynb),
-[L1105](L1105_lecture.ipynb), [L1107](L1107_lecture.ipynb)) use the real `ChatAnthropic` client where
-they make live calls; the labs deliberately don't, so the wiring and state are the only variables.
+Covers the one L11 lab: **L1104** (build a shallow agent with `create_agent`). It runs **fully
+offline** — a scripted `FakeModel` stands in for `ChatAnthropic`, and the **real** `common/tools.py`
+tools run inside the **real** `create_agent` graph — so no API key is needed and every run is
+reproducible. The focus is *building and configuring* the one-line agent and *reading its returned
+messages*, not model output. The build-and-run lecture demo ([L1103](L1103_lecture.ipynb)) has an
+optional live section that uses the real `ChatAnthropic` client (Sonnet 4.6); the lab deliberately
+stays offline so `create_agent` is the only variable.
 
-> Keep repeating the lesson's spine: **it's the same model → tool → model loop from L10, now drawn as
-> a graph.** The one new thing versus an L04 workflow is the **back-edge** `tools → agent`, which
-> hands the model control of the path. If a student can't map a graph piece back to an L10 line,
-> slow down and do the mapping out loud — that mapping *is* objective 1.
+> Keep repeating the lesson's spine: **`create_agent` is the L10 loop, packaged.** Model → tool →
+> model until termination is unchanged from L10; the one call just writes the loop, routing, message
+> bookkeeping, and step cap for the student. If a student thinks the framework is doing something
+> *fundamentally different* from their L10 loop, slow down and map it back — the returned `messages`
+> list is the same sequence they appended by hand in L10.
 
----
+## Environment notes (whole lab)
 
-## L1104_lab problem 1 — The typed state
-
-COMMON GOTCHAS:
-- Forgetting the `add_messages` reducer — writing `messages: list[BaseMessage]` instead of
-  `messages: Annotated[list[BaseMessage], add_messages]`. Without it the default reducer
-  **overwrites**, the history gets clobbered, and the agent loops to the recursion cap. They'll see
-  this break on purpose in L1106 — name the link now.
-- Dropping the `step` field, or annotating `step` with a reducer it doesn't need (it should just
-  overwrite — the default).
-- `add_messages` import path: `from langgraph.graph.message import add_messages` (already in the
-  given setup cell).
-
-UNBLOCKERS: Point at the L1103/L1105 state schema — two fields, only `messages` is annotated. A
-`TypedDict` is just a class with typed attributes.
-
-TIME: 3–5 min. STRETCH: ask *why* messages must append and step may overwrite (the
-`tool_use`/`tool_result` pairing invariant).
-
-## L1104_lab problem 2 — The agent node and the router
-
-COMMON GOTCHAS:
-- Returning the **whole state** instead of a partial update. A node returns only the fields it
-  changed — `{"messages": [response], "step": state["step"] + 1}` — and LangGraph merges it.
-- Wrapping `response` in a bare `{"messages": response}` (not a list). It must be a list —
-  `{"messages": [response]}` — because `add_messages` appends an iterable of messages.
-- `route` checking the wrong thing. It inspects the **last** message and returns `"tools"` only when
-  that message is an `AIMessage` **with** `tool_calls`; otherwise `END`. A common slip is returning
-  the string `"END"` instead of the imported `END` sentinel.
-- Forgetting `bind_tools` — calling `model.invoke(...)` without binding the tools first. With the
-  stub it happens to still work (it ignores schemas), but it's wrong for a real client; correct it.
-
-UNBLOCKERS: Have them say each line's L10 equivalent aloud: `agent_node` = "call the model",
-`route` = "is there a tool_use?". The `tools` node is given (prebuilt `ToolNode`).
-
-TIME: 6–10 min. STRETCH: ask what `handle_tool_errors=True` does (turns a tool exception into an
-error `ToolMessage` — L10's `is_error`).
-
-## L1104_lab problem 3 — Wire, compile, render
-
-COMMON GOTCHAS:
-- Omitting the **back-edge** `add_edge("tools", "agent")`. Without it the graph runs the tools once
-  and stops — it's a workflow, not an agent. The diagram will show no cycle. This is *the* teaching
-  moment: the back-edge is the whole lesson.
-- Mismatched conditional-edge mapping: `add_conditional_edges("agent", route, {"tools": "tools",
-  END: END})`. The dict maps each value `route` can return to a destination node; `END` maps to
-  `END`.
-- Forgetting `set_entry_point("agent")`, or never calling `compile()` and trying to `invoke` the
-  builder.
-
-UNBLOCKERS: The render needs no API key — if `draw_mermaid()` prints a graph with the `tools → agent`
-arrow, the wiring is right. Compare it to the L1103 diagram.
-
-TIME: 5–8 min. STRETCH: render `draw_mermaid_png()` for an image instead of the text.
-
-## L1104_lab problem 4 — Run the agent
-
-COMMON GOTCHAS:
-- Forgetting `step` (or `messages`) in the initial state — `invoke` needs both keys present
-  (`{"messages": [HumanMessage(TASK)], "step": 0}`). A missing `step` raises a `KeyError` inside
-  `agent_node`.
-- Reading the tool path wrong. The path is the tool **names** across the `AIMessage`s'
-  `tool_calls` — expect `['calculator', 'lookup']`. If it's empty, the back-edge or `route` is
-  wrong.
-- `result["messages"][-1].text` — use the `.text` **property** (not `.text()` — that's deprecated).
-
-UNBLOCKERS: If the run hits a recursion error, the reducer or the route is wrong — jump to the L1106
-"break the reducer" framing. If the path is `['calculator']` only, the back-edge is missing.
-
-TIME: 4–6 min. STRETCH: invoke on the crash task (`flaky_fetch https://crash`) and watch the error
-`ToolMessage` flow back through the loop.
-
-## L1104_lab problem 5 — What makes it an agent? (written)
-
-COMMON GOTCHAS:
-- Answering "the conditional edge" for Q1. Close, but the precise answer is the **back-edge**
-  `tools → agent`: a conditional edge alone (as in L04) is still a workflow; the *cycle* is what
-  makes the model drive the path.
-- For Q2, missing that the node depends on the **interface** (`bind_tools(...).invoke(...)`), not the
-  concrete client — which is exactly why swapping `StubChat` for `ChatAnthropic` is a one-line
-  change.
-
-UNBLOCKERS: Point back to L04's "the line between a workflow and an agent is a single back-edge."
-
-TIME: 3–5 min. STRETCH: ask where the recursion limit (the framework's `max_steps`) would catch a
-runaway.
+- **`create_agent` needs a `FakeModel` that tolerates extra kwargs.** The shared
+  `common/fake_model.py` `FakeModel` was extended so `bind_tools(tools, **kwargs)` and
+  `invoke(messages, *args, **kwargs)` accept the arguments `create_agent` passes (it binds tools
+  with `tool_choice=...`). Students don't touch this — it's already handled in `common` — but if a
+  student pastes an *older* `FakeModel` they hand-wrote, they'll hit
+  `TypeError: bind_tools() got an unexpected keyword argument 'tool_choice'`. Redirect them to import
+  `FakeModel` from `common`, not reuse an L10 copy.
+- **`create_agent` re-raises uncaught tool exceptions by default.** Unlike the L10 loop (which caught
+  every exception into an error `ToolMessage`), the prebuilt tool node re-raises a raised Python
+  exception. The lab only ever drives tools that *succeed* or *return an error as data*, so this
+  won't bite — but if a curious student scripts `flaky_fetch("https://crash")` and the notebook
+  blows up with `RuntimeError: connection reset by peer`, that's expected: configuring tool-error
+  handling lives *below* the one-liner (L15). Name it as a real boundary difference, not a bug.
+- **The `tqdm`/`IProgress` warning on the first cell is harmless** — it's a Jupyter widget notice,
+  not an error. Ignore it.
+- Invoking the agent takes a **dict**: `agent.invoke({"messages": [HumanMessage(...)]})`. The most
+  common beginner error is passing the string or the list directly. The result is also a dict — read
+  `result["messages"]`, not `result` itself.
 
 ---
 
-## L1106_lab problem 1 — Define the state
+## L1104_lab problem 1 — Build the agent in one line
 
 COMMON GOTCHAS:
-- Same as L1104 problem 1: forgetting `add_messages`. Here it matters even more — problem 3 *depends*
-  on first having the correct reducer to contrast against the broken one.
+- Passing the tools as three positional args (`create_agent(model, calculator, lookup, ...)`) instead
+  of **one list** (`create_agent(model, [calculator, lookup, flaky_fetch], ...)`). The second
+  positional arg is the whole tool list.
+- Passing the *model class* or a string instead of an instance. Here the model is
+  `FakeModel(chaining_script)` — an instance built from the scripted replies.
+- Forgetting `system_prompt=` is a keyword-only argument.
 
-UNBLOCKERS: The given `build_agent(state_cls)` helper takes the state class as an argument — they
-only write the schema, not the graph.
+UNBLOCKERS:
+- "It's three arguments: the model, the list of tools, the system prompt. One line." Point them at
+  the one-liner in the intro / L1102 outline.
+- If `type(agent).__name__` prints `ellipsis`, they left the `...` placeholder — the `agent = ...`
+  line still needs filling in.
 
-TIME: 2–4 min.
+APPROX TIME: 3-5 min.
 
-## L1106_lab problem 2 — Watch the history grow
+STRETCH: ask them to print `agent.get_graph().draw_mermaid()` and find the `tools -> model`
+back-edge in the output — the same graph from the L1102 outline.
 
-COMMON GOTCHAS:
-- Iterating but not distinguishing message types — the cleanest read prints `type(m).__name__` and,
-  for `AIMessage`, the tool names from `m.tool_calls`.
-- Expecting a fixed *length* but getting confused by content. The history should be 6 messages:
-  `Human → AI(calculator) → Tool → AI(lookup) → Tool → AI(text)`, with `steps: 3`.
+---
 
-UNBLOCKERS: If the length is wrong or it errors, the reducer from problem 1 is the cause — send them
-back one cell.
-
-TIME: 4–6 min. STRETCH: print `m.tool_calls` fully to see the args the (stub) model chose.
-
-## L1106_lab problem 3 — Break it, then fix the reducer
-
-COMMON GOTCHAS:
-- Surprise that the **given** `BrokenState` cell raises `GraphRecursionError` — that's the point, and
-  it's caught. Make sure students read *why*: the overwrite reducer clobbers history, the
-  `tool_use`/`tool_result` pairing breaks, the loop never reaches `END`.
-- For the fix, `FixedState` must be **identical** to `BrokenState` except the `messages` annotation
-  (`Annotated[list[BaseMessage], add_messages]`). Students sometimes also change `step` or the task —
-  keep the diff to the one line.
-- The `recursion_limit` is passed as the second arg to `invoke` (`{"recursion_limit": 8}`); it's set
-  low so the bug surfaces fast.
-
-UNBLOCKERS: This is the single most important beat of the lab — the L10 invariant bug, reborn in
-graph form. Have them state the connection out loud.
-
-TIME: 5–8 min. STRETCH: lower `recursion_limit` to 2 and watch it trip even sooner; raise it and note
-it still never terminates.
-
-## L1106_lab problem 4 — State or dependency? (written)
+## L1104_lab problem 2 — Run it and read the tool sequence
 
 COMMON GOTCHAS:
-- Putting the **client** or the **tools** in state. They're dependencies wired in at build time
-  (closed over by the nodes), not data that flows between nodes. This is the boundary that keeps a
-  graph from getting tangled.
-- Treating the API key as "state" — it's config/secret, loaded once via `common/config.py`.
+- `agent.invoke(chaining_task)` — passing the raw string. It must be
+  `agent.invoke({"messages": [HumanMessage(content=chaining_task)]})`.
+- Building `tool_sequence` off `ToolMessage`s instead of `AIMessage`s. The **tool calls** live on the
+  assistant turn (`AIMessage.tool_calls`); the `ToolMessage` is the *result*, not the request.
+- Reading `msg.tool_calls["name"]` — `tool_calls` is a **list** of calls; iterate it and read
+  `call["name"]` on each.
 
-UNBLOCKERS: The test is "does it *flow between nodes and change across the loop*?" Yes → state
-(messages, step). No → dependency (client, tools, key).
+UNBLOCKERS:
+- Have them print `result["messages"]` first with `describe` and *look* at the shape before building
+  the list comprehension. Seeing the `AIMessage -> tool call` lines makes the comprehension obvious.
+- Expected result: `['calculator', 'lookup']` — the same sequence L10's hand-rolled loop produced.
 
-TIME: 3–5 min. STRETCH: ask what *would* belong in state for a deeper agent (a plan, a scratchpad, a
-todo list — the L18/L19 forward pointer).
+APPROX TIME: 5-8 min.
+
+STRETCH: have them compare this `messages` list to the one their L10 loop built — same user /
+assistant-with-tool-calls / tool-result / assistant shape, none of it written by hand this time.
+
+---
+
+## L1104_lab problem 3 — Pull the final answer off the messages
+
+COMMON GOTCHAS:
+- Over-thinking it — the final answer is just `result["messages"][-1].content`. Some students search
+  for a `.final_text` or `.output` attribute that doesn't exist on a `create_agent` result.
+- Confusing the last message (the plain-text answer) with the last *tool* message. Natural
+  termination means the last message is an `AIMessage` with **no** tool calls.
+
+UNBLOCKERS:
+- "The last message is the model's plain-text answer — that's what natural termination looks like.
+  Its `.content` is your answer."
+
+APPROX TIME: 2-3 min.
+
+STRETCH: ask *how the code would know* the run terminated naturally vs. hit the step cap. (Natural =
+last message is a text `AIMessage`; a capped run would raise a recursion error instead — the
+framework's `max_steps`.)
+
+---
+
+## L1104_lab problem 4 — Swap the system prompt (config surface)
+
+COMMON GOTCHAS:
+- Expecting the *scripted* `FakeModel` reply text to change when the prompt changes. It won't — the
+  `FakeModel` returns fixed lines regardless of the prompt. The teaching point is "same agent, new
+  instruction," i.e. you reconfigured behavior by changing one knob; against a live model the answer
+  shape would actually shift.
+- Reusing the *same* `FakeModel` instance across both agents. A `FakeModel` is stateful (it advances
+  through its script), so build a **fresh** `FakeModel(chaining_script)` for `terse_agent`. (The
+  solution does this; watch for students who hoist the model into a shared variable.)
+
+UNBLOCKERS:
+- "The system prompt is one of the three knobs. You're building the *same* agent with a different
+  instruction — nothing about the loop changes."
+- If they ask why the answer looks identical: "because the `FakeModel` is scripted. On a live model
+  the terse prompt would visibly shorten the answer. The point is the *configuration*, not the
+  wording."
+
+APPROX TIME: 5-7 min.
+
+STRETCH: if a key is available, have them run this problem's two prompts against a live
+`ChatAnthropic` (Sonnet 4.6) and see the answer shape actually change.
+
+---
+
+## L1104_lab problem 5 — Swap the tool set (config surface)
+
+COMMON GOTCHAS:
+- Scripting the `FakeModel` to call a tool that isn't in the passed list (e.g. `lookup` when only
+  `[calculator]` was given). The scripted call and the tool list must agree, or the tool node won't
+  find the tool.
+- Forgetting to build a fresh `FakeModel(calc_script)` — same statefulness gotcha as problem 4.
+
+UNBLOCKERS:
+- "The tools you pass *are* the agent's whole capability. Fewer tools is a real configuration choice —
+  script the model to use only what you gave it."
+
+APPROX TIME: 4-6 min.
+
+STRETCH: ask what happens if the model asks for a tool that wasn't passed (it can't — the model only
+sees the tools you bind; a good segue to "the tool list is the capability surface").
+
+---
+
+## L1104_lab problem 6 — What did `create_agent` write for you? (written)
+
+COMMON GOTCHAS:
+- Vague answers ("it makes it easier"). Push for a *specific* L10 line: the `while` driver, the
+  `if reply.tool_calls` routing, the `messages.append(...)` bookkeeping, the `max_steps`/recursion
+  cap, or the tool dispatch.
+- Naming a freebie but not what breaks without it. The prompt asks for one concrete failure mode.
+
+UNBLOCKERS:
+- Point back to the freebies table in the [L1103 demo](L1103_lecture.ipynb) (section 7) — each row is
+  a freebie paired with the exact L10 twin.
+- A good answer names two distinct pieces and, for one, a concrete break (e.g. "without the message
+  append, the next model call is malformed — the L10 message-history invariant").
+
+APPROX TIME: 4-6 min.
+
+STRETCH: ask which freebie they'd *most* want to keep control of, and when — a natural lead-in to
+Demo 3 / L1105 (the ceiling of the one-liner) and L15.
