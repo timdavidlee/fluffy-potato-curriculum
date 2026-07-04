@@ -34,7 +34,7 @@ estimated duration: 75
 | [L07](L1001_intro.md) | one tool-call round-trip; `.bind_tools()` + `.tool_calls` + `ToolMessage` | the exact interface, now repeated in a loop |
 | [L08](../L08/objectives.md) | tool design; what a tool *returns* on failure | the error-as-data idea, now propagated by the loop |
 | **L10** | the model→tool→model **loop**: termination + loop-level failure handling | — |
-| L11 (next) | tracing what the loop did | the loop becomes the thing you instrument |
+| L12 (next) | tracing what the loop did | the loop becomes the thing you instrument |
 | L04 (later) | the same loop, reframed as a LangGraph graph | the skeleton is identical; the wrapper changes |
 
 - The loop you write here is **reused, not replaced**, by every later lesson. That is why it is worth
@@ -65,7 +65,7 @@ estimated duration: 75
 
 ### slide 2.2 The function shape we standardize on
 
-- We give the loop one fixed shape so the labs, the demo, and L11 all reference it the same way.
+- We give the loop one fixed shape so the labs, the demo, and L12 all reference it the same way.
 - text: `run_loop(model, tools, user_msg, max_steps)` returns a small result bundle with the final
   text, the number of iterations, and **why** it stopped.
 - table: the four parameters and what each is.
@@ -79,7 +79,7 @@ estimated duration: 75
 
 - The return is a `RunResult` carrying `final_text`, `iterations`, and `termination` (a string like
   `"natural"` or `"max_steps"`). Naming the *termination cause* is what makes the loop debuggable —
-  and is exactly what L11's traces will build on.
+  and is exactly what L12's traces will build on.
 
 ### slide 2.3 Rule 1 — the message-history invariant
 
@@ -159,7 +159,7 @@ estimated duration: 75
   `termination` and decides. **(c) give the model one last turn to summarize** — friendliest output,
   costs one more call.
 - text: we use **(b)** in L10: `RunResult.termination` is `"natural"` or `"max_steps"`, and the
-  caller (or L11's trace) reads it. Defend your choice against *who consumes the result* — a batch
+  caller (or L12's trace) reads it. Defend your choice against *who consumes the result* — a batch
   job wants (a); a chat UI may want (c).
 
 ### slide 3.5 Sketching the other two caps
@@ -250,9 +250,9 @@ estimated duration: 75
 
 - text: hand-rolled loops show up constantly in production — for tightly-scoped jobs, for tests, for
   places where a framework is too heavy. "I'll never write this in real life" is false.
-- text: **tracing (L11) is the most common reason teams reach for a framework** — and it is exactly
+- text: **tracing (L12) is the most common reason teams reach for a framework** — and it is exactly
   what the next lesson starts adding to *this* hand-rolled loop.
-- text: foreshadow — L11 instruments *this exact loop* with structured traces; L04 reframes *this
+- text: foreshadow — L12 instruments *this exact loop* with structured traces; L04 reframes *this
   exact loop* as a LangGraph graph. The loop itself doesn't change; the wrapper around it does. We
   keep L10 plain Python **on purpose**, so you see the skeleton before a framework hides it.
 
@@ -262,19 +262,19 @@ estimated duration: 75
 
 | "I think..." | Actually |
 | --- | --- |
-| "the loop ends when the answer is right" | the loop ends when the model stops calling tools or a cap fires; *correctness* is a downstream concern (L11 traces, L12 eval) |
+| "the loop ends when the answer is right" | the loop ends when the model stops calling tools or a cap fires; *correctness* is a downstream concern (L12 traces, L13 eval) |
 | "I should retry every failed tool call" | usually not — a `404` is not a `503`; default to surfacing the error and letting the model decide |
 | "the model needs my Python traceback" | it doesn't and shouldn't — a short error `ToolMessage` is better signal and cheaper |
 | "if I skip the `ToolMessage` the model will figure it out" | it won't — the next request is rejected; the pairing is protocol, not a suggestion |
 | "the model called the same tool 3× so my loop is broken" | maybe — or it's correctly exploring; loop-detection needs *args + progress*, not just counts |
 
-### slide 5.4 The minimum-viable trace (bridge to L11)
+### slide 5.4 The minimum-viable trace (bridge to L12)
 
 - text: by the end of L10 your loop prints, per iteration: the iteration number, the tool calls it
   made, and the termination cause. That is a **minimum-viable trace**.
-- text: L11 replaces that `print()` with a structured record (`{"event": "tool_call", "iteration": i,
+- text: L12 replaces that `print()` with a structured record (`{"event": "tool_call", "iteration": i,
   "tool": name, "args": args}` appended to a list) and teaches you to *read* it. Keep your L10 code
-  accessible — you extend it in L11.
+  accessible — you extend it in L12.
 - text: one sentence to leave L10 with: *an agent is a loop around a stateless model — call, run the
   tool, feed the result back, repeat, until the model stops or a cap you chose fires; and when a tool
   breaks, the loop turns the break into a message, not a crash.*

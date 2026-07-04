@@ -283,8 +283,8 @@ estimated duration: 80
   the model fires it, a record is created it never intended, because the description hid the effect.
   Add one sentence — *"if the user does not exist, this tool creates one"* — and the model pauses to
   ask first.
-- Forward link: **L14 (human-in-the-loop / approval gates)** revisits this exact tension for
-  high-stakes side effects. L08 plants the seed; L14 builds the structure.
+- Forward link: **L11 (human-in-the-loop / approval gates)** revisits this exact tension for
+  high-stakes side effects. L08 plants the seed; L11 builds the structure.
 
 [↑ Back to top](#designing-good-tools-name-schema-and-error-as-interface)
 

@@ -1,73 +1,77 @@
-# L11 intro: What an agent generates — state, logs, traces & extracts
+# Shallow agents in LangGraph: the same loop, now drawn as a graph
 
 ```yaml
-title: "L11 intro: What an agent generates — state, logs, traces & extracts"
-keywords: tracing, trace, span, state, logs, extracts, observability, data plane, agent loop, langfuse, debugging
+title: "Shallow agents in LangGraph: the same loop, now drawn as a graph"
+keywords: langgraph, agent, shallow agent, stategraph, node, edge, conditional edge, back-edge, state, reducer, add_messages, toolnode, message history, control flow as data, chatanthropic, langfuse, eval carry-over
 estimated duration: 10
 ```
 
-> **Lesson:** L11 — What an agent generates: state, logs, traces & extracts.
-> **Roadmap:** [objectives.md](../../../../docs/origin/lesson_roadmaps/L11/objectives.md) · [demos_or_activities.md](../../../../docs/origin/lesson_roadmaps/L11/demos_or_activities.md)
-> **Read in order:** this intro (the map) → `L1102_lecture` (read a trace, locate a failure) → `L1103_lab` → `L1104_lecture` (instrument the loop, compare two runs) → `L1105_lab` → `L1106_lecture` (see it in Langfuse; where extracts go instead).
-> **Anchor model for the live demo: Claude Sonnet 4.6.** The reading demos and both labs run **offline with no API key** (a scripted `FakeModel`); only the live instrument/export steps call a real model.
+> **Lesson:** L11 — Shallow agents in LangGraph.
+> **Roadmap:** see this lesson's [objectives.md](../../../../docs/origin/lesson_roadmaps/L11/objectives.md).
+> This is a short framing piece. Read it before the written reference lecture
+> ([L1102_lecture.md](L1102_lecture.md)), then the three teacher demo notebooks —
+> build the agent ([L1103_lecture.ipynb](L1103_lecture.ipynb)), state & reducers
+> ([L1105_lecture.ipynb](L1105_lecture.ipynb)), eval carry-over + tracing
+> ([L1107_lecture.ipynb](L1107_lecture.ipynb)) — with the bridge to L15 in
+> [L1108_lecture.md](L1108_lecture.md). Hands-on practice is in the L11 labs (L1104, L1106).
+> **Anchor model: Claude Sonnet 4.6** — a *single* model throughout, so the graph shape is the
+> only thing that changed versus the L10 hand-rolled loop. (Mixing models per node was L04's demo;
+> *which* model to use is L14's topic.)
 
 ## Where this lesson sits
 
-In [L10](../L10/L1001_intro.md) you built an agent from nothing: a **model → tool → model loop** in plain Python that calls the model, runs any tool the model asks for, hands the result back, and repeats until the model stops — `run(...)` returning a `RunResult` with the `final_text`, the number of `iterations`, and *why* it stopped (`termination`: `"natural"` or `"max_steps"`). That loop already *did* something on every run. But unless you were watching the console live, that "something" vanished the moment the run ended.
+This is the lesson the whole first arc has been building toward. You hand-built an agent from
+nothing: a single tool round-trip ([L07](../L07/objectives.md)), good tool design
+([L08](../L08/objectives.md)), and then the **model → tool → model loop** in plain Python
+([L10](../L10/objectives.md)) — `agent_loop.run(...)` returning a
+`RunResult(final_text, iterations, termination, trace)`. You then learned to *observe* that loop
+with a structured trace ([L12](../L12/objectives.md)) and to *judge* it with a minimal eval set
+([L13](../L13/objectives.md)).
 
-L11 is the turning point where the agent stops being only something you *build* and becomes something you *observe*. This lesson is titled for the whole inventory of what a run leaves behind — but its **center of gravity is tracing**, because the trace is the artifact next lesson (evaluation) consumes.
+L11 cashes that in. You rebuild the **same agent you already understand** as a **LangGraph graph**.
+The control flow does not change — it is still model → tool → model until termination. What changes
+is the *shape*: an explicit `while` loop becomes an explicit **graph** of nodes and edges over a
+shared **state**, and LangGraph supplies the runtime that drives it. Meeting the framework only
+*after* you hand-rolled the loop is the whole bet of this arc: the framework reads as a set of
+conveniences over a familiar skeleton, not as magic.
 
-## The map: what a run generates, on two planes
+## The one idea: it's the same loop, drawn as a graph
 
-Every agent run produces byproducts, and the first skill is knowing **which plane each belongs on** — because they have different homes, lifetimes, and readers.
+In [L04](../L04/objectives.md) you built a **workflow** — a directed *acyclic* graph (a DAG) where
+*you* wired every edge and the model never decided what ran next. L11 takes those exact same
+primitives — `StateGraph`, nodes, edges, typed state, reducers — and adds **one thing**: a
+**conditional edge that loops back to the model**. That single **back-edge** hands control of the
+path to the *model*, and an acyclic workflow becomes a cyclic, model-driven **agent**.
 
-- **Observability plane — *what the agent did*** (for *you* and the eval harness to read):
-  - **State** — the agent's live working memory: the message history the loop grows turn by turn and feeds back to the model. In-memory, mutating, gone when the process exits. It's the model's actual input on every step.
-  - **Logs** — the human-readable play-by-play, one line per event (L10's `print()` stream). Streamed, unstructured; fine for one live run, useless the moment you have two to compare.
-  - **Traces** — the durable, structured, run-scoped record: every model call, tool call, and result, ordered and keyed by a shared `trace_id`. Filterable, diffable, feedable to evaluation.
+- **L04 owns:** *you* drive the graph (acyclic).
+- **L11 owns:** the *model* drives the graph (cyclic).
+- **The line between them is a single back-edge.**
 
-  These three sit on one **axis of increasing permanence**: live state → streamed logs → durable trace. A trace is largely *state captured over time* — which is why reading a trace (most of this lesson) **is** reading what the model saw.
+Map every graph piece back to an L10 line and the lesson lands:
 
-- **Data plane — *what the agent made*** (the deliverable, for downstream systems and users):
-  - **Extracts / new records** — the hard data a run produces as its actual output: extracted fields, generated records, files. This does **not** go in the trace. It's persisted to its proper home — a **database** (rows/documents) or an **object store like S3** (files/blobs) — with its own schema, retention, and consumers.
+| L10 hand-rolled loop | L11 LangGraph graph |
+| --- | --- |
+| "call the model" step | the **`agent`** node |
+| "run every `tool_use`, append a `tool_result`" step | the **`tools`** node |
+| `while` / loop back after running tools | the **edge** `tools → agent` (the back-edge) |
+| `if there's a tool_use: … else: return` | the **conditional edge** out of `agent` |
+| the `messages` list you mutated in place | the **state**, merged by the `add_messages` **reducer** |
+| `max_steps` cap | LangGraph's **recursion limit** |
 
-**The one boundary to hold onto:** don't cross the streams. Your trace is not your database (wrong retention, wrong query model), and your database is not your trace (a trace is sampled, TTL'd observability, not durable business data). Observe the run in the trace; persist the product to the datastore. We teach this boundary **conceptually** here and spend the hands-on time on the trace.
+## What "shallow" means (define it early)
 
-## The one idea, said three ways
+A **shallow agent** is a *single tool-calling loop*: one model, one set of tools, one decision
+point that either calls a tool or finishes. It is exactly the L10 loop, now expressed as a graph.
+"Shallow" is **not** "lesser" — most production agents are shallow. *Deep* agents (planning,
+persistent memory, sub-todos, reflection) are a later, heavier choice (L18) — named here only as
+"what we are **not** building yet."
 
-- **You debug agents by reading, not by re-running.** A normal program is deterministic: re-run it and the bug reproduces. An agent is **not** — re-running can hide the bug or produce a *different* one. The trace of the failing run *is* the reproduction. Reading it is the first move when an agent misbehaves.
-- **A trace is the durable memory of an ephemeral run.** The loop runs and exits; without a record, all you keep is the final answer and whatever scrolled past. The trace is what lets you answer *"what did it actually do?"* an hour, a day, or a hundred runs later.
-- **Arguments are where the truth is.** Call counts tell you *how much*; the **arguments** the model chose tell you *what it was thinking*. "Called `lookup` three times" is ambiguous; "called `lookup('288')`, `lookup('289')`, `lookup('290')`" is obviously a fumbling search. Trace the arguments, and read them first.
+## A note on the client: still the framework's, not the seam
 
-## What you'll be able to do
-
-By the end of L11 you can:
-
-1. **Read a trace** of a multi-step run and narrate what the agent did, event by event — including the **state** (the message history) the trace carries.
-2. **Locate a failure** from the trace alone — and name its signature: a **tool error**, **wrong arguments**, a **runaway loop**, or **premature termination**.
-3. **Instrument** the L10 loop to emit a structured trace (`RunResult.trace`) — a wrapper around the loop, never a rewrite of it.
-4. **Compare two traces** of the same task and separate a real change (**signal**) from run-to-run variance (**noise**).
-5. **Export the same run to a real observability tool** — the cohort's self-hosted **Langfuse** — and recognize your hand-built spans rendered in a dashboard.
-6. **Sort what a run generates onto the right plane** — state, logs, traces (observability) vs extracts / new records (data) — and keep hard data out of the trace, in a database or S3 where it belongs.
-
-## The vocabulary this lesson fixes
-
-- **State** — the agent's live, in-memory working set (the growing message history the loop feeds back to the model each turn). Mutating and consumed by the loop; a trace is this state *serialized over time* so you can read it later.
-- **Trace** — the complete, ordered record of one run: every model call, tool call, and the loop step, with enough detail to reconstruct the run without re-executing it.
-- **Span** — one entry in a trace (one model call, one tool call, the loop step). We say **span** in prose; OpenTelemetry says "span," Langfuse says "observation," LangSmith says "run" — so you'll recognize the structure when you meet a real tool.
-- **`trace_id`** — the id shared by every span of one run, so multiple runs' traces can be stored together and still be told apart. It's what makes the two-run comparison (and the Langfuse view) possible.
-- **Structured trace vs. `print()`** — machine-readable records you can filter, count, and diff, versus human-readable text that collapses the moment you have more than one run to compare.
-- **Extracts / new records (the data plane)** — the hard data a run produces as its deliverable. Distinct from state/logs/traces: it's the *product*, not a lens on the run, and it belongs in a **database or object store (S3)**, never in the trace.
-- **`RunResult` vs. trace** — `RunResult` (from L10) is the *summary*; the trace is the *full record* the summary was derived from. You should be able to point at where each `RunResult` field came from in the trace.
-
-## How we teach it: concept first, then tooled
-
-You build the trace **by hand first** — instrument the L10 loop, read the spans, diff two runs — and only *then* meet the real tool (Langfuse), where you discover the structure you built by hand is exactly what the industry uses. That ordering is deliberate: when you open the dashboard, the timeline, token counts, and errors are the very `TraceEvent` fields you emitted, so the tool reads as obvious instead of magic.
-
-## A note on the code you'll see
-
-The L10 loop and tools now live as a shared, reusable reference in `fluffy_potato_curriculum.common` — `common/agent_loop.py` (`run()` → `RunResult`), `common/tools.py` (`calculator`, `lookup`, `flaky_fetch`), and the new `common/tracing.py` (`TraceEvent`). L11 is the first lesson that *imports* them instead of hand-building them, because this lesson is about *observing* the loop, not re-deriving it. The labs drive that loop with a scripted `FakeModel` so they run deterministically with no API key.
-
-## The takeaway
-
-L11 produces the record; **L12 (evaluation) judges it.** Tracing without evaluation tells you *what happened*; evaluation without tracing tells you *that something is wrong but not where*. They are a pair, and tracing comes first — because you cannot evaluate a run you cannot read. Keep the failures you find in this lesson's traces: they become your first eval cases next lesson. And keep the boundary straight: the trace is for *reading what the run did*; the hard data the run *made* goes to a database or S3, not into the trace.
+Continuing the departure that began in L04: inside graph nodes we call LangChain's
+**`ChatAnthropic`** directly, **not** the hand-rolled `potato_llm` seam from L01–L13 — "frameworks
+bring their own client abstraction." The API key still loads through the same `common/config.py`
+seam; only the *client* is the framework's. And the things you carry forward are exactly the
+skills from L12–L13: the **same** L13 eval set runs against this rebuild (it passes → the rebuild is
+correct), and the graph's run lands in the **same** L12 Langfuse dashboard. Evaluation and tracing
+travel with the agent, not the implementation.

@@ -8,7 +8,7 @@ lab deliberately doesn't, so the wiring is the only variable.
 
 > Keep repeating the lesson's spine: **a conditional edge is not the model deciding.** Every branch
 > in this lab is decided by *code the student wrote* reading *state*, never by the model deciding
-> to call a tool. That's L14.
+> to call a tool. That's L11.
 
 ---
 
@@ -54,7 +54,7 @@ UNBLOCKERS: Have them print `draw_mermaid()` — the dashed conditional edges fr
 to all three branches, all converging on `END`.
 
 TIME: 8–12 min. STRETCH: what happens if `route` returns a key not in the mapping? (It raises — a
-nudge toward validating model output, an L02/L12 theme.)
+nudge toward validating model output, an L02/L13 theme.)
 
 ## L0504_lab problem 4 — Run and prove determinism
 
@@ -97,9 +97,9 @@ COMMON GOTCHAS:
   keywords first, so it labels it `billing` while the eval expects `technical`. Don't let them "fix"
   the data to force 4/4 — the eval is doing its job by surfacing a real ambiguity.
 
-UNBLOCKERS: This is the L12 discipline inlined ("when you build something, you evaluate it"). One line:
+UNBLOCKERS: This is the L13 discipline inlined ("when you build something, you evaluate it"). One line:
 a deterministic workflow is the *easiest* thing to evaluate — same input → same path. This same eval
-set rides forward onto the L14 agent.
+set rides forward onto the L11 agent.
 
 TIME: 5–8 min. STRETCH: add two more cases; or change the classifier to check technical keywords
 first and watch which cases flip — eval as a feedback loop.
@@ -109,7 +109,7 @@ first and watch which cases flip — eval as a feedback loop.
 EXPECTED ANSWER: Add a **conditional edge that loops back to the model** (a back-edge / cycle) so the
 **model** decides whether to keep going (call a tool) or stop. That single back-edge converts the
 acyclic workflow into a cyclic, model-driven **agent** — and hands control of the path from the
-developer to the model. (It's the L10 loop, now as a graph edge; built for real in L14.) This is the
+developer to the model. (It's the L10 loop, now as a graph edge; built for real in L11.) This is the
 exact question [L0505_lecture.md](L0505_lecture.md) answers in full.
 
 COMMON GOTCHAS: Answers that say "use a bigger model" or "add more nodes" miss it — the change is

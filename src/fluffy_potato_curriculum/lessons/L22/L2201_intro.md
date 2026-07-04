@@ -25,7 +25,7 @@ whole agent stack: prompting and structured output ([L02](../L02/L0201_intro.md)
 they are, how they're wired, and what they cost ([L07](../L07/L0701_intro.md),
 [L08](../L08/L0801_intro.md)); the hand-rolled model → tool → model loop
 ([L10](../L10/L1001_intro.md)); and that same loop drawn as a LangGraph graph
-([L04](../L04/L0401_intro.md), [L14](../L14/L1401_intro.md)).
+([L04](../L04/L0401_intro.md), [L11](../L11/L1101_intro.md)).
 
 All of that shares one nagging, unsolved problem: **everything the agent might need has to sit in
 the context window all the time.** Every tool's schema is re-sent on every request (L07's "tools
@@ -53,8 +53,8 @@ The one-line discriminator you'll drill this whole lesson:
 
 ## Concept first, then the real thing
 
-This lesson follows the course's spine — **hand-roll it, then meet the product** — exactly like L11
-(you built a trace before Langfuse) and L14 (you built the loop before LangGraph):
+This lesson follows the course's spine — **hand-roll it, then meet the product** — exactly like L12
+(you built a trace before Langfuse) and L11 (you built the loop before LangGraph):
 
 1. First you build a **minimal just-in-time skill loader** on the agent you already own. The agent
    sees a list of skill *names + descriptions*; only when it picks one does the full instruction

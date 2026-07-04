@@ -94,7 +94,7 @@ Times are rough and assume a semi-technical student with basic Python who comple
 
 - **Common gotchas:** giving one reason three ways ("it's cleaner"); missing the downstream framing.
 - **Unblockers:** acceptable points: (1) **parsing** — code reads a field, not a paragraph; (2)
-  **UX** — show the answer, hide/collapse the reasoning; (3) **evals/tracing** (L11–L12) score a clean
+  **UX** — show the answer, hide/collapse the reasoning; (3) **evals/tracing** (L12–L13) score a clean
   answer field while the logged reasoning stays available for debugging.
 - **Time:** ~5 min.
 

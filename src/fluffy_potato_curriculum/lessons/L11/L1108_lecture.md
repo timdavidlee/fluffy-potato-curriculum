@@ -6,9 +6,9 @@ keywords: shallow agent, react, create_agent, pattern, langgraph, design pattern
 estimated duration: 8
 ```
 
-> **Lesson:** L14. **Roadmap:** the optional forward-pointer in [demos_or_activities.md](../../../../docs/origin/lesson_roadmaps/L14/demos_or_activities.md).
+> **Lesson:** L11. **Roadmap:** the optional forward-pointer in [demos_or_activities.md](../../../../docs/origin/lesson_roadmaps/L11/demos_or_activities.md).
 > A short closing lecture — **diagram + discussion, no live build**. It reuses the compiled agent
-> from the demos ([L1403](L1403_lecture.ipynb)) and *names* what comes next. Building the patterns is
+> from the demos ([L1103](L1103_lecture.ipynb)) and *names* what comes next. Building the patterns is
 > **L15's** job; don't teach them here.
 
 ## section 1. Recap — what you built
@@ -19,12 +19,12 @@ estimated duration: 8
   conditional edge, and the **back-edge** `tools → agent` that hands the model control of the path.
 - diagram: the compiled shallow-agent graph — `agent` with a conditional edge to `tools`/`END`, and
   `tools → agent` closing the loop — captioned "one model, one tool set, one decision point."
-- You also **evaluated** it (the L12 set passed unchanged) and **traced** it (the run landed in the
-  L11 Langfuse). The skills travelled with the agent, not the implementation.
+- You also **evaluated** it (the L13 set passed unchanged) and **traced** it (the run landed in the
+  L12 Langfuse). The skills travelled with the agent, not the implementation.
 
 ### slide 1.2 The primitives you now own
 
-- table: the L14 vocabulary — every one of these is what L15 builds *patterns* on top of.
+- table: the L11 vocabulary — every one of these is what L15 builds *patterns* on top of.
 
 | Primitive | What it is |
 | --- | --- |
@@ -40,7 +40,7 @@ estimated duration: 8
 
 ### slide 2.1 The one-liner you revealed is named: ReAct
 
-- In [L1403](L1403_lecture.ipynb) you hand-built the graph, then revealed
+- In [L1103](L1103_lecture.ipynb) you hand-built the graph, then revealed
   `create_agent("anthropic:claude-sonnet-4-6", tools)` — *the same graph, wrapped*.
 - That whole-graph one-liner is the **ReAct** pattern: **reason** (the model decides) →
   **act** (call a tool) → observe → repeat. It is a **pattern over the primitives you just built**,
@@ -59,7 +59,7 @@ estimated duration: 8
 
 ### slide 3.1 What else can this graph shape express?
 
-- L14 owns **one graph, one loop, state mechanics.** L15 owns the **named patterns** and their
+- L11 owns **one graph, one loop, state mechanics.** L15 owns the **named patterns** and their
   trade-offs (latency, control, complexity).
 - A taste of what's coming (do **not** teach these now — just name them):
   - **plan-and-execute** — make a plan first, then run the steps;
@@ -72,7 +72,7 @@ estimated duration: 8
 
 ### slide 3.2 …and when *not* to reach for a pattern
 
-- Carry the L14 caution forward: a fancier pattern is more cost, more latency, more to debug.
+- Carry the L11 caution forward: a fancier pattern is more cost, more latency, more to debug.
   **Reach for the simplest shape that solves the task** — often that's the shallow loop you already
   have, or even the plain L10 function before it.
 - Patterns are tools for when the single loop genuinely isn't enough — not an upgrade everyone needs.

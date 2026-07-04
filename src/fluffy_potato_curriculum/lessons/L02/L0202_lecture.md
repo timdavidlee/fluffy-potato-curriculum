@@ -120,7 +120,7 @@ estimated duration: 110
 
 - Structured output makes the model's response **programmatic** rather than **conversational** — a
   dict your code can index, not a paragraph you have to read.
-- It is the precondition for almost everything later: evals (L12), tool calling (L07), and
+- It is the precondition for almost everything later: evals (L13), tool calling (L07), and
   multi-step pipelines all need the model's output to be *machine-readable*.
 - The shapes you'll ask for: a **JSON object**, a **fixed list of fields**, or **XML-ish tags**
   like `<answer>…</answer>`.
@@ -150,7 +150,7 @@ estimated duration: 110
   2. On failure, **regex out the first `{...}` block** and retry — salvages JSON wrapped in prose.
   3. On failure again, **raise loudly** with the raw response in the error message.
 - **Fail loudly, never silently.** A silent fallback (e.g. returning `{}` on parse failure) hides a
-  bug that *compounds* downstream in agent loops (L10) and traces (L11). A logged, raised error is a
+  bug that *compounds* downstream in agent loops (L10) and traces (L12). A logged, raised error is a
   diagnosis; a silent empty dict is a time bomb.
 - Validate the *contents*, not just "did it parse": required keys present? enum value in the allowed
   set? You decide whether a missing optional field is `null`-tolerant or an error — and you decide
@@ -227,7 +227,7 @@ estimated duration: 110
 | A single clear instruction already works | just the instruction — skip few-shot |
 | The model needs the team's idiosyncratic format/labels | few-shot (for format) |
 | The task needs *reasoning* steps, not pattern-matching | chain-of-thought — L06 |
-| The example set would dominate the context window | a different approach (retrieval L21, model class L13, fine-tuning — out of scope) |
+| The example set would dominate the context window | a different approach (retrieval L21, model class L14, fine-tuning — out of scope) |
 
 [↑ Back to top](#prompting-fundamentals-roles-structured-output-few-shot)
 

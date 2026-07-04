@@ -1,13 +1,14 @@
 """The shared tools the hand-rolled agent loop dispatches.
 
 This is the canonical reference copy of the tools students first built inline in
-L10. L11 (and L12, and the later LangGraph lessons) import them from here instead
-of re-deriving them, so every lesson traces and evaluates the *same* agent.
+L10. The tracing (L12), eval (L13), and shallow-agent (L11) lessons import them
+from here instead of re-deriving them, so every lesson traces and evaluates the
+*same* agent.
 
 The tools stay deliberately tiny and deterministic — the lessons are about the
 loop, the trace, and the eval set, not about tool design (that was L08). Each
 tool returns a ``str`` and signals failure in one of two ways, which is exactly
-what gives L11's "locate a failure" objective its raw material:
+what gives L12's "locate a failure" objective its raw material:
 
 - a tool that **raises** (``calculator`` on junk input, ``lookup`` on a missing
   city, ``flaky_fetch`` on a crashing URL) — the loop converts the exception

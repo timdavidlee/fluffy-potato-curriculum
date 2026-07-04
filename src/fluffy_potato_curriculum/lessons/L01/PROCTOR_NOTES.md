@@ -34,7 +34,7 @@ Python).
   chars/token; JSON ≈ 2.9. "Every cost and window number later is downstream of this count."
 - **L0106 — model scale ladder.** Same prompt, three sizes: ` oxygen` climbs **0.46 → 0.63 → 0.84**.
   Draw the boundary out loud — this is *mechanistic* (capability sharpens prediction); **which**
-  model/provider to pick per capability (OCR, planning, execution) is **L13**, not here.
+  model/provider to pick per capability (OCR, planning, execution) is **L14**, not here.
 - **L0107 — temperature.** §1 is offline: temperature reshapes the *same* GPT-2 distribution
   (T=0.5 sharpens ` oxygen` → ~0.73; T=2.0 flattens → ~0.03). §2 is the live Claude sweep. Land
   "temperature 0 is *low* variance, not zero."

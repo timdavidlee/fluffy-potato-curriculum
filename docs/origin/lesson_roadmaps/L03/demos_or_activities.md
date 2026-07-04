@@ -28,7 +28,7 @@ The teacher should have, before the first demo starts:
 - **One model client constructed and named:** `sonnet = ChatAnthropic(model="claude-sonnet-4-6-...")`. One client, used by the one node — keep it that simple. <!-- *NEED INPUT*: confirm exact model id string for the Sonnet 4.6 snapshot used by ChatAnthropic, read from common/config.py rather than hard-coded in cells. Mirrored from the equivalent open question in L04's demos. -->
 - **A small running-example dataset for the single node.** Decided running example: an **`extract` node** that pulls a handful of structured fields out of a short piece of raw text (reusing L02's structured-output-by-instruction discipline, now returned as a typed state update instead of a hand-parsed script variable). <!-- *NEED INPUT*: confirm the exact domain/text for the extract node — recommend reusing a support-ticket-style snippet so L04 (whose first node is also a `parse`/extract step over support tickets) can plausibly be read as "the next lesson takes this exact kind of node and adds two more." A different, unrelated domain is also fine if the intent is to keep L03 visually distinct from L04's running example. -->
 - **The one-node graph definition in a sibling file** to paste if live-coding falls behind.
-- LangGraph's own run/stream output ready to call (`stream()` on the compiled graph) — **not** Langfuse. Real trace tooling is [L11](../L11/objectives.md); name it as a forward pointer, don't reach for it.
+- LangGraph's own run/stream output ready to call (`stream()` on the compiled graph) — **not** Langfuse. Real trace tooling is [L12](../L12/objectives.md); name it as a forward pointer, don't reach for it.
 
 > Why one node, one model, one dataset: L03's entire pedagogical job is to make "what is a node" land cleanly before any wiring exists. Every extra moving part (a second model, a second node, a tracing platform) borrows attention from that one idea and belongs to a later lesson instead.
 
@@ -63,7 +63,7 @@ The teacher should have, before the first demo starts:
 
 ## Demo 2 — Compile, invoke, and inspect one node in isolation (Objective 3)
 
-**Goal:** take Demo 1's node and put it through the smallest possible `StateGraph`: one node, entry point, straight to `END`. Compile it, invoke it, and inspect the returned state. Use LangGraph's own stream output to "watch it run," and name — but do not use — real trace tooling as an L11 forward pointer.
+**Goal:** take Demo 1's node and put it through the smallest possible `StateGraph`: one node, entry point, straight to `END`. Compile it, invoke it, and inspect the returned state. Use LangGraph's own stream output to "watch it run," and name — but do not use — real trace tooling as an L12 forward pointer.
 
 **Pre-flight:**
 
@@ -77,14 +77,14 @@ The teacher should have, before the first demo starts:
 3. `graph.invoke({"raw_text": sample_1})`. Show the returned state on screen: the `raw_text` field is still there unchanged, and `extracted_fields` is now populated. Point at both — the input survived, the output appeared.
 4. Re-run with a second, harder sample text (missing or ambiguous field). Show the returned state again — reinforce that "state comes out" every time, even when the underlying extraction quality varies.
 5. Call `graph.stream({"raw_text": sample_1})` and watch the single step fire in the stream output. Say explicitly: *"this is LangGraph's own built-in way to watch a run — for one node it's almost overkill, but it's the same mechanism L04 will use to watch several nodes fire in sequence."*
-6. Forward-pointer, one line, do not demo it: *"Later, in L11, you'll route runs like this to a real tracing platform and read a structured trace — for now, the return value and the stream are all you need to answer 'did my node run, and what came back.'"*
+6. Forward-pointer, one line, do not demo it: *"Later, in L12, you'll route runs like this to a real tracing platform and read a structured trace — for now, the return value and the stream are all you need to answer 'did my node run, and what came back.'"*
 
 **What to highlight:**
 
 - **Compile then invoke is two separate steps.** Compiling declares the runnable; invoking runs it on a specific input. Worth saying plainly since students haven't seen this two-step shape before.
 - **The returned state has both the old and the new.** `invoke()` doesn't return "just the output" — it returns the whole state, input field intact, output field populated. This is the direct, hands-on version of "state comes out."
 - **More ceremony than just calling the function — and that's the point, not yet paid off.** Be honest: for one node, `graph.invoke(...)` is more setup than `extract_node_plain(sample_1)` would have been. The payoff is coming in L04, not here.
-- **This is not tracing.** `stream()` shows *that* the node ran; it is not a substitute for the structured, comparable traces L11 will teach. Naming the gap now makes L11 land as "now you get the real tool," not a redundant repeat.
+- **This is not tracing.** `stream()` shows *that* the node ran; it is not a substitute for the structured, comparable traces L12 will teach. Naming the gap now makes L12 land as "now you get the real tool," not a redundant repeat.
 
 **If the demo misbehaves:**
 

@@ -28,10 +28,10 @@ and `tracks.toml` in sync when lessons change.
 | L08 | Designing good tools                                          |  ✅  |  ✅  |
 | L09 | MCP: packaging tools as a portable contract                   |      |  ✅  |
 | L10 | Hand-rolled agent loop                                        |  ✅  |  ✅  |
-| L11 | What an agent generates: state, logs, traces & extracts       |  ✅  |  ✅  |
-| L12 | Evaluation: first pass                                        |  ✅  |  ✅  |
-| L13 | Choosing model power for the task                             |      |  ✅  |
-| L14 | Shallow agents in LangGraph                                   |  ✅  |  ✅  |
+| L11 | Shallow agents in LangGraph                                   |  ✅  |  ✅  |
+| L12 | What an agent generates: state, logs, traces & extracts       |  ✅  |  ✅  |
+| L13 | Evaluation: first pass                                        |  ✅  |  ✅  |
+| L14 | Choosing model power for the task                             |      |  ✅  |
 | L15 | LangGraph design patterns                                     |      |  ✅  |
 | L16 | Agent middleware and conditional tools                        |      |  ✅  |
 | L17 | Human-in-the-loop and approval gates                          |      |  ✅  |
@@ -44,7 +44,7 @@ and `tracks.toml` in sync when lessons change.
 | L24 | Multi-agent / subagent architecture (stretch)                 |      |  ✅  |
 | L25 | Evaluation revisited                                          |      |  ✅  |
 
-Mini teaching order: L01 → L02 → L03 → L04 → L05 → L06 → L07 → L08 → L10 → L11 → L12 → L14 → L22 → L23.
+Mini teaching order: L01 → L02 → L03 → L04 → L05 → L06 → L07 → L08 → L10 → L11 → L12 → L13 → L22 → L23.
 
 ## Course wrap-ups
 

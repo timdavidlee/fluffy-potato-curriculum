@@ -111,7 +111,7 @@ The teacher should have, before the first demo starts:
 
 - The history carries **three message types** — `HumanMessage`, `AIMessage`, and the dedicated `ToolMessage` — and the `ToolMessage` is the application speaking, not the human. The message type marks *protocol position*, not who is a person.
 - The model is **stateless across calls** — Message 4's request had to include Messages 1–3 *and* the tool definition again. The model did not "remember" the tool from Message 2; the schema (still carried by the tool-bound model on every `.invoke`) rode along in the prompt every time. This is the single most common student misconception; name it here.
-- Tools cost tokens **twice over**: the tool *definition* is re-sent on every request, and the tool *result* lives in the history for every subsequent turn. A 500-token tool definition across a 10-turn chat is ~5,000 input tokens before the tool is even called. Forward-link to L13 (models & providers) and L19 (context management), which return to this cost.
+- Tools cost tokens **twice over**: the tool *definition* is re-sent on every request, and the tool *result* lives in the history for every subsequent turn. A 500-token tool definition across a 10-turn chat is ~5,000 input tokens before the tool is even called. Forward-link to L14 (models & providers) and L19 (context management), which return to this cost.
 
 **If the demo misbehaves:**
 

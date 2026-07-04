@@ -41,9 +41,9 @@ class Settings(BaseSettings):
     anthropic_api_key: str | None = None
     openai_api_key: str | None = None
 
-    # Self-hosted Langfuse tracing (introduced in L11, reused by the LangGraph
-    # lessons L14+). All optional: when unset, tracing is simply skipped and the
-    # code runs unchanged — see `langfuse_configured()` and the L11 notebooks.
+    # Self-hosted Langfuse tracing (introduced in L12, reused by the LangGraph
+    # lessons L11 and L15+). All optional: when unset, tracing is simply skipped and
+    # the code runs unchanged — see `langfuse_configured()` and the L12 notebooks.
     langfuse_public_key: str | None = None
     langfuse_secret_key: str | None = None
     langfuse_host: str | None = None

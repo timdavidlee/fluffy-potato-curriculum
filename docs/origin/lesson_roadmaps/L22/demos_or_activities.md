@@ -22,8 +22,8 @@ The demos are ordered to match the four learning objectives. Demo 1 lands the ta
 
 The teacher should have, before the first demo:
 
-- **The L14 shallow agent** (the LangGraph agent students built) running on Sonnet 4.6, with the shared tools from `common/tools.py` (`calculator`, `lookup`, `flaky_fetch`). Skills attach to *this* agent — the message is "add just-in-time capability to the agent you already built," not a new toy. <!-- *NEED INPUT*: confirm the demos host on the L14 shallow agent (vs. the L10 hand-rolled loop). Recommendation: L14, so the lesson reads as the capstone of the agent the students just finished. -->
-- **A context/token readout** — the L11 trace (or the shared Langfuse instance) showing tokens-per-call and what's in the context window, so "always-on vs. just-in-time" is *visible in numbers*, not asserted.
+- **The L11 shallow agent** (the LangGraph agent students built) running on Sonnet 4.6, with the shared tools from `common/tools.py` (`calculator`, `lookup`, `flaky_fetch`). Skills attach to *this* agent — the message is "add just-in-time capability to the agent you already built," not a new toy. <!-- *NEED INPUT*: confirm the demos host on the L11 shallow agent (vs. the L10 hand-rolled loop). Recommendation: L11, so the lesson reads as the capstone of the agent the students just finished. -->
+- **A context/token readout** — the L12 trace (or the shared Langfuse instance) showing tokens-per-call and what's in the context window, so "always-on vs. just-in-time" is *visible in numbers*, not asserted.
 - **A minimal hand-rolled JIT skill loader**: the agent is handed a registry of skills as `{name, description}` only; a `load_skill(name)` step reads the *full* markdown body into context, and the model is told to call it when a skill's description matches the task. The teacher writes the core of this live in Demo 3; keep a completed version in a sibling file to paste if live-coding falls behind. <!-- *NEED INPUT*: tooling — hand-rolled JIT loader for the concept (no new dep), then a real `.claude/skills/` `SKILL.md` for the "production" reveal (uses the already-present `claude` tooling). Mirrors the objectives open question; confirm no new runtime dep is needed. -->
 - **Two prepared skills as markdown files** (Anthropic Agent Skills `SKILL.md` shape — YAML frontmatter `name` + `description`, markdown body, optional bundled script):
   - A **good** skill, e.g. `refund-policy` — description that clearly states *when* it applies, a body of step-by-step instructions, and a tiny supporting script (e.g. compute a refund amount) the skill tells the agent to run.
@@ -137,7 +137,7 @@ The teacher should have, before the first demo:
 
 If time allows, close the loop: open a real skill from this repo (`.claude/skills/author-lesson-roadmap/`) and show that it's the *same* shape students just hand-built — frontmatter `name` + `description`, a markdown instruction body, supporting structure — loaded just-in-time by Claude Code. Punchline: **the JIT loader you wrote in Demo 3 is what the Agent SDK / Claude Code does for real; the curriculum you're taking is itself built from skills.**
 
-Don't teach the SDK's mechanics — just land that the hand-rolled concept and the production product are the same idea, the way L11's hand-rolled trace mapped to Langfuse and L14's loop mapped to LangGraph.
+Don't teach the SDK's mechanics — just land that the hand-rolled concept and the production product are the same idea, the way L12's hand-rolled trace mapped to Langfuse and L11's loop mapped to LangGraph.
 
 <!-- *NEED INPUT*: include this capstone demo as the mini-cut closer, or hold the real-Agent-Skills reveal for a lab? Recommendation: include it — it's the satisfying "you built the real thing" capstone moment for the final mini-cut lesson. -->
 
@@ -156,7 +156,7 @@ For the full-course track only (L24 follows): one line and a sketch — a *subag
 
 - <!-- *NEED INPUT*: tooling — hand-rolled JIT loader for the concept, then a real `.claude/skills/` `SKILL.md` for the production reveal. Confirm no new runtime dep is needed (the real-skills demo uses the already-present `claude` tooling). Mirrors the objectives open question. -->
 - <!-- *NEED INPUT*: exact `SKILL.md` format (frontmatter name+description + markdown body + optional bundled scripts, matching `.claude/skills/`), and whether the demo skill ships a runnable supporting script or is instructions-only. Mirrors the objectives open question. -->
-- <!-- *NEED INPUT*: confirm the demos host on the L14 shallow agent with the shared `common/tools.py` tools, for continuity with the rest of the mini cut. -->
-- <!-- *NEED INPUT*: how to make the token-savings payoff vivid — read real counts off the L11 trace / Langfuse, or a prepared side-by-side slide? Recommendation: live trace numbers, with a slide as fallback. -->
+- <!-- *NEED INPUT*: confirm the demos host on the L11 shallow agent with the shared `common/tools.py` tools, for continuity with the rest of the mini cut. -->
+- <!-- *NEED INPUT*: how to make the token-savings payoff vivid — read real counts off the L12 trace / Langfuse, or a prepared side-by-side slide? Recommendation: live trace numbers, with a slide as fallback. -->
 - <!-- *NEED INPUT*: depth/duration target for this capstone lesson (full ~2hr vs. lighter), since it is the one mini-cut lesson "added by request" and not anchored to a core course objective. Mirrors the objectives open question. -->
 - <!-- *NEED INPUT*: include the optional capstone (real Agent Skills) in the lecture, or move it to a lab? Recommendation: include it as the closer. -->

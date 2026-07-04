@@ -190,7 +190,7 @@ estimated duration: 75
 
 - **[L08](../L08/objectives.md)** — "more tools = more schema text in every prompt, more chances to
   mis-pick." The cost is one reason *not* to add a tool.
-- **[L12](../L12/objectives.md)** (model power) and **L16** (context management) revisit tool cost as
+- **[L13](../L13/objectives.md)** (model power) and **L16** (context management) revisit tool cost as
   a budget you actively manage. Carry the "twice over" framing forward.
 
 [↑ Back to top](#tool-calling-the-protocol-the-round-trip-and-who-runs-what)

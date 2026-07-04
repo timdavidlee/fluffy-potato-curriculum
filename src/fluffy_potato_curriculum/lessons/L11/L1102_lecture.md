@@ -6,12 +6,12 @@ keywords: langgraph, agent, shallow agent, stategraph, node, edge, conditional e
 estimated duration: 80
 ```
 
-> **Lesson:** L14. **Roadmap:** [objectives.md](../../../../docs/origin/lesson_roadmaps/L14/objectives.md).
+> **Lesson:** L11. **Roadmap:** [objectives.md](../../../../docs/origin/lesson_roadmaps/L11/objectives.md).
 > This is the written reference lecture — thorough on purpose, so a student who missed the live
 > delivery can rebuild the lesson from the page. The live demos are notebooks
-> ([L1403](L1403_lecture.ipynb) build the agent, [L1405](L1405_lecture.ipynb) state & reducers,
-> [L1407](L1407_lecture.ipynb) eval carry-over + tracing); the bridge to L15 is
-> [L1408](L1408_lecture.md); hands-on practice is in the L14 labs (L1404, L1406).
+> ([L1103](L1103_lecture.ipynb) build the agent, [L1105](L1105_lecture.ipynb) state & reducers,
+> [L1107](L1107_lecture.ipynb) eval carry-over + tracing); the bridge to L15 is
+> [L1108](L1108_lecture.md); hands-on practice is in the L11 labs (L1104, L1106).
 > **Anchor model: Claude Sonnet 4.6** — a single model throughout, so the *only* variable versus
 > the L10 hand-rolled loop is the graph shape.
 
@@ -19,29 +19,29 @@ estimated duration: 80
 
 ### slide 1.1 It's the same loop, drawn as a graph
 
-- L14 introduces **no new control flow**. Model → tool → model until termination is *exactly* the
+- L11 introduces **no new control flow**. Model → tool → model until termination is *exactly* the
   loop you hand-rolled in [L10](../L10/objectives.md).
 - What's new is the **shape**: an explicit `while` loop becomes an explicit **graph** of nodes and
   edges over a shared **state**, and LangGraph supplies the runtime that drives it.
 - You met every primitive already in [L04](../L04/objectives.md) — `StateGraph`, node, edge,
-  conditional edge, typed state, reducer. L14 reuses them unchanged and adds **one** thing.
+  conditional edge, typed state, reducer. L11 reuses them unchanged and adds **one** thing.
 - The pedagogical bet: meeting the framework *after* hand-rolling the loop means the framework
   reads as **conveniences over a familiar skeleton**, not as magic.
 
-### slide 1.2 The one thing L14 adds: a back-edge
+### slide 1.2 The one thing L11 adds: a back-edge
 
 - L04's graphs were **acyclic** (DAGs): the developer wired every edge, the model never chose the
-  path. L14 adds a **conditional edge that loops back to the model** — a **back-edge**.
+  path. L11 adds a **conditional edge that loops back to the model** — a **back-edge**.
 - That single edge hands control of the path to the *model*: *it* decides whether to call another
   tool and go again, or to stop. The acyclic **workflow** becomes a cyclic, model-driven **agent**.
 - diagram: L04's acyclic chain on the left; on the right the same primitives with one new dashed
-  back-edge curving from a `tools` node back to the `agent` node — labeled "the only thing L14 adds."
+  back-edge curving from a `tools` node back to the `agent` node — labeled "the only thing L11 adds."
 
 ### slide 1.3 Workflow vs. agent — the line is who drives the path
 
 - table: the one difference, carried verbatim from L04.
 
-| | **Workflow** (L04) | **Agent** (L14) |
+| | **Workflow** (L04) | **Agent** (L11) |
 | --- | --- | --- |
 | Who decides the path? | the **developer** (fixed/derived logic) | the **model** |
 | Graph shape | **acyclic** (DAG) — always reaches `END` | **cyclic** — loops `agent → tools → agent` |
@@ -77,7 +77,7 @@ estimated duration: 80
 - table: the graph is the L10 loop, re-expressed. If you can't map a piece to an L10 line, slow
   down — *this mapping is objective 1.*
 
-| L10 hand-rolled loop | L14 graph piece |
+| L10 hand-rolled loop | L11 graph piece |
 | --- | --- |
 | "call the model" | the `agent` node |
 | "run every `tool_use`, append a `tool_result`" | the `tools` node |
@@ -156,7 +156,7 @@ builder.add_node("agent", agent_node)
 builder.add_node("tools", ToolNode(tools, handle_tool_errors=True))
 builder.set_entry_point("agent")
 builder.add_conditional_edges("agent", route, {"tools": "tools", END: END})
-builder.add_edge("tools", "agent")        # <-- the back-edge: the only thing L14 adds
+builder.add_edge("tools", "agent")        # <-- the back-edge: the only thing L11 adds
 app = builder.compile()
 ```
 
@@ -205,7 +205,7 @@ app = builder.compile()
   reach — **hits LangGraph's recursion limit** and raises `GraphRecursionError`. *The L10
   invariant bug, in graph form.*
 - Restore `add_messages` and it works again. (You'll do exactly this break/restore in
-  [L1405](L1405_lecture.ipynb) and the L1406 lab.)
+  [L1105](L1105_lecture.ipynb) and the L1106 lab.)
 
 ### slide 4.4 What belongs in state — and what doesn't
 
@@ -247,7 +247,7 @@ app = create_agent("anthropic:claude-sonnet-4-6", tools)   # the whole shallow a
 ```
 
 - That one-liner is also the lead-in to **L15**: it is the **ReAct** pattern — *a pattern over*
-  these primitives, not a new mechanism (see [L1408](L1408_lecture.md)).
+  these primitives, not a new mechanism (see [L1108](L1108_lecture.md)).
 
 ### slide 5.3 The step cap didn't go away — and tool errors still need handling
 
@@ -260,11 +260,11 @@ app = create_agent("anthropic:claude-sonnet-4-6", tools)   # the whole shallow a
 
 ## section 6. Carry your eval set across, and tracing transfers
 
-### slide 6.1 Bring the L12 eval set onto the rebuild
+### slide 6.1 Bring the L13 eval set onto the rebuild
 
-- The cleanest proof the rebuild is correct: run the **same L12 eval set** against the LangGraph
+- The cleanest proof the rebuild is correct: run the **same L13 eval set** against the LangGraph
   agent and watch the same cases pass. *Same cases, different implementation, nothing regressed.*
-- The graph returns a **state dict** (a `messages` list); the L12 scorers expect a `RunResult`
+- The graph returns a **state dict** (a `messages` list); the L13 scorers expect a `RunResult`
   (`final_text`, `trace`). A thin **adapter** maps one to the other so the *same* `EvalCase`s and
   scorers from [`common/evals.py`](../../common/evals.py) run unchanged.
 - diagram: `graph.invoke(...) → {messages, step} → to_run_result() → RunResult → common/evals.py
@@ -280,13 +280,13 @@ def to_run_result(final_state) -> RunResult:
     # ... build a RunResult whose .trace carries one 'tool' span per tool call ...
 ```
 
-- This is L12's **"carry it forward"** rule cashing out one lesson later — make it a *visible* beat,
+- This is L13's **"carry it forward"** rule cashing out one lesson later — make it a *visible* beat,
   not an afterthought.
 
 ### slide 6.2 Tracing transfers, too
 
-- Attach the **Langfuse callback** (the same self-hosted instance from [L11](../L11/objectives.md))
-  and the graph's run lands in the **same dashboard**, next to your hand-rolled L11 traces.
+- Attach the **Langfuse callback** (the same self-hosted instance from [L12](../L12/objectives.md))
+  and the graph's run lands in the **same dashboard**, next to your hand-rolled L12 traces.
 - You see the **same spans** you already know: a **GENERATION** for each model call, a **SPAN** for
   each tool call. The skill is portable — only the trace's *packaging* changed.
 - One honest caveat: the framework's auto-trace is *shaped* by LangGraph, so span names and nesting
@@ -319,4 +319,4 @@ def to_run_result(final_state) -> RunResult:
 - **Reason about graph state** — messages-as-state, the `add_messages` reducer that preserves the
   L10 pairing invariant, and the state-vs-dependency boundary (objective 3).
 - Next: **L15** surveys the *patterns* these primitives compose into — and frames `create_agent` as
-  **ReAct, a pattern over what you just built**. See [L1408](L1408_lecture.md).
+  **ReAct, a pattern over what you just built**. See [L1108](L1108_lecture.md).

@@ -24,7 +24,7 @@ can talk about agents: the **conditional edge** — a transition chosen at *runt
 function that inspects state and returns the name of the next node. With L05, the **L03–L05 graph
 ramp is complete**: single node → fixed sequence → runtime-chosen branch, all still without tools
 ([L07](../L07/objectives.md)) and without an agent loop ([L10](../L10/objectives.md) /
-[L14](../L14/objectives.md)).
+[L11](../L11/objectives.md)).
 
 L05 does **not** re-teach L04's sequential chaining — you arrive already able to build a fixed-edge
 `StateGraph`; L05's entire job is the one new primitive, the conditional edge, and what can decide
@@ -40,12 +40,12 @@ Said a few ways:
    second, runtime-chosen kind.
 2. The decider can be **derived data**, a **model classification label**, or **direct user
    input** — never whether the model asked for a tool. That last case is the agent, taught at
-   [L14](../L14/objectives.md).
+   [L11](../L11/objectives.md).
 3. **"Runtime-chosen" does not mean "unpredictable."** Re-run the same input and it takes the
    **same** branch, every time — a conditional edge is still a deterministic function of state.
 4. **User-input branching is the purest contrast with an agent.** No model is anywhere near the
    routing decision — the user (or the developer's code) picked the path.
-5. **Same mechanism, different decider, is the whole story.** L05's conditional edge and L14's
+5. **Same mechanism, different decider, is the whole story.** L05's conditional edge and L11's
    conditional edge use the identical LangGraph API; only *what the routing function is allowed to
    read* changes.
 
@@ -56,7 +56,7 @@ agent) and adds:
 
 - **Conditional edge** — a runtime-chosen transition: a routing function reads **state** and
   returns the next node's name, wired with `add_conditional_edges`. In L05 the routing function
-  reads developer-owned inputs to state; in L14 it reads whether the model asked for a tool.
+  reads developer-owned inputs to state; in L11 it reads whether the model asked for a tool.
 - **Routing function** — the plain Python function (an `if`/`match`, not a model call) that
   implements a conditional edge's decision.
 - **Router / switch** — the recurring shape: one entry node (often a classifier) whose conditional
@@ -71,8 +71,8 @@ agent) and adds:
 ## A note on the client and tracing: no new departures
 
 Like L03/L04, L05's nodes call the native LangChain **`ChatAnthropic`** — no new departure here.
-Tracing is still a forward reference: the full skill is **[L11's](../L11/objectives.md)** job.
+Tracing is still a forward reference: the full skill is **[L12's](../L12/objectives.md)** job.
 
 The single sentence to leave L05 with: **"L04 showed you a graph with no branches; L05 showed you
-a graph with developer-owned branches; L14 shows you a graph whose branches the model owns. Same
+a graph with developer-owned branches; L11 shows you a graph whose branches the model owns. Same
 primitives throughout — the only thing that ever changes is who decides."**

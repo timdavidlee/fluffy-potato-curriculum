@@ -32,7 +32,7 @@ wire; state goes in, state comes out"* — you have the entire payload of this l
 **several** nodes into a fixed sequence; L05 adds conditional branching. Together L03–L05 install the
 graph model using **plain LLM calls only** — no tools (those arrive at
 [L07](../../../../docs/origin/lesson_roadmaps/L07/objectives.md)) and no agent loop (hand-rolled at
-L10, as LangGraph at L14).
+L10, as LangGraph at L11).
 
 ## The one idea, said a few ways
 
