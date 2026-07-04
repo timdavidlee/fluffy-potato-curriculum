@@ -1,8 +1,18 @@
-# L11: Tracing — reading what your agent did
+# L11: What an agent generates — state, logs, traces & extracts
 
 > Parent design doc: [CURRICULUM_PRD.md](../../CURRICULUM_PRD.md) (lesson-plan row L11).
 > Folder conventions: [docs/origin/CLAUDE.md](../../CLAUDE.md).
 > Preceding lesson: [L10 Hand-rolled agent loop](../L10/objectives.md). Following lesson: L12 Evaluation: first pass (roadmap not yet written).
+
+> **Framing (read first).** This lesson is titled for the whole inventory of what an
+> agent run produces, but its **center of gravity is tracing** (objectives 1–5) —
+> because the trace is the durable artifact L12 (evaluation) consumes. The opening
+> taxonomy (objective 6, taught *first* in delivery order) exists to place tracing among
+> the other things a run generates and to draw one hard boundary: the **observability
+> plane** (state · logs · traces — *what the agent did*, for you to debug and evaluate)
+> is separate from the **data plane** (extracts / new records — *what the agent made*,
+> persisted to a database or object store). Don't cross the streams: a trace is not a
+> datastore, and a datastore is not a trace.
 
 ## Where this lesson sits
 

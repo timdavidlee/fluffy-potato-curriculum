@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+# Validates the commit message against Conventional Commits via commitizen
+# (`cz check`), so messages stay compatible with `cz bump` / CHANGELOG generation.
+# - Runs alongside the prepare-commit-msg drafter (which fills a blank message first).
+# - Skips silently when uv/commitizen can't run (e.g. a minimal checkout or CI without
+#   dev deps), so it never blocks a commit in an environment that simply lacks the tool.
+# - Merge/revert/fixup messages are allowed by commitizen's default prefixes.
+
+set -euo pipefail
+
+COMMIT_MSG_FILE="$1"
+
+# No uv → can't run commitizen; don't block the commit.
+if ! command -v uv >/dev/null 2>&1; then
+    exit 0
+fi
+
+# Enforce: cz check's non-zero exit aborts the commit and prints the expected format.
+exec uv run --frozen cz check --commit-msg-file "$COMMIT_MSG_FILE"

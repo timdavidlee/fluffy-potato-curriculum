@@ -69,7 +69,7 @@ LangGraph at L14?>`
 | L08 | Designing good tools                                  | decide when a tool is needed vs. model-alone; name and schema-design a tool; handle tool errors           |
 | L09 | MCP: packaging tools as a portable contract           | describe the problem MCP solves (portable tool contract across clients); connect to an existing MCP server from a client; expose a simple tool as an MCP server; decide when MCP is worth the overhead vs. an inline tool |
 | L10 | Hand-rolled agent loop                                | build a model→tool→model loop in plain Python; reason about termination; handle tool failures             |
-| L11 | Tracing: reading what your agent did                  | read a trace of an agent run (model calls, tool calls, intermediate state); locate where a failure occurred from the trace alone; instrument a hand-rolled agent loop to emit useful traces; compare two traces of the same task to spot what changed |
+| L11 | What an agent generates: state, logs, traces & extracts | inventory what an agent run produces and split it across two planes — *observability* (state, logs, traces: what the agent did, for you to debug/eval) vs *data* (extracts / new records: what the agent made, persisted to a DB or S3); read a trace of an agent run (model calls, tool calls, intermediate state); locate where a failure occurred from the trace alone; instrument a hand-rolled agent loop to emit useful traces; compare two traces of the same task to spot what changed; keep hard data out of the trace and the trace out of the datastore |
 | L12 | Evaluation: first pass                                | build a minimal eval set for a tool-calling / hand-rolled-loop agent; design eval cases that target failure modes already seen in traces from L11; compare two runs of the same task to flag regressions; reason about eval cost (sample size, model calls, human review); establish the practice that every later lesson will carry forward |
 | L13 | Choosing models & providers for the task              | survey the major model providers and where each is differentially strong (vision/OCR, long-context, reasoning/planning, cheap high-throughput execution); match a task or agent step to an appropriate provider *and* power tier — not just a size class within one provider; design a mixed-model, mixed-provider agent (e.g. a vision model for OCR, a strong reasoner for planning, a small fast model for routing/execution), binding different models to different nodes of the graphs from L03–L05; weigh capability against latency, cost, and context length; estimate cost and latency budgets for a multi-step, multi-model agent |
 | L14 | Shallow agents in LangGraph                           | model an agent as a graph; build a single-loop LangGraph agent; reason about graph state                  |
@@ -95,65 +95,62 @@ anchored on the five course objectives (tool design, when-to-use-a-tool,
 shallow LangGraph agent, eval, tracing) and drops everything that doesn't
 directly serve them. The multi-agent stretch is the first thing out.
 
-**Kept (13 lessons, ~30 hrs at the full-course per-lesson rate):**
+**Kept (14 lessons, ~32 hrs at the full-course per-lesson rate):**
 
 Skills (L22) and skill patterns & composition (L23) are included by explicit request on top of the
 five-objective core — the two kept lessons not anchored to a course objective; they push the cut
 past the ~20 hr floor. Together they make "compose skills into a system" the mini-cut capstone.
 The early graph ramp (L03 single-node → L04 sequential → L05 conditional) is kept whole: it now
 precedes tools and the agent loop, so every later mini lesson builds on the node/graph model and
-none of the three can be dropped without breaking what follows — this is why the mini grew from 11
-to 13 lessons.
+none of the three can be dropped without breaking what follows. Chain-of-thought prompting (L06)
+is kept by explicit request: it gives the `<thinking>` channel a real home (see the assistant
+message-channels thread below) and reinforces "deciding to call a tool is a reasoning step" right
+before L07 — this is why the mini grew from 11 to 14 lessons.
 
 | #   | Lesson title                            | Why it stays                                                                 |
 | --- | --------------------------------------- | ---------------------------------------------------------------------------- |
 | L01 | LLM and token basics                    | Non-negotiable foundation — every later lesson assumes it                    |
-| L02 | Prompting fundamentals                  | Non-negotiable foundation; CoT (L06) folds in here                           |
+| L02 | Prompting fundamentals                  | Non-negotiable foundation                                                    |
 | L03 | Single-node operations                  | The orchestration unit — a node is one LLM call you wire; every graph builds on it |
 | L04 | Directed graphs: sequential chaining    | Deterministic prompt-chaining before the model-driven loop                   |
 | L05 | Conditional graphs: routing & branching | Developer-controlled branching before the agent drives control               |
+| L06 | Teaching an LLM to think via prompting  | Kept by request; owns the `<thinking>` channel and frames tool-calling as reasoning before L07 |
 | L07 | Tool calling: how it works              | Covers the *tool design* objective — mechanics half                          |
 | L08 | Designing good tools                    | Covers the *when a tool is needed vs. model alone* objective                 |
 | L10 | Hand-rolled agent loop                  | The spine — exposes mechanics before LangGraph hides them                    |
-| L11 | Tracing                                 | Covers the *tracing* objective; sets up L12                                  |
+| L11 | What an agent generates                 | Tracing at the center (sets up L12), framed by the artifact taxonomy: state · logs · traces (observability) vs extracts / new records → DB/S3 (data) |
 | L12 | Evaluation: first pass                  | Covers the *evaluation* objective; pairs with tracing                        |
 | L14 | Shallow agents in LangGraph             | Covers the *design a shallow agent in LangGraph* objective                   |
 | L22 | Skills: just-in-time capabilities       | Added by request; depends on tools + prompting, which the mini course keeps  |
 | L23 | Skill patterns & composition            | Added by request; the composition capstone — compose skills into a system    |
 
 **Cross-cutting thread — assistant message channels (narration / thinking / answer).**
-The three kinds of assistant output must stay covered in the mini even though L06
-(their natural home) is cut. Assign homes explicitly:
+The three kinds of assistant output are all covered in the mini. Homes:
 
-- **Answer** messages — already owned by **L02** (parsing the structured
+- **Answer** messages — owned by **L02** (parsing the structured
   `<answer>{…}</answer>` block; the structured-output subgoal). No gap.
 - **Narration** messages — the agent's interim assistant text between tool calls.
   Already present in **L10** (called out as "interim narration") and made readable
   in **L11** (narrate the run from the trace). Keep; consider naming it explicitly
   as a channel rather than an aside.
-- **Thinking** messages — **GAP in the mini.** The `<thinking>` channel is owned by
-  **L06, which the mini cuts**, and L02/L07 both currently *defer* it to L06
-  ("that's L06, don't re-teach"). With no L06, the mini needs a home for the minimal
-  thinking-block treatment. **Fix:** promote L02's existing optional `<thinking>`
-  preview demo into a small taught beat in the mini (L02 already teaches the
-  structured-`<answer>` half, so the thinking half is a natural sibling), reinforced
-  at L07 where "deciding to call a tool is a reasoning step." Resolve the latent
-  inconsistency: the mini plan says "CoT folds into L02," but L02's roadmap says it
-  does *not* teach the thinking half — in the mini cut, it must.
+- **Thinking** messages — owned by **L06**, which the mini now keeps: the
+  `<thinking>` channel gets its full chain-of-thought treatment there, reinforced at
+  L07 where "deciding to call a tool is a reasoning step." (L02 keeps its lighter
+  `<thinking>` preview as a sibling to the structured-`<answer>` half, but no longer
+  has to carry the channel alone.)
 
 **Cut, in rough order of "first to add back if the budget grows":**
 
 1. **L21 RAG pipeline** (+ L20 embeddings as its prerequisite) — most-asked-for practical capability; pulls in two lessons but is the highest-impact restoration
 2. **L13 Choosing models & providers** — short, broadly useful; matches models/providers to capabilities
-3. **L06 Teaching an LLM to think via prompting** — folds into L02 in the mini cut; restores cleanly if you have an extra ~2 hrs
-4. **L17 Human-in-the-loop and approval gates** — production-relevant; not foundational for first exposure
-5. **L09 MCP** — topical but advanced; defer until students have built and felt the pain MCP solves
-6. **L15 LangGraph design patterns** — a survey lesson, not a skill lesson
-7. **L16 Agent middleware and conditional tools** — advanced agent-control mechanism; defer until students have a working shallow agent and know the patterns
-8. **L18 Deep vs. shallow** — framing only; collapses into L19 cleanly
-9. **L19 Context management** — secondary in a short course; the mini course doesn't build long enough sessions to feel the problem
-10. **L24 Multi-agent (stretch)** — already stretch in the full course
-11. **L25 Evaluation revisited** — depends on multi-step / RAG / multi-agent systems the mini course doesn't build
+3. **L17 Human-in-the-loop and approval gates** — production-relevant; not foundational for first exposure
+4. **L09 MCP** — topical but advanced; defer until students have built and felt the pain MCP solves
+5. **L15 LangGraph design patterns** — a survey lesson, not a skill lesson
+6. **L16 Agent middleware and conditional tools** — advanced agent-control mechanism; defer until students have a working shallow agent and know the patterns
+7. **L18 Deep vs. shallow** — framing only; collapses into L19 cleanly
+8. **L19 Context management** — secondary in a short course; the mini course doesn't build long enough sessions to feel the problem
+9. **L24 Multi-agent (stretch)** — already stretch in the full course
+10. **L25 Evaluation revisited** — depends on multi-step / RAG / multi-agent systems the mini course doesn't build
 
 
 

@@ -10,6 +10,7 @@ real one) so tests can point them at a temporary tree.
 
 from __future__ import annotations
 
+import json
 import re
 import tomllib
 from pathlib import Path
@@ -52,13 +53,60 @@ _NUMBERED_KINDS: dict[str, ItemKind] = {
 # PROCTOR_NOTES.md has no numeric index; sort it after every numbered item.
 _PROCTOR_ORDER = 9999
 
+# A markdown ATX H1 (``# Title``) — captures the heading text after the ``# ``.
+_H1_RE = re.compile(r"^#[ \t]+(?P<title>\S.*?)[ \t]*$", re.MULTILINE)
 
-def _item_title(kind: ItemKind, order: int) -> str:
-    """Human label for the sidebar, e.g. ``"3. Lecture"`` or ``"Proctor notes"``."""
+
+def _item_title(kind: ItemKind, order: int, doc_title: str | None) -> str:
+    """Human label for the sidebar, e.g. ``"3. Lecture — Roles and prompts"``.
+
+    ``doc_title`` is the file's own ``# H1`` heading when it has one; the fixed
+    kind label is used as a fallback (and always for proctor notes).
+    """
     label = _KIND_LABELS[kind]
     if kind == "proctor_notes":
         return label
-    return f"{order}. {label}"
+    prefix = f"{order}. {label}"
+    return f"{prefix} — {doc_title}" if doc_title else prefix
+
+
+def _cell_source_text(source: object) -> str:
+    """Notebook cell ``source`` is a list of line strings or a single string."""
+    if isinstance(source, list):
+        return "".join(str(line) for line in cast("list[object]", source))
+    return str(source)
+
+
+def _notebook_markdown_text(raw: str) -> str:
+    """Concatenated markdown-cell sources of a notebook (for title extraction)."""
+    try:
+        nb = cast("dict[str, Any]", json.loads(raw))
+    except json.JSONDecodeError:
+        return ""
+    cells = nb.get("cells", [])
+    if not isinstance(cells, list):
+        return ""
+    parts: list[str] = []
+    for cell in cast("list[dict[str, Any]]", cells):
+        if cell.get("cell_type") == "markdown":
+            parts.append(_cell_source_text(cell.get("source", "")))
+    return "\n".join(parts)
+
+
+def _doc_title(path: Path, fmt: ItemFormat) -> str | None:
+    """The file's own first ``# H1`` heading, or ``None`` if it has none.
+
+    Lets the sidebar show ``"2. Lecture — <title>"`` instead of the bare kind
+    label. For a notebook the heading lives in a markdown cell; for a ``.md``
+    file it's the document text itself.
+    """
+    try:
+        raw = path.read_text()
+    except OSError:
+        return None
+    text = _notebook_markdown_text(raw) if fmt == "notebook" else raw
+    match = _H1_RE.search(text)
+    return match.group("title") if match else None
 
 
 def _scan_items(lesson_dir: Path, lesson_id: str) -> list[LessonItem]:
@@ -76,7 +124,7 @@ def _scan_items(lesson_dir: Path, lesson_id: str) -> list[LessonItem]:
                     order=_PROCTOR_ORDER,
                     kind="proctor_notes",
                     fmt="markdown",
-                    title=_item_title("proctor_notes", _PROCTOR_ORDER),
+                    title=_item_title("proctor_notes", _PROCTOR_ORDER, None),
                     filename=path.name,
                 )
             )
@@ -99,7 +147,7 @@ def _scan_items(lesson_dir: Path, lesson_id: str) -> list[LessonItem]:
                 order=order,
                 kind=kind,
                 fmt=fmt,
-                title=_item_title(kind, order),
+                title=_item_title(kind, order, _doc_title(path, fmt)),
                 filename=path.name,
             )
         )

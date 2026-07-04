@@ -69,6 +69,27 @@ def test_item_kind_derived_from_filename(
     assert item.kind == expected_kind
 
 
+@pytest.mark.parametrize(
+    ("item_id", "expected_title"),
+    [
+        # H1 heading in the file is appended after the kind label...
+        ("L0101_intro", "1. Intro — Intro"),
+        ("L0103_lab_empty", "3. Lab (empty) — Notebook heading"),
+        # ...but a file with no ``# H1`` (only ``## Lecture``) keeps the bare label.
+        ("L0102_lecture", "2. Lecture"),
+        # Proctor notes keep their fixed label regardless of heading.
+        ("PROCTOR_NOTES", "Proctor notes"),
+    ],
+)
+def test_item_title_includes_document_heading(
+    lessons_dir: Path, item_id: str, expected_title: str
+) -> None:
+    detail = catalog.load_lesson_detail("L01", lessons_dir)
+    assert detail is not None
+    item = next(it for it in detail.items if it.item_id == item_id)
+    assert item.title == expected_title
+
+
 def test_load_lesson_detail_unknown_returns_none(lessons_dir: Path) -> None:
     assert catalog.load_lesson_detail("L99", lessons_dir) is None
 
