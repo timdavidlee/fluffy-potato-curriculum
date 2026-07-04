@@ -52,7 +52,7 @@ The eval harness is the new shared module `fluffy_potato_curriculum.common.evals
 
 ## This is a first pass, on purpose
 
-L13 is a tiny, readable harness over the hand-rolled loop — **not** a production eval system. That smallness is deliberate: the goal is to make the *habit* cheap enough to keep. [L25 (Evaluation revisited)](../../../../docs/origin/CURRICULUM_PRD.md) — outside the mini cut — scales the same discipline to multi-step graphs, retrieval quality (precision@k / recall@k), LLM-as-judge done properly, and multi-agent systems. Knowing where the first pass stops is part of the lesson.
+L13 is a tiny, readable harness over the hand-rolled loop — **not** a production eval system. That smallness is deliberate: the goal is to make the *habit* cheap enough to keep. A later *Evaluation revisited* lesson — outside the mini cut — scales the same discipline to multi-step graphs, retrieval quality (precision@k / recall@k), LLM-as-judge done properly, and multi-agent systems. Knowing where the first pass stops is part of the lesson.
 
 ## The takeaway
 

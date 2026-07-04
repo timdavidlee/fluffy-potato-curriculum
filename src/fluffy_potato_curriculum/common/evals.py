@@ -31,8 +31,9 @@ LangSmith calls it an *Example* (``inputs`` / ``reference_outputs``); a scorer i
 Langfuse *score* — LangSmith an *Evaluator* returning ``{key, score}``; the runner
 is a Langfuse *Experiment* — LangSmith's ``evaluate()``. Exact field-name fidelity
 to any one vendor is **not** the goal — recognizable structure is. This is a *first
-pass*; L25 scales the same discipline (on the same Langfuse) to multi-step graphs,
-retrieval quality, LLM-as-judge done properly, and multi-agent systems.
+pass*; a later at-scale evaluation lesson scales the same discipline (on the same
+Langfuse) to multi-step graphs, retrieval quality, LLM-as-judge done properly, and
+multi-agent systems.
 
 Promoted to ``common/`` (alongside ``agent_loop.py`` and ``tracing.py``) so a later
 LangGraph lesson can import the *same* types and bridge and run the *same* cases
