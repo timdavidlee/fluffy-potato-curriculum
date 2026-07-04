@@ -24,6 +24,48 @@ This is a turning point in the course's arc. Up to here, the agent has been some
 
 L11 is **concept-first, then tooled.** Students *first* instrument the same hand-rolled loop from L10 and read the trace themselves — so the *concept* of a trace is never hidden behind a product — and *then* graduate to a **real observability tool, self-hosted Langfuse**, where they see the very same spans rendered in a dashboard (objective 5). The hand-rolled trace is the teaching artifact; Langfuse is where students learn that the structure they built by hand is exactly what the industry uses. **Decided:** the hosted tracer for this course is **self-hosted Langfuse** — open-source (MIT), run as one shared instructor instance the whole cohort points at, so there are no per-student signups or seat costs (see [docs/classroom-llm-management.md](../../../classroom-llm-management.md) for the infra). Students never depend on a paid SaaS account, and a keyless/offline run still works on the hand-rolled trace alone.
 
+## What a run generates: the two planes (the lesson's organizing map)
+
+Before any tracing mechanics, the lecture opens by inventorying **everything a single agent
+run produces** and sorting it onto two planes. This map is the reason the lesson is titled the
+way it is, and it makes the tracing objectives (1–5) land as *one corner of a bigger picture*
+rather than an isolated topic.
+
+**Observability plane — *what the agent did* (for you, the developer, to read):**
+
+- **State** — the agent's **live working memory**: the message history the loop grows turn by
+  turn, plus any scratchpad the model reads back. It is **in-memory, mutating, and consumed by
+  the next step** — the model's actual input on every iteration. It is ephemeral by default
+  (gone when the process exits) unless you deliberately snapshot it. A trace is, in large part,
+  *state captured over time*.
+- **Logs** — the **human-readable play-by-play**, one line per event (L10's `print()` stream).
+  Streamed, unstructured, fine for one live run — collapses the moment you have two runs to
+  compare. Medium permanence at best.
+- **Traces** — the **durable, structured, run-scoped record**: every model call, tool call, and
+  result, ordered and keyed by a shared `trace_id`, built to be filtered, diffed, and fed to
+  evaluation. This is the artifact the lesson spends most of its time on and the one L12 grades.
+
+  These three sit on a single **axis of increasing permanence**: live state → streamed logs →
+  durable trace. All three answer *"what did the run do?"* and are consumed by **developers and
+  the eval harness** — never by the product's end users.
+
+**Data plane — *what the agent made* (the deliverable, for downstream consumers):**
+
+- **Extracts / new records** — the **hard data an agent produces as its actual output**:
+  extracted fields, generated records, files, computed results — the business artifact the run
+  exists to create. This does **not** belong in the trace. When a run produces hard data, that
+  data is **persisted to its proper home — a database (rows/documents) or an object store like
+  S3 (files/blobs)** — with its own schema, retention, and downstream consumers. It is durable,
+  business-owned, and read by systems and people who never look at a trace.
+
+**The one boundary to teach (and the common mistake):** keep the two planes separate. Do **not**
+stuff extracted business records into trace spans (your tracer is not your database — wrong
+retention, wrong query model, wrong access controls), and do **not** treat your trace store as
+the system of record for the data your agent produces (a trace is sampled, TTL'd observability,
+not durable business data). This lesson teaches the boundary **conceptually** — where each
+artifact goes and why — and does the hands-on work on the trace; a real persistence exercise
+(writing extracts to a DB/S3) is out of scope for the mini budget and is flagged as such.
+
 ## Prerequisites
 
 Students arriving at L11 should already be able to:
@@ -42,7 +84,7 @@ By the end of L11, a student should be able to:
 1. **Read a trace of an agent run and reconstruct what the agent did.** Concretely:
    - Given a trace of a multi-step run (an ordered list of events — see "What a trace is" below), narrate the run out loud: "iteration 1, the model called `calculator(expression='17**2 - 1')`, got `288`; iteration 2, it called `lookup(key='288')`, got a city; iteration 3, it returned a final answer; terminated `natural`."
    - Identify, for each event, *which kind* it is — a model call, a tool call, a tool result, or a termination event — and where one iteration ends and the next begins.
-   - Read the **intermediate state** the trace carries: the running message history, cumulative token usage, per-call latency, and the arguments the model chose for each tool. Emphasize that the *arguments* are often where the interesting information is — the model's choices, not just the call counts.
+   - Read the **intermediate state** the trace carries — and name it as *state*, the first artifact from the taxonomy: the **running message history** (the model's actual input each turn, grown turn by turn), cumulative token usage, per-call latency, and the arguments the model chose for each tool. Make the connection explicit: the trace is largely *the live state captured over time*, so reading a trace **is** reading the state the loop built up. Emphasize that the *arguments* and the *evolving message history* are where the interesting information is — the model's choices and what it was looking at, not just the call counts.
    - Distinguish a **trace** (the ordered record of *what happened* in one run) from a **log line** (one event) and from the `RunResult` (the loop's *summary* of the run). A trace sits between raw prints and the summary: structured, complete, and replayable on the page.
 
 2. **Locate where a failure occurred from the trace alone — without re-running the agent.** Concretely:
@@ -73,6 +115,12 @@ By the end of L11, a student should be able to:
    - Keep this graceful: the export is an *additive* step. A student without the Langfuse instance configured still completes objectives 1–4 on the in-memory/`.to_jsonl()` trace; Langfuse is the "now see it in the real tool" payoff, not a hard dependency. **Decided:** the cohort uses **one shared instructor-run Langfuse instance** (zero per-student setup — students get a URL + project key through `common/config.py`), with a **local-Docker instance documented as the fallback** for solo/self-paced learners. Infra in [docs/classroom-llm-management.md](../../../classroom-llm-management.md).
    - Mechanics: instrument via the `langfuse` SDK (added as a project dep) or by exporting the OTel-shaped spans over OTLP, since Langfuse ingests OpenTelemetry — the approximate-OTel trace schema (below) was chosen partly to make this export natural.
 
+6. **Sort what an agent generates onto the right plane, and keep hard data out of the trace.** Taught **first** in delivery order (it is the lesson's opening map) but numbered last so objectives 1–5 — the tracing core — keep their identifiers stable for the labs and demos. Concretely:
+   - Name the four artifacts a run produces and which plane each lives on: **state** (live, in-memory), **logs** (streamed, human-readable), **traces** (durable, structured, run-scoped) — all *observability*, all answering "what did the run do?" — versus **extracts / new records** (the hard data the run produces), which are *data*, answering "what did the run make?".
+   - Place the three observability artifacts on the **increasing-permanence axis** (state → logs → trace) and articulate that a trace is largely *state captured durably over time*, which is why reading a trace (objective 1) is reading the state the loop built.
+   - State the **plane boundary** as a rule with a reason on each side: extracted business data goes to a **database or object store (S3)** — its own schema, retention, and consumers — **not** into trace spans (a tracer has the wrong retention, query model, and access controls to be a datastore); and the **trace store is not the system of record** for that data (traces are sampled and TTL'd observability, not durable business data). Give the concrete failure of crossing the streams: an agent that writes its extracted records *only* into its trace has no queryable datastore and will lose the data when traces expire; an agent that treats Langfuse as its database can't serve, join, or back up that data.
+   - Keep this **conceptual** — a diagram/whiteboard beat plus a tiny illustrative sketch (e.g. one line that appends a `TraceEvent` for observability *next to* a separate `save_record(...)` call that would write to a DB/S3), **not** a real persistence lab. Wiring an actual database or S3 client is out of scope for the mini time budget; name that omission explicitly so students read it as a deliberate boundary, not a gap. **Decided:** conceptual-only for this lesson; a hands-on "persist the extract" exercise is a candidate for a later data/RAG lesson (L20/L21) or a project brief, not L11.
+
 ## What a trace is (vocabulary the lecture must establish)
 
 Define these terms explicitly and reuse them verbatim through the labs and into L12:
@@ -82,6 +130,8 @@ Define these terms explicitly and reuse them verbatim through the labs and into 
 - **Run identifier (`trace_id`)** — a value shared by all spans of one run, so multiple runs' traces can be stored together and still be separable. Needed for the two-trace comparison.
 - **Structured trace** — spans as machine-readable records (Pydantic models / JSON-lines), as opposed to free-text `print()` output. Structured traces can be filtered, diffed, counted, and fed to evaluation; print output can't, at scale.
 - **`RunResult` vs. trace** — `RunResult` (from L10) is the *summary*: final text, iteration count, termination cause. The trace is the *full record* the summary was derived from. A student should be able to point at where in the trace each `RunResult` field came from.
+- **State** — the agent's live, in-memory working set (the growing message history the loop feeds back to the model each turn). Distinct from a trace: state is *mutating and consumed by the loop*; a trace is *append-only and read by you*. The trace is state serialized over time — reading one is reading the other.
+- **Extracts / new records (data plane)** — the hard data the run produces as its deliverable (extracted fields, generated records, files). Distinct from all three observability artifacts: it is the *product*, not a lens on the run, and it belongs in a **database or object store (S3)**, not in the trace. Named here so students hold the boundary — trace ≠ datastore — verbatim through the lesson.
 
 ### Decided trace schema (approximate, OpenTelemetry / Langfuse-shaped)
 
@@ -99,7 +149,8 @@ Define these terms explicitly and reuse them verbatim through the labs and into 
 
 ## Main points the lecture should land
 
-- **A trace is the durable memory of an ephemeral run.** The agent loop runs and exits; without a trace, all you keep is the final answer and whatever scrolled past in the console. The trace is what lets you answer "what did it *do*?" an hour, a day, or a hundred runs later. This is the whole reason the lesson exists — say it first and say it plainly.
+- **A run generates two kinds of thing, on two planes — say this first of all.** *Observability* (state · logs · traces — what the agent *did*, read by you and the eval harness) is separate from *data* (extracts / new records — what the agent *made*, persisted to a database or S3 for downstream consumers). The whole lesson lives in the trace corner of the observability plane; open with the map so students know where they are, and close (objective 6 / Demo 7) by drawing the boundary: **a trace is not a datastore, and a datastore is not a trace.**
+- **A trace is the durable memory of an ephemeral run.** The agent loop runs and exits; without a trace, all you keep is the final answer and whatever scrolled past in the console. The trace is what lets you answer "what did it *do*?" an hour, a day, or a hundred runs later. This is the whole reason the lesson exists — say it first and say it plainly. (And a trace is largely the agent's **state** — its message history — captured durably over time.)
 - **You debug agents by reading, not by re-running.** A normal program is deterministic: re-run it and the bug reproduces. An agent is not — re-running can hide the bug or produce a *different* bug. The trace is the reproduction. Teach "read the trace" as the first move when an agent misbehaves, before "run it again."
 - **Arguments are where the truth is.** Call counts tell you *how much*; arguments tell you *what the model was thinking*. A run that "called the lookup tool 3 times" is ambiguous; a run that "called `lookup('288')`, `lookup('289')`, `lookup('290')`" is obviously a fumbling search. Instrument arguments, and read them first.
 - **Structured beats printed the moment you have two runs.** One run, a `print()` is fine. Two runs you need to compare — or a hundred runs you need to filter — and free text collapses. The jump from print to structured event is the single most important instrumentation move in the lesson; motivate it with a concrete "now compare these two runs" moment, not as a style preference.
@@ -115,6 +166,7 @@ Define these terms explicitly and reuse them verbatim through the labs and into 
 - *"The two traces are different, so I broke something."* Maybe — or maybe that's just run-to-run variance on a non-deterministic loop. A single differing run proves nothing; you need to know what variation is normal before you call a difference a regression. This is precisely why L12 moves from one comparison to a *set* of cases.
 - *"The trace shows the tool returned successfully, so that step was fine."* Not necessarily — the call can succeed with *wrong arguments* and return a perfectly valid-looking result to the wrong question. Reading the arguments, not just the success flag, is the skill.
 - *"Tracing changes what my agent does."* It shouldn't. If adding a trace changed the run's behavior, the instrumentation leaked into the control flow. Observation is read-only with respect to the loop's decisions.
+- *"I'll just save the agent's output in the trace."* No — that crosses the plane boundary. A trace is observability: sampled, TTL'd, keyed for debugging. The hard data your agent produces is a *deliverable* — it belongs in a database or object store with its own schema and retention. Put extracted records in the trace and you have no queryable datastore and lose the data when traces expire; treat the trace store as your database and you can't serve, join, or back up the data. Observe the run in the trace; persist the product to the datastore.
 
 ## Bridge to L12
 

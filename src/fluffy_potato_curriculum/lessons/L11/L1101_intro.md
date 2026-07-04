@@ -1,25 +1,37 @@
-# L11 intro: Tracing — reading what your agent did
+# L11 intro: What an agent generates — state, logs, traces & extracts
 
 ```yaml
-title: "L11 intro: Tracing — reading what your agent did"
-keywords: tracing, trace, span, observability, agent loop, langfuse, debugging
+title: "L11 intro: What an agent generates — state, logs, traces & extracts"
+keywords: tracing, trace, span, state, logs, extracts, observability, data plane, agent loop, langfuse, debugging
 estimated duration: 10
 ```
 
-> **Lesson:** L11 — Tracing: reading what your agent did.
+> **Lesson:** L11 — What an agent generates: state, logs, traces & extracts.
 > **Roadmap:** [objectives.md](../../../../docs/origin/lesson_roadmaps/L11/objectives.md) · [demos_or_activities.md](../../../../docs/origin/lesson_roadmaps/L11/demos_or_activities.md)
-> **Read in order:** this intro → `L1102_lecture` (read a trace, locate a failure) → `L1103_lab` → `L1104_lecture` (instrument the loop, compare two runs) → `L1105_lab` → `L1106_lecture` (see it in Langfuse).
+> **Read in order:** this intro (the map) → `L1102_lecture` (read a trace, locate a failure) → `L1103_lab` → `L1104_lecture` (instrument the loop, compare two runs) → `L1105_lab` → `L1106_lecture` (see it in Langfuse; where extracts go instead).
 > **Anchor model for the live demo: Claude Sonnet 4.6.** The reading demos and both labs run **offline with no API key** (a scripted `FakeModel`); only the live instrument/export steps call a real model.
 
 ## Where this lesson sits
 
 In [L10](../L10/L1001_intro.md) you built an agent from nothing: a **model → tool → model loop** in plain Python that calls the model, runs any tool the model asks for, hands the result back, and repeats until the model stops — `run(...)` returning a `RunResult` with the `final_text`, the number of `iterations`, and *why* it stopped (`termination`: `"natural"` or `"max_steps"`). That loop already *did* something on every run. But unless you were watching the console live, that "something" vanished the moment the run ended.
 
-L11 is the turning point where the agent stops being only something you *build* and becomes something you *observe*. The whole lesson rests on one sentence:
+L11 is the turning point where the agent stops being only something you *build* and becomes something you *observe*. This lesson is titled for the whole inventory of what a run leaves behind — but its **center of gravity is tracing**, because the trace is the artifact next lesson (evaluation) consumes.
 
-> **A trace is the durable, structured record of what happened, so you can read the run after the fact instead of guessing.**
+## The map: what a run generates, on two planes
 
-L10 already showed you the seed of this: its loop *printed* one line per iteration, and we called that print-wrapper a **"minimum-viable trace."** L11 takes that idea seriously — it replaces the ephemeral `print()` with a structured record you can filter, diff, and feed to the next lesson.
+Every agent run produces byproducts, and the first skill is knowing **which plane each belongs on** — because they have different homes, lifetimes, and readers.
+
+- **Observability plane — *what the agent did*** (for *you* and the eval harness to read):
+  - **State** — the agent's live working memory: the message history the loop grows turn by turn and feeds back to the model. In-memory, mutating, gone when the process exits. It's the model's actual input on every step.
+  - **Logs** — the human-readable play-by-play, one line per event (L10's `print()` stream). Streamed, unstructured; fine for one live run, useless the moment you have two to compare.
+  - **Traces** — the durable, structured, run-scoped record: every model call, tool call, and result, ordered and keyed by a shared `trace_id`. Filterable, diffable, feedable to evaluation.
+
+  These three sit on one **axis of increasing permanence**: live state → streamed logs → durable trace. A trace is largely *state captured over time* — which is why reading a trace (most of this lesson) **is** reading what the model saw.
+
+- **Data plane — *what the agent made*** (the deliverable, for downstream systems and users):
+  - **Extracts / new records** — the hard data a run produces as its actual output: extracted fields, generated records, files. This does **not** go in the trace. It's persisted to its proper home — a **database** (rows/documents) or an **object store like S3** (files/blobs) — with its own schema, retention, and consumers.
+
+**The one boundary to hold onto:** don't cross the streams. Your trace is not your database (wrong retention, wrong query model), and your database is not your trace (a trace is sampled, TTL'd observability, not durable business data). Observe the run in the trace; persist the product to the datastore. We teach this boundary **conceptually** here and spend the hands-on time on the trace.
 
 ## The one idea, said three ways
 
@@ -31,18 +43,21 @@ L10 already showed you the seed of this: its loop *printed* one line per iterati
 
 By the end of L11 you can:
 
-1. **Read a trace** of a multi-step run and narrate what the agent did, event by event.
+1. **Read a trace** of a multi-step run and narrate what the agent did, event by event — including the **state** (the message history) the trace carries.
 2. **Locate a failure** from the trace alone — and name its signature: a **tool error**, **wrong arguments**, a **runaway loop**, or **premature termination**.
 3. **Instrument** the L10 loop to emit a structured trace (`RunResult.trace`) — a wrapper around the loop, never a rewrite of it.
 4. **Compare two traces** of the same task and separate a real change (**signal**) from run-to-run variance (**noise**).
 5. **Export the same run to a real observability tool** — the cohort's self-hosted **Langfuse** — and recognize your hand-built spans rendered in a dashboard.
+6. **Sort what a run generates onto the right plane** — state, logs, traces (observability) vs extracts / new records (data) — and keep hard data out of the trace, in a database or S3 where it belongs.
 
 ## The vocabulary this lesson fixes
 
+- **State** — the agent's live, in-memory working set (the growing message history the loop feeds back to the model each turn). Mutating and consumed by the loop; a trace is this state *serialized over time* so you can read it later.
 - **Trace** — the complete, ordered record of one run: every model call, tool call, and the loop step, with enough detail to reconstruct the run without re-executing it.
 - **Span** — one entry in a trace (one model call, one tool call, the loop step). We say **span** in prose; OpenTelemetry says "span," Langfuse says "observation," LangSmith says "run" — so you'll recognize the structure when you meet a real tool.
 - **`trace_id`** — the id shared by every span of one run, so multiple runs' traces can be stored together and still be told apart. It's what makes the two-run comparison (and the Langfuse view) possible.
 - **Structured trace vs. `print()`** — machine-readable records you can filter, count, and diff, versus human-readable text that collapses the moment you have more than one run to compare.
+- **Extracts / new records (the data plane)** — the hard data a run produces as its deliverable. Distinct from state/logs/traces: it's the *product*, not a lens on the run, and it belongs in a **database or object store (S3)**, never in the trace.
 - **`RunResult` vs. trace** — `RunResult` (from L10) is the *summary*; the trace is the *full record* the summary was derived from. You should be able to point at where each `RunResult` field came from in the trace.
 
 ## How we teach it: concept first, then tooled
@@ -55,4 +70,4 @@ The L10 loop and tools now live as a shared, reusable reference in `fluffy_potat
 
 ## The takeaway
 
-L11 produces the record; **L12 (evaluation) judges it.** Tracing without evaluation tells you *what happened*; evaluation without tracing tells you *that something is wrong but not where*. They are a pair, and tracing comes first — because you cannot evaluate a run you cannot read. Keep the failures you find in this lesson's traces: they become your first eval cases next lesson.
+L11 produces the record; **L12 (evaluation) judges it.** Tracing without evaluation tells you *what happened*; evaluation without tracing tells you *that something is wrong but not where*. They are a pair, and tracing comes first — because you cannot evaluate a run you cannot read. Keep the failures you find in this lesson's traces: they become your first eval cases next lesson. And keep the boundary straight: the trace is for *reading what the run did*; the hard data the run *made* goes to a database or S3, not into the trace.
