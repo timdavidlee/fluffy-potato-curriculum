@@ -1,4 +1,4 @@
-# 2026-07-03 — LangChain notebook migration (foundation landed; notebooks pending)
+# 2026-07-03 — LangChain notebook migration (L07/L08 done; L22 + roadmaps remain)
 
 **Decision (user):** the tool/agent lessons go **fully model-agnostic via LangChain** — the raw
 Anthropic SDK is retired from the curriculum's loop/tool code in favor of a LangChain chat model
@@ -11,6 +11,18 @@ Anthropic SDK is retired from the curriculum's loop/tool code in favor of a Lang
   chat-model interface; `tests/common/` updated; gate green (pyright 0, pytest passing).
 - `common/CLAUDE.md`, `common/*.py` docstrings updated (incl. stale reorder lesson-refs the
   earlier renumber missed).
+- **L07** (Tool calling) — all 10 notebooks + the markdown companions migrated (notebooks in
+  PR #38, markdown in PR #40). `ChatAnthropic().bind_tools([fn])` → `AIMessage.tool_calls` →
+  `ToolMessage`; tool definition inferred from a typed `Annotated` function (no hand-written JSON
+  schema). No `tool_use`/`tool_result`/`client.messages.create`/"under the seam" framing left.
+  Empty-lab written answers still `_TODO_` (solutions filled); live restart-run-all still needs an
+  `ANTHROPIC_API_KEY` run before class.
+- **L08** (Designing good tools) — 4 lectures (L0803/L0805/L0807/L0809) + markdown migrated;
+  `ToolMessage(status="error")` for the L0807 error path. L0806 schema-design lab recast around
+  "the typed function *is* the schema": `Literal` → enum, `Annotated` → per-field description,
+  no-default → required, inspected via `convert_to_openai_tool`. The other lab pairs
+  (L0804/L0808/L0810) were already pure-Python design exercises — no model calls, left as-is
+  (PR #40).
 - **L10** (Hand-rolled loop): L1003, L1004, L1005, L1006 — verified migrated (`bind_tools` /
   `.tool_calls` / `ToolMessage`, no old symbols).
 - **L11** (Tracing): L1102, L1103, L1104, L1105 — verified migrated.
@@ -24,22 +36,7 @@ Anthropic SDK is retired from the curriculum's loop/tool code in favor of a Lang
 `model.bind_tools(TOOL_LIST)` + `.invoke(messages)` → `AIMessage.tool_calls` + `ToolMessage`.
 `TOOL_SCHEMAS` (removed) → `TOOL_LIST`.
 
-- **L07** (Tool calling) — **DONE** (notebooks in PR #38; markdown companions here). All 10
-  notebooks migrated to `ChatAnthropic().bind_tools([fn])` → `AIMessage.tool_calls` → `ToolMessage`;
-  tool definition inferred from a typed `Annotated` function (no hand-written JSON schema). The
-  markdown companions (`L0701_intro.md`, `L0702_lecture.md`, `PROCTOR_NOTES.md`) rewritten to the
-  LangChain framing — no `tool_use`/`tool_result`/`client.messages.create`/"under the seam" left.
-  Empty-lab written answers still `_TODO_` (solutions filled). Live restart-run-all still needs an
-  `ANTHROPIC_API_KEY` run before class.
-- **L08** (Designing good tools) — **DONE**. 4 lectures (L0803/L0805/L0807/L0809) migrated to
-  `bind_tools`/`AIMessage.tool_calls`/`ToolMessage` (`ToolMessage(status="error")` for the L0807
-  error path). L0806 schema-design lab pair recast around "the typed function *is* the schema":
-  `Literal` → enum, `Annotated` → per-field description, no-default → required, inspected via
-  `convert_to_openai_tool`. The other three lab pairs (L0804/L0808/L0810) were already pure-Python
-  design exercises — no model calls, left as-is. Markdown (`L0801_intro.md`, `PROCTOR_NOTES.md`)
-  rewritten; `L0802_lecture.md` was provider-agnostic already. L0806 solutions execute clean
-  offline; gate green (ruff format + check).
-- **L22** (Skills): L2203, L2204 (lab) — uses the loop/tools; align to the new API. **(remaining)**
+- **L22** (Skills): L2203, L2204 (lab) — uses the loop/tools; align to the new API.
 
 ## Also (Phase 4)
 
