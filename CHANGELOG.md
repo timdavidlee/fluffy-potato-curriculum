@@ -1,3 +1,9 @@
+## v0.8.0 (2026-07-04)
+
+### Feat
+
+- **L23**: generate stage-2 materials from roadmap
+
 ## v0.7.0 (2026-07-04)
 
 ### Feat
