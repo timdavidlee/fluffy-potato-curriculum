@@ -11,8 +11,14 @@ from typing import Literal
 
 from pydantic import BaseModel
 
-ItemKind = Literal["intro", "lecture", "lab_empty", "lab_solutions", "proctor_notes"]
-"""What role a file plays inside a lesson, derived from its filename."""
+ItemKind = Literal[
+    "intro", "lecture", "lab_empty", "lab_solutions", "proctor_notes", "guide", "demo"
+]
+"""What role a file plays inside a lesson, derived from its filename.
+
+``guide`` and ``demo`` are the prework (``K<NN>``) kinds: a self-paced written guide and
+its optional runnable demo notebook. The rest are the ``L<NN>`` lesson kinds.
+"""
 
 ItemFormat = Literal["markdown", "notebook"]
 """How the file is stored — a ``.md`` document or a ``.ipynb`` notebook."""

@@ -52,6 +52,43 @@ _NOTEBOOK: dict[str, Any] = {
 }
 
 
+_K_TRACKS_TOML = """
+[prework]
+order = ["K03"]
+
+[full]
+order = ["L01"]
+
+[titles]
+K03 = "Jupyter workflow"
+L01 = "First lesson"
+"""
+
+
+@pytest.fixture
+def k_lessons_dir(tmp_path: Path) -> Path:
+    """A tree containing a prework ``K<NN>`` unit (a guide + a demo notebook).
+
+    Separate from ``lessons_dir`` so the exact-match assertions there stay stable while
+    these tests cover the prework-specific behaviour (K dirs, ``guide``/``demo`` kinds).
+    """
+    root = tmp_path / "klessons"
+    root.mkdir()
+    (root / "tracks.toml").write_text(_K_TRACKS_TOML)
+
+    k03 = root / "K03"
+    k03.mkdir()
+    (k03 / "__init__.py").write_text("")
+    (k03 / "K0301_guide.md").write_text("# K03 — Jupyter workflow\nGuide body.")
+    (k03 / "K0302_demo.ipynb").write_text(json.dumps(_NOTEBOOK))
+
+    l01 = root / "L01"
+    l01.mkdir()
+    (l01 / "L0101_intro.md").write_text("# Intro")
+
+    return root
+
+
 @pytest.fixture
 def lessons_dir(tmp_path: Path) -> Path:
     """Write a fake lessons tree and return its root."""

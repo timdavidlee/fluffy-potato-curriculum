@@ -113,3 +113,33 @@ def test_find_item_cannot_escape_lessons_tree(lessons_dir: Path) -> None:
     # A traversal-style item_id has no matching catalog entry, so it resolves to None
     # rather than reading an arbitrary file.
     assert catalog.find_item("L01", "../../tracks", lessons_dir) is None
+
+
+# --- Prework (K<NN>) track --------------------------------------------------
+
+
+def test_prework_track_is_discovered(k_lessons_dir: Path) -> None:
+    names = [t.name for t in catalog.load_tracks(k_lessons_dir)]
+    assert "prework" in names
+
+
+def test_k_lessons_sort_before_l(k_lessons_dir: Path) -> None:
+    assert [lesson.lesson_id for lesson in catalog.load_lessons(k_lessons_dir)] == ["K03", "L01"]
+
+
+def test_k_lesson_detail_resolves(k_lessons_dir: Path) -> None:
+    assert catalog.load_lesson_detail("K03", k_lessons_dir) is not None
+
+
+@pytest.mark.parametrize(
+    ("item_id", "expected_kind"),
+    [
+        ("K0301_guide", "guide"),
+        ("K0302_demo", "demo"),
+    ],
+)
+def test_prework_item_kinds(k_lessons_dir: Path, item_id: str, expected_kind: str) -> None:
+    detail = catalog.load_lesson_detail("K03", k_lessons_dir)
+    assert detail is not None
+    item = next(it for it in detail.items if it.item_id == item_id)
+    assert item.kind == expected_kind
