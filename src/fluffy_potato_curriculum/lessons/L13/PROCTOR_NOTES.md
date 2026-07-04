@@ -1,8 +1,30 @@
 # L13 Proctor Notes — Evaluation: first pass
 
 Covers both L13 labs: **L1303** (write your first eval set) and **L1305** (pass rates and
-regressions). Both run **offline with no API key** (scripted `FakeModel` / a deterministic model
-simulator). One section per problem.
+regressions). The **concept** problems run **offline with no API key** (scripted `FakeModel` / a
+deterministic model simulator); each lab then ends with a **tooled Langfuse problem** (L1303
+Problem 5, L1305 Problem 4) that soft-skips when Langfuse isn't configured. One section per problem.
+
+## Langfuse hard-dependency pre-flight (do this before class)
+
+L13 is **Langfuse-forward**: the lectures upload the `l13-agent-evals` dataset, run experiments
+(Sonnet vs Haiku), read the run comparison, and turn on a managed LLM-as-judge; the labs push their
+own runs. The notebooks *soft-skip* Langfuse so a keyless machine still runs top-to-bottom — but the
+teaching payoff only lands with a **live instance**. Dry-run all of it before class:
+
+- **Keys via the config seam, never hard-coded.** `LANGFUSE_HOST` / `LANGFUSE_PUBLIC_KEY` /
+  `LANGFUSE_SECRET_KEY` (plus `ANTHROPIC_API_KEY` for the live model/judge cells) load through
+  `common/config.py` (a repo-root `.env`). `require_langfuse()` raises a clear error naming any
+  missing var; `langfuse_configured()` is the soft-skip gate.
+- **Connection + dataset.** Run `L1302_lecture` §4 to create the `l13-agent-evals` dataset, then open
+  it in the Langfuse UI and confirm the 5 items show `input` / `expected_output`.
+- **An experiment.** Run `L1304_lecture` §4.1 (needs the model key too). Confirm two dataset runs
+  (Sonnet, Haiku) appear and line up in the **Runs / run-comparison** view.
+- **The managed judge.** In the Langfuse UI, register an LLM-as-judge evaluator (a prompt like
+  `L1306`'s `JUDGE_PROMPT` + a model) on the `graceful` quality — or run `L1306_lecture` §3.2 to push
+  example `graceful` scores — and confirm the scores land on the traces.
+- **Fallback:** if the instance is unreachable on the day, the offline concept beats still teach the
+  whole lesson (the tooled cells just print their skip note). Have a screenshot walk-through ready.
 
 General setup gotchas:
 
@@ -98,6 +120,27 @@ UNBLOCKERS:
 TIME: ~6 min. STRETCH: this is exactly the quality `L1306_lecture` builds an LLM-judge for — point
 finishers there.
 
+## L1303_lab problem 5 (tooled — Langfuse)
+
+**Task:** collect the cases into one `my_cases` list (unique ids) and
+`upload_dataset(client, my_cases, name="l13-lab-my-evals")`, gated on `langfuse_configured()`.
+
+COMMON GOTCHAS:
+- **Duplicate ids.** The dataset item id *is* the key — a repeated `EvalCase.id` upserts (overwrites)
+  instead of adding. If the uploaded set is short a case, look for two cases sharing an id.
+- Building the client but not gating on `langfuse_configured()` — a keyless student then hits
+  `require_langfuse()`'s error. The cell must take the soft-skip `else` branch when unset.
+- Expecting scores here — this problem only uploads the **dataset** (inputs + expected outputs).
+  Scoring against it happens in `L1305` and the lectures.
+
+UNBLOCKERS:
+- "One list, unique ids, one `upload_dataset` call. Offline it prints the set; with Langfuse it
+  creates the `l13-lab-my-evals` dataset."
+- If configured: open the dataset in the UI and confirm one item per case.
+
+TIME: ~5 min (offline) / ~8 with a live upload + UI check. STRETCH: re-run the upload and confirm the
+item count doesn't grow — that's the id upsert, not a duplicate.
+
 ---
 
 ## L1305_lab problem 1
@@ -156,3 +199,28 @@ UNBLOCKERS:
 
 TIME: ~4 min. STRETCH: ask what pass rate they'd require before calling a case "passing" for a
 release gate, and why that threshold is itself a judgment call.
+
+## L1305_lab problem 4 (tooled — Langfuse)
+
+**Task:** call `dataset.run_experiment(...)` on the shared `l13-agent-evals` dataset (the
+`as_evaluator` adapter and `make_task` are given), gated on both `ANTHROPIC_API_KEY` and
+`langfuse_configured()`.
+
+COMMON GOTCHAS:
+- **Both** keys are required — a live model *and* Langfuse. With only one set, the cell skips; remind
+  students that's expected, not a bug.
+- `run_experiment` reads the dataset uploaded by `L1302_lecture` (`get_dataset("l13-agent-evals")`).
+  If it 404s, the lecture's upload cell hasn't run on this instance yet — run it first.
+- Passing the scorers directly instead of the wrapped evaluators. `run_experiment` wants
+  **evaluators** (`(*, input, output, expected_output, ...)`), which is why `as_evaluator(...)` adapts
+  each course `Scorer`. The `answer_correct` evaluator returns `[]` (skips) on the runaway case that
+  carries no reference answer — intended, not a failure.
+- Reading the pass rate in the wrong place — it's on the **dataset run** in Langfuse (the printed
+  URL), not in the notebook output.
+
+UNBLOCKERS:
+- "The adapter and task are done for you. You just call `dataset.run_experiment(name=..., run_name=...,
+  task=make_task(...), evaluators=[...])` and open the printed URL."
+
+TIME: ~5 min (offline skip) / ~10 with a live run + UI read. STRETCH: launch a second run with a
+different model or `run_name` and compare the two in the run-comparison view.
