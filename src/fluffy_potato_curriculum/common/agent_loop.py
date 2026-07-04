@@ -115,16 +115,21 @@ def _new_id() -> str:
     return uuid.uuid4().hex
 
 
-def _extract_usage(message: AIMessage) -> SpanUsage | None:
-    """Pull token counts off a reply, if it reports any."""
+def extract_usage(message: AIMessage) -> SpanUsage | None:
+    """Pull token counts off a reply, if it reports any.
+
+    Shared with the graph producer (:mod:`.agent_graph`) so an ``llm`` span carries
+    the same token accounting whether a loop or a graph produced it."""
     usage = message.usage_metadata
     if usage is None:
         return None
     return SpanUsage(input_tokens=usage["input_tokens"], output_tokens=usage["output_tokens"])
 
 
-def _text_of(message: AIMessage) -> str:
-    """The plain-text answer of a reply, whether ``content`` is a string or blocks."""
+def text_of(message: AIMessage) -> str:
+    """The plain-text answer of a reply, whether ``content`` is a string or blocks.
+
+    Shared with the graph producer (:mod:`.agent_graph`)."""
     if isinstance(message.content, str):
         return message.content
     parts: list[str] = []
@@ -177,7 +182,7 @@ def run(
                 name="model.invoke",
                 inputs={"messages": len(messages)},
                 outputs={"tool_calls": [call["name"] for call in reply.tool_calls]},
-                usage=_extract_usage(reply),
+                usage=extract_usage(reply),
                 start_time=llm_start,
                 end_time=llm_end,
             )
@@ -185,7 +190,7 @@ def run(
 
         # No tool calls -> the model thinks it's done. NATURAL termination.
         if not reply.tool_calls:
-            final_text = _text_of(reply)
+            final_text = text_of(reply)
             termination = "natural"
             iterations = step
             break
