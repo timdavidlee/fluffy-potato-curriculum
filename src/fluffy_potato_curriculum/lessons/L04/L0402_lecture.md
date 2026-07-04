@@ -24,15 +24,15 @@ estimated duration: 55
 - From L01–L02 your control flow was plain Python: a single call, then in L03 one wrapped node.
   L04 turns a *sequence* of steps into a **graph**: explicit nodes wired by edges *you* lay out.
   The model lives *inside* the nodes; it never decides what runs next.
-- [L05](../L05/objectives.md) adds a **conditional** edge on the same primitives; L14 later reuses
+- [L05](../L05/objectives.md) adds a **conditional** edge on the same primitives; L11 later reuses
   everything here and adds exactly one more thing — a back-edge — to make an agent.
 
 ### slide 1.2 Workflow vs. agent — the headline distinction (first pass)
 
 - This is the industry distinction from Anthropic's *Building Effective Agents*, and it carries
-  unchanged into L05 and L14.
+  unchanged into L05 and L11.
 
-| | **Workflow** (L04–L05) | **Agent** (L14) |
+| | **Workflow** (L04–L05) | **Agent** (L11) |
 | --- | --- | --- |
 | Who decides the path? | the **developer** (fixed/derived logic) | the **model** |
 | Graph shape | **acyclic** (DAG) — always reaches `END` | **cyclic** — loops model → tools → model |
@@ -94,7 +94,7 @@ def parse(state: TicketState) -> dict[str, object]:
   L04's first genuinely new primitive — L03 never needed one (one node, nothing to merge).
 - diagram: a `TicketState` box with fields `ticket: str`, `parsed: str`, `draft: str`,
   `steps: Annotated[list[str], add]` — the last one tagged "append reducer".
-- This is the **same** state/reducer machinery L14 reuses for an agent's *message history* — you
+- This is the **same** state/reducer machinery L11 reuses for an agent's *message history* — you
   meet it here, on a simpler acyclic graph.
 
 ### slide 2.4 What belongs in state — and what doesn't
@@ -139,7 +139,7 @@ def parse(state: TicketState) -> dict[str, object]:
 
 - Name it honestly: for a *strictly linear* three-step task the graph is near break-even. Its real
   payoff shows up with **branching** ([L05](../L05/objectives.md), next), shared state, and tracing
-  ([L11](../L11/objectives.md), later).
+  ([L12](../L12/objectives.md), later).
 
 ## section 4. Each node can bind its own model
 
@@ -152,13 +152,13 @@ def parse(state: TicketState) -> dict[str, object]:
 - diagram: the chaining graph with each node tagged by model — `parse` = Haiku, `draft` /
   `policy_check` = Sonnet.
 
-### slide 4.2 Mechanism here; the decision framework is L13's
+### slide 4.2 Mechanism here; the decision framework is L14's
 
 - L04 shows only **that** you can mix and **how** (per-node `ChatAnthropic(model=...)`), with a
   light cost/latency aside: the extraction step is cheap, the reasoning step is where the spend
   goes.
 - The full *which-model* decision framework — capability vs. latency vs. cost axes, budgets,
-  "small model for routing, capable for reasoning" — is **[L13's](../L13/objectives.md)** job
+  "small model for routing, capable for reasoning" — is **[L14's](../L14/objectives.md)** job
   (Choosing model power). The two reinforce; they do not re-teach each other. [L05](../L05/objectives.md)
   reuses this same mechanism for its classifier node.
 
@@ -176,8 +176,8 @@ def parse(state: TicketState) -> dict[str, object]:
 ### slide 5.2 A first taste of tracing (not a prerequisite)
 
 - The demo shows an **optional** taste of routing spans to Langfuse, the same self-hosted instance
-  **[L11](../L11/objectives.md)** will teach in full — reading a structured trace, comparing runs,
-  diagnosing failures from a trace alone is entirely L11's job, several lessons away.
+  **[L12](../L12/objectives.md)** will teach in full — reading a structured trace, comparing runs,
+  diagnosing failures from a trace alone is entirely L12's job, several lessons away.
 - If Langfuse isn't configured, the workflow runs exactly the same; you simply won't see the
   spans. Nothing in L04 depends on tracing being set up.
 
@@ -186,7 +186,7 @@ def parse(state: TicketState) -> dict[str, object]:
 - A workflow takes the **same path** on the same input: predictable, cheaper, lower-latency, and
   **trivially testable**.
 - That testability is half the reason to prefer workflows: a tiny eval set (the
-  [L12](../L12/objectives.md) discipline, same input → same path) is cheap and honest.
+  [L13](../L13/objectives.md) discipline, same input → same path) is cheap and honest.
 - Note the model *inside* a node is still non-deterministic — a draft's wording varies. The
   **path** is what's stable, and the path is the lesson.
 
@@ -200,4 +200,4 @@ def parse(state: TicketState) -> dict[str, object]:
   `A → B`.
 - L05 is also where the full **workflow vs. agent** contrast closes out, once you've seen both a
   fixed chain (this lesson) and a routed branch (L05) — the two things that make "developer wires
-  every path" concrete before L14 hands the model that control.
+  every path" concrete before L11 hands the model that control.

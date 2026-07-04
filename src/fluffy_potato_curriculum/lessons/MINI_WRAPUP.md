@@ -13,7 +13,7 @@
 
 ## 2. What you built (the arc)
 
-*The through-line as a sequence, in mini teaching order: L01 → L02 → L03 → L04 → L05 → L06 → L07 → L08 → L10 → L11 → L12 → L14 → L22 → L23. One line per lesson — what it added to the stack. End on the mental picture: tokens → prompts → graphs (node → sequence → branch) → chain-of-thought → tools → hand-rolled loop → tracing → eval → shallow agent → skills → skill systems.*
+*The through-line as a sequence, in mini teaching order: L01 → L02 → L03 → L04 → L05 → L06 → L07 → L08 → L10 → L11 → L12 → L13 → L22 → L23. One line per lesson — what it added to the stack. End on the mental picture: tokens → prompts → graphs (node → sequence → branch) → chain-of-thought → tools → hand-rolled loop → shallow agent → tracing → eval → skills → skill systems.*
 
 <!-- *NEED INPUT*: per-lesson recap granularity — one line each (11 bullets), or grouped into ~4 phases (foundations / tools / agent+observability / skills)? Recommendation: grouped phases with the lesson numbers in each, so the arc reads as a story, not a table. -->
 
@@ -33,7 +33,7 @@
 
 *The mini cut deliberately dropped lessons. List them in the PRD's "first to add back" order, one line each on what they'd add, linking to the full syllabus.* See [FULL_WRAPUP.md](FULL_WRAPUP.md) for the complete arc.
 
-<!-- *NEED INPUT*: pull the add-back list + order straight from CURRICULUM_PRD.md's "Cut, in rough order of first to add back" (L21+L20 RAG, L13 model power, L17 HITL, L09 MCP, L15 patterns, L16 middleware, L18 deep/shallow, L19 context mgmt, L24 multi-agent, L25 eval revisited). Keep it a pointer to the PRD rather than duplicating the rationale, so it can't drift. -->
+<!-- *NEED INPUT*: pull the add-back list + order straight from CURRICULUM_PRD.md's "Cut, in rough order of first to add back" (L21+L20 RAG, L14 model power, L17 HITL, L09 MCP, L15 patterns, L16 middleware, L18 deep/shallow, L19 context mgmt, L24 multi-agent, L25 eval revisited). Keep it a pointer to the PRD rather than duplicating the rationale, so it can't drift. -->
 
 ## 7. Further resources
 

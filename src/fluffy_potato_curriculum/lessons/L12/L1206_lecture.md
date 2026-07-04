@@ -1,21 +1,21 @@
-# L11 lecture: Seeing your trace in Langfuse
+# L12 lecture: Seeing your trace in Langfuse
 
 ```yaml
-title: "L11 lecture: Seeing your trace in Langfuse"
+title: "L12 lecture: Seeing your trace in Langfuse"
 keywords: langfuse, observability, trace, span, generation, observation, OpenTelemetry, export
 estimated duration: 20
 ```
 
-> **Lesson:** L11 — What an agent generates: state, logs, traces & extracts.
-> **Roadmap:** [objectives.md](../../../../docs/origin/lesson_roadmaps/L11/objectives.md) (objectives 5–6) · [demos_or_activities.md](../../../../docs/origin/lesson_roadmaps/L11/demos_or_activities.md) (Demos 6–7)
-> **Comes after:** `L1104_lecture` (you instrumented the loop and produced `RunResult.trace`). This lecture sends *that* trace to a real tool — then closes the lesson by drawing the line between observability and the data your agent produces.
+> **Lesson:** L12 — What an agent generates: state, logs, traces & extracts.
+> **Roadmap:** [objectives.md](../../../../docs/origin/lesson_roadmaps/L12/objectives.md) (objectives 5–6) · [demos_or_activities.md](../../../../docs/origin/lesson_roadmaps/L12/demos_or_activities.md) (Demos 6–7)
+> **Comes after:** `L1204_lecture` (you instrumented the loop and produced `RunResult.trace`). This lecture sends *that* trace to a real tool — then closes the lesson by drawing the line between observability and the data your agent produces.
 > **Anchor model for the live demo: Claude Sonnet 4.6.** This step is **additive** — objectives 1–4 stand alone on the in-memory / `.to_jsonl()` trace. Langfuse is the "now see it in the real tool" payoff, not a hard dependency.
 
 ## section 1. Why a real tool at all
 
 ### slide 1.1 You already built the minimal version
 
-- text: in `L1104_lecture` you emitted a structured trace by hand — `TraceEvent` spans with `run_type`, `name`, `inputs`, `usage`, timings, all sharing one `trace_id`.
+- text: in `L1204_lecture` you emitted a structured trace by hand — `TraceEvent` spans with `run_type`, `name`, `inputs`, `usage`, timings, all sharing one `trace_id`.
 - text: real teams don't read `.jsonl` by eye at scale. They send traces to a **managed observability backend** and read them in a dashboard: a timeline of spans, token usage and cost, latency, inputs/outputs, errors.
 - text: the point of building it by hand *first*: when you open the dashboard, none of it is magic — the timeline, the token counts, the errors are the **exact fields you emitted**.
 
@@ -24,7 +24,7 @@ estimated duration: 20
 - text: **Langfuse** is an open-source (MIT) LLM observability platform. The cohort runs **one shared instructor instance** — you get a base URL + project keys, no per-student signup, no seat cost.
 - text: it ingests **OpenTelemetry** spans. That is *why* `TraceEvent` was shaped the way it was in `common/tracing.py` — an approximate OTel/Langfuse shape — so exporting is a natural step, not a rewrite.
 - text: keys load through `common/config.py` (the pydantic-settings seam), **never hard-coded** — the same stance as every other live call in the course.
-- diagram: a box "your instrumented `agent_loop.run(...)`" with an arrow labeled "export (langfuse SDK / OTLP)" pointing to a box "shared Langfuse dashboard"; a second arrow from "L14 LangGraph agent" pointing at the *same* dashboard, to foreshadow that later traces land here too.
+- diagram: a box "your instrumented `agent_loop.run(...)`" with an arrow labeled "export (langfuse SDK / OTLP)" pointing to a box "shared Langfuse dashboard"; a second arrow from "L11 LangGraph agent" pointing at the *same* dashboard, to foreshadow that later traces land here too.
 
 [↑ Back to top](#l11-lecture-seeing-your-trace-in-langfuse)
 
@@ -35,7 +35,7 @@ estimated duration: 20
 - text: nothing new is happening — the same run, relabeled. Learn this table and the dashboard reads itself.
 - table: maps each hand-built concept to its Langfuse name.
 
-| You built (L1104) | Langfuse calls it | Notes |
+| You built (L1204) | Langfuse calls it | Notes |
 | --- | --- | --- |
 | one run (all spans share a `trace_id`) | a **trace** | the `trace_id` is the grouping key |
 | one span (`TraceEvent`) | an **observation** | one row in the trace's timeline |
@@ -69,18 +69,18 @@ estimated duration: 20
 
 [↑ Back to top](#l11-lecture-seeing-your-trace-in-langfuse)
 
-## section 4. Re-doing L11's reading skills in the dashboard
+## section 4. Re-doing L12's reading skills in the dashboard
 
 ### slide 4.1 Locate a failure (objective 2), now point-and-click
 
 - text: filter the project to the failing run, expand the offending observation, read its `inputs` and `error`.
-- text: it's the *same reading* you did on the `.jsonl` in `L1103_lab` — wrong arguments, a runaway's repeated calls, a tool error — only faster to find at scale.
+- text: it's the *same reading* you did on the `.jsonl` in `L1203_lab` — wrong arguments, a runaway's repeated calls, a tool error — only faster to find at scale.
 - text: the dashboard does not replace the skill; it accelerates a skill you already have. A student who never read a raw trace would treat the dashboard as a mystery.
 
 ### slide 4.2 Compare two runs (objective 4), now visual
 
 - text: open two runs of the same task side by side; compare token usage, latency, and the span timeline.
-- text: same comparison as `L1105_lab`'s diff helper — signal (a real behavior change) vs. noise (a few tokens, a few milliseconds) — now read off a waterfall instead of two printed lists.
+- text: same comparison as `L1205_lab`'s diff helper — signal (a real behavior change) vs. noise (a few tokens, a few milliseconds) — now read off a waterfall instead of two printed lists.
 
 [↑ Back to top](#l11-lecture-seeing-your-trace-in-langfuse)
 
@@ -93,8 +93,8 @@ estimated duration: 20
 
 ### slide 5.2 This is the cohort's one observability home
 
-- text: the same Langfuse instance returns in **L14**, where your LangGraph agent's auto-emitted trace lands in the *same dashboard* — and looks familiar, because it's the same spans (GENERATION/SPAN) you learned here.
-- text: it also has a datasets/experiments feature that **L12** name-drops for evaluation — the platform version of the eval harness you'll hand-build next lesson.
+- text: the same Langfuse instance returns in **L11**, where your LangGraph agent's auto-emitted trace lands in the *same dashboard* — and looks familiar, because it's the same spans (GENERATION/SPAN) you learned here.
+- text: it also has a datasets/experiments feature that **L13** name-drops for evaluation — the platform version of the eval harness you'll hand-build next lesson.
 - text: closing line: *"you built the minimal version by hand, so the real tool is just your trace, rendered."*
 
 [↑ Back to top](#l11-lecture-seeing-your-trace-in-langfuse)
@@ -127,6 +127,6 @@ estimated duration: 20
 
 - text: put extracts **only** in the trace → you have no queryable datastore, and the data vanishes when traces expire.
 - text: treat the trace store **as** your database → you can't serve, join, back up, or access-control the data.
-- text: neither tool is wrong; each is being used for the other's job. The rule, one line to carry out of L11: **observe the run in the trace; persist the product to the datastore.**
+- text: neither tool is wrong; each is being used for the other's job. The rule, one line to carry out of L12: **observe the run in the trace; persist the product to the datastore.**
 
 [↑ Back to top](#l11-lecture-seeing-your-trace-in-langfuse)

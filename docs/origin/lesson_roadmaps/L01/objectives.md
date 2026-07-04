@@ -11,7 +11,7 @@ The spine of the lesson is a single chain of "why":
 
 1. **An LLM is a next-word predictor** — given the text so far, it produces a probability distribution over what comes next, samples one piece, appends it, and repeats. Everything else in the lesson is a consequence of this one fact.
 2. **The pieces it predicts are *tokens*, not words** — so we motivate *why* the unit is sub-word, and look at what tokenization does to the strings agents actually handle (proper names, novel words, code, non-English).
-3. **How good the prediction is depends on the model and on the context you give it** — bigger models put more probability on the right continuation (a *mechanistic* foreshadow of L13, not model-selection), and *front-loading* relevant context steers the whole continuation.
+3. **How good the prediction is depends on the model and on the context you give it** — bigger models put more probability on the right continuation (a *mechanistic* foreshadow of L14, not model-selection), and *front-loading* relevant context steers the whole continuation.
 4. **So you build reusable preambles** — stable blocks of instruction/context you reuse across calls.
 5. **…and now budgeting is unavoidable** — because there is no server-side memory, every call re-sends that preamble plus the whole history, all measured in tokens. Those tokens hit two budgets at once: **space** (the context window) and **money** (per-token pricing, both directions, every call).
 
@@ -45,8 +45,8 @@ By the end of L01, a student should be able to:
    - Predict, before tokenizing, whether a string will be "short" or "long" in tokens, and identify where intuition breaks: **proper names, invented words, long numbers, code identifiers, URLs, and non-Latin scripts** all shatter into many pieces because the tokenizer never learned them as units.
    - Articulate the rule of thumb (≈4 chars per token for English, much worse for code/JSON/non-Latin) and explain *why* it is only a rule of thumb — tokenizers are *learned* from training data, so anything rare in that data fragments.
 
-3. **Explain how prediction quality depends on model scale and on provided context.** *(New framing; foreshadows L13 and motivates preambles — not itself a PRD subgoal.)* Concretely:
-   - Describe, from seeing a small→medium→large model predict the *same* next token, that a more capable model concentrates more probability on the sensible continuation and less on noise. Frame this as a *mechanistic* observation about prediction quality — **the engineering decision of *which* model or provider to use for a given capability (say, a vision model for OCR, a strong reasoner for planning, a cheap fast model for execution), with its cost/latency trade-offs, is deferred to L13 (choosing models & providers).** L01 only shows *that* capability sharpens prediction, not *how to choose*.
+3. **Explain how prediction quality depends on model scale and on provided context.** *(New framing; foreshadows L14 and motivates preambles — not itself a PRD subgoal.)* Concretely:
+   - Describe, from seeing a small→medium→large model predict the *same* next token, that a more capable model concentrates more probability on the sensible continuation and less on noise. Frame this as a *mechanistic* observation about prediction quality — **the engineering decision of *which* model or provider to use for a given capability (say, a vision model for OCR, a strong reasoner for planning, a cheap fast model for execution), with its cost/latency trade-offs, is deferred to L14 (choosing models & providers).** L01 only shows *that* capability sharpens prediction, not *how to choose*.
    - Explain **front-loading**: because the model conditions its next-token distribution on everything before, putting the relevant instructions, definitions, and examples *early* steers the whole continuation. Better input context is the lever the student controls (model scale is mostly not).
 
 4. **Recognize reusable preambles as accumulated overhead.** Concretely:
@@ -68,14 +68,14 @@ By the end of L01, a student should be able to:
    - Read per-token pricing (input vs. output rates) and compute the cost of a single call from its input and output token counts.
    - Estimate a multi-turn conversation's cost, accounting for prior turns **and the preamble** being re-sent every call (no server-side memory — the fact that motivates prompt caching and L19/L21).
    - Recognize the input/output asymmetry (output typically 3–5× input) and what it implies for prompt design (long prompt + short answer is often cheaper than the reverse).
-   - Order-of-magnitude estimate an agent run's cost (preview of L10/L12) without needing exact numbers.
+   - Order-of-magnitude estimate an agent run's cost (preview of L10/L13) without needing exact numbers.
 
 ## Main points the lecture should land
 
 - **An LLM does exactly one thing: predict the next token, then do it again.** Text generation is that loop. Get this and temperature, streaming, "hallucination," and cost all become consequences rather than separate mysteries.
 - **There is no memory between calls.** The model does not "remember" the conversation; the client re-sends it. This single fact is the thread that ties front-loading, preambles, the context window, and cost together — and it is the one students most need corrected before they run up a bill.
 - **A token is not a word, a letter, or a syllable — it is whatever the tokenizer learned.** The unit is sub-word *on purpose*: it trades a fixed vocabulary against the ability to spell anything. That trade is exactly why rare strings — names, code, JSON, non-English — fragment, and why eyeball estimates fail on the inputs agents actually consume.
-- **Prediction quality has two levers: the model, and the context you give it.** A more capable model sharpens the distribution (shown mechanistically here; *which* model/provider you match to each capability is L13). Front-loading relevant context is the lever the student controls — and it is *why* preambles exist.
+- **Prediction quality has two levers: the model, and the context you give it.** A more capable model sharpens the distribution (shown mechanistically here; *which* model/provider you match to each capability is L14). Front-loading relevant context is the lever the student controls — and it is *why* preambles exist.
 - **Reusable preambles are overhead you pay for on every call.** The same instruction block that makes prediction better is re-sent (and re-billed, and re-counted against the window) every time. Budgeting is not a new topic bolted onto the end — it is the bill for the overhead the lesson spent its first half building up.
 - **The context window is a hard ceiling on input *and* output combined**, and the preamble/history sit inside it alongside the current prompt and the model's own response.
 - **The model produces a probability distribution; the sampler picks one token; temperature reshapes the distribution first.** This is the right altitude for the audience — high enough to skip transformer internals, low enough that "why did it answer differently this time" has a real answer.
@@ -86,9 +86,9 @@ By the end of L01, a student should be able to:
 
 - *"The model remembers our previous conversation."* It does not, by default. The illusion of memory is the client re-sending prior turns — and now, prior preambles too. This confusion causes real bills if not corrected here; it is the load-bearing correction of the lesson.
 - *"One token equals one word."* Wrong almost everywhere — especially on the structured strings (JSON, code, URLs) and proper names that agents deal in. The lab should include a deliberate "guess then tokenize" exercise on exactly those.
-- *"A bigger/newer model is just 'smarter' in some vague way."* Reframe: it puts more probability on good continuations. And resist letting this become a model-selection discussion — that is L13.
+- *"A bigger/newer model is just 'smarter' in some vague way."* Reframe: it puts more probability on good continuations. And resist letting this become a model-selection discussion — that is L14.
 - *"Temperature 0 is deterministic."* See Main Points — frame as low variance, not zero.
-- *"Bigger context window = always better."* No: more tokens cost more, slow inference, and can degrade quality near the long-context tail. Revisited in L12 and L16.
+- *"Bigger context window = always better."* No: more tokens cost more, slow inference, and can degrade quality near the long-context tail. Revisited in L13 and L16.
 - *"Cost is too small to matter."* True for one call, false for a 10-step agent run, doubly false when iterating a prompt 100× in development. The cost objective exists to build the back-of-envelope habit *before* students run agents.
 
 ## Bridge to L02
@@ -104,7 +104,7 @@ The single sentence to leave students with at the end of L01: *"Everything you f
 ## Open authoring questions
 
 - <!-- *NEED INPUT*: the model-scale beat (objective 3 / demo 3.5) uses a local small→medium→large model ladder (GPT-2 124M → 355M → 774M via HuggingFace) so the next-token distribution is visible offline and deterministically. Confirm we accept transformers+torch as lesson dependencies for this one demo, versus a lighter (but softer) API-tier quality comparison. -->
-- **RESOLVED:** the model-scale beat gets a one-line note on the L01 row in `CURRICULUM_PRD.md`, flagging it as a mechanistic foreshadow of L13 rather than a separately assessed subgoal.
+- **RESOLVED:** the model-scale beat gets a one-line note on the L01 row in `CURRICULUM_PRD.md`, flagging it as a mechanistic foreshadow of L14 rather than a separately assessed subgoal.
 - **RESOLVED:** L01 stays a single lecture item (~75–90 min) — not split into two blocks.
 - <!-- *NEED INPUT*: is prompt caching introduced here (as a foreshadow when discussing the "every call re-sends the preamble + history" cost surprise), or strictly deferred to L19 (context management)? -->
 - <!-- *NEED INPUT*: confirm token *counting* stays on `tiktoken` (offline, deterministic) for the labs, with Anthropic's count-tokens endpoint shown once for the anchor model — versus standardizing on one of them. -->

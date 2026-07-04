@@ -30,7 +30,7 @@ estimated duration: 45
 - Three things a conditional edge's routing function may read in this lesson: **derived/computed
   data** already in state, a **model classification result** (a label a node wrote to state), or
   **direct user input** (a value supplied as part of the initial state).
-- One thing it is never allowed to read: whether **the model asked for a tool**. That's L14.
+- One thing it is never allowed to read: whether **the model asked for a tool**. That's L11.
 - Say the line every time: **here you (the developer) own the branch; in an agent, the model
   owns it.**
 
@@ -54,7 +54,7 @@ builder.add_conditional_edges("classify", route,
 - Per-node models, reused from L04: `classify` only needs to emit a label, so it runs on the
   **cheap, fast model** (Haiku 4.5); the branches do the real reasoning, so they run on the
   **capable model** (Sonnet 4.6). This is the *mechanism* of mixed-model design — the full
-  decision framework is **[L13's](../L13/objectives.md)** job.
+  decision framework is **[L14's](../L14/objectives.md)** job.
 
 ### slide 2.2 Determinism: the workhorse proof
 
@@ -109,5 +109,5 @@ builder.add_conditional_edges("classify", route,
 
 - L05 never builds a cycle — every graph in this lesson is still a DAG, still a workflow, no
   matter how many branches it has.
-- The full workflow-vs-agent recap and close — what carries into L14, what precisely changes, and
+- The full workflow-vs-agent recap and close — what carries into L11, what precisely changes, and
   when to reach for which — is [L0505_lecture.md](L0505_lecture.md).

@@ -13,7 +13,7 @@
 
 ## 2. What you built (the arc)
 
-*The through-line across all 23 lessons, in teaching order. Group into phases so it reads as a story rather than a list. Suggested phases: Foundations (L01–L06) · Tools & MCP (L07–L09) · The agent spine + observability (L10–L12) · Model choice & LangGraph (L13–L14) · Agent-control patterns (L15–L19) · Retrieval (L20–L21) · Skills & composition (L22–L23) · Multi-agent & eval-at-scale (L24–L25).*
+*The through-line across all 23 lessons, in teaching order. Group into phases so it reads as a story rather than a list. Suggested phases: Foundations (L01–L06) · Tools & MCP (L07–L09) · The agent spine (L10) · Shallow agents in LangGraph (L11) · Observability & evaluation (L12–L13) · Model choice (L14) · Agent-control patterns (L15–L19) · Retrieval (L20–L21) · Skills & composition (L22–L23) · Multi-agent & eval-at-scale (L24–L25).*
 
 <!-- *NEED INPUT*: confirm the phase groupings above (they're a proposal, not from the PRD). Recommendation: keep ~8 phases so each is a coherent chunk; put the lesson numbers in each phase heading. -->
 

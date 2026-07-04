@@ -176,5 +176,5 @@ Times are rough and assume a semi-technical student with basic Python who comple
   create in soft language ("may update records") instead of stating it plainly.
 - **Unblockers:** expected: something like *\"If the user does not exist, this tool will create one
   with default settings — call only when a missing user should be auto-created.\"* Name the effect so
-  the model can reason about it before calling. Forward-link to L14 (approval gates).
+  the model can reason about it before calling. Forward-link to L11 (approval gates).
 - **Time:** ~4 min.

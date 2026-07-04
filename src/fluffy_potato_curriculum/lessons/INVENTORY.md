@@ -36,9 +36,9 @@ pad ~20–30% for a real class clock.
 | L07 | Tool calling: how it works                   |   1   |   1    |     4     |  3   |   2 h 15 m |
 | L08 | Designing good tools                         |   1   |   1    |     4     |  4   |   2 h 35 m |
 | L10 | Hand-rolled agent loop                       |   1   |   1    |     2     |  2   |   1 h 30 m |
-| L11 | Tracing: reading what your agent did         |   1   |   1    |     2     |  2   |   1 h 30 m |
-| L12 | Evaluation: first pass                       |   1   |   1    |     3     |  2   |   1 h 40 m |
-| L14 | Shallow agents in LangGraph                  |   1   |   2    |     3     |  2   |   1 h 55 m |
+| L11 | Shallow agents in LangGraph                  |   1   |   2    |     3     |  2   |   1 h 55 m |
+| L12 | Tracing: reading what your agent did         |   1   |   1    |     2     |  2   |   1 h 30 m |
+| L13 | Evaluation: first pass                       |   1   |   1    |     3     |  2   |   1 h 40 m |
 | L22 | Skills: just-in-time capabilities for agents |   1   |   2    |     1     |  2   |   1 h 25 m |
 | L23 | Skill patterns & composition                 |   —   |   —    |     —     |  —   | not built yet |
 

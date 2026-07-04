@@ -7,7 +7,7 @@ whose ``.tool_calls`` list says which tools (if any) the model wants run. The re
 provides a *deterministic* version so the reading demos and labs run with **no API
 key and no network**, and produce the exact same trace every time.
 
-This matters pedagogically: the L11 reading skills are clearest on a fixed, known
+This matters pedagogically: the L12 reading skills are clearest on a fixed, known
 trace. A scripted model gives that — its moves are decided in advance, so a
 "runaway", a "wrong-arguments" run, or a clean run is reproducible on demand. The
 real model only appears in the live instrument/export demos, where *producing* a

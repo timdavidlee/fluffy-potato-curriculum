@@ -17,9 +17,9 @@ it (see the reuse rule in [.claude/rules/python-style.md](../../../.claude/rules
   (`model.bind_tools(...)` → `.invoke(messages)` → `AIMessage.tool_calls` → `ToolMessage`), so any
   `bind_tools`-capable model works — `ChatAnthropic`, `ChatOpenAI`, an `init_chat_model("provider:model")`
   handle, or the offline `FakeModel`. That is what makes the loop **provider-agnostic**.
-- `tracing.py` — `TraceEvent`, an OpenTelemetry-shaped span model; the L11 teaching artifact,
-  reused by L12 and the later LangGraph lessons and exportable to Langfuse.
-- `evals.py` — a tiny eval harness (`EvalCase`, `Scorer`, `evaluate`); the L12 artifact.
+- `tracing.py` — `TraceEvent`, an OpenTelemetry-shaped span model; the L12 teaching artifact,
+  reused by L13 and the LangGraph lessons and exportable to Langfuse.
+- `evals.py` — a tiny eval harness (`EvalCase`, `Scorer`, `evaluate`); the L13 artifact.
 - `tools.py` — the shared, deterministic tools the loop dispatches (calculator, lookup, etc.).
 - `fake_model.py` — a scripted, offline stand-in for a LangChain chat model (implements
   `.bind_tools()` + `.invoke()` returning scripted `AIMessage`s) so reading demos and labs run with
