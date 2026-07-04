@@ -26,7 +26,7 @@ The teacher should have, before the first demo starts:
 
 - **LangGraph + the native LangChain Claude client ready.** `from langgraph.graph import StateGraph, END` and `from langchain_anthropic import ChatAnthropic`. Both `langgraph` and `langchain-anthropic` are already project dependencies (added via `uv add` in the L11 decision); no install during class. The API key still loads through `common/config.py` (`ChatAnthropic` reads `ANTHROPIC_API_KEY` from the same environment the config seam populates) — key handling is unchanged, only the *client* is the framework's now.
 - **Two model clients constructed and named:** `haiku = ChatAnthropic(model="claude-haiku-4-5-...")` for light nodes, `sonnet = ChatAnthropic(model="claude-sonnet-4-6-...")` for heavy nodes. Each node constructs/uses its own — that *is* objective 1's per-node binding. <!-- *NEED INPUT*: confirm exact model id strings for the Haiku 4.5 and Sonnet 4.6 snapshots used by ChatAnthropic, read from common/config.py rather than hard-coded in cells. -->
-- **The shared Langfuse callback handler wired up**, pointing at the *same* self-hosted Langfuse instance students met in L12 (LangChain/LangGraph callback handler; keys via `common/config.py`). The workflows run with this callback so their spans land in the dashboard students already know — "watch the workflow run" reuses an L12 skill, it is not new.
+- **`graph.stream(stream_mode="updates")` ready as the run-inspection tool** — the same built-in call students met in L03, no external setup. Run each workflow with `stream` instead of `invoke` so the nodes' updates print in order as they fire. Langfuse is **not** wired up here: it is L12's tool and comes *later* in the course; "watch the workflow run" reuses the L03 `stream` skill, not a dashboard.
 - **A graph-diagram renderer ready** — LangGraph's `compiled_graph.get_graph().draw_mermaid_png()` (or the Mermaid text) — so "control flow as data" is *literally visible* (a decided beat: render each workflow's diagram once). <!-- *NEED INPUT*: confirm the diagram render path works in the demo environment (draw_mermaid_png needs a renderer; the Mermaid-text or ASCII fallback is fine if the PNG path is awkward to set up live). -->
 - **A small support-ticket dataset** for the running example (the decided domain): a handful of sample tickets that clearly fall into **billing / technical / general**, plus a short **policy snippet** the policy-check node checks a drafted reply against. <!-- *NEED INPUT*: confirm the exact sample tickets and the policy text. Recommendation: 3–4 tickets (one obviously billing, one technical, one general, one ambiguous to stress the classifier) and a 4–5 line refund/escalation policy for the policy-check node. Stage 2 ships these as a small fixture. -->
 - **Completed graph definitions in a sibling file** to paste if live-coding falls behind — the prompt-chaining graph (Demo 1), the routing graph (Demo 2), and the user-input-branching graph (Demo 3).
@@ -54,18 +54,18 @@ The teacher should have, before the first demo starts:
    - `policy_check` — checks the draft against the policy snippet (a Sonnet call, or a plain Python check).
 4. Wire it with the `StateGraph` builder: `add_node` ×3, `set_entry_point("parse")`, `add_edge("parse","draft")`, `add_edge("draft","policy_check")`, `add_edge("policy_check", END)`. **`compile()`**, then **`invoke()`** on the chosen ticket.
 5. **Render the compiled graph diagram** (`draw_mermaid_png`/Mermaid text) and put it next to the code — "this picture *is* the control flow, as data."
-6. Open the run in **Langfuse**: a linear chain of GENERATION spans, one per node, in order. Confirm the path was developer-determined.
+6. Run it with `graph.stream(stream_mode="updates")`: one chunk per node, in order — `{"parse": {...}}` → `{"draft": {...}}` → `{"policy_check": {...}}`. Confirm the path was developer-determined. (Routing this *same* run to Langfuse for a structured, comparable trace is **L12** — forward-reference it, don't reach for it here.)
 
 **What to highlight:**
 
-- **Control flow is now data.** Nodes and edges can be listed, drawn, and traced — unlike `if`/`while` buried in Python. Show the diagram and the trace as proof.
+- **Control flow is now data.** Nodes and edges can be listed, drawn, and streamed step by step — unlike `if`/`while` buried in Python. Show the diagram and the `stream` output as proof.
 - **The model lives *inside* the nodes; the developer owns the edges.** The model does the smart per-step work (parse, draft); *what runs next* is decided by the edges *you* wired. This is the contrast you'll repeat all lesson.
 - **First framework, native client.** Say the departure out loud: from L04 on, nodes call LangChain's `ChatAnthropic` directly, not the `potato_llm` seam from L01–L13 — "frameworks bring their own client abstraction."
 - **Why decompose into three prompts instead of one mega-prompt?** Smaller focused prompts are more reliable and individually testable; the cost is more calls (the L01 cost trade). Name it honestly: for a strictly linear chain the graph is near break-even — its payoff shows with branching, visualization, shared state, and tracing.
 
 **If the demo misbehaves:**
 
-- If live-coding the builder falls behind, paste the completed graph and walk it node by node — but keep the **`invoke()` run, the diagram, and the trace**, which is where "workflow" stops being abstract.
+- If live-coding the builder falls behind, paste the completed graph and walk it node by node — but keep the **`stream` run and the diagram**, which is where "workflow" stops being abstract.
 - If a node's structured extraction is flaky, tighten its prompt to return a small structured shape (callback to L02 structured-output-by-instruction) — don't reach for tool calling, which is L11's territory.
 
 ## Demo 2 — Routing + mixed models: classify, then branch (Objectives 1, 2 & 3b)
@@ -83,18 +83,18 @@ The teacher should have, before the first demo starts:
 2. Add three specialized branch nodes (`billing`, `technical`, `general`), each a **Sonnet** call with its own prompt. They converge to `END`.
 3. Wire the **conditional edge**: a routing function reads `state["category"]` and returns the matching branch name — `add_conditional_edges("classify", route_fn, {...})`. Say the line out loud: *the **classification result in state** picks the branch; re-running the same ticket takes the same path.*
 4. `compile()`, render the diagram (now it visibly **branches**), and `invoke()` on one ticket per category. Re-run the *same* ticket and show the path is identical — **deterministic**.
-5. Open **Langfuse**: the `classify` span shows **Haiku** (and its cost); the chosen branch span shows **Sonnet** (and its cost). Point at the two different models on two spans. A light cost/latency aside: the label step is cheap, the reasoning step is where the spend goes.
+5. Run it with `graph.stream(stream_mode="updates")`: the `classify` update came from **Haiku**, the chosen branch's update from **Sonnet** — point at the two different models across the two node updates. A light cost/latency aside: the label step is cheap, the reasoning step is where the spend goes. (Per-span *cost* attribution is a Langfuse/**L12** feature — name it as coming later, don't open a dashboard.)
 
 **What to highlight:**
 
 - **A conditional edge is *not* the model deciding** — in L04 the routing function branches on **state the developer set** (here a model *classification label*). In L11 the routing function branches on whether the **model asked for a tool**. Same mechanism, different decider — call out which it is *every time*.
-- **Each node can use its own model.** A node is an independent call, so a graph mixes models: Haiku where you need a label, Sonnet where you need quality. The trace makes it tangible — each span shows its own model and cost. This is the **mechanism** of mixed-model design.
+- **Each node can use its own model.** A node is an independent call, so a graph mixes models: Haiku where you need a label, Sonnet where you need quality. The `stream` output makes it tangible — each node's update shows which model produced it. This is the **mechanism** of mixed-model design.
 - **The *which-model* decision framework is L14's job, not L04's.** L04 shows only *that* you can mix and *how*; the capability/latency/cost axes and budgets ("small model for routing, capable for reasoning") are L14 (Choosing models & providers). In the mini cut L14 is dropped, so this is students' first and only mixed-model exposure — keep it light but make it land.
 
 **If the demo misbehaves:**
 
 - If Haiku mis-classifies the ambiguous ticket, **keep it** — it's a perfect lead-in to the optional eval beat ("a deterministic workflow is trivially testable; let's measure the classifier") and a callback to L13. Don't paper over it.
-- If the trace doesn't show distinct models per span, check that each node constructed its own `ChatAnthropic(model=...)` rather than sharing one client — that *is* the per-node-binding lesson surfacing as a bug.
+- If the `stream` output doesn't show distinct models per node, check that each node constructed its own `ChatAnthropic(model=...)` rather than sharing one client — that *is* the per-node-binding lesson surfacing as a bug.
 
 ## Demo 3 — Same graph, different decider: user-input branching (Objectives 2 & 3c)
 
@@ -140,7 +140,7 @@ The teacher should have, before the first demo starts:
 
 **What to highlight:**
 
-- **The workflow→agent line is one back-edge.** Don't let it feel like a new world — L11 keeps nodes, edges, typed state, reducers, compile/invoke, and the Langfuse hookup *unchanged*, and adds only the cycle. Framing it this way is the whole reason L04 comes first.
+- **The workflow→agent line is one back-edge.** Don't let it feel like a new world — L11 keeps nodes, edges, typed state, reducers, compile/invoke, and the `stream` run-inspection *unchanged*, and adds only the cycle. Framing it this way is the whole reason L04 comes first.
 - **Determinism is a feature, not a limitation.** Most production "AI features" are workflows, not agents. Choosing the simplest shape that solves the task — usually a workflow — *is* the engineering skill.
 - Do **not** build the agent here. Building the cycle is **L11's** lesson; L04 only *names* the back-edge. (L04 and L11 intentionally overlap on the primitives so each stands alone — but the cyclic agent belongs to L11.)
 
@@ -169,7 +169,7 @@ Don't re-teach eval mechanics here — that's L13. Just show the harness *pointi
 
 ## Open authoring questions
 
-Most of L04's big decisions are already pinned in [objectives.md](objectives.md) (native `ChatAnthropic` not the seam; Haiku-light/Sonnet-heavy per-node mixing as *mechanism only*, with the decision framework deferred to L14; the support-ticket domain; Langfuse tracing via the L12 instance; render-the-diagram-once; user-input branching in the initial-state form with `interrupt`/checkpointer deferred to L17; parallel branches as a forward-pointer mention only; the intentional L04↔L11 primitives overlap). The remaining open items are stage-2 mechanics:
+Most of L04's big decisions are already pinned in [objectives.md](objectives.md) (native `ChatAnthropic` not the seam; Haiku-light/Sonnet-heavy per-node mixing as *mechanism only*, with the decision framework deferred to L14; the support-ticket domain; `stream`-based run inspection (Langfuse tracing deferred to L12); render-the-diagram-once; user-input branching in the initial-state form with `interrupt`/checkpointer deferred to L17; parallel branches as a forward-pointer mention only; the intentional L04↔L11 primitives overlap). The remaining open items are stage-2 mechanics:
 
 - <!-- *NEED INPUT*: exact model id strings for the Haiku 4.5 and Sonnet 4.6 snapshots, read from common/config.py rather than hard-coded in cells. -->
 - <!-- *NEED INPUT*: the sample support tickets (3–4, including one ambiguous to stress the classifier) and the policy snippet for the policy-check node, shipped as a fixture. -->

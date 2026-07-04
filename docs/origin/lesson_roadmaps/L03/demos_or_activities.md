@@ -76,7 +76,7 @@ The teacher should have, before the first demo starts:
 2. `graph = builder.compile()`. Note this turns the *declaration* into a *runnable* — nothing has executed yet.
 3. `graph.invoke({"raw_text": sample_1})`. Show the returned state on screen: the `raw_text` field is still there unchanged, and `extracted_fields` is now populated. Point at both — the input survived, the output appeared.
 4. Re-run with a second, harder sample text (missing or ambiguous field). Show the returned state again — reinforce that "state comes out" every time, even when the underlying extraction quality varies.
-5. Call `graph.stream({"raw_text": sample_1})` and watch the single step fire in the stream output. Say explicitly: *"this is LangGraph's own built-in way to watch a run — for one node it's almost overkill, but it's the same mechanism L04 will use to watch several nodes fire in sequence."*
+5. Call `graph.stream({"raw_text": sample_1}, stream_mode="updates")` and watch the single step fire — one chunk, `{"extract": {...}}` (the node name → the state update it wrote). Say explicitly: *"this is LangGraph's own built-in way to watch a run, one update per node — for one node it's almost overkill, but it's the **same call, in the same mode, you'll reuse the rest of the course**: to watch several nodes fire in sequence (L04), which branch runs (L05), and the agent loop turn (L10) — before routing that same run to a real tracer in L12."*
 6. Forward-pointer, one line, do not demo it: *"Later, in L12, you'll route runs like this to a real tracing platform and read a structured trace — for now, the return value and the stream are all you need to answer 'did my node run, and what came back.'"*
 
 **What to highlight:**

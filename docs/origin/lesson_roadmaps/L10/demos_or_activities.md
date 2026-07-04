@@ -28,7 +28,7 @@ The teacher should have, before the first demo starts:
   - `flaky_fetch(url: str) -> str` — one tool keyed on the URL: `https://ok` returns a value, `https://error` returns a structured error, `https://crash` raises an exception, `https://garbage` returns malformed output. Keeps the demo prompt natural.
 - A small `build_agent(model, tools, *, handle_tool_errors=True)` helper that the teacher will *write live* in Demo 1 (the agent node, the `route` function, the `StateGraph` wiring) and *reuse unchanged* through Demos 2 and 3. Keep a "completed" version in a sibling cell the teacher can paste if live-coding falls behind.
 - A `draw` of the compiled graph (`graph.get_graph().draw_ascii()` or the Mermaid render) ready to project — the picture of agent → tools → agent is the demo's spine.
-- After each `invoke`, a tiny helper that pretty-prints the returned `messages` list: role, `.tool_calls` (name + args), and `ToolMessage` content, so the turn-by-turn cycle is legible. This turn-by-turn readout is the closest thing to a "trace" the lesson exposes; L12 replaces it with something structured. Foreshadow that.
+- **`graph.stream(task, stream_mode="updates")` — the same run-inspection call students have used since L03**, now watching the *loop* turn: each chunk is one node firing (`{"agent": {...}}`, then `{"tools": {...}}`, then `{"agent": {...}}`, …), so the cycle is legible turn by turn. Pair it with a tiny helper that pretty-prints each chunk's new message(s): role, `.tool_calls` (name + args), and `ToolMessage` content. This stream is the closest thing to a "trace" the lesson exposes; L12 routes this *same* run to a structured tracer. Foreshadow that.
 
 > Why pre-defined tools: the lesson is about the *graph/cycle*, not about tool design. L08 already covered tool design. Re-litigating tool schemas mid-demo eats time and dilutes the message. Spend tool-design time only on `flaky_fetch` (Demo 3), where the failure modes *are* the point.
 
@@ -51,7 +51,7 @@ The teacher should have, before the first demo starts:
    - The **route function**: return `"tools"` if the last message has `.tool_calls`, else `END`.
    - The **wiring**: `StateGraph(State)`, `add_node("agent", ...)`, `add_node("tools", ToolNode(tools))`, `set_entry_point("agent")`, `add_conditional_edges("agent", route, {"tools": "tools", END: END})`, `add_edge("tools", "agent")`, `compile()`. **Do not set a `recursion_limit` yet** — that's Demo 2's punchline.
 3. Project the compiled graph's diagram. Point at the back-edge. "That is the agent."
-4. `invoke` on the starter task. Walk the returned `messages` with the pretty-printer: `AIMessage`(calculator) → `ToolMessage` → `AIMessage`(lookup) → `ToolMessage` → `AIMessage`(final text). Name each time control crossed the back-edge.
+4. `stream` the starter task (`stream_mode="updates"`) and walk the chunks with the pretty-printer: `{"agent": …}` (calculator call) → `{"tools": …}` → `{"agent": …}` (lookup call) → `{"tools": …}` → `{"agent": …}` (final text). Name each time control crossed the back-edge.
 
 **What to highlight:**
 
