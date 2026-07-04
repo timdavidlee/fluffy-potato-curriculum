@@ -59,10 +59,41 @@ Roadmap beat lives in `docs/origin/lesson_roadmaps/<L>/demos_or_activities.md`.
       recap slide to `L0202_lecture.md` §6 (the "three levers reconnected" wrap-up already *is* the closing
       slide) naming all four + one-line cures + forward-links (defensive-parsing → L07 tool args; lean-system
       → L19/L22), and explicitly name #4. No new fixture needed.
-- [ ] **L04 — DAGs** (coda, names 4). Assets: `L0402_lecture.md`, `L0403_lecture.ipynb`,
-      `L0404_lab_*`. **Finding:**
-- [ ] **L07 — tool calling** (coda, names 4). Assets: `L0702_lecture.md`,
-      `L0703/L0704/L0706/L0708_lecture.ipynb`, `L0705/L0707/L0709_lab_*`. **Finding:**
+- [x] **L04 — DAGs** (coda, names 4). Assets: `L0402_lecture.md`, `L0403_lecture.ipynb`,
+      `L0404_lab_*`. **Finding: `add-coda` (partial, ~2 of 4) + FLAG mis-scope.** ⚠️ L04 is mid-split:
+      `objectives.md` carries a "Split note (reorder 2026-07-02)" — L04 was the former combined L12
+      (chaining **+** routing); it's now **sequential-chaining-only**, routing moved to the new **L05**.
+      `objectives.md` **and the built materials** (`L0402`/`L0403`/`L0404`) are already trimmed to
+      chaining-only, but the `demos_or_activities.md` (where this coda was added) is **still the pre-split
+      broad version** with Demos 2–4 = routing/branching/workflow-vs-agent — those now live in L05.
+      Effect on the four gotchas: **#2 deterministic-DAG/accidental-back-edge** (shown `L0403` §4 "no
+      back-edge = workflow" + `L0402` §5.3) and **#3 wrong-model-per-node** (shown `L0403` per-node
+      Haiku/Sonnet binding + `L0402` §4) are **L04-native and already *shown* positively** (not yet
+      *named* as pitfalls) → clean coda targets. But **#1 workflow-vs-agent** and **#4 brittle branch
+      conditions/fallback** rest on routing/branch demos **L04 no longer contains** — they're **L05**
+      material (L05 roadmap Demo 2 router+fallback, Demo 4 close). **Actions:** (a) when L04 stage-2
+      regenerates sequential-only, add a coda naming just **#2 + #3** (both already shown); (b) **FLAG**:
+      trim `L04/demos_or_activities.md` to match the `objectives.md` split note (it still describes routing
+      as L04) — a reconciliation this coda sits on top of; (c) **new follow-up**: give **L05** its own
+      gotcha coda for #1 + #4 — L05 was *out of the original beat scope* but its materials already show
+      routing + fallback + the workflow-vs-agent close, so it's the honest home. **Assumption the
+      materials don't support:** the coda's point-backs to "Demo 2 routing" / "Demo 4 back-edge" don't
+      exist in L04's built materials.
+- [x] **L07 — tool calling** (coda, names 4). Assets: `L0702_lecture.md`,
+      `L0703/L0704/L0706/L0708_lecture.ipynb`, `L0705/L0707/L0709_lab_*`. **Finding: `covered`
+      (optional light merge into `L0702_lecture.md` §6.1).** Best-covered coda lesson so far. All four
+      gotchas are *shown* (Demos 1–4 = `L0703`/`L0704`/`L0706`/`L0708`; the "three outcomes" demo
+      `L0708` shows the hallucinated-call **and** no-call outcomes by design) **and mostly *named*** in
+      `L0702_lecture.md`: §6.1 "The misconceptions, named" is a 6-row confusion→correction table that
+      already covers #4 ("if I define a tool it'll use it" → not necessarily; "deterministic" → no) and #3
+      ("tool result is part of the assistant message" → no, `ToolMessage`), plus dedicated sections §3
+      (round-trip / id / `ToolMessage`), §4 (tools cost tokens twice over), §5 (three outcomes + why you
+      validate → #2). **Gaps (thin):** (a) the four aren't consolidated in the coda's *action-pitfall +
+      one-line-cure + demo-point-back* shape (§6.1 is belief-correction framed, no cure column); (b)
+      gotcha **#1 "schema sent once"** is covered in §4 but is **not** a row in the §6.1 recap. **Action:**
+      accept as covered, or (low priority) extend §6.1 with a cure column + a "schema rides in every
+      request" row to fully match the coda. Belongs at the *already-covered* end of the carry-over order.
+      No new fixture needed.
 - [ ] **L08 — designing tools** (FULL Demo 5, incl. new live "tool-soup"). Assets:
       `L0802_lecture.md` (already mentions anti-patterns), `L0803/L0805/L0807/L0809_lecture.ipynb`,
       `L08*_lab_*`. Highest-value target — the roadmap grew a genuinely new demo, so check
