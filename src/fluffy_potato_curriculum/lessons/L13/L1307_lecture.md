@@ -33,9 +33,9 @@ estimated duration: 8
 
 ### slide 2.2 L11 (shallow agents) — the ratchet's headline demonstration
 
-- text: in **L11** you rebuild the agent as a LangGraph graph. The handoff is the *practice*, not a file: run the **same `l13-agent-evals` dataset** as a **Langfuse experiment** against the new implementation.
-- text: *same dataset, different implementation — did anything regress?* Two dataset runs — L13's hand-rolled loop and L11's graph — line up in Langfuse's **run-comparison view**, the cleanest possible demonstration of the ratchet. (L11 itself comes *before* L13 and checks its L10-equivalence by eye; the repeatable experiment is what you add here and carry forward — L11's own lab doesn't run it.)
-- diagram: two boxes — "L13 hand-rolled loop" and "L11 LangGraph agent" — both run as experiments over the *same* `l13-agent-evals` dataset, producing two dataset runs compared side by side in Langfuse.
+- text: in **L11** you rebuild the agent with LangGraph's prebuilt `create_agent` (a shallow-agent one-liner). The handoff is the *practice*, not a file: run the **same `l13-agent-evals` dataset** as a **Langfuse experiment** against the new implementation.
+- text: *same dataset, different implementation — did anything regress?* Two dataset runs — L13's reference L10 graph (`agent_graph`) and L11's `create_agent` agent — line up in Langfuse's **run-comparison view**, the cleanest possible demonstration of the ratchet. (L11 itself comes *before* L13 and checks its L10-equivalence by eye; the repeatable experiment is what you add here and carry forward — L11's own lab doesn't run it.)
+- diagram: two boxes — "L13 reference graph (`agent_graph`)" and "L11 `create_agent` agent" — both run as experiments over the *same* `l13-agent-evals` dataset, producing two dataset runs compared side by side in Langfuse.
 
 [↑ Back to top](#l13-lecture-carry-the-eval-set-forward)
 
@@ -48,7 +48,7 @@ estimated duration: 8
 
 | L13 (first pass) | later: evaluation at scale |
 | --- | --- |
-| one hand-rolled loop | multi-step LangGraph graphs: per-node vs. end-to-end metrics |
+| one shallow ReAct graph | multi-step LangGraph graphs: per-node vs. end-to-end metrics |
 | outcome + trajectory checks | retrieval quality for RAG (precision@k / recall@k) |
 | one illustrative LLM-judge | LLM-as-judge done properly — what it can and can't reliably score |
 | a single agent | multi-agent systems (subagent quality vs. orchestration quality) |

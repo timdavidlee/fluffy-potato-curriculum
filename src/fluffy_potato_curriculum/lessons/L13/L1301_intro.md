@@ -13,7 +13,7 @@ estimated duration: 10
 
 ## Where this lesson sits
 
-In [L12](../L12/L1201_intro.md) you learned to *read* what your agent did: you instrumented the L10 loop so `run(...)` returns a `RunResult` carrying a **trace** — an ordered list of `TraceEvent` spans — you read that trace to reconstruct a run and locate a failure, and then you **sent that run to the cohort's Langfuse instance** and found it in the UI. L12's framing was **"produce the record."** L13 is the turn from *observation* to *judgment*:
+In [L12](../L12/L1201_intro.md) you learned to *read* what your agent did: you instrumented the L10 graph so `run(...)` returns a `RunResult` carrying a **trace** — an ordered list of `TraceEvent` spans — you read that trace to reconstruct a run and locate a failure, and then you **sent that run to the cohort's Langfuse instance** and found it in the UI. L12's framing was **"produce the record."** L13 is the turn from *observation* to *judgment*:
 
 > **L12 produces the record; L13 judges it.** Tracing tells you *what happened* on one run. Evaluation tells you *whether it was good* — and, crucially, whether it is *still* good after you change something. Both live in the same Langfuse.
 
@@ -23,20 +23,20 @@ The headline move is to stop asking "did this one run look right?" (the L12 eyeb
 
 L13 teaches evaluation the way L12 taught tracing: **you build the primitive by hand once, so nothing about the tool is magic — then you do the real work in the tool.**
 
-- **The concept, in ~15 lines.** A **case** is an input plus what "good" means; a **scorer** turns one run into a verdict; a **runner** runs every case and reports a summary. You'll see all three as plain Python against the L10/L12 loop — about fifteen lines, no framework.
+- **The concept, in ~15 lines.** A **case** is an input plus what "good" means; a **scorer** turns one run into a verdict; a **runner** runs every case and reports a summary. You'll see all three as plain Python against the L10/L12 graph — about fifteen lines, no framework.
 - **Then Langfuse.** The eval set becomes a Langfuse **Dataset**, the runner becomes a Langfuse **Experiment** over that dataset, and each scorer becomes a Langfuse **score** (code-based *and*, at the end, a managed LLM-as-judge). Evaluation is where a platform pays off fastest — durable datasets, repeated experiments, and a one-toggle LLM-judge are tedious to hand-roll and trivial in Langfuse — so L13 spends most of its minutes in the tool.
 
 ## The one idea, said three ways
 
-- **Good eval cases come from real failures, not imagination.** The traces you captured in L12 are the source of your cases. The loop is plain: **trace a failure → add a dataset item that catches it → keep the case forever.** A case grown from an observed failure stays relevant; one invented up front tends to test the wrong thing.
+- **Good eval cases come from real failures, not imagination.** The traces you captured in L12 are the source of your cases. The rule is plain: **trace a failure → add a dataset item that catches it → keep the case forever.** A case grown from an observed failure stays relevant; one invented up front tends to test the wrong thing.
 - **An eval set is a ratchet against regressions.** Its real payoff isn't the first green run — it's catching the day a prompt tweak or a model swap silently breaks something that used to work. Langfuse keeps every past experiment run, so the ratchet is durable across days and teammates, not a table that scrolls off a terminal.
-- **You measure rates, not verdicts.** The agent loop is non-deterministic (L12's "variance budget"). One green run can be luck. The cheapest honest answer is a **pass rate** over a few samples — and a flaky case is itself a *finding*, not noise to ignore.
+- **You measure rates, not verdicts.** The agent graph is non-deterministic (L12's "variance budget"). One green run can be luck. The cheapest honest answer is a **pass rate** over a few samples — and a flaky case is itself a *finding*, not noise to ignore.
 
 ## What you'll be able to do
 
 By the end of L13 you can:
 
-1. **Build a minimal eval set** for the hand-rolled loop — a **case** (input + what "good" means), a **scorer** (turns one run into a verdict), and a **runner** (runs every case and reports a summary) — and score the **answer**, the **path** (trajectory), or both. Then map each part onto Langfuse: case → **dataset item**, scorer → **score**, runner → **experiment**.
+1. **Build a minimal eval set** for the L10 graph agent — a **case** (input + what "good" means), a **scorer** (turns one run into a verdict), and a **runner** (runs every case and reports a summary) — and score the **answer**, the **path** (trajectory), or both. Then map each part onto Langfuse: case → **dataset item**, scorer → **score**, runner → **experiment**.
 2. **Design regression cases** that target failure modes you saw in L12 traces — each a Langfuse dataset item plus a code-based score that *fails when the bug is present and passes when it's fixed*.
 3. **Run an experiment across two models** — Sonnet 4.6 and Haiku 4.5 over the *same* dataset — and use Langfuse's **run-comparison view** to watch the cheaper model's pass rate drop and to flag regressions (pass→fail) after a change.
 4. **Reason about eval cost** — back-of-envelope *and* off the real token numbers on a Langfuse experiment trace — and place each scorer on the **cost/judgment spectrum**: exact assertion → fuzzy check → **LLM-as-judge** → human review. You'll turn on Langfuse's managed LLM-judge on one fuzzy quality.
@@ -57,7 +57,7 @@ Use these terms verbatim — each maps onto a Langfuse concept, so learn both na
 
 ## A note on the code you'll see
 
-The eval vocabulary is the shared module `fluffy_potato_curriculum.common.evals` — `EvalCase`, the `Scorer` protocol, `EvalResult`, a ~15-line `evaluate(...)` kept as an under-the-hood *concept sketch*, and the **Langfuse bridge** (`upload_dataset` maps cases onto a Langfuse Dataset; `emit_score` maps a scorer's verdict onto a Langfuse score). It sits alongside L10's `common/agent_loop.py` (`run(model, tools, user_msg)` → `RunResult`), L12's `common/tracing.py` (`TraceEvent`), and `common/tools.py` (`calculator`, `lookup`, `flaky_fetch`). The **concept** cells drive the loop with the scripted `FakeModel`, so they're deterministic and keyless; the **tooled** cells need the live cohort Langfuse (and, for the A/B, an `ANTHROPIC_API_KEY`) — they read their config through `common/config.py` (`require_langfuse()`), never a hard-coded key.
+The eval vocabulary is the shared module `fluffy_potato_curriculum.common.evals` — `EvalCase`, the `Scorer` protocol, `EvalResult`, a ~15-line `evaluate(...)` kept as an under-the-hood *concept sketch*, and the **Langfuse bridge** (`upload_dataset` maps cases onto a Langfuse Dataset; `emit_score` maps a scorer's verdict onto a Langfuse score). It sits alongside L10's `common/agent_graph.py` (`run(model, tools, user_msg)` → `RunResult`, the reference L10 ReAct graph — `common/agent_loop.py` is the kept-alongside by-hand version), L12's `common/tracing.py` (`TraceEvent`), and `common/tools.py` (`calculator`, `lookup`, `flaky_fetch`). The **concept** cells drive the graph with the scripted `FakeModel`, so they're deterministic and keyless; the **tooled** cells need the live cohort Langfuse (and, for the A/B, an `ANTHROPIC_API_KEY`) — they read their config through `common/config.py` (`require_langfuse()`), never a hard-coded key.
 
 ## This is a first pass, on purpose
 

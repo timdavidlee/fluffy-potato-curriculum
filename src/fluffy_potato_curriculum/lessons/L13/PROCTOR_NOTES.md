@@ -28,7 +28,7 @@ teaching payoff only lands with a **live instance**. Dry-run all of it before cl
 
 General setup gotchas:
 
-- Everything imports from `fluffy_potato_curriculum.common` — the loop (`agent_loop.run` → `RunResult`),
+- Everything imports from `fluffy_potato_curriculum.common` — the graph (`agent_graph.run` → `RunResult`),
   the tools (`common.tools.TOOLS`), and the new eval harness (`common.evals`). If imports fail, the
   student's environment isn't synced: `uv sync` from the repo root.
 - The harness is ~30 lines in `common/evals.py`. Encourage a student who is stuck on *what a scorer
@@ -153,7 +153,7 @@ COMMON GOTCHAS:
 - Calling `report.pass_rate` with the wrong order of arguments — it's `pass_rate(case_id, key)`,
   i.e. `report.pass_rate("hard_lookup", "no_runaway")`.
 - Expecting the *same* number every run. It is deterministic here (the simulator is seeded by
-  attempt count) and should read `3/5`; reassure students the real loop would jitter, which is the
+  attempt count) and should read `3/5`; reassure students a real run would jitter, which is the
   whole reason to sample.
 
 UNBLOCKERS:
