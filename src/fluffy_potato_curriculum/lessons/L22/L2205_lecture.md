@@ -6,7 +6,8 @@ keywords: decision heuristic, skill vs tool vs system prompt, composition, orche
 estimated duration: 22
 ```
 
-> **Lesson:** L22 (the mini cut's **final lesson** — a capstone).
+> **Lesson:** L22 — its closing lecture, and a capstone of the *"where does a single capability
+> live?"* question. It is **not** the end of the mini cut: L23 and L50 still follow (see §5.2).
 > **Roadmap:** [demos_or_activities.md](../../../../docs/origin/lesson_roadmaps/L22/demos_or_activities.md).
 > Closing lecture — **decision + reveal, diagram and discussion, no live build**. It applies the
 > heuristic from Demo 4 and then opens a real `SKILL.md` from *this repo* to show the production
@@ -102,7 +103,7 @@ estimated duration: 22
 - We are **not** teaching the Agent SDK's mechanics here — just landing that the concept and the
   product are the same idea.
 
-## section 5. Capstone — and one line beyond
+## section 5. Capstone — and where you go next
 
 ### slide 5.1 The one sentence to leave with
 
@@ -111,10 +112,19 @@ estimated duration: 22
 - That single question ties together everything you built this course: prompts (L02), tools
   (L07/L08), the agent loop (L10), and its LangGraph form (L04/L11).
 
-### slide 5.2 The forward pointer (full course only — don't teach it here)
+### slide 5.2 What's next
 
-- In the full course, L22 bridges to **L24 (multi-agent / subagents)**: a *subagent* is
-  capability-as-a-whole-agent — the same "where should capability live" lens, scaled from a skill up
-  to an entire agent.
-- The broader "keep a long-running agent's context lean" problem is **L19 (context management)**;
-  the fuller capability-packaging taxonomy (with MCP) is **L09**. Name them; the mini cut ends here.
+- **Next — [L23: Skill patterns & composition](../L23/L2301_intro.md)** (both tracks). You authored
+  *one* skill well; L23 composes *many* into a **system**: skill archetypes, the two composition moves
+  (sequential handoff and a shared sub-skill), the dependency graph that just-in-time loading runs
+  across, and the **composition anti-patterns** — the system-scale sequel to §3's "wrong container"
+  faults.
+- **Then the mini cut closes with L50 — the agent mini-project walkthrough** (an end-to-end build:
+  tool → agent loop → trace → eval). So L22 is a capstone of *"where does a single capability live?"*,
+  **not** the last mini lesson; the track's closing recap is [MINI_WRAPUP.md](../MINI_WRAPUP.md), owned by
+  no single lesson. (Full mini sequence: [SYLLABUS.md](../SYLLABUS.md).)
+- **Full-course-only branches — name them, don't teach them here.** In the full course L22 also bridges
+  to **L24 (multi-agent / subagents)**: a *subagent* is capability-as-a-whole-agent — the same "where
+  should capability live" lens, scaled from a skill up to an entire agent. The broader "keep a
+  long-running agent's context lean" problem is **L19 (context management)**, and the fuller
+  capability-packaging taxonomy (with MCP) is **L09**. All three are outside the mini cut.
