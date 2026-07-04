@@ -29,6 +29,14 @@ tool calling, the agent loop, tracing, and evals all drive a LangChain chat mode
 - **Keep provider translation in pure, testable helpers** (`extract_system`,
   `to_openai_messages`, …) so the mapping logic is unit-tested without a network call or an API
   key — see [tests/potato_llm/](../../../tests/potato_llm/). Never hit a live API in a test.
+- **Every client exposes a sync/async pair** — `chat` (blocking) and `achat`
+  (awaitable) — the same `.invoke`/`.ainvoke` shape a LangChain model carries. The
+  course defaults to the async one (awaiting the model call is what lets many calls
+  overlap; the "why async" reasoning is taught in the K05 prework). Each client
+  holds both a sync and an async SDK client and builds each lazily, so a test can
+  inject a fake for just the path it exercises (`client=` / `async_client=`) with no
+  key. Keep the request/response mapping in the shared `to_chat_response` helper so
+  both paths return the identical `ChatResponse`.
 - **Keys come from the config seam**, not raw `os.environ`: both clients call the
   `require_*_key` helpers in [../common/config.py](../common/CLAUDE.md).
 - Each client carries a `DEFAULT_MODEL` (Anthropic → the course anchor `claude-sonnet-4-6`;

@@ -102,3 +102,37 @@ def test_chat_wires_request_and_normalizes_response() -> None:
     assert sent["system"] == "be brief"
     assert sent["messages"] == [{"role": "user", "content": "hello"}]
     assert sent["max_tokens"] == 64
+
+
+class _FakeAsyncMessages:
+    def __init__(self, response: _FakeResponse) -> None:
+        self._response = response
+        self.last_kwargs: dict[str, object] = {}
+
+    async def create(self, **kwargs: object) -> _FakeResponse:
+        self.last_kwargs = kwargs
+        return self._response
+
+
+class _FakeAsyncAnthropic:
+    def __init__(self, response: _FakeResponse) -> None:
+        self.messages = _FakeAsyncMessages(response)
+
+
+async def test_achat_wires_request_and_normalizes_response() -> None:
+    fake = _FakeAsyncAnthropic(
+        _FakeResponse(content=[TextBlock(type="text", text="hi there", citations=None)])
+    )
+    client = AnthropicClient(model="claude-test", async_client=cast(anthropic.AsyncAnthropic, fake))
+
+    resp = await client.achat([Message.system("be brief"), Message.user("hello")], max_tokens=64)
+
+    assert resp.text == "hi there"
+    assert resp.model == "claude-test"
+    assert resp.usage.input_tokens == 11
+    assert resp.usage.output_tokens == 22
+
+    sent = fake.messages.last_kwargs
+    assert sent["system"] == "be brief"
+    assert sent["messages"] == [{"role": "user", "content": "hello"}]
+    assert sent["max_tokens"] == 64

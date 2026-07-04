@@ -40,6 +40,7 @@ dev = [
     "nbconvert>=7.17.1",
     "pyright>=1.1.409",
     "pytest>=9.0.3",
+    "pytest-asyncio>=1.4.0",
     "ruff>=0.15.12",
     "types-markdown>=3.10.2.20260518",
 ]
@@ -86,6 +87,10 @@ venv = ".venv"
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "-ra --strict-markers --strict-config"
+# The async-seam tests are plain `async def test_*` with no per-test marker;
+# pytest-asyncio's auto mode collects them, preserving the marker-free style the
+# rest of the suite keeps under --strict-markers.
+asyncio_mode = "auto"
 
 [tool.commitizen]
 name = "cz_conventional_commits"

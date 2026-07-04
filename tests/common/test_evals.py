@@ -3,11 +3,12 @@ from typing import Any
 
 import pytest
 
-from fluffy_potato_curriculum.common.agent_loop import RunResult, run
+from fluffy_potato_curriculum.common.agent_loop import RunResult, arun, run
 from fluffy_potato_curriculum.common.evals import (
     EvalCase,
     EvalReport,
     EvalResult,
+    aevaluate,
     compare,
     emit_score,
     evaluate,
@@ -239,3 +240,43 @@ def test_emit_score_tags_bool_as_boolean_and_number_as_numeric(
     client = _FakeLangfuse()
     emit_score(client, EvalResult(key="k", score=score), trace_id="t1")
     assert client.scores[0]["data_type"] == data_type
+
+
+# --- the async runner (aevaluate) -------------------------------------------
+
+
+async def _achaining_run() -> RunResult:
+    """The async twin of ``_chaining_run``: the same script, produced by ``arun``."""
+    model = FakeModel(
+        [
+            tool_reply(tool_call("c1", "calculator", {"expression": "17*23"})),
+            tool_reply(tool_call("c2", "lookup", {"city": "Tokyo"})),
+            text_reply("17*23 is 391, and Tokyo has 37000000 people."),
+        ]
+    )
+    return await arun(model, TOOLS, "q", max_steps=8)
+
+
+async def test_aevaluate_scores_a_passing_outcome_case() -> None:
+    case = EvalCase(id="tokyo", inputs={"task": "q"}, reference_outputs={"answer": "37000000"})
+
+    async def arun_case(_case: EvalCase) -> RunResult:
+        return await _achaining_run()
+
+    report = await aevaluate(arun_case, [case], [answer_contains])
+    assert report.pass_rate("tokyo", "answer_correct") == 1.0
+
+
+async def test_aevaluate_matches_evaluate_rollup() -> None:
+    # Same cases + scorers, sync vs. async target: the shared _build_report rollup
+    # must produce the same pass rate.
+    case = EvalCase(id="tokyo", reference_outputs={"expected_tools": ["calculator", "lookup"]})
+
+    async def arun_case(_case: EvalCase) -> RunResult:
+        return await _achaining_run()
+
+    sync_report = evaluate(lambda _case: _chaining_run(), [case], [expected_tools])
+    async_report = await aevaluate(arun_case, [case], [expected_tools])
+    assert async_report.pass_rate("tokyo", "expected_tools") == sync_report.pass_rate(
+        "tokyo", "expected_tools"
+    )

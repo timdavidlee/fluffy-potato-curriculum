@@ -26,19 +26,41 @@ and materials async-first so they can lean on that concept. This resolves the "i
 from L01 vs. later" question: the concept lands in K05, the seams are async from the first lesson
 that uses them.
 
+## Progress (2026-07-04): the code seams are DONE; the notebooks are deferred
+
+Chose "seams now, notebooks later" (the notebook conversion is folded into the active
+[LangChain notebook migration](2026-07-03-langchain-notebook-migration.md) so those files are
+touched once, when regenerated — the "don't touch twice" call below). The **seams** landed
+async-first with the existing sync names kept working, so nothing downstream broke:
+
+- [x] **`potato_llm/`** — `chat`/`achat` on the `PotatoLLMClient` Protocol + both clients (each
+      holds a lazily-built sync **and** async SDK client; shared `to_chat_response`).
+- [x] **`common/`** — `agent_loop.arun`, `agent_graph.arun`/`atrace_graph` (dual-mode
+      `RunnableLambda` node → same compiled graph runs `.stream` **and** `.astream`),
+      `evals.aevaluate` (shared `_build_report` rollup), `FakeModel.ainvoke`. Tool dispatch and
+      `TraceEvent` stay sync — pure/in-memory, no I/O to await.
+- [x] **Test tooling** — `pytest-asyncio` (dev dep) with `asyncio_mode = "auto"`; async sibling
+      tests for every new entry point (marker-free `async def test_*`).
+- [ ] **Lessons** — deferred to the LangChain migration: notebooks `await` the seams, labs model
+      async signatures. Not done here (would collide with the in-flight migration worktrees).
+- [ ] **`invoke` / `ainvoke` note** — deferred with the notebooks: a one-line pointer back to K05
+      wherever a framework sync call first appears.
+
 ## Scope / where it lands
 
 - **`potato_llm/`** — `PotatoLLMClient` Protocol + Anthropic/OpenAI impls expose `async` call
-  methods (keep a thin sync wrapper only if a specific lecture needs it).
-- **`common/`** — agent loop, tool dispatch, `TraceEvent` export, eval harness all `async`.
+  methods (keep a thin sync wrapper only if a specific lecture needs it). ✅ done — see above.
+- **`common/`** — agent loop, tool dispatch, `TraceEvent` export, eval harness all `async`. ✅ the
+  I/O-bearing producers now have async twins; pure helpers (tools, `TraceEvent`) stay sync.
 - **Lessons** — notebooks `await` inside cells (Jupyter supports top-level `await`); labs’
   `_empty`/`_solutions` model async signatures. Introduce the async model early enough that the
-  agent-arc lessons (L10–L14) can lean on it.
+  agent-arc lessons (L10–L14) can lean on it. ⏳ deferred to the migration.
 - **`invoke` / `ainvoke` note** — wherever a framework object's sync call first shows up
   (LangChain/LangGraph `.invoke()`, first met in L03/L04; the Anthropic/OpenAI SDKs' sync vs.
   async clients), add a **short note that both a sync (`.invoke()`) and an async (`.ainvoke()`)
   variant exist, that we default to the async one, → see K05's "why async for agents."** Keep it
   a one-liner pointer at the point of use, not a re-explanation — the reasoning lives in K05.
+  ⏳ deferred to the migration.
 
 ## Open questions
 

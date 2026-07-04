@@ -42,6 +42,32 @@ class _Conforming:
     ) -> ChatResponse:
         return ChatResponse("", "x", Usage(0, 0), None)
 
+    async def achat(
+        self,
+        messages: list[Message],
+        *,
+        max_tokens: int = 1024,
+        temperature: float = 1.0,
+    ) -> ChatResponse:
+        return ChatResponse("", "x", Usage(0, 0), None)
+
+
+class _SyncOnly:
+    """Has `chat` but no `achat` — no longer a full `PotatoLLMClient`."""
+
+    @property
+    def model(self) -> str:
+        return "x"
+
+    def chat(
+        self,
+        messages: list[Message],
+        *,
+        max_tokens: int = 1024,
+        temperature: float = 1.0,
+    ) -> ChatResponse:
+        return ChatResponse("", "x", Usage(0, 0), None)
+
 
 class _NotConforming:
     pass
@@ -50,3 +76,8 @@ class _NotConforming:
 def test_protocol_is_structural() -> None:
     assert isinstance(_Conforming(), PotatoLLMClient)
     assert not isinstance(_NotConforming(), PotatoLLMClient)
+
+
+def test_protocol_requires_the_async_method() -> None:
+    # The seam now carries both `chat` and `achat`; a sync-only class is not a client.
+    assert not isinstance(_SyncOnly(), PotatoLLMClient)

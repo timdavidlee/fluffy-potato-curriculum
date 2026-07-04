@@ -39,6 +39,15 @@ it (see the reuse rule in [.claude/rules/python-style.md](../../../.claude/rules
 
 ## Conventions
 
+- **Every run producer has an `await`-able twin.** `agent_loop.run`/`arun`,
+  `agent_graph.run`/`arun` (+ `trace_graph`/`atrace_graph`), and `evals.evaluate`/`aevaluate`
+  come in sync + async pairs; the async one awaits the model call — the run's only real I/O —
+  so callers can overlap runs with `asyncio.gather`. The async twins return the identical
+  `RunResult`/`EvalReport`, so every scorer and trace reader stays put. `FakeModel` implements
+  both `invoke` and `ainvoke` (the async one delegates — a script has nothing to await), and
+  `agent_graph.build_agent`'s node is dual-mode (a `RunnableLambda` with sync + async bodies) so
+  the *same* compiled graph runs under both `.stream` and `.astream`. The async *concept* is
+  taught in the K05 prework; here the seams just expose it.
 - **Instrumentation observes; it never changes control flow.** Tracing wraps the loop — if a
   trace ever altered a run's behavior, that's a bug.
 - **Prefer the `FakeModel`/canned path in tests and CI**; live calls are for the demos where

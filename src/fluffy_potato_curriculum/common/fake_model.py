@@ -105,3 +105,13 @@ class FakeModel:
         index = min(self.calls, len(self.scripted) - 1)
         self.calls += 1
         return self.scripted[index]
+
+    async def ainvoke(
+        self, messages: Sequence[BaseMessage], *args: Any, **kwargs: Any
+    ) -> AIMessage:
+        """The awaitable twin of :meth:`invoke`, so the *async* agent path
+        (``arun`` / ``graph.astream``, which call the model's ``ainvoke``) can drive
+        the scripted model offline. A script has nothing to await — it just returns
+        the next line — so this delegates to :meth:`invoke`; the same call counter
+        advances, so a script drives sync and async runs identically."""
+        return self.invoke(messages, *args, **kwargs)
