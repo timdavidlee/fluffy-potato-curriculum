@@ -2,6 +2,9 @@
 
 Student-facing lesson materials. Each `L<NN>/` directory holds the generated teaching
 artifacts for one lesson (zero-padded, monotonically increasing — `L01` is taught first).
+The parallel **prework** track lives here too, under `K<NN>/` (`K01`–`K06`): required,
+gated setup completed *before* `L01`, authored as self-paced step-by-step guides rather than
+lecture+lab — see the K-series section in [docs/origin/CLAUDE.md](../../../docs/origin/CLAUDE.md).
 
 ## Mini vs full tracks
 
@@ -12,6 +15,12 @@ is the single source of truth for which lessons belong to the mini vs full cours
 view. Both mirror the master + "Condensed Mini Lesson Plan" tables in
 `docs/origin/CURRICULUM_PRD.md` — keep the PRD and `tracks.toml` in sync when lessons
 change.
+
+A few more track-level docs sit at the root of this directory alongside `tracks.toml` /
+`SYLLABUS.md`: [INVENTORY.md](INVENTORY.md) (a bottom-up time estimate for the mini track,
+derived from the material on disk) and [FULL_WRAPUP.md](FULL_WRAPUP.md) /
+[MINI_WRAPUP.md](MINI_WRAPUP.md) (the end-of-course closers — no lesson roadmap owns the
+"end of the course" framing, so these do).
 
 ## Where the source material lives
 
@@ -42,6 +51,10 @@ Items are numbered `L<NN><II>` where `<II>` is the item's order within the lesso
 - `L<NN>NN_lab_empty.ipynb` / `L<NN>NN_lab_solutions.ipynb` — paired student / solution lab notebooks
 - `PROCTOR_NOTES.md` — teaching notes for whoever runs the lesson
 - `__init__.py` — keeps the lesson importable as a package
+
+`K<NN>/` prework dirs follow the same numbering but a different item shape: self-paced
+`K<NN><II>_guide.md` runbooks (concepts called out inline, occasionally with a `K<NN><II>_demo.ipynb`)
+instead of lecture/lab pairs, and no `PROCTOR_NOTES.md` (the prework is unattended).
 
 ## Conventions
 

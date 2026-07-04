@@ -29,7 +29,11 @@ projects/
 
 - **Claude owns the idea bank.** `README.md` here is a Claude-maintained index of suggested
   project themes mapped to the lessons they exercise, each with a corresponding `<brief>/`
-  folder. Default to maintaining it rather than asking.
+  folder. Default to maintaining it rather than asking. Early brainstorming that feeds this
+  bank lives under
+  [docs/origin/projects/](../../../docs/origin/projects/) — e.g.
+  [agent-shape-demonstrators.md](../../../docs/origin/projects/agent-shape-demonstrators.md);
+  mine those drafts before adding a new brief.
 - Each brief's `README.md` follows the 8-section structure in `PROJECT_BRIEF_DESIGN.md`
   (problem statement → background → target users → implementation considerations → suggested
   API contract → evaluation → stretch goals → helpful links) and links to the shared
