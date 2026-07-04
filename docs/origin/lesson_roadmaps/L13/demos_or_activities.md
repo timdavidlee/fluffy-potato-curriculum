@@ -148,6 +148,33 @@ The teacher should have, before the first demo starts:
 - If the managed judge gives an obviously wrong verdict on the day, **keep it** — the most honest possible demonstration that a judge is a fallible scorer, not an oracle. Name it and move on.
 - If the live cost numbers are tiny and undramatic on the toy set, extrapolate out loud to a realistic set (hundreds of cases, K=10, on every commit) so the linear cost growth is felt, not dismissed.
 
+## Common pitfalls coda — naming L13's five anti-patterns
+
+**Shape note:** a short **"common pitfalls" coda**, not a new live demo — L13 already *shows* each of these across Demos 1–4. Its job is to **name** them as portable anti-patterns, restate the cure in a line, and pin each back to where the room saw it. Budget ~5 minutes as a recap slide. Follows the [L23 Demo 5](../L23/demos_or_activities.md#demo-5--the-three-composition-anti-patterns-objective-5) template, like the [L01 coda](../L01/demos_or_activities.md#common-pitfalls-coda--naming-l01s-four-gotchas). *(The cross-cutting tracker filed this under the old number "L12" and referred to "L11 traces"; eval is L13 and its traces come from L12 after the 2026-07-04 reorder.)*
+
+**Goal:** turn the dataset / scorer / experiment demos into five named eval anti-patterns a student can catch when they write their own eval set.
+
+**Pre-flight:**
+
+- Nothing new to load. One recap slide; Demo 3's Sonnet-vs-Haiku pass-rate columns and Demo 4's scorer spectrum still on screen to point back at.
+
+**Live script (recap — point back, don't re-run):**
+
+1. **Happy-path-only eval set.** ❌ Cases you imagined passing, none drawn from real failures — so the set tests nothing that actually breaks. Point back at Demo 2: good cases come from **observed** trace failures, not imagination. **Cure:** trace a failure → add a case that fails-when-broken and passes-when-fixed → keep it forever.
+2. **Sample too small.** ❌ One green run treated as proof on a non-deterministic agent. Point back at Demo 3: a single pass can be luck. **Cure:** a pass *rate* over K samples, not a single verdict.
+3. **Over-trusting the LLM-as-judge.** ❌ Treating a judge's verdict as ground truth. Point back at Demo 4: the judge is a fallible, token-costed scorer with its own biases. **Cure:** place it deliberately on the cost/judgment spectrum (assertion → fuzzy → judge → human), cross-check it, never treat it as an oracle.
+4. **Not targeting failure modes seen in traces.** ❌ Scoring generic quality instead of the specific bugs [L12](../L12/objectives.md) surfaced. Point back at Demo 2: the trace is the source of truth for what actually goes wrong. **Cure:** one regression case per observed trace failure (runaway, wrong-args, premature termination).
+5. **Regressions that slip through.** ❌ No durable before/after comparison, so a fix that breaks something else goes unnoticed. Point back at Demo 3 step 4. **Cure:** keep every experiment run (the Langfuse ratchet) and compare today vs. last week, not vs. memory.
+
+**What to highlight:**
+
+- A cross-cutting failure sits *inside* the scorers: the **over-tight (brittle) check** — an exact-string match red-flagging a correct-but-reworded answer. It trains you to ignore reds, which is worse than no check. Use the *loosest check that still catches the bug* (Demo 2's brittleness beat).
+- #1 and #4 are the same discipline from L12's side: **eval design starts in the trace.** #2, #3, and #5 are the "don't trust one number" family — one run, one judge, one terminal table are each a single point you shouldn't build on.
+
+**If a student pushes back:**
+
+- "Isn't a passing eval enough?" Only if it's a *rate* over cases drawn from real failures, kept durably. A single green on an imagined happy-path case is anti-patterns #1, #2, and #5 at once.
+
 ## Optional bridge demo — carry the dataset forward (Objective 5)
 
 If time allows, close on the practice the PRD asks L13 to *establish*. Don't build anything new — make the handoff concrete:

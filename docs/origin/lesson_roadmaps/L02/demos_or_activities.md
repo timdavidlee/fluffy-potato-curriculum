@@ -224,6 +224,32 @@ A small multi-turn script for the second half of the demo: a 4-turn conversation
 
 > Implemented as **section 4 of the L0205 structured-output demo** (it extends Demo 2's notebook rather than adding a separate item).
 
+## Common pitfalls coda — naming L02's four anti-patterns
+
+**Shape note:** a short **"common pitfalls" coda**, not a new live demo — L02 already *shows* each of these inside Demos 1–3. Its job is to **name** them as portable anti-patterns, restate the cure in a line, and pin each back to where the room saw it. Budget ~5 minutes as a closing recap slide. Follows the [L23 Demo 5](../L23/demos_or_activities.md#demo-5--the-three-composition-anti-patterns-objective-5) anti-pattern-beat template, adapted (like the [L01 coda](../L01/demos_or_activities.md#common-pitfalls-coda--naming-l01s-four-gotchas)) for a lesson whose gotchas are woven *through* the happy path.
+
+**Goal:** turn three demos' worth of "watch this break" into four named prompting anti-patterns a student can catch in their own prompts later.
+
+**Pre-flight:**
+
+- Nothing new to load. One recap slide with the four names + one-line cures; the Demo 1/2/3 outputs (or screenshots) still on screen to point back at.
+
+**Live script (recap — point back, don't re-run):**
+
+1. **Instructions in the wrong role.** ❌ Policy shoved into the user message, or per-call data pinned in `system`. Point back at Demo 1 (variants 2 and 3): user-role policy degrades over turns; system-role per-call data poisons reuse. **Cure:** *system = always-true, user = per-call.*
+2. **Trusting structured output as a guarantee.** ❌ Calling `json.loads` on the raw reply and assuming it holds. Point back at Demo 2: the model *agreed* to the JSON contract and still broke it under stress. **Cure:** the parser is the enforcement — try / validate / fail-loud; never silently return `{}`. (Still true under L07's stricter tool-use schema — tool args can be malformed too.)
+3. **Few-shot that leaks format or biases the answer.** ❌ Under-diverse examples (all one label) that make the model overfit, or examples that smuggle in a shape you didn't intend. Point back at Demo 3 variant 2 (uniform `P0-bug` → everything becomes a P0). **Cure:** diversity over volume; cover the label set; when the example list keeps growing, reach for retrieval ([L21](../L21/objectives.md)) or a stronger model ([L14](../L14/objectives.md)).
+4. **Bloated always-on system prompt.** ❌ Cramming every rule and example into `system`, which then rides in *every* call. Point back at Demo 1 step 5 (the per-turn token staircase). **Cure:** keep `system` lean and durable; move occasionally-needed guidance to the user turn. Forward-point: this is the seed of context management ([L19](../L19/objectives.md), full course) and the skill-vs-system-prompt call in [L22](../L22/objectives.md).
+
+**What to highlight:**
+
+- All four share one root fault: **treating a strong nudge as a hard guarantee.** Role weighting, a JSON contract, an example's pull, a system prompt's authority are each *best-effort* — L02's whole job is building the validate-don't-assume reflex.
+- Two point straight forward — defensive parsing → L07 tool args; lean-system → L19/L22. Name the link, **don't re-teach it here.**
+
+**If a student pushes back:**
+
+- "Isn't the system prompt enforced?" No — strongly weighted, not a sandbox (Demo 1's highlight). That's *why* #1 and #4 are anti-patterns, not just style preferences.
+
 ## Pacing notes for the teacher
 
 - **Per-demo time:** 15–20 minutes each for Demos 1–3, including the post-demo discussion; Demo 4 is a faster ~12–15 minute *survey* (five shapes, ~2–3 minutes apiece). Four demos plus the optional bridge fits in a ~100–120 minute block, matching the updated duration estimate in [objectives.md](objectives.md). Demo 2 is the longest of the levers demos because of the five test emails — budget time for it; if the whole block runs long, Demo 4 is the one to shorten (cut ranking or the mixed-schema extraction variant) or push its lab to take-home. <!-- *NEED INPUT*: confirm against the lesson-time budget once duration is pinned in objectives.md's open questions. -->

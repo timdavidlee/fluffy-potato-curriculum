@@ -266,6 +266,32 @@ The teacher should have, before the first demo starts:
 
 - Purely conceptual — nothing to run. If time is tight, this compresses to a single sentence over the Demo 0 slide: *"extracts go to a DB or S3, never the trace."* Don't skip it entirely — it's the payoff of the Demo 0 frame and objective 6.
 
+## Common pitfalls coda — naming L12's four anti-patterns
+
+**Shape note:** a short **"common pitfalls" coda**, not a new live demo — L12 already *shows* each of these across Demos 1, 3, and 4. Its job is to **name** them as portable anti-patterns, restate the cure in a line, and pin each back to where the room saw it. Budget ~5 minutes as a recap slide. Follows the [L23 Demo 5](../L23/demos_or_activities.md#demo-5--the-three-composition-anti-patterns-objective-5) anti-pattern-beat template, like the [L01 coda](../L01/demos_or_activities.md#common-pitfalls-coda--naming-l01s-four-gotchas). *(The cross-cutting gotcha tracker filed this beat under the old number "L11"; tracing is L12 after the 2026-07-04 reorder.)*
+
+**Goal:** turn the trace-reading and instrumentation demos into four named tracing anti-patterns a student can catch when they instrument their own agent.
+
+**Pre-flight:**
+
+- Nothing new to load. One recap slide; Demo 3's four failure signatures and Demo 4's field-set defense still on screen to point back at.
+
+**Live script (recap — point back, don't re-run):**
+
+1. **Tracing too little.** ❌ A wall of `print()` lines with no structure, order, or `trace_id` — you can't filter, diff, or locate a failure. Point back at Demo 1: a pile of streamed lines isn't a trace. **Cure:** structure + order + a shared run id (Demo 4) — the minimum that makes a run *readable after the fact*.
+2. **Tracing too much.** ❌ Dumping full prompt bodies, raw tracebacks, every intermediate variable — and PII — into spans, until the trace is as unreadable as no trace (and a privacy/cost liability). Point back at Demo 4 step 4. **Cure:** the minimal field set where each field answers a question; instrumentation is deliberate *subtraction*.
+3. **Not tracing tool arguments.** ❌ Recording that `calculator` was *called* but not with *what* — so the wrong-arguments bug is invisible. Point back at Demos 2–3: arguments are where the model's thinking shows. **Cure:** trace `inputs`, not just call names — a success flag never reveals a call to the *wrong question*.
+4. **Reading the summary, not the trace.** ❌ Trusting a tool's success flag or a `natural` termination as "correct," or re-running a non-deterministic agent to "reproduce" a bug. Point back at Demo 3 (wrong-args + premature termination). **Cure:** read the arguments and the model's *next* span; the captured trace **is** the reproduction — don't chase it live.
+
+**What to highlight:**
+
+- #1 and #2 are the same dial set wrong in both directions: a trace is a **curated** record, neither a firehose nor a shrug. Getting the field set right *is* the instrumentation skill (Demo 4).
+- #3 and #4 are the reading half — and they're exactly [L13](../L13/objectives.md)'s first eval cases: each failure you can *read* here becomes a regression case you can *score* next lesson. Name the handoff.
+
+**If a student pushes back:**
+
+- "Shouldn't I log everything, just in case?" That's anti-pattern #2 — an everything-trace is unsearchable and a liability. Trace what answers a question; store the rest (the extract) on the data plane (Demo 7).
+
 ## Pacing notes for the teacher
 
 - **Per-demo time (targets the objectives' decided ~75–100 minute, one-lecture budget):** Demo 0 is a ~4-min whiteboard frame (no code). Demo 1 is short (3–5 min, it's a recap + one edit). Demo 2 is 10–15 min (the core reading skill — don't rush it). Demo 3 is 12–18 min (four signatures; the wrong-arguments one deserves the most time). Demo 4 is the long live-code beat, 15–20 min. Demo 5 is 10–15 min. Demo 6 is 10–15 min and is the trimmable one — drop to a 5-minute screenshot tour or cut entirely if time is tight, since objectives 1–4 stand alone. Demo 7 is a ~5-min conceptual close (no code), compressible to one sentence but not skippable — it's the objective-6 payoff. Total: ~70–100 min for all eight, fitting the lecture block with discussion; the two conceptual bookends (Demos 0 and 7) add ~9 min and are the cheapest to compress under time pressure.

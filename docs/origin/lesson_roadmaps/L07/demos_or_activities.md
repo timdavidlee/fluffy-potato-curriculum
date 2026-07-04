@@ -150,6 +150,32 @@ The teacher should have, before the first demo starts:
 - If neither the primary nor the Haiku model produces a malformed call on the day, fall back to **hand-building** a tool call in the LangChain `{name, args, id}` shape with a bad value (e.g. an `expression` of `"twenty + 1"`) and feed it to the dispatch code. The teaching point is the application's *response* to a bad call, which you can demonstrate regardless of whether the model cooperated in producing one.
 - If the model invents a tool name that doesn't exist, that is the best possible version of this demo — slow down and show the dispatch step finding no matching tool.
 
+## Common pitfalls coda — naming L07's four gotchas
+
+**Shape note:** a short **"common pitfalls" coda**, not a new live demo — L07's four demos already *show* each of these (Demos 2–4). Its job is to **name** them as portable gotchas, restate the cure in a line, and pin each back to where the room saw it. Budget ~5 minutes as a closing recap slide. Follows the [L23 Demo 5](../L23/demos_or_activities.md#demo-5--the-three-composition-anti-patterns-objective-5) anti-pattern-beat template, adapted (like the [L01 coda](../L01/demos_or_activities.md#common-pitfalls-coda--naming-l01s-four-gotchas)) for a lesson whose gotchas are woven *through* the happy path.
+
+**Goal:** consolidate the round-trip demos into four named tool-calling gotchas the student will hit the first time they wire a tool themselves.
+
+**Pre-flight:**
+
+- Nothing new to load. One recap slide; Demo 3's four-message trace and Demo 4's three outcomes still on screen to point back at.
+
+**Live script (recap — point back, don't re-run):**
+
+1. **"The schema is sent once."** ❌ Forgetting the tool *definition* rides in **every** request, and the tool *result* stays in history every turn after. Point back at Demo 3's highlight: tools cost tokens **twice over** — a 500-token definition across a 10-turn chat is ~5,000 input tokens before the tool even fires. **Cure:** budget the schema as recurring input; keep definitions tight. Forward: [L14](../L14/objectives.md) (model/provider cost), [L19](../L19/objectives.md) (context management).
+2. **Trusting the model's arguments.** ❌ Assuming `args` are well-formed because a schema exists. Point back at Demo 4 P3: the model hallucinates arg types, omits required fields, or invents argument names — the schema is a *shape contract*, not a generation guarantee. **Cure:** the application validates every call before dispatch and hands a structured error back (designing that error is [L08](../L08/objectives.md)).
+3. **Mishandling the round-trip.** ❌ Dropping the assistant's tool-request turn, or not matching `ToolMessage.tool_call_id` to the call's `id`. Point back at Demos 2–3: a tool exchange is *at least four messages*, threaded by that id. **Cure:** append the request turn *and* the result turn; match ids — mandatory once more than one call is in flight ([L10](../L10/objectives.md)).
+4. **Assuming the model always calls the tool.** ❌ Expecting a bound tool to be used. Point back at Demo 4 P2 (`2 + 2` → answered directly, empty `.tool_calls`) and Demo 1's misbehave. **Cure:** a bound tool is an *offer, not a command* — handle the no-call branch; a vague description makes the skip more likely (that's [L08](../L08/objectives.md)).
+
+**What to highlight:**
+
+- The lesson's through-line inverts straight into the gotchas: **the model emits tokens; the application acts.** Every one of the four is a place students expect the model to have done the application's job.
+- #2 and #4 are two faces of one coin — the model *chose* (to call, to skip, how to fill args) and can choose wrong; validation and branch-handling are yours, not the schema's.
+
+**If a student pushes back:**
+
+- "Can't I force a call with `tool_choice`?" You can force the *call*, not well-formed *arguments* — #2 still bites. (Deeper in L08.)
+
 ## Optional bridge demo — toward designing good tools (L08)
 
 If time allows, run one final demo that previews [L08](../L08/objectives.md): take the `calculator` tool and swap its rich description for a deliberately vague one — replace the function's docstring with `"Does math."` (the docstring *is* the description `bind_tools` infers), changing nothing else. Re-run Demo 4's P1 prompt and show the model now hesitates, skips the tool, or calls it with worse arguments. Don't teach *how* to write a good description here — just show that the description visibly moved the model's behavior, and name the question L08 will answer: *what makes a tool worth adding, well-named, and well-described?* This mirrors the bridge demo L06 used to set up L07, and the one [L08](../L08/demos_or_activities.md) uses to set up L09.

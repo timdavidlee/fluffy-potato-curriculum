@@ -237,6 +237,34 @@ Show `tiktoken` counts on screen; run Anthropic's count-tokens endpoint on **Cla
 - If rate-limited mid-script, walk the pre-printed numbers — the math is the demo, not the live call.
 - If pricing changed since the slide, *say so out loud* and update live. An unflagged pricing mismatch undermines every cost claim in the course.
 
+## Common pitfalls coda — naming L01's four gotchas
+
+**Shape note:** this is a short **"common pitfalls" coda**, not a new live demo — L01 already *showed* each of these failure modes inside the demo chain (Demos 2/3, 3.6, 5). Its job is to **name** them as portable anti-patterns, restate the cure in one line, and pin each back to where the room already watched it happen. Budget ~5 minutes as a closing recap slide; don't re-run the live calls. This follows the [L23 Demo 5](../L23/demos_or_activities.md#demo-5--the-three-composition-anti-patterns-objective-5) anti-pattern-beat template (name it → show it → state the cure → tie to the payoff), adapted for a lesson whose gotchas are woven *through* the happy path rather than saved for the end.
+
+**Goal:** convert four intuitions the demo chain built into four *named, portable* pitfalls a student can catch themselves committing later — so "tokens" leaves the room as a **budgeting discipline** (measure, don't guess), not as trivia.
+
+**Pre-flight:**
+
+- Nothing new to load. One recap slide listing the four names + one-line cures. Keep the Demo 3, 3.6, and 5 outputs (or screenshots) on screen to point back at — the evidence is already there.
+
+**Live script (run as a recap — point back, don't re-run):**
+
+1. **"A word is a token."** ❌ Eyeballing text as roughly word-count. Point back at Demo 3: proper names fragment 3–5×, and JSON / non-Latin blow past the ≈4-chars-per-token rule by ~3×. **Cure:** count with the tokenizer (or the count-tokens endpoint) before you budget; the rule of thumb is *English-prose-only*. This is the root the other three ride on.
+2. **"Temperature is just a randomness knob"** (and its cousin, "temperature 0 is deterministic"). ❌ Point back at Demo 3.6: temperature reshapes the distribution *before* sampling, and temp 0 is **low variance, not zero** (floating-point, batching, and tie-breaks still diverge). **Cure:** pick temperature by task — ~0 for extraction / routing / structured output (foreshadow L07), ~1 for brainstorming — and never *promise reproducibility* from temp 0 alone (that lands again as an eval gotcha in [L13](../L13/objectives.md)).
+3. **"Cost ≈ how long my prompt is."** ❌ Budgeting on input length and forgetting the response. Point back at Demo 5, step 6: output tokens cost ~3–5× input per token. **Cure:** estimate *both* directions; a long prompt + short answer often beats the reverse, and output-token growth is what makes an agent loop ([L10](../L10/objectives.md)) expensive.
+4. **Silent context-window overflow / truncation.** ❌ Assuming an over-long request always errors loudly. Point back at Demo 5, steps 3–4: besides the hard rejection you saw, some frameworks **silently drop the oldest turns**, and quality degrades near the long-context tail *before* any hard limit. **Cure:** track cumulative tokens against the window yourself — treat truncation as a bug you must detect, not the framework's job. Forward-point: this is the whole of L19 (context management) and part of L21 (RAG), both full-course.
+
+**What to highlight:**
+
+- The move here is **naming**, not new material — all four are already on screen from the chain. A pitfall you can *name* is one you can catch in your own code three lessons from now; an unnamed one you re-discover the hard way.
+- The common root: **no memory (Demo 1) + tokens are the unit of both budgets** means every one of these four is the same discipline — *measure, don't guess.*
+- Two of the four are another lesson's main topic — say the forward link (overflow → L19/L21; reproducibility → L13) and **don't re-teach it here.**
+
+**If a student pushes back:**
+
+- "But temp 0 *was* identical across all 15 runs in Demo 3.6." Exactly — low variance is usually indistinguishable from zero, which is *why* the rare production divergence blindsides people. Name it now so it's not a surprise later.
+- "Which of these bites hardest?" The overflow/truncation one, because it can fail **silently** — the other three at least show up on the bill.
+
 ## Optional bridge demo — toward prompting fundamentals (L02)
 
 If time allows, take Demo 4's reusable preamble and Demo 5's multi-turn script and show how the same call looks with explicit system/user/assistant role separation. Don't *teach* role design — just point at the structure: "L02 makes this preamble a formal contract and shows why instructions in the system vs. user message change results." It seeds the role concept while the preamble-and-cost intuition is still warm.
