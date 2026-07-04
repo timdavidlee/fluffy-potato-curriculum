@@ -1,0 +1,66 @@
+# Fluffy Potato — local development stack (LEAN DEFAULT)
+#
+# This is the multi-container stack the K06 prework unit teaches students to operate.
+# It is deliberately the *lean* default (per the K-prework design decision:
+# docs/todos/2026-07-03-2211-k-prework-track.md):
+#
+#   - `db`      — a local PostgreSQL: the "data plane" datastore where later lessons
+#                 (L12+) persist an agent's *extracts / new records* (NOT trace spans).
+#   - `adminer` — a tiny web UI for browsing that database. It exists mainly so the
+#                 stack is genuinely multi-service: it reaches `db` *by service name*
+#                 over the shared network, which is the networking concept K06 teaches.
+#
+# WHAT'S NOT HERE (on purpose):
+#   - Tracing (Langfuse) is NOT in the lean default. Point tracing at the shared
+#     instructor Langfuse instance, OR bring up a local Langfuse with the documented
+#     overlay (see docs/origin/lesson_roadmaps/K06/demos_or_activities.md, "Appendix:
+#     self-host Langfuse locally"). Langfuse's own stack (web + worker + postgres +
+#     clickhouse + redis + minio) is heavy; keeping it out of the default is the whole
+#     point of "lean".
+#   - The AGENT SERVICE is forward-looking: there is no agent app in the repo yet.
+#     When the course grows one, it attaches to THIS compose network as another service
+#     and reaches `db` at `db:5432`. Marked here so the shape is visible now.
+#
+# Config comes from the same `.env` seam as everything else (K02): the variables below
+# fall back to dev-only defaults so a first `docker compose up -d` works with zero setup.
+
+services:
+  db:
+    image: postgres:16-alpine
+    # Container→host port map: reach this DB from your machine at localhost:5432.
+    ports:
+      - "5432:5432"
+    environment:
+      # Dev defaults; override in .env if you like (see .env.example).
+      POSTGRES_USER: "${POSTGRES_USER:-potato}"
+      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD:-potato}"
+      POSTGRES_DB: "${POSTGRES_DB:-fluffy_potato}"
+    volumes:
+      # NAMED VOLUME: the database's data lives here and SURVIVES `docker compose down`.
+      # `docker compose down -v` deletes this volume = deletes your data (the K06 footgun).
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      # `docker compose ps` reads this to report the service healthy/unhealthy.
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-potato} -d ${POSTGRES_DB:-fluffy_potato}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  adminer:
+    image: adminer:5
+    ports:
+      # Open http://localhost:8080 in a browser to browse the db.
+      - "8080:8080"
+    environment:
+      # Prefill the login host with the DB's SERVICE NAME — inside the compose network
+      # `db` resolves to the postgres container, not `localhost`. This is the one
+      # networking idea K06 wants students to see.
+      ADMINER_DEFAULT_SERVER: db
+    depends_on:
+      # Don't start adminer until the database passes its healthcheck.
+      db:
+        condition: service_healthy
+
+volumes:
+  # Declared named volume — referenced by the `db` service above.
+  pgdata:

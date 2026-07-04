@@ -10,6 +10,23 @@
 #
 # When you add, remove, or renumber a lesson: update the PRD table AND this
 # file together so they don't drift.
+#
+# The `K<NN>` PREWORK track is separate from the course proper: it is required,
+# gated setup students complete BEFORE L01 (environment, keys/config, Jupyter,
+# reading typed/pydantic/async code, and a mandatory Docker stack). `K` sorts
+# ahead of `L` so it needs no `L<NN>` renumbering. Prework gates BOTH the mini
+# and full tracks — it is not a subset relationship, it is a prerequisite.
+
+[prework]
+# Required, gated prework — completed before L01 by every student, both tracks.
+# Docker (K06) + keys (K02) are hard environment gates; K04/K05 (types/pydantic
+# and async) are understanding gates the agent arc assumes.
+order = ["K01", "K02", "K03", "K04", "K05", "K06"]
+# <need input: does the mini track require the full K01–K06, or a reduced prework
+# set? Current opinionated stance: mini requires all six — Docker+keys are
+# universal, and K04/K05 gate the agent arc the mini also reaches (L10–L13).>
+mini = ["K01", "K02", "K03", "K04", "K05", "K06"]
+full = ["K01", "K02", "K03", "K04", "K05", "K06"]
 
 [full]
 # Master lesson plan — all 25 lessons, taught in numeric order.
@@ -30,6 +47,12 @@ order = [
 ]
 
 [titles]
+K01 = "Environment & tooling"
+K02 = "Keys & the config seam"
+K03 = "Jupyter workflow"
+K04 = "Python you'll read: types & pydantic"
+K05 = "Async concepts"
+K06 = "Docker & the multi-container stack"
 L01 = "LLM and token basics"
 L02 = "Prompting fundamentals"
 L03 = "Single-node operations"

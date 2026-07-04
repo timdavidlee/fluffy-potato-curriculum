@@ -5,6 +5,13 @@ directories in this folder stay flat (`L01/` … `L25/`); track membership is
 data, defined in [tracks.toml](tracks.toml) — a lesson belongs to a track by
 membership there, not by where it lives on disk.
 
+- **Prework (`K01`–`K06`)** — required, gated setup completed **before `L01`** by
+  every student, on **both** tracks. Not part of the mini/full lesson count — it's a
+  prerequisite, not a subset. These are **self-paced, step-by-step setup guides** (not
+  proctor-led lecture+lab): environment/tooling, keys & the config seam, the Jupyter
+  workflow, reading typed/pydantic/async code, and a **mandatory** multi-container Docker
+  stack. The gate to start `L01` is K06's "does the stack come up?" check. See the design
+  todo [`docs/todos/2026-07-03-2211-k-prework-track.md`](../../../docs/todos/2026-07-03-2211-k-prework-track.md).
 - **Full** — the master 25-lesson plan.
 - **Mini** — the condensed ~32 hr cut (14 lessons): the five-objective core
   (tool design, when-to-use-a-tool, shallow LangGraph agent, eval, tracing)
@@ -15,6 +22,24 @@ membership there, not by where it lives on disk.
 See [docs/origin/CURRICULUM_PRD.md](../../../docs/origin/CURRICULUM_PRD.md) for
 the full rationale (master table + "Condensed Mini Lesson Plan"). Keep that PRD
 and `tracks.toml` in sync when lessons change.
+
+## Prework — required before `L01` (both tracks)
+
+Gated setup, completed before the course proper. Every student does all six regardless
+of track (`mini`/`full`).
+
+| #   | Prework unit                              | Gate |
+| --- | ----------------------------------------- | ---- |
+| K01 | Environment & tooling                     | soft |
+| K02 | Keys & the config seam                    | **hard** (keys wired through the config seam) |
+| K03 | Jupyter workflow                          | soft |
+| K04 | Python you'll read: types & pydantic      | understanding gate for the agent arc |
+| K05 | Async concepts                            | understanding gate for the agent arc |
+| K06 | Docker & the multi-container stack        | **hard** (`docker compose ps` all-healthy + a smoke call through the config seam) |
+
+Prework order: K01 → K02 → K03 → K04 → K05 → K06.
+
+## Course lessons
 
 | #   | Lesson title                                                  | Mini | Full |
 | --- | ------------------------------------------------------------- | :--: | :--: |

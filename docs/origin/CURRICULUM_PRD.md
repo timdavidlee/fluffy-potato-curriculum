@@ -37,6 +37,29 @@ and should map to one or more lessons below.
 - understand the basics of agent evaluation and tracing
 
 
+## Prework track (`K<NN>`) — required before `L01`
+
+Before the course proper, every student completes a **gated prework track** prefixed
+**`K`** (sorts ahead of `L`, so no `L<NN>` renumbering). It front-loads the environment
+and mental-model setup the lessons assume so the whole cohort starts `L01` from one
+baseline instead of debugging setup mid-lesson. Unlike the lessons, K units are
+**self-paced, step-by-step setup guides** (concepts highlighted inline as you work), not
+proctor-led lecture+lab. Prework gates **both** the mini and full tracks — it is a
+prerequisite, not a subset. Roadmaps live under `./lesson_roadmaps/K<NN>/`; design and
+rationale in [`docs/todos/2026-07-03-2211-k-prework-track.md`](../todos/2026-07-03-2211-k-prework-track.md).
+
+| #   | Prework unit                         | Covers                                                                                          |
+| --- | ------------------------------------ | ----------------------------------------------------------------------------------------------- |
+| K01 | Environment & tooling                | git clone, `uv sync` / `uv run`, venv & the pinned `.venv`, the `src/` layout, optional `core.hooksPath` |
+| K02 | Keys & the config seam               | `.env.example` → `.env`, `common/config.py` (`require_*_key()`, never scattered `os.environ`), live-call hygiene (real paid calls: keep small/cheap; never commit keys or live output) |
+| K03 | Jupyter workflow                     | `uv run jupyter lab`, the **restart-and-run-all** mental model, top-level `await` in cells       |
+| K04 | Python you'll read: types & pydantic | fast refresher (types, functions, imports), **reading type hints** (`X \| None` / `list[int]` / `-> None`, pyright-strict), and **what a pydantic model is** (`BaseSettings`, structured output, tool schemas) |
+| K05 | Async concepts                       | `async`/`await`, the event loop, `asyncio.gather` for concurrency, top-level `await`; owns the canonical **"why async for agents"** explainer the course cross-references (see [`docs/todos/2026-07-03-2152-prefer-async-methods.md`](../todos/2026-07-03-2152-prefer-async-methods.md)) |
+| K06 | Docker & the multi-container stack   | **mandatory for everyone** — image/container/volume, `compose.yaml` services + named volumes, `docker compose up -d / ps / logs -f / down` (and the `down -v` footgun), basic troubleshooting; stands up Langfuse + Postgres + ClickHouse plus the DB/agent services |
+
+**Gate to start `L01`:** K06's "does the stack come up?" check — `docker compose ps` all
+healthy + a smoke call through the config seam — is the go/no-go, alongside the K02 keys gate.
+
 ## Lesson plan
 
 Lessons are taught in numeric order (`L01` first). Each row links to that
