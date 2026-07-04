@@ -1,4 +1,5 @@
 from collections.abc import Callable
+from typing import Any
 
 import pytest
 
@@ -8,9 +9,11 @@ from fluffy_potato_curriculum.common.evals import (
     EvalReport,
     EvalResult,
     compare,
+    emit_score,
     evaluate,
     tool_calls,
     tool_trajectory,
+    upload_dataset,
 )
 from fluffy_potato_curriculum.common.fake_model import (
     FakeModel,
@@ -131,3 +134,108 @@ def test_compare_flags_a_fix() -> None:
     before = _report(lambda _case: _runaway_run())  # fails
     after = _report(lambda _case: _chaining_run())  # passes
     assert compare(before, after).fixes == [("atlantis", "no_runaway")]
+
+
+# --- the Langfuse bridge ----------------------------------------------------
+
+
+class _FakeLangfuse:
+    """An offline recorder that structurally satisfies ``LangfuseClient``.
+
+    Records what the bridge would send to Langfuse so the tests can assert the
+    mapping without a live instance (same offline stance as the rest of common/).
+    """
+
+    def __init__(self) -> None:
+        self.datasets: list[dict[str, Any]] = []
+        self.items: list[dict[str, Any]] = []
+        self.scores: list[dict[str, Any]] = []
+
+    def create_dataset(self, *, name: str, description: str | None = None) -> None:
+        self.datasets.append({"name": name, "description": description})
+
+    def create_dataset_item(
+        self, *, dataset_name: str, id: str, input: Any, expected_output: Any
+    ) -> None:
+        self.items.append(
+            {
+                "dataset_name": dataset_name,
+                "id": id,
+                "input": input,
+                "expected_output": expected_output,
+            }
+        )
+
+    def create_score(
+        self,
+        *,
+        name: str,
+        value: float | str,
+        trace_id: str,
+        comment: str | None = None,
+        data_type: str | None = None,
+    ) -> None:
+        self.scores.append(
+            {
+                "name": name,
+                "value": value,
+                "trace_id": trace_id,
+                "comment": comment,
+                "data_type": data_type,
+            }
+        )
+
+
+def test_upload_dataset_creates_the_named_dataset() -> None:
+    client = _FakeLangfuse()
+    upload_dataset(client, [EvalCase(id="a")], name="l13", description="first pass")
+    assert client.datasets == [{"name": "l13", "description": "first pass"}]
+
+
+def test_upload_dataset_maps_each_case_to_a_dataset_item() -> None:
+    client = _FakeLangfuse()
+    cases = [
+        EvalCase(id="a", inputs={"task": "q1"}, reference_outputs={"answer": "1"}),
+        EvalCase(id="b", inputs={"task": "q2"}, reference_outputs={"expected_tools": ["lookup"]}),
+    ]
+    upload_dataset(client, cases, name="l13")
+    assert client.items == [
+        {
+            "dataset_name": "l13",
+            "id": "a",
+            "input": {"task": "q1"},
+            "expected_output": {"answer": "1"},
+        },
+        {
+            "dataset_name": "l13",
+            "id": "b",
+            "input": {"task": "q2"},
+            "expected_output": {"expected_tools": ["lookup"]},
+        },
+    ]
+
+
+def test_emit_score_maps_result_fields_onto_a_langfuse_score() -> None:
+    client = _FakeLangfuse()
+    emit_score(client, EvalResult(key="no_runaway", score=True, comment="ok"), trace_id="trace-9")
+    assert client.scores == [
+        {
+            "name": "no_runaway",
+            "value": True,
+            "trace_id": "trace-9",
+            "comment": "ok",
+            "data_type": "BOOLEAN",
+        }
+    ]
+
+
+@pytest.mark.parametrize(
+    ("score", "data_type"),
+    [(True, "BOOLEAN"), (False, "BOOLEAN"), (1.0, "NUMERIC"), (0.5, "NUMERIC")],
+)
+def test_emit_score_tags_bool_as_boolean_and_number_as_numeric(
+    score: float | bool, data_type: str
+) -> None:
+    client = _FakeLangfuse()
+    emit_score(client, EvalResult(key="k", score=score), trace_id="t1")
+    assert client.scores[0]["data_type"] == data_type

@@ -19,7 +19,11 @@ it (see the reuse rule in [.claude/rules/python-style.md](../../../.claude/rules
   handle, or the offline `FakeModel`. That is what makes the loop **provider-agnostic**.
 - `tracing.py` — `TraceEvent`, an OpenTelemetry-shaped span model; the L12 teaching artifact,
   reused by L13 and the LangGraph lessons and exportable to Langfuse.
-- `evals.py` — a tiny eval harness (`EvalCase`, `Scorer`, `evaluate`); the L13 artifact.
+- `evals.py` — the L13 eval seam: the `EvalCase` / `Scorer` / `EvalResult` vocabulary, a
+  ~15-line hand-rolled `evaluate()`/`compare()` kept as an under-the-hood *concept sketch*, and
+  the **Langfuse bridge** (`upload_dataset`, `emit_score`) that maps cases onto a Langfuse
+  Dataset and scorer verdicts onto Langfuse scores. L13 is Langfuse-forward — the real runner is
+  a Langfuse Experiment launched from the notebooks, not `evaluate()`.
 - `tools.py` — the shared, deterministic tools the loop dispatches (calculator, lookup, etc.).
 - `fake_model.py` — a scripted, offline stand-in for a LangChain chat model (implements
   `.bind_tools()` + `.invoke()` returning scripted `AIMessage`s) so reading demos and labs run with
