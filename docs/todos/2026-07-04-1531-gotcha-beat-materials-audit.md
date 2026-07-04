@@ -153,10 +153,40 @@ Roadmap beat lives in `docs/origin/lesson_roadmaps/<L>/demos_or_activities.md`.
       "Where you land" that consolidates the three (the cures already exist verbatim in the sections above —
       this is a pull-together, not new teaching). No new fixture needed. Sits near the *already-covered* end
       of the carry-over order, just above L07.
-- [ ] **L12 — tracing** (coda, names 4). Assets: `L1202/L1204_lecture.ipynb`, `L1206_lecture.md`,
-      `L1203/L1205_lab_*`, `PROCTOR_NOTES.md` (already has a gotcha hit). **Finding:**
-- [ ] **L13 — evaluation** (coda, names 5). Assets: `L1302/L1304/L1306_lecture.ipynb`,
-      `L1307_lecture.md`, `L1303/L1305_lab_*`. Verify the L12-traces cross-ref lands. **Finding:**
+- [x] **L12 — tracing** (coda, names 4). Assets: `L1202/L1204_lecture.ipynb`, `L1206_lecture.md`,
+      `L1203/L1205_lab_*`, `PROCTOR_NOTES.md` (already has a gotcha hit).
+      **Finding: `add-coda` → end of `L1204_lecture.ipynb` (instrumentation notebook).** All four
+      anti-patterns are *shown* directly: #1 tracing-too-little = `L1202` §2 "From `print()` to a structured
+      record"; #2 tracing-too-much = `L1204` §2.2 "the field set, and what is left out" + §3.3 "Signal vs
+      noise"; #3 not-tracing-tool-args = `L1202` §4.2 "Wrong arguments — the call succeeded but on the
+      wrong input"; #4 reading-the-summary-not-the-trace = `L1202` §3.2 "the `RunResult` summary is
+      *derived from* the trace" + §4.4 premature-`natural`-stop. The **"reading spans out of order" →
+      "reading the summary, not the trace" reframe lands** (§3.2/§4.4). **The flagged PROCTOR "gotcha
+      hit" is a false lead for naming:** PROCTOR's "COMMON GOTCHAS" are *lab-mechanics* gotchas
+      (unhashable-`dict`, reading `termination` off the wrong span), **not** the four tracing anti-patterns.
+      **Gap:** no student-facing cell *names/consolidates* the four as a portable set. **Action:** add a coda
+      to the end of `L1204_lecture.ipynb` (tightest fit — #1/#2 are Demo 4's field-set skill, #3/#4 the
+      reading skills just practiced) naming the four + cures + point-backs; **preserve the L13 handoff line**
+      (#3/#4 = L13's first eval cases). Note `L1206_lecture.md` §6 ("what does NOT go in the trace:
+      extracts") already partially covers #2's boundary. No new fixture needed.
+- [x] **L13 — evaluation** (coda, names 5). Assets: `L1302/L1304/L1306_lecture.ipynb`,
+      `L1307_lecture.md`, `L1303/L1305_lab_*`. Verify the L12-traces cross-ref lands.
+      **Finding: `add-coda` → `L1307_lecture.md` (the closing "carry forward" lecture).**
+      **L12-traces cross-ref: CONFIRMED, robustly** — explicit `L12` refs in `L1302`/`L1304`/`L1306`/
+      `L1307`/intro/PROCTOR, and `L1302` §3 "From a trace to a regression case" (§3.1 "the runaway
+      becomes a trajectory check") grounds cases in L12's real failures (runaway/wrong-args/premature),
+      exactly anchoring anti-patterns #1 & #4. All five *shown* across Demos 1–4: #1 happy-path-only =
+      `L1302` §3 (cases from traces, not imagination); #2 sample-too-small = `L1304` §2 "One run can be
+      luck" + §3 "Measure rates, not verdicts"; #3 over-trusting-judge = `L1306` §3 "scorer cost/judgment
+      spectrum"; #4 not-targeting-trace-failures = `L1302` §3; #5 regressions-slip-through = `L1304` §4
+      (Langfuse A/B experiments) + `L1307` §1.2 "Why a ratchet, not a one-time test". **Bonus:** the
+      cross-cutting **brittle/over-tight-scorer** beat is well covered — `L1302` `reworded_case`
+      "brittleness" fixture + "loosest check that still catches the bug", a dedicated `L1303` lab **Problem 4
+      "loosen a brittle check"**, and `L1306` §3's exact-match/rewording trade-off. **Gap:** no consolidated
+      5-item naming recap (`L1307` closes with the ratchet rule + forward pointers, not an anti-pattern list).
+      **Action:** add a "five eval anti-patterns" recap section to `L1307_lecture.md` (name + cure + point-back;
+      fold in the brittle-scorer as the cross-cutting one). No new fixture needed. Near the *already-covered*
+      end of the carry-over order.
 - [ ] **L22 — skills** (coda, names 4). Assets: `L2202/L2205_lecture.md`,
       `L2203_lecture.ipynb`, `L2204/L2206_lab_*`. `L2205_lecture.md` already has anti-pattern
       content — check overlap with the promoted beat + the L23 handoff. **Finding:**
