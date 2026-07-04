@@ -2,7 +2,7 @@
 
 Covers both labs in this lesson: **L1203** (read traces, locate failures) and **L1205**
 (instrument and compare traces). Both labs are **pure Python, offline — no API key needed**;
-they drive the shared `agent_loop.run` with a scripted `FakeModel`, so every trace is
+they drive the shared `agent_graph.run` with a scripted `FakeModel`, so every trace is
 deterministic. If a student's trace looks different from the solution, suspect an edited setup
 cell, not "the model did something else" — there is no live model here.
 
@@ -19,7 +19,7 @@ produces is a deliverable and belongs in a **database or S3**. One line to leave
 
 General unblockers that apply across the lesson:
 
-- The shared code lives in `fluffy_potato_curriculum.common` (`agent_loop`, `tools`, `tracing`,
+- The shared code lives in `fluffy_potato_curriculum.common` (`agent_graph`, `tools`, `tracing`,
   `fake_model`). If imports fail, the student is likely running a stale kernel or the wrong venv —
   `Restart Kernel` and confirm they launched with `uv run jupyter lab`.
 - Remind students of the span vocabulary: `trace[0]` is the `chain` (run summary) span; each model
@@ -125,7 +125,7 @@ signal and which would be noise, and why one run can't prove a fix.
 
 - COMMON GOTCHAS: Students label the **token delta** as "signal." On its own it's noise — the
   meaningful change is `termination: max_steps → natural` (the runaway was fixed). The deeper point
-  they often miss: because the loop is non-deterministic, a *single* A-vs-B pair can't prove the
+  they often miss: because the graph is non-deterministic, a *single* A-vs-B pair can't prove the
   prompt edit caused the fix — you'd need several runs (the seed of L13's eval set).
 - UNBLOCKERS: Ask two questions: "Which difference would a user actually feel?" (the runaway) and
   "If you re-ran B five times, are you sure it always terminates naturally?" (you're not — hence
