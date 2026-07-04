@@ -1,4 +1,4 @@
-# L10: Teacher-led demos — Hand-rolled agent loop
+# L10: Teacher-led demos — Cyclic graphs: the ReAct agent loop
 
 > Sibling docs: [objectives.md](objectives.md) (what the lesson aims for), parent design [CURRICULUM_PRD.md](../../CURRICULUM_PRD.md).
 >
@@ -14,164 +14,202 @@ Each demo is a self-contained block with:
 - **What to highlight** — the moment(s) where the teacher should slow down and call out the takeaway out loud.
 - **If the demo misbehaves** — graceful fallback for when the model surprises you (because it will).
 
-The demos are ordered to match the four learning objectives from [objectives.md](objectives.md). Demo 1 builds the loop; Demo 2 stresses termination; Demo 3 stresses failure handling; Demo 4 contrasts hand-rolled vs. framework. They build on each other — Demos 2 and 3 deliberately reuse Demo 1's loop so students see it stretched and broken, not replaced. Run them in order on first delivery.
+The demos are ordered to match the four learning objectives from [objectives.md](objectives.md). Demo 1 wires the graph node by node; Demo 2 stresses termination; Demo 3 stresses failure handling; Demo 4 shows the graph *is* the loop and previews the prebuilt. They build on each other — Demos 2 and 3 deliberately reuse Demo 1's compiled graph so students see it stretched and broken, not replaced. Run them in order on first delivery.
 
 ## Pre-flight (once, at the top of the lesson)
 
 The teacher should have, before the first demo starts:
 
-- A working REPL or notebook with the project's LangChain chat-model setup (per the project's `uv` env), and a known-good single-tool round-trip from L07 in scrollback as a warm-up reference.
-- Two pre-defined inline Python tools that will be reused across all demos:
-  - `calculator(expression: str) -> str` — evaluates a small arithmetic expression. Cheap, deterministic, easy to reason about.
-  - `lookup(key: str) -> str` — returns a value from a tiny in-memory dict (e.g. mapping product names to prices, or city names to populations). Has a couple of keys present and a couple deliberately missing, so "key not found" is reachable.
+- A working notebook with the project's LangChain chat-model setup (per the project's `uv` env), LangGraph imported (`from langgraph.graph import StateGraph, END`; `from langgraph.prebuilt import ToolNode`; `from langgraph.graph.message import add_messages`), and an L05 conditional-edge graph in scrollback as a warm-up reference. The agent is "that, but the edge points back."
+- Two pre-defined inline LangChain tools reused across all demos:
+  - `calculator(expression: str) -> str` — evaluates a small arithmetic expression. Cheap, deterministic.
+  - `lookup(key: str) -> str` — returns a value from a tiny in-memory dict (e.g. city → population). A couple of keys present, a couple deliberately missing, so "key not found" is reachable.
 - A third tool that will *fail on demand*, used only in Demo 3:
-  - `flaky_fetch(url: str) -> str` — has a flag the teacher flips to make it raise an exception, return a structured error, or return malformed output. <!-- *NEED INPUT*: confirm whether this is implemented as a single tool with a global flag, three distinct tools, or a tool whose behavior depends on the `url` argument. Recommendation: one tool keyed on the URL — `https://ok` returns a value, `https://error` returns a structured error, `https://crash` raises, `https://garbage` returns malformed JSON. Keeps the demo prompt natural. -->
-- A loop function `agent_loop.run(...)` that the teacher will *write live* in Demo 1 and *reuse unchanged* through Demos 2 and 3. Keep a "completed" version in a sibling file the teacher can paste in if live-coding falls behind. <!-- *NEED INPUT*: confirm naming with [objectives.md](objectives.md) open question on `agent_loop.run` API shape. Same name should be used in lectures, labs, and L12. -->
-- A small wrapper that prints, after each model call: iteration number, tool calls requested, tool results returned, cumulative input/output tokens, and wall-clock latency. This is the closest thing to a "trace" the lesson exposes; L12 replaces it with something structured. Foreshadow that.
-- A second model configured for Demo 4's framework comparison. <!-- *NEED INPUT*: confirm which Claude model anchors L10's demos — the loop is model-agnostic but chaining depth varies. Mirrors the open question in [objectives.md](objectives.md). -->
+  - `flaky_fetch(url: str) -> str` — one tool keyed on the URL: `https://ok` returns a value, `https://error` returns a structured error, `https://crash` raises an exception, `https://garbage` returns malformed output. Keeps the demo prompt natural.
+- A small `build_agent(model, tools, *, handle_tool_errors=True)` helper that the teacher will *write live* in Demo 1 (the agent node, the `route` function, the `StateGraph` wiring) and *reuse unchanged* through Demos 2 and 3. Keep a "completed" version in a sibling cell the teacher can paste if live-coding falls behind.
+- A `draw` of the compiled graph (`graph.get_graph().draw_ascii()` or the Mermaid render) ready to project — the picture of agent → tools → agent is the demo's spine.
+- After each `invoke`, a tiny helper that pretty-prints the returned `messages` list: role, `.tool_calls` (name + args), and `ToolMessage` content, so the turn-by-turn cycle is legible. This turn-by-turn readout is the closest thing to a "trace" the lesson exposes; L12 replaces it with something structured. Foreshadow that.
 
-> Why pre-defined tools: the lesson is about the *loop*, not about tool design. L08 already covered tool design. Re-litigating tool schemas mid-demo eats time and dilutes the message. Spend tool-design time only on `flaky_fetch` (Demo 3), where the failure modes *are* the point.
+> Why pre-defined tools: the lesson is about the *graph/cycle*, not about tool design. L08 already covered tool design. Re-litigating tool schemas mid-demo eats time and dilutes the message. Spend tool-design time only on `flaky_fetch` (Demo 3), where the failure modes *are* the point.
 
-## Demo 1 — The loop made visible (Objective 1)
+## Demo 1 — The agent graph, wired node by node (Objective 1)
 
-**Goal:** build a model→tool→model loop from scratch in front of the class. Land the framing from [objectives.md](objectives.md): *"an agent is a loop, not a model."* Show the message-history invariant in practice.
+**Goal:** build the ReAct agent as a `StateGraph` in front of the class. Land the framing from [objectives.md](objectives.md): *"an agent is a graph with a cycle."* Show the back-edge as the one new primitive over L04/L05.
 
 **Pre-flight:**
 
-- An empty `agent_loop.py` (or notebook cell) the teacher will fill in live.
+- An empty cell for `build_agent(...)`.
 - The `calculator` and `lookup` tools defined and importable.
-- A starter task on the slide: *"What is the population of the city whose name is the answer to 17 squared minus 1?"* — chosen because it forces (1) a calculator call, then (2) a lookup using the calculator's result, then (3) a final assistant answer. <!-- *NEED INPUT*: confirm the lookup table contains a "288"-keyed entry that produces a sensible city, or swap the puzzle. The point is two sequential tool calls plus a natural-termination model message — pick any task that produces that shape. -->
+- A starter task on the slide: *"What is the population of the city whose name is the answer to 17 squared minus 1?"* — chosen because it forces (1) a calculator call, then (2) a lookup using the calculator's result, then (3) a final assistant answer. Confirm the lookup table has an entry keyed to the calculator's result, or swap the puzzle; the point is two sequential tool calls plus a natural-termination model message.
 
 **Live script:**
 
-1. Sketch the loop on the whiteboard before typing: *`bind_tools`, then invoke → reply's `.tool_calls` non-empty? run each, append a `ToolMessage` per call, loop. Empty (text only)? return it.* Three lines of pseudocode.
-2. Live-code the loop in Python. Write the message list, `model.bind_tools(...)`, the `.invoke(messages)` call, the `.tool_calls` check, the tool dispatch, and the append-`ToolMessage` step. **Do not add an iteration cap yet.** That's Demo 2's punchline.
-3. Run the loop on the starter task. Walk through the printed iterations: reply's `.tool_calls` has `calculator`, tool runs, `ToolMessage` appended, next `.invoke`, reply's `.tool_calls` has `lookup`, tool runs, `ToolMessage` appended, next `.invoke`, reply is an `AIMessage` with empty `.tool_calls` — natural termination.
-4. Re-run with a task that produces *two entries in `.tool_calls` in a single reply*. <!-- *NEED INPUT*: confirm a task that reliably produces parallel tool calls on the target model — e.g. *"Look up the populations of Tokyo and Lagos and tell me which is larger."* If the chosen model splits these into sequential calls, swap to a task where the calls are clearly independent. --> Show the loop executing both tools and appending one `ToolMessage` per call before the next `.invoke`.
+1. Draw the graph on the whiteboard before typing: three boxes — `agent`, `tools`, `END` — with a **conditional edge** out of `agent` (`route`: has `.tool_calls`? → `tools` : → `END`) and a plain **back-edge** `tools → agent`. Say out loud: "L04 gave us nodes and edges; L05 gave us the conditional edge; the only new thing is *this edge points backward*."
+2. Live-code it:
+   - The **state**: a `TypedDict` with `messages: Annotated[list, add_messages]`. Pause on `add_messages` — "this reducer *appends*; in L04 returning a key overwrote it. That's why the conversation grows every turn."
+   - The **agent node**: `def agent_node(state): return {"messages": [model.bind_tools(tools).invoke(state["messages"])]}`.
+   - The **route function**: return `"tools"` if the last message has `.tool_calls`, else `END`.
+   - The **wiring**: `StateGraph(State)`, `add_node("agent", ...)`, `add_node("tools", ToolNode(tools))`, `set_entry_point("agent")`, `add_conditional_edges("agent", route, {"tools": "tools", END: END})`, `add_edge("tools", "agent")`, `compile()`. **Do not set a `recursion_limit` yet** — that's Demo 2's punchline.
+3. Project the compiled graph's diagram. Point at the back-edge. "That is the agent."
+4. `invoke` on the starter task. Walk the returned `messages` with the pretty-printer: `AIMessage`(calculator) → `ToolMessage` → `AIMessage`(lookup) → `ToolMessage` → `AIMessage`(final text). Name each time control crossed the back-edge.
 
 **What to highlight:**
 
-- The message-history invariant. After appending an assistant `AIMessage` with `.tool_calls`, you must append a `ToolMessage` (paired by `tool_call_id`) for *every* entry, in order, before the next `.invoke`. Show what happens if you skip one — an unanswered `tool_call` leaves the conversation malformed and the next request is rejected. This is the lesson's most-bug-prone moment in real code — call it out by name.
-- The model is *not* aware of the loop. From its perspective, every call is one round-trip. The loop lives entirely in the surrounding Python.
-- The same loop will run MCP-exposed tools from L09 unchanged — the dispatch function is the only thing that differs.
+- The **back-edge** is the whole idea. Remove it (make `tools` go to `END`) and you're back to an L04 pipeline that can't react to its tools.
+- **`ToolNode` maintains the message-history invariant for you.** After an `AIMessage` with `.tool_calls`, every call must be answered by a matching `ToolMessage` (by `tool_call_id`) before the next model call. In a hand loop that's the #1 bug; the prebuilt node does it. Say what the invariant *is* so they can debug it later — don't let it stay hidden.
+- The model is *not* aware of the graph. From its perspective every agent-node visit is one round-trip. The loop lives entirely in the edges.
+- The same graph will run MCP-exposed tools from L09 unchanged — only the tool objects handed to `ToolNode` differ.
 
 **If the demo misbehaves:**
 
-- If live-coding falls behind, paste the prepared completed version and walk through it line by line. Don't sacrifice the runs — the runs are where the loop becomes concrete.
-- If the model answers from prior knowledge without calling the tools, tighten the system prompt (*"You may only answer using the tools provided"*) and rerun.
-- If the reply carries both `.tool_calls` and final-answer text in the same `AIMessage`, that's a real protocol nuance worth a brief aside — the loop should still execute the tool *and* keep going; the text is interim narration.
+- If live-coding falls behind, paste the prepared `build_agent` and walk it line by line. Don't sacrifice the `invoke` runs — the runs are where the cycle becomes concrete.
+- If the model answers from prior knowledge without calling tools, tighten the system prompt (*"You may only answer using the tools provided"*) and rerun.
+- If a reply carries both `.tool_calls` and final text, that's a real protocol nuance — `route` still sends it to `tools` (there are calls to answer); the text is interim narration.
 
-## Demo 2 — Termination conditions, three ways (Objective 2)
+## Demo 2 — Termination: `route` to `END`, and the recursion limit (Objective 2)
 
-**Goal:** show natural termination, an iteration-cap rescue, and a runaway loop in the same demo. Land that *termination is a design decision* from [objectives.md](objectives.md), not a default.
+**Goal:** show natural termination, a `recursion_limit` rescue, and a runaway in the same demo. Land that *termination is a design decision* and *it's just a branch of the conditional edge.*
 
 **Pre-flight:**
 
-- The Demo 1 loop, plus a one-line addition of an `iteration_cap` parameter that defaults to a sensibly low number for the demo (e.g. 6).
-- A "looping" task designed to provoke the model into calling the same tool repeatedly. <!-- *NEED INPUT*: confirm a task that reliably produces a runaway — e.g. asking the model to "keep checking" a value via the lookup tool, or giving it a tool whose result is ambiguous so the model retries with variations. The exact prompt depends on the chosen model's behavior; dry-run before class. -->
-- A side-by-side panel ready: iteration number on the left, tool call args on the right. Helps the audience see "same call, again" land visually.
+- Demo 1's compiled graph, unchanged.
+- A "looping" task designed to provoke the model into calling the same tool repeatedly (e.g. asking it to "keep re-checking" a value via `lookup`, or a tool whose result is ambiguous so the model retries). Dry-run before class; behavior is model-dependent.
+- A side-by-side panel ready: turn number on the left, tool-call args on the right, so "same call, again" lands visually.
 
 **Live script:**
 
-1. Re-run Demo 1's starter task with `iteration_cap=20`. It naturally terminates in 3–4 iterations. Read out the termination cause: *"natural — reply's `.tool_calls` was empty."*
-2. Run the looping task with `iteration_cap=20`. Watch the model call the same tool 8+ times. Cap fires. Read out the termination cause: *"iteration cap hit — non-natural termination."*
-3. Show the *same* looping task with `iteration_cap=3`. Cap fires faster. Discuss: the cap caught the bug, but smaller caps cost less when things go wrong.
-4. Sketch (don't implement live) two more termination conditions:
-   - **Token budget:** sum input+output tokens across iterations; halt if over budget. Show the printed token counts from pre-flight that already make this trivial to add.
-   - **Loop detection:** keep a small history of `(tool_name, json.dumps(args))` tuples; halt if the last 3 are identical.
+1. Re-run Demo 1's starter task. It terminates naturally in 2–3 turns. Read the cause out loud: *"`route` returned `END` — the last reply had empty `.tool_calls`."* Emphasize: that is the *only* condition meaning "the model thinks it's done."
+2. Run the looping task with a generous `graph.invoke(task, {"recursion_limit": 25})`. Watch the model call the same tool 8+ times, then a `GraphRecursionError` fires. *"That's the graph's iteration cap — non-natural termination."*
+3. Re-run the looping task with `{"recursion_limit": 6}`. It bails faster. Discuss: the cap caught the runaway; smaller caps cost less when things go wrong.
+4. Sketch (don't fully implement) two more conditions as **custom routing** — reinforcing "termination is just another branch of `route`":
+   - **Token budget:** carry a running token count in state; `route` returns `END` if over budget.
+   - **Loop detection:** carry the last few `(tool_name, args)` tuples in state; `route` returns `END` if the last 3 are identical.
 
 **What to highlight:**
 
-- The iteration cap *is* the safety net. Hitting it is always a signal worth investigating — either the task is genuinely too hard (need a higher cap) or the agent is misbehaving (need to fix the prompt, the tools, or the model). Either way, treat cap-hits as alerts, not noise.
-- "Natural termination" is one specific signal — the reply is an `AIMessage` with empty `.tool_calls` (text only). Make sure students hear that phrase tied to *empty `.tool_calls` in the reply.* That's the only condition that means "the model thinks it's done."
-- A loop with no cap is not "minimal" — it's broken. Even a hand-rolled toy needs a cap.
+- `recursion_limit` *is* the safety net, and it lives on `invoke`, not in the graph shape. Hitting it (a `GraphRecursionError`) is always a signal worth investigating — the task is too hard (raise the cap) or the agent is misbehaving (fix the prompt/tools/model).
+- **Natural termination = `route` returns `END` because `.tool_calls` was empty.** Tie that phrase to the routing function students wrote in Demo 1. Termination isn't a separate mechanism; it's the `END` branch of an L05 conditional edge.
+- A graph with no cap is not "minimal" — it's a runaway waiting to happen. Even a toy agent gets a `recursion_limit`.
 
 **If the demo misbehaves:**
 
-- If the chosen model refuses to loop on the looping task (e.g. it correctly gives up after one or two retries), force the issue with a tool whose result is deliberately unhelpful (`lookup` returning `"unknown — try again"`). The point is to show the cap *catching* something, not to make the model look bad.
-- If the natural-termination run actually hits the cap on the day (model keeps wanting to call tools), raise the cap and re-run. Don't let the demo accidentally teach "natural termination is rare."
+- If the model refuses to loop (gives up after a retry or two), force it with a tool whose result is deliberately unhelpful (`lookup` returning `"unknown — try again"`). The point is to show the cap *catching* something.
+- If the natural-termination run hits the cap on the day, raise `recursion_limit` and rerun. Don't accidentally teach "natural termination is rare."
 
-## Demo 3 — Tool failure as a message, not an exception (Objective 3)
+## Demo 3 — Tool failure as a message: `handle_tool_errors` (Objective 3)
 
-**Goal:** show all three failure modes from [objectives.md](objectives.md) flowing back through the loop as `ToolMessage`s, and watch the model recover. Land that *the loop's job is mostly translating exceptions into well-formed messages.*
+**Goal:** show all three failure modes flowing back through the back-edge as `ToolMessage`s, and watch the model recover. Land that *the graph's job is mostly translating exceptions into well-formed messages.*
 
 **Pre-flight:**
 
-- The Demo 1 loop with one addition: a `try/except` wrapper around the tool dispatch that converts any uncaught exception to a `ToolMessage(content=repr(exc), tool_call_id=..., status="error")`. **Do not write this addition yet** — it's the live-code beat.
+- Demo 1's graph, built once with `ToolNode(tools, handle_tool_errors=False)` and once with `handle_tool_errors=True` — the toggle is the live beat.
 - The `flaky_fetch` tool with the four URL behaviors from pre-flight.
-- A small task on the slide: *"Fetch the value at https://ok and tell me what it is. If that fails, try https://crash, then https://error, then give up gracefully."* — chosen so the model walks through every failure mode in one run, with explicit recovery instructions in the prompt so the demo doesn't depend on the model improvising. <!-- *NEED INPUT*: confirm the prompt is explicit enough that the model will walk all four URLs without deciding to abort early. Adjust the system prompt if the model gives up after the first failure. -->
+- A small task on the slide: *"Fetch the value at https://ok. Then try https://crash, then https://error, then give up gracefully."* — chosen so the model walks every failure mode in one run, with explicit recovery instructions so the demo doesn't depend on the model improvising.
 
 **Live script:**
 
-1. Run the loop on the failure task *without* the `try/except` wrapper. The first call to `https://crash` raises; the loop crashes. Walk through the traceback. Punchline: *the agent died because one tool had a bug.*
-2. Live-add the `try/except` → `ToolMessage(content=repr(exc), tool_call_id=..., status="error")` conversion. Five lines.
-3. Re-run the same task. Watch the model:
-   - call `https://ok` → success → continue.
-   - call `https://crash` → exception → loop converts to a `ToolMessage(status="error")` → model receives the error, sees it can't recover that URL, tries the next.
-   - call `https://error` → tool returns a structured error result (`{"error": "..."}`) as its `ToolMessage` content — show that this case needs *no* loop changes, because the tool followed the L08 pattern of returning errors as data.
-   - call `https://garbage` → tool returns malformed output — show what the model does with it. <!-- *NEED INPUT*: depending on the model's behavior, this may be the place to introduce a *minimum* output-shape check in the loop (e.g. ensure the result is a string), or to leave it for the lab. Pick one based on time budget. -->
-   - emit a final `AIMessage` (empty `.tool_calls`) acknowledging the failures and giving up gracefully — natural termination.
-4. Quick aside: show what *not* to do. Re-run with the exception's full traceback as the `ToolMessage` content (instead of a short `repr(exc)`). Note token cost, irrelevance to the model, and the stack-trace leak concern.
+1. Run the task with `handle_tool_errors=False`. The call to `https://crash` raises inside `ToolNode`; the exception escapes and the graph `invoke` crashes. Walk the traceback. Punchline: *one buggy tool killed the whole agent.*
+2. Rebuild the graph with `ToolNode(tools, handle_tool_errors=True)`. One argument.
+3. Re-run the same task. Read the returned `messages` and watch the model:
+   - `https://ok` → success → back-edge → continue.
+   - `https://crash` → exception → `ToolNode` appends a `ToolMessage(status="error")` → back-edge → model sees the error, can't recover that URL, moves on.
+   - `https://error` → tool *returns* a structured error result as its `ToolMessage` content — point out this case needed *no* graph change, because the tool followed the L08 "errors as data" pattern.
+   - `https://garbage` → malformed output — show what the model does with it, and note where a minimum output-shape check could live.
+   - final `AIMessage` (empty `.tool_calls`) acknowledging the failures — natural termination.
+4. Quick aside — what *not* to do: a custom error handler that dumps the full traceback into the `ToolMessage`. Note token cost, irrelevance to the model, and the stack-trace leak.
 
 **What to highlight:**
 
-- The default move when a tool fails is to convert the failure into a `ToolMessage` (`status="error"`) and hand it back to the model. The model is often the best component to decide whether to retry, swap tools, or give up.
-- Loop-level failure handling and tool-level failure handling are *different layers*. L08 taught the tool author what to *return* when something goes wrong; L10 teaches the loop what to do when the tool *can't even return* (raise, malformed, etc.).
-- Don't dump tracebacks at the model. A short, descriptive error string is better signal and cheaper.
-- Retries are a model-side decision in this design. The loop doesn't auto-retry. If you wanted auto-retry, you'd add it deliberately, with a budget, and you'd probably regret it on the first idempotency-violating tool.
+- `handle_tool_errors=True` is the default move: convert the raised exception into a `ToolMessage(status="error")` and let the **back-edge** hand it to the model, which is often the best component to decide retry vs. swap vs. give up.
+- Graph-level and tool-level failure handling are *different layers*. L08 taught the tool author what to *return* on failure; L10 teaches the graph what to do when the tool *can't even return* (raises, malformed).
+- Don't dump tracebacks at the model. A short descriptive error string is better signal and cheaper.
+- Retries are a model-side decision here. `ToolNode` doesn't auto-retry. Auto-retry is a deliberate add — with a budget — and it will bite you on the first non-idempotent tool.
 
 **If the demo misbehaves:**
 
-- If the model immediately gives up after the first failure instead of trying the next URL, strengthen the prompt's recovery instructions and re-run. The point is to show the loop *enabling* recovery, even if today's model is being conservative.
-- If `https://garbage` produces an output the model handles gracefully, mention that and skip the malformed-output beat. Don't manufacture a failure that doesn't naturally occur.
+- If the model gives up after the first failure instead of trying the next URL, strengthen the prompt's recovery instructions and rerun. The point is the graph *enabling* recovery.
+- If `https://garbage` is handled gracefully, mention it and skip the malformed beat. Don't manufacture a failure that doesn't occur.
 
-## Demo 4 — Hand-rolled vs. framework: a one-screen contrast (Objective 4)
+## Demo 4 — The graph *is* the loop; the prebuilt is one line (Objective 4)
 
-**Goal:** show the same task running on the hand-rolled loop and on a minimal framework loop side by side. Land that *every framework students will see (L11, L18) is a fancier version of this loop.*
+**Goal:** show that the hand-wired graph and a bare `while` loop are the same skeleton, then preview that L11's `create_agent` builds this exact graph in a line. Land that *every framework students will see (L11, L18) is this graph, packaged.*
 
 **Pre-flight:**
 
-- The Demo 1+2+3 loop, now with iteration cap and exception-to-`ToolMessage(status="error")` conversion built in (~50 lines of Python).
-- A LangGraph "minimum viable" agent doing the same thing, pre-written. <!-- *NEED INPUT*: confirm whether L10 should preview LangGraph here at all, or stay strictly framework-free and defer the comparison to L14's opening. Recommendation: a 60-second preview here is high-value because it makes "hand-rolled" feel like a real choice, not a default. But the *lecture* should not teach LangGraph mechanics — that's L14's job. -->
-- The starter task from Demo 1, runnable against both implementations.
+- Demo 1–3's `build_agent` graph (agent node + `ToolNode` + conditional back-edge, ~25 lines of wiring).
+- A tiny plain-Python `while` loop doing the same model→tool→model round (pre-written) — the "before graphs" version, for contrast only.
+- `create_agent` (or the prebuilt `create_react_agent`) pre-imported for a *look, don't teach* one-liner. **Do not teach the prebuilt's mechanics here — that's L11's job.** A 30-second "this one line builds the graph you just wired" is the whole beat.
+- The starter task from Demo 1, runnable against all three.
 
 **Live script:**
 
-1. Show the hand-rolled loop side by side with the framework version. ~50 lines vs. however-many. Don't read the framework code line by line — just point out the abstractions (graph, nodes, state object).
-2. Run the *same task* on both. Identical final answer (or close enough). Identical tool-call sequence. Different code shape.
-3. Discuss: when does the framework's overhead pay off? Three specific cases — graph-shaped control flow (parallel branches, conditional routing), built-in observability/tracing, persistent state across runs.
-4. Discuss: when does it *not* pay off? Three specific cases — small surface area (this lesson's loop), one-off scripts, debugging a behavior the framework abstracts.
-5. Foreshadow: L12 will instrument *this exact hand-rolled loop* with structured tracing. L14 will reframe *this exact loop* as a LangGraph graph. The loop itself doesn't change — the wrapper around it does.
+1. Put three things on one screen: the `while` loop, the hand-wired graph, and `agent = create_agent(model, tools)`. Map them: the loop body's "call model" = the agent node; "run tools" = the tool node; "more tool calls?" = the conditional back-edge.
+2. Run the *same task* on the hand-wired graph and on `create_agent`. Same final answer, same tool-call sequence. Different amount of code typed.
+3. Discuss what the graph form buys over the bare loop: a routing seam you can extend, a prebuilt `ToolNode` that owns the invariant, and a structure L11 can hand you prebuilt and L12 can instrument.
+4. Foreshadow: L11 reveals `create_agent` as *this exact graph, packaged*; L12 instruments *this exact graph* node by node with structured traces; L18 nests it. The graph shape is the constant.
 
 **What to highlight:**
 
-- The framework decision is a real engineering choice with real trade-offs. Students who only ever see frameworks tend to over-reach for them; students who only ever hand-roll tend to under-reach. Both extremes are bugs.
-- Tracing (L12) is the most common reason teams *do* reach for a framework — and it's exactly what the next lesson will start adding to the hand-rolled version. Set the expectation now.
+- The graph didn't add behavior — it drew the control flow as data. That's what makes it packageable (L11) and inspectable (L12).
+- Building it by hand first is *on purpose*: when L11 shows the one-liner, students see "the thing I already built," not a black box.
 
 **If the demo misbehaves:**
 
-- If the LangGraph install or the framework demo flakes on the day, skip the live run and walk through the *code shape* on the slide. The point is the contrast in shape, not a live race.
+- If `create_agent` / the prebuilt import flakes on the day, skip the live run and show the one line on the slide next to the wiring. The point is the shape match, not a live race.
 
 ## Optional bridge demo — toward tracing (L12)
 
-If time allows, run one final beat that previews L12: take the print-wrapper from pre-flight and replace one `print()` with a structured dict (`{"event": "tool_call", "iteration": i, "tool": name, "args": args}`) appended to a list. Show the list at the end of a run. That's the simplest possible trace.
+If time allows, run one final beat that previews L12: wrap the agent node so it appends a structured dict (`{"event": "model_call", "turn": i, "tool_calls": [...]}`) to a list on each visit. Show the list after a run. That's the simplest possible trace — one span per node.
 
-Don't teach trace analysis here — that's L12. Just show the *shape* of what's about to come, so students see the next lesson as a natural extension of this one rather than a new topic.
+Don't teach trace analysis here — that's L12. Just show the *shape* of what's coming, so students see the tracing lesson as a natural extension.
 
-<!-- *NEED INPUT*: include this bridge demo, or save it as the opener for L12? -->
+## Optional extension demos (stretch — only if the core four land with time to spare)
+
+Both are **optional** and tied to the stretch extensions in [objectives.md](objectives.md). Each is a small addition to Demo 1's compiled graph — one node, one edge — reinforcing that the graph is a surface you extend. Skip either freely.
+
+### Optional A — a dedicated `respond` node (self-contained)
+
+**Goal:** show that the terminal branch of `route` can point at *another node*, not just `END` — a direct reuse of the L05 routing skill.
+
+**Live script:**
+
+1. Take Demo 1's graph. Add a tiny `respond` node that shapes the final answer (e.g. strips interim narration, or wraps the reply in a fixed `"Final answer: …"` format).
+2. Re-point the routing map: `route` now returns `"respond"` instead of `END` when there are no tool calls; wire `add_conditional_edges("agent", route, {"tools": "tools", "respond": "respond"})` and `add_edge("respond", END)`.
+3. Re-run Demo 1's task. Same tool-call sequence; the difference is the last hop — `agent → respond → END` — and a cleaned-up final message.
+
+**What to highlight:** the cycle didn't change; you added a terminal node on the `END` branch. This is the same "structured final response" idea L11's `create_agent(response_format=...)` will formalize — you just wired it by hand.
+
+### Optional B — a `human_approval` / `interrupt` node (a preview of L17)
+
+**Goal:** show *where in the cycle* a human-approval pause goes, and *why an agent is the natural place to want one*. This is the course's first `interrupt` — frame it as a forward-reference, not a lesson.
+
+**Pre-flight:** a checkpointer (`from langgraph.checkpoint.memory import MemorySaver`), the graph compiled with `checkpointer=MemorySaver()`, and a `thread_id` config. Keep this pre-written; do not derive it live.
+
+**Live script:**
+
+1. Insert a `human_approval` node **between the agent's tool request and the tool run** — i.e. `route` sends tool-call replies to `human_approval` first, which calls `interrupt(...)` to surface the proposed tool calls, then edges to `tools`.
+2. `invoke` the graph; it **pauses** at `interrupt`. Show that the run halted with the proposed tool calls surfaced for a human.
+3. Resume with `graph.invoke(Command(resume="approved"), config)` and watch it continue into `tools` and back around the cycle.
+
+**What to highlight:**
+
+- The pause lives exactly where you'd want a human in the loop: *after* the model proposes an action, *before* it executes. That placement is only possible because the agent is a graph you can splice a node into.
+- **Say the boundary out loud:** "this needs a checkpointer and resume semantics — that's [L17](../L17/objectives.md)'s whole lesson. Today we're just seeing the *shape*." Do **not** teach thread IDs, checkpointer backends, or resume internals here.
+
+**If the demo misbehaves:** if the checkpointer/resume flakes on the day, skip the live run and show the graph diagram with the `human_approval` node spliced in — the placement is the point, not a live pause.
+
+> **Authoring note:** L17's roadmap is not yet written, so this is the course's first `interrupt` appearance. When L17 is authored it should back-reference this preview. Keep the two consistent.
 
 ## Pacing notes for the teacher
 
-- **Per-demo time:** Demo 1 is the long one (15–25 minutes including the live-code build). Demos 2 and 3 are 10–15 minutes each. Demo 4 is 8–12 minutes. Total: 45–75 minutes for the four demos plus the optional bridge. Fits a 90-minute block with discussion. <!-- *NEED INPUT*: confirm against the lesson-time budget once duration is pinned in [objectives.md](objectives.md)'s open questions. -->
-- **Live-coding budget:** Demo 1's loop is the only place to live-code. Demos 2–4 should reuse Demo 1's code with small additions; do *not* re-derive the loop in each demo.
-- **Variance budget:** the model's tool-call patterns are not deterministic. Budget at least one re-run per demo for tasks that depend on the model issuing specific tool calls.
-- **The audience watches, doesn't participate.** Resist the temptation to ask "what should the loop do here?" — that's a lab pattern, not a demo pattern. Hands-on practice is for the L10 labs.
+- **Per-demo time:** Demo 1 is the long one (15–25 minutes including the live wiring). Demos 2 and 3 are 10–15 minutes each. Demo 4 is 8–12 minutes. Total: 45–75 minutes for the four demos plus the optional bridge. Fits a 90-minute block with discussion.
+- **Live-coding budget:** Demo 1's `build_agent` is the only place to live-code. Demos 2–4 reuse it with small changes (a `recursion_limit`, an `handle_tool_errors` toggle); do *not* re-wire the graph in each demo.
+- **Variance budget:** the model's tool-call patterns are not deterministic. Budget at least one re-run per demo for tasks that depend on specific tool calls.
+- **The audience watches, doesn't participate.** Resist asking "what should `route` return here?" — that's a lab pattern. Hands-on wiring is for the L10 labs.
 
 ## Open authoring questions
 
-- <!-- *NEED INPUT*: which model class anchors the demos — see pre-flight. Mirrors the open question in [objectives.md](objectives.md). -->
-- <!-- *NEED INPUT*: are demos run in a Jupyter notebook the teacher projects, or a slide-embedded REPL, or a custom demo runner script? Affects how `agent_loop.run` is structured for live-code in Demo 1. -->
-- <!-- *NEED INPUT*: should Demo 4's LangGraph preview happen here, or be deferred entirely to L14? Recommendation in the demo above; final call is the author's. -->
-- <!-- *NEED INPUT*: should Demo 3 use one of L09's MCP-exposed tools as the failing tool, to reinforce "the loop runs both kinds"? Adds setup overhead; reinforces the L09 framing. Trade-off worth deciding. -->
+- <!-- *NEED INPUT*: which model class anchors the live demo notebook — the graph is model-agnostic but chaining depth varies. Course anchor is Sonnet 4.6; Haiku 4.5 chains more shallowly on the same task. -->
+- <!-- *NEED INPUT*: should Demo 4 use `langchain.agents.create_agent` or `langgraph.prebuilt.create_react_agent` for the one-liner preview? Match whichever the (concurrently-rewritten) L11 shallow-agents lesson lands on, so the "you already built this" bridge stays exact. -->
+- <!-- *NEED INPUT*: should Demo 3 use one of L09's MCP-exposed tools as the failing tool, to reinforce "the graph runs both kinds"? Adds setup overhead; reinforces the L09 framing. -->
 - <!-- *NEED INPUT*: a pointer/link to where the demo prompts and the `flaky_fetch` tool live as code (a `demos/` subdir? inline in a notebook?) — not yet decided. -->
-- <!-- *NEED INPUT*: are *parallel tool calls* (multiple `.tool_calls` entries in one assistant `AIMessage`) shown in Demo 1 as planned, or deferred to the lab? Mirrors the same open question in [objectives.md](objectives.md). -->

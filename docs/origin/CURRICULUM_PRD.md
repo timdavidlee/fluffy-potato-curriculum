@@ -49,13 +49,15 @@ LLM calls only (no tools yet). Only then does it return to **L06 chain-of-though
 and **L07 tool calling**. The through-line: *you wire the graph (L03–L05); the model
 drives the loop (from L10, the agent loop)* — deterministic developer-controlled
 branching is taught first, model-driven control comes later. Two consequences worth
-tracking: (a) the L03–L05 graph block currently carries the LangGraph framing inherited
-from the former workflows lesson, so LangGraph now appears *before* the hand-rolled loop
-(L10) — if you'd rather preserve "mechanics before the framework," teach L03–L05
-hand-rolled in plain Python and reserve the LangGraph name for L11; (b) the
-workflow-vs-agent contrast opens at L04 and closes at L11 (shallow agents), ~7 lessons
-apart. `<need input: keep L03–L05 in LangGraph, or teach them hand-rolled and introduce
-LangGraph at L11?>`
+tracking: (a) the graph model is now **continuous from L03 onward** — L03–L05 build
+forward graphs in LangGraph (`StateGraph`, nodes, edges, conditional edges), and L10
+reuses those exact primitives to build the **ReAct agent as a *cyclic* graph**, adding
+the one thing the earlier graphs lacked: a **back-edge** from the tool node to the agent
+node. So "mechanics before the framework" is satisfied *within* the graph model — L10
+wires the agent node-by-node by hand, and L11 immediately reveals the prebuilt `create_agent`
+as "that same graph, packaged"; (b) the workflow-vs-agent contrast opens at L04
+(forward, developer-driven) and closes at L10–L11 (the loop, model-driven), with L10 as the
+hinge where the graph first gains a cycle.
 
 | #   | Lesson title                                          | Subgoals                                                                                                  |
 | --- | ----------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
@@ -68,10 +70,10 @@ LangGraph at L11?>`
 | L07 | Tool calling: how it works                            | wire a single tool to a model call; trace one tool-call round-trip; describe the tool-call protocol       |
 | L08 | Designing good tools                                  | decide when a tool is needed vs. model-alone; name and schema-design a tool; handle tool errors           |
 | L09 | MCP: packaging tools as a portable contract           | describe the problem MCP solves (portable tool contract across clients); connect to an existing MCP server from a client; expose a simple tool as an MCP server; decide when MCP is worth the overhead vs. an inline tool |
-| L10 | Hand-rolled agent loop                                | build a model→tool→model loop in plain Python; reason about termination; handle tool failures             |
-| L11 | Shallow agents in LangGraph                           | build a shallow agent with LangChain's `create_agent` — the one-line equivalent of the L10 hand-rolled loop; run it on the L10 tasks and confirm behavioral equivalence; recognize what `create_agent` wraps (the model→tool loop as a graph) without hand-building it, deferring explicit `StateGraph` internals to L15 |
-| L12 | What an agent generates: state, logs, traces & extracts | inventory what an agent run produces and split it across two planes — *observability* (state, logs, traces: what the agent did, for you to debug/eval) vs *data* (extracts / new records: what the agent made, persisted to a DB or S3); read a trace of an agent run (model calls, tool calls, intermediate state); locate where a failure occurred from the trace alone; instrument a hand-rolled agent loop to emit useful traces; compare two traces of the same task to spot what changed; keep hard data out of the trace and the trace out of the datastore |
-| L13 | Evaluation: first pass                                | build a minimal eval set for a tool-calling / hand-rolled-loop agent; design eval cases that target failure modes already seen in traces from L12; compare two runs of the same task to flag regressions; reason about eval cost (sample size, model calls, human review); establish the practice that every later lesson will carry forward |
+| L10 | Cyclic graphs: the ReAct agent loop                   | build a ReAct agent as a cyclic `StateGraph` (agent node → conditional back-edge → prebuilt `ToolNode`), reusing the L04/L05 graph primitives plus the new back-edge; reason about termination (`recursion_limit`, natural `END`); handle tool failures (`ToolNode(handle_tool_errors=True)`) |
+| L11 | Shallow agents in LangGraph                           | build a shallow agent with LangChain's `create_agent` — the one-line equivalent of the L10 agent graph; run it on the L10 tasks and confirm behavioral equivalence; recognize what `create_agent` wraps (the same agent-node/tool-node/back-edge graph students built by hand) without re-wiring it, deferring the deeper `StateGraph` internals to L15 |
+| L12 | What an agent generates: state, logs, traces & extracts | inventory what an agent run produces and split it across two planes — *observability* (state, logs, traces: what the agent did, for you to debug/eval) vs *data* (extracts / new records: what the agent made, persisted to a DB or S3); read a trace of an agent run (model calls, tool calls, intermediate state); locate where a failure occurred from the trace alone; instrument an agent to emit useful traces; compare two traces of the same task to spot what changed; keep hard data out of the trace and the trace out of the datastore |
+| L13 | Evaluation: first pass                                | build a minimal eval set for a tool-calling agent; design eval cases that target failure modes already seen in traces from L12; compare two runs of the same task to flag regressions; reason about eval cost (sample size, model calls, human review); establish the practice that every later lesson will carry forward |
 | L14 | Choosing models & providers for the task              | survey the major model providers and where each is differentially strong (vision/OCR, long-context, reasoning/planning, cheap high-throughput execution); match a task or agent step to an appropriate provider *and* power tier — not just a size class within one provider; design a mixed-model, mixed-provider agent (e.g. a vision model for OCR, a strong reasoner for planning, a small fast model for routing/execution), binding different models to different nodes of the graphs from L03–L05; weigh capability against latency, cost, and context length; estimate cost and latency budgets for a multi-step, multi-model agent |
 | L15 | LangGraph design patterns                             | name common patterns (ReAct, plan-and-execute, supervisor, hierarchical, state-machine routing) and their distinguishing features; match a use case to an appropriate pattern; describe trade-offs (latency, control, complexity) |
 | L16 | Agent middleware and conditional tools                | explain agent middleware as hooks around the agent loop (before/after model, request/response modification) that change behavior without rewriting the graph; apply a middleware to inspect, log, or guard a step; implement conditional (dynamic) tool exposure — gate which tools the model sees based on state, role, or prior steps; reason about when middleware is the right seam vs. editing graph nodes directly <!-- *NEED INPUT*: placed after L15 patterns so students see ReAct/supervisor first; move to immediately after L11 (shallow agents) if you'd rather teach middleware before patterns --> |
@@ -117,8 +119,8 @@ before L07 — this is why the mini grew from 11 to 14 lessons.
 | L06 | Teaching an LLM to think via prompting  | Kept by request; owns the `<thinking>` channel and frames tool-calling as reasoning before L07 |
 | L07 | Tool calling: how it works              | Covers the *tool design* objective — mechanics half                          |
 | L08 | Designing good tools                    | Covers the *when a tool is needed vs. model alone* objective                 |
-| L10 | Hand-rolled agent loop                  | The spine — exposes mechanics before LangGraph hides them                    |
-| L11 | Shallow agents in LangGraph             | Covers the *design a shallow agent in LangGraph* objective — LangChain's `create_agent`, the one-line form of the L10 loop |
+| L10 | Cyclic graphs: the ReAct agent loop     | The spine — the agent as a graph with a back-edge; wire it by hand before L11's prebuilt hides it |
+| L11 | Shallow agents in LangGraph             | Covers the *design a shallow agent in LangGraph* objective — LangChain's `create_agent`, the one-line form of the L10 agent graph |
 | L12 | What an agent generates                 | Tracing at the center (sets up L13), framed by the artifact taxonomy: state · logs · traces (observability) vs extracts / new records → DB/S3 (data) |
 | L13 | Evaluation: first pass                  | Covers the *evaluation* objective; pairs with tracing                        |
 | L22 | Skills: just-in-time capabilities       | Added by request; depends on tools + prompting, which the mini course keeps  |
