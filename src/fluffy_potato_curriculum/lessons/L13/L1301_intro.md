@@ -61,7 +61,7 @@ The eval vocabulary is the shared module `fluffy_potato_curriculum.common.evals`
 
 ## This is a first pass, on purpose
 
-L13 is a small dataset scored by a handful of checks in a platform you already run — **not** a production eval system. That smallness is deliberate: the goal is to make the *habit* cheap enough to keep. [L25 (Evaluation revisited)](../../../../docs/origin/CURRICULUM_PRD.md) — outside the mini cut — scales the same discipline on the same Langfuse to multi-step graphs, retrieval quality (precision@k / recall@k), LLM-as-judge done rigorously, and multi-agent systems. Knowing where the first pass stops is part of the lesson.
+L13 is a small dataset scored by a handful of checks in a platform you already run — **not** a production eval system. That smallness is deliberate: the goal is to make the *habit* cheap enough to keep. A later *Evaluation revisited* lesson — outside the mini cut — scales the same discipline on the same Langfuse to multi-step graphs, retrieval quality (precision@k / recall@k), LLM-as-judge done rigorously, and multi-agent systems. Knowing where the first pass stops is part of the lesson.
 
 ## The takeaway
 
