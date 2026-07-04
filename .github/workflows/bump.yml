@@ -49,6 +49,19 @@ jobs:
           if [ "$code" -ne 0 ]; then
             exit "$code"
           fi
+          # cz bumps pyproject.toml's version but not uv.lock's editable
+          # self-reference (uv.lock isn't in commitizen's version_files), so it
+          # drifts every release. Re-lock and fold the result into the bump
+          # commit, moving the freshly-created tag onto the amended commit so
+          # the tagged commit stays internally consistent.
+          set -e
+          tag="v$(uv run cz version -p)"
+          uv lock
+          if ! git diff --quiet uv.lock; then
+            git add uv.lock
+            git commit --amend --no-edit
+            git tag -f -a "$tag" -m "$tag" HEAD
+          fi
           echo "did_bump=true" >> "$GITHUB_ENV"
 
       - name: Push bump commit and tag
