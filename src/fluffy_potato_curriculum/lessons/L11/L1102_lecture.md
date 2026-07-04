@@ -2,7 +2,7 @@
 
 ```yaml
 title: "From loop to graph: draw what create_agent wraps"
-keywords: shallow agent, create_agent, langgraph, agent node, tools node, back-edge, cycle, conditional exit, workflow vs agent, acyclic, recursion limit, max_steps, L10 loop mapping, L15 stategraph, ReAct
+keywords: shallow agent, create_agent, langgraph, MessagesState, tools_condition, agent node, tools node, back-edge, cycle, conditional exit, workflow vs agent, acyclic, recursion_limit, ToolNode, add_messages, L10 graph mapping, L15 stategraph, ReAct
 estimated duration: 15
 ```
 
@@ -12,7 +12,7 @@ estimated duration: 15
 > the build-and-run notebook that follows ([L1103_lecture.ipynb](L1103_lecture.ipynb)), where the
 > diagram sketched here is rendered from a real `create_agent` result.
 > **Anchor model: Claude Sonnet 4.6** — a single model throughout, so `create_agent` is the only
-> new thing on screen versus the L10 hand-rolled loop.
+> new thing on screen versus the L10 agent graph you wired by hand.
 
 ## section 1. Recap: an agent is a loop you already wrote
 
@@ -38,8 +38,8 @@ agent = create_agent(model, [calculator, lookup, flaky_fetch], system_prompt=...
 - `create_agent` returns a **running shallow agent**: the loop, the routing, the message
   bookkeeping, and the step cap — all supplied.
 - **Shallow agent, defined:** one model, one tool set, one decision point that either calls a tool
-  or finishes. That is *exactly* the L10 loop. Not a deep agent (planning / memory / reflection —
-  L18). Shallow ≠ lesser; most production agents are shallow.
+  or finishes. That is *exactly* the L10 agent graph. Not a deep agent (planning / memory /
+  reflection — L18). Shallow ≠ lesser; most production agents are shallow.
 
 [↑ Back to top](#from-loop-to-graph-draw-what-create_agent-wraps)
 
@@ -67,8 +67,8 @@ agent = create_agent(model, [calculator, lookup, flaky_fetch], system_prompt=...
 
 ### slide 3.1 The two nodes and two edges
 
-- Draw the shallow-agent graph piece by piece — this is a *picture of the L10 loop*, not something
-  you build today.
+- Draw the shallow-agent graph piece by piece — this is a *picture of the L10 graph you wired by
+  hand*, not something you build today.
 - diagram: two nodes and the wiring —
   `__start__ → agent`; a **conditional exit** out of `agent`: (tool call) → `tools`, (plain text) →
   `__end__`; and a fixed **back-edge** `tools → agent`. Label the `tools → agent` arrow **"the
@@ -87,19 +87,28 @@ agent = create_agent(model, [calculator, lookup, flaky_fetch], system_prompt=...
      __end__  (natural termination)
 ```
 
-### slide 3.2 Map every piece back to an L10 line
+### slide 3.2 Map every piece back to what you wired in L10
 
-- table: each graph piece against its L10 hand-rolled twin. If a student can't do this mapping,
-  slow down — *this mapping is the objective.*
+- table: each piece you wired **by hand** in L10's `StateGraph`, and what `create_agent` gives you
+  for it. If a student can't do this mapping, slow down — *this mapping is the objective.* Two rows
+  are the payoff: your hand-written `route` **is** the prebuilt `tools_condition`, and your
+  `ToolNode` is the *same* `ToolNode` — the framework just packaged what you already wrote.
 
-| Graph piece | Its L10 twin |
+| You wired by hand in L10 | `create_agent` gives you |
 | --- | --- |
-| **`agent`** node (call the model — LangGraph labels it `model` in the rendered graph) | the "call the model" / `bound.invoke(messages)` step |
-| **`tools`** node (run every requested tool, append a result) | the "run every `tool_call`, append a `ToolMessage`" step |
-| **back-edge** `tools → agent` | the `while` looping back after running tools |
-| **conditional exit** out of `agent` | the `if reply.tool_calls: … else: return` branch |
-| the message list threaded between nodes | the `messages` list you appended to by hand |
-| the framework's **recursion / step limit** | your `max_steps` cap |
+| `TypedDict` state + the `add_messages` reducer | `MessagesState` — the same thing, prebuilt (you don't declare it) |
+| the `agent` node: `model.bind_tools(...).invoke(...)` | the **`model`** argument |
+| `ToolNode(tools, handle_tool_errors=True)` | the **`tools`** argument (the *same* `ToolNode` inside) |
+| your hand-written `route` function | the prebuilt **`tools_condition`** |
+| `add_edge("tools", "agent")` — the back-edge | built in |
+| the system message you prepended | the **`system_prompt`** argument |
+| `recursion_limit` on `invoke` | the same knob, on the run config (default 25) |
+
+- **The two "oh — it just packaged what I wrote" beats.** In L10 you already saw `ToolNode` revealed
+  as "the message-history bookkeeping, prebuilt." The same move applies to the *edge*: the `route`
+  function you wrote by hand is exactly `langgraph.prebuilt.tools_condition`. Node and edge — both
+  the thing you built, packaged. (LangGraph labels the model-call node `model` in the rendered
+  graph; we called it `agent` in L10. Same node.)
 
 ### slide 3.3 Trace one run on the diagram
 
@@ -121,14 +130,14 @@ agent = create_agent(model, [calculator, lookup, flaky_fetch], system_prompt=...
 - **You do not need to understand `StateGraph` to use `create_agent`** — that is precisely what the
   one-liner spares you. Assembling the graph node-by-node (state schema, `add_messages` reducer,
   explicit conditional edges) is **[L15](../../CURRICULUM_PRD.md)'s** job.
-- The point of the diagram is only this: `create_agent` is **not magic** — it is the loop you
-  already wrote, packaged.
+- The point of the diagram is only this: `create_agent` is **not magic** — it is the graph you
+  already wired, packaged.
 
 ### slide 4.2 The step cap did not disappear
 
 - A common misread: *"the one-liner removed the need for a step cap."* It didn't.
-- `create_agent` ships a **recursion / step limit** — the framework's `max_steps` (LangGraph's
-  default is 25 loop steps; you can raise or lower it in the run config).
+- `create_agent` ships a **recursion / step limit** — the same `recursion_limit` you set on
+  `invoke` in L10 (LangGraph's default is 25 loop steps; you can raise or lower it in the run config).
 - A runaway agent still hits that cap, and **hitting it is still a signal worth investigating** —
   exactly the L10 lesson, restated.
 
