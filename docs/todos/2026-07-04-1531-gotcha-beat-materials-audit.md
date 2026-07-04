@@ -94,7 +94,7 @@ Roadmap beat lives in `docs/origin/lesson_roadmaps/<L>/demos_or_activities.md`.
       accept as covered, or (low priority) extend §6.1 with a cure column + a "schema rides in every
       request" row to fully match the coda. Belongs at the *already-covered* end of the carry-over order.
       No new fixture needed.
-- [ ] **L08 — designing tools** (FULL Demo 5, incl. new live "tool-soup"). Assets:
+- [x] **L08 — designing tools** (FULL Demo 5, incl. new live "tool-soup"). Assets:
       `L0802_lecture.md` (already mentions anti-patterns), `L0803/L0805/L0807/L0809_lecture.ipynb`,
       `L08*_lab_*`. Highest-value target — the roadmap grew a genuinely new demo, so check
       whether a lecture notebook needs the live tool-soup beat added.
@@ -116,12 +116,43 @@ Roadmap beat lives in `docs/origin/lesson_roadmaps/<L>/demos_or_activities.md`.
       Haiku 4.5 client (course cheap-contrast model, available) and a capped/re-runnable live selection
       (variance budget, mirror L07 Demo 4). Soup registry is L08-specific teaching material → keep it in
       the lesson (like L23's `example_skills/`), don't promote to `common/`.
-- [ ] **L10 — agent loop** (coda, names 3). Assets: `L1002_lecture.md`, `L1003/L1006_lecture.ipynb`,
+- [x] **L10 — agent loop** (coda, names 3). Assets: `L1002_lecture.md`, `L1003/L1006_lecture.ipynb`,
       `L1004/L1005_lab_*`. Confirm the infinite-loop beat stays capped (never actually hangs).
-      **Finding:**
-- [ ] **L11 — shallow LangGraph agent** (coda, names 3). Assets: `L1102_lecture.md`,
+      **Finding: `add-coda` → new section in `L1002_lecture.md` (after §5.3).** **Infinite-loop-stays-capped:
+      CONFIRMED.** `L1003` §4 runs on a **scripted/stub model** (deterministic, no key needed), hits
+      `recursion_limit` by design, and both `L1002` §3.3 ("safety net, not a correctness tool") and
+      `PROCTOR_NOTES.md` ("a cyclic graph with no cap is a runaway waiting to happen — hitting the cap is
+      [expected]") frame it as a demonstrated safety mechanism, never an actual hang. Materials map cleanly
+      onto all 4 roadmap demos despite only 2 notebooks: `L1003` bundles Demos 1–3 (wire graph, termination
+      +`recursion_limit`, tool-failure-as-message); `L1006` = Demo 4 (real model + prebuilt one-liner).
+      **Per-gotcha:** #1 no-termination-guard and #2 tool-failure-escaping are thoroughly *shown*
+      (`L1003` §4/§5, `L1002` §3/§4) but only *implied*, matching the roadmap's own honest self-assessment.
+      #3 unbounded-context-growth is the thinnest — `L1002` slide 2.2 shows `add_messages` **appends every
+      turn** mechanically, but neither notebook ties that to actual token/cost growth (no grep hit for
+      context-growth/cumulative-token language) — consistent with the roadmap saying L10 only *implies* #3.
+      **Gap:** no consolidated naming — `L1002` §5.3 "Common confusions to leave behind" is a *different*
+      table (correctness/black-box/retry misconceptions, not these 3 named gotchas) and doesn't overlap.
+      **Action:** add a coda section to `L1002_lecture.md` after §5.3, naming the 3 gotchas + one-line cures
+      + point-backs (Demo 2's turn panel, Demo 3's error trace, slide 2.2's `add_messages`); #3's cure can
+      stay purely a forward-link (L19) per the roadmap's own "name it, don't build it" instruction — no new
+      fixture/token-measurement demo needed.
+- [x] **L11 — shallow LangGraph agent** (coda, names 3). Assets: `L1102_lecture.md`,
       `L1103_lecture.ipynb`, `L1105_lecture.md`, `L1104_lab_*`. Note: state-mismanagement gotcha
-      moved to L15 — coda here is `create_agent`-first only. **Finding:**
+      moved to L15 — coda here is `create_agent`-first only.
+      **Finding: `add-coda` (light — borderline `covered`) → new closing section in `L1105_lecture.md`
+      (after §3.4).** Well covered: all three gotchas are individually *addressed and even cautioned* in
+      the two lecture markdowns. #1 one-liner-can-still-run-away = `L1102` §4.2 "The step cap did not
+      disappear" + `L1105` §2.2 "The step cap is still there, just a default now"; #2 create_agent-as-
+      un-debuggable-magic = `L1102` §3.2 "Map every piece back to what you wired in L10" + `L1103` §6–7
+      ("Render what it wrapped" / "Name the freebies against their L10 twins"); #3 wrong-altitude/ceiling =
+      `L1105` §3 (whole section) + §3.3 "Knowing where the ceiling is *is* the skill". **Scope check:** the
+      state-mismanagement gotcha is correctly **absent** — materials are `create_agent`-first (`L1102` §4.1
+      "You will not wire this graph by hand today"); that content is L15's, matching the roadmap's reorder
+      scope note. **Gap (thin):** the three are spread across §4.2/§2.2/§3 and never *consolidated* into one
+      named portable-gotcha recap. **Action:** add a short closing coda to `L1105_lecture.md` after §3.4
+      "Where you land" that consolidates the three (the cures already exist verbatim in the sections above —
+      this is a pull-together, not new teaching). No new fixture needed. Sits near the *already-covered* end
+      of the carry-over order, just above L07.
 - [ ] **L12 — tracing** (coda, names 4). Assets: `L1202/L1204_lecture.ipynb`, `L1206_lecture.md`,
       `L1203/L1205_lab_*`, `PROCTOR_NOTES.md` (already has a gotcha hit). **Finding:**
 - [ ] **L13 — evaluation** (coda, names 5). Assets: `L1302/L1304/L1306_lecture.ipynb`,
