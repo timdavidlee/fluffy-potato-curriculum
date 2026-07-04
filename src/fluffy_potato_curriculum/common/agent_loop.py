@@ -2,7 +2,7 @@
 
 This is the canonical reference copy of the loop students built inline in L10.
 L10's loop *printed* one line per iteration — a "minimum-viable trace" that
-vanished when the run ended. L11 keeps the **control flow identical** and adds
+vanished when the run ended. L12 keeps the **control flow identical** and adds
 *observation*: a ``TraceEvent`` emitted at each boundary (before/after the model
 call, around each tool dispatch, and a framing span for the whole run), collected
 into ``RunResult.trace``.
@@ -67,7 +67,7 @@ def _empty_trace() -> list[TraceEvent]:
 @dataclass
 class RunResult:
     """What the loop returns: the answer, how many model calls it took, why it
-    stopped, and — new in L11 — the full ``trace`` the summary was derived from.
+    stopped, and — new in L12 — the full ``trace`` the summary was derived from.
 
     You should be able to point at where each summary field came from in the
     trace: ``final_text`` is the last ``llm`` span's text, ``iterations`` is the

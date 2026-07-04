@@ -134,7 +134,7 @@ estimated duration: 85
   levers on prediction quality; the other (the context you provide) is section 6.
 - It is **not** a model-selection lesson. *Which* model or provider you'd actually pick for a job —
   a vision model for OCR, a strong reasoner for planning, a small fast model for cheap execution,
-  trading capability against cost, latency, and context length — is **L13 (choosing models &
+  trading capability against cost, latency, and context length — is **L14 (choosing models &
   providers)**. Here we only establish *that* capability sharpens prediction.
 
 ## section 5. Temperature: the knob on the distribution

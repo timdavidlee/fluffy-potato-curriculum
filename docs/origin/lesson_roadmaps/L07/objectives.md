@@ -55,7 +55,7 @@ By the end of L07, a student should be able to:
 3. **Describe the tool-call protocol.** Concretely:
    - Explain in one or two sentences that *tool calling is a protocol the model has been trained to participate in*, not a runtime capability of the model. The model emits structured tokens; the application interprets them. The model does not "execute" anything.
    - Name the three actors in a single round-trip — model, application, tool — and which one performs each step (decide to call → emit tool-call block → validate arguments → run the function → format the result → continue the conversation).
-   - Explain why tool definitions are passed on *every* request (the model is stateless across calls; the schema is part of the prompt) and what that implies for token cost (foreshadow L13 on model & provider choice and L19 on context management — every tool definition is paid for, every request).
+   - Explain why tool definitions are passed on *every* request (the model is stateless across calls; the schema is part of the prompt) and what that implies for token cost (foreshadow L14 on model & provider choice and L19 on context management — every tool definition is paid for, every request).
    - Recognize that the *decision to call a tool* is a reasoning step, and that L06's CoT/scratchpad/when-not-to-reason guidance applies inside that decision (reinforce, do not re-teach).
 
 ## Main points the lecture should land
@@ -68,7 +68,7 @@ By the end of L07, a student should be able to:
 
 - **The model is stateless across calls.** Every request must include the full tool definition list and the full conversation history (or a compaction of it — but that is L19's territory). Students often assume "I told the model about the tool last turn, so it remembers." It does not. The schema is in the prompt every time.
 
-- **Tools cost tokens, twice over.** The tool *definition* is in every prompt; the tool *result* is in the message history forever after. A 500-token tool definition added to a 10-turn conversation costs roughly 5,000 input tokens before any tool is even called. This is why L13 (models & providers) and L19 (context management) come back to tool-cost reasoning.
+- **Tools cost tokens, twice over.** The tool *definition* is in every prompt; the tool *result* is in the message history forever after. A 500-token tool definition added to a 10-turn conversation costs roughly 5,000 input tokens before any tool is even called. This is why L14 (models & providers) and L19 (context management) come back to tool-cost reasoning.
 
 - **The model can hallucinate tool calls.** Wrong tool name, wrong argument types, made-up tools, missing required args, extra unspecified args. The application is responsible for catching these. Showing one hallucination in the lecture is more educational than ten clean runs — the same way L06 used a tag-violation moment to teach that scratchpad contracts are best-effort.
 

@@ -1,6 +1,6 @@
-"""A tiny, hand-rolled evaluation harness for the agent loop (the L12 artifact).
+"""A tiny, hand-rolled evaluation harness for the agent loop (the L13 artifact).
 
-L11 taught you to *read* a run — its trace. L12 teaches you to *judge* it: stop
+L12 taught you to *read* a run — its trace. L13 teaches you to *judge* it: stop
 asking "did this one run look right?" and start asking "do my agent's runs pass a
 fixed set of cases I defined in advance, and do they *still* pass after I change
 something?" An **eval set** is that fixed set of cases plus the machinery to run
@@ -69,7 +69,7 @@ class EvalResult(BaseModel):
     ``key`` names the metric (e.g. ``"answer_correct"``, ``"no_runaway"``);
     ``score`` is the verdict; ``comment`` is an optional human-readable why.
 
-    L12's scorers return a **bool** ``score`` (pass/fail). The ``float`` option
+    L13's scorers return a **bool** ``score`` (pass/fail). The ``float`` option
     exists so a graded scorer (an LLM-judge returning a confidence) fits the same
     type; :attr:`passed` treats any truthy score — ``True`` or a nonzero number —
     as a pass.
@@ -98,7 +98,7 @@ class Scorer(Protocol):
 
 
 # The "target" under test: how to produce a run for one case. Two run_cases over
-# the same cases (e.g. one per model) is exactly the A/B in L12's headline demo.
+# the same cases (e.g. one per model) is exactly the A/B in L13's headline demo.
 # (LangSmith calls this argument the *target* of ``evaluate()``.)
 RunCase = Callable[[EvalCase], RunResult]
 
@@ -119,7 +119,7 @@ def tool_calls(run: RunResult) -> list[tuple[str, dict[str, Any]]]:
     """The ordered ``(tool_name, args)`` pairs a run made, read off its trace.
 
     The path *with arguments* — e.g. ``[("lookup", {"city": "Tokyo"})]``. Use this
-    when the bug is in the arguments (the L11 "wrong arguments" signature) or to
+    when the bug is in the arguments (the L12 "wrong arguments" signature) or to
     detect a runaway (the same pair repeating).
     """
     return [(span.name, span.inputs) for span in run.trace if span.run_type == "tool"]
@@ -334,7 +334,7 @@ def compare(before: EvalReport, after: EvalReport, *, min_rate: float = 1.0) -> 
 
     A pair counts as passing when its pass rate is ``>= min_rate`` (default
     ``1.0``: must pass on every sample). Only pairs present in *both* reports are
-    compared. This is L11's eyeball trace-diff, promoted to a repeatable check.
+    compared. This is L12's eyeball trace-diff, promoted to a repeatable check.
     """
     regressions: list[tuple[str, str]] = []
     fixes: list[tuple[str, str]] = []

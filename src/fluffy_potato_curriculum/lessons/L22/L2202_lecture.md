@@ -17,7 +17,7 @@ estimated duration: 25
 
 ### slide 1.1 Everything is always in context
 
-- After L07, L08, L10 and L14 you have a working agent — and one unsolved cost problem.
+- After L07, L08, L10 and L11 you have a working agent — and one unsolved cost problem.
 - Every **tool schema** is re-sent on *every* request (L07: "tools cost tokens, twice over").
 - Every **system-prompt instruction** is paid for on *every* call, relevant or not.
 - Ten tools the agent uses occasionally = ten schemas in the window on the call that needed none of

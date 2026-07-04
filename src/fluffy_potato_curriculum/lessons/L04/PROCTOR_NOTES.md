@@ -26,7 +26,7 @@ COMMON GOTCHAS:
 UNBLOCKERS: Point at the docstring example in the solution-shaped prompt — five fields, only `steps`
 is annotated. A `TypedDict` is just a class with typed attributes and no body logic.
 
-TIME: 3–5 min. STRETCH: ask what reducer message history would need (append) — that's the L14 link.
+TIME: 3–5 min. STRETCH: ask what reducer message history would need (append) — that's the L11 link.
 
 ## L0404_lab problem 2 — The three nodes
 

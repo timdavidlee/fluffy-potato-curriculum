@@ -10,8 +10,8 @@ estimated duration: 12
 > This is the closing lecture — mostly **diagram + discussion**, no live build. It recaps the
 > compiled workflows from L04's and this lesson's demos ([L04's Demo 1](../L04/L0403_lecture.ipynb)
 > / [this lesson's Demo](L0503_lecture.ipynb)) and *names* the one change that makes an agent.
-> Building the agent is **L14's** job.
-> **Anchor:** the workflow-vs-agent contrast, stated verbatim so it carries into L14.
+> Building the agent is **L11's** job.
+> **Anchor:** the workflow-vs-agent contrast, stated verbatim so it carries into L11.
 
 ## section 1. Recap — what a workflow is
 
@@ -28,9 +28,9 @@ estimated duration: 12
 
 ### slide 1.2 The primitives you now own
 
-- table: the L04 + L05 primitives — and the note that **L14 reuses every one of them unchanged.**
+- table: the L04 + L05 primitives — and the note that **L11 reuses every one of them unchanged.**
 
-| Primitive | What it is | Reused in L14? |
+| Primitive | What it is | Reused in L11? |
 | --- | --- | --- |
 | `StateGraph` | the builder | yes |
 | node | typed function: state → update | yes |
@@ -44,21 +44,21 @@ estimated duration: 12
 
 ### slide 2.1 Add a back-edge
 
-- L14 keeps **all** of the above and adds exactly one thing: a **conditional edge that loops back
+- L11 keeps **all** of the above and adds exactly one thing: a **conditional edge that loops back
   to the model**. After the model node, the graph either routes to a `tools` node and **loops back
   to the model**, or routes to `END`.
 - diagram: the acyclic chain on the left; on the right the same shape with one new **dashed
-  back-edge** curving from the model node to `tools` and back — labeled "the only thing L14 adds."
+  back-edge** curving from the model node to `tools` and back — labeled "the only thing L11 adds."
 - That single back-edge hands the **model** control of the path: *it* decides whether to call a
   tool and go again, or stop. The acyclic **workflow** becomes a cyclic, model-driven **agent**.
 
 ### slide 2.2 You have seen this cycle before
 
 - That model → tools → model loop is exactly the one you **hand-rolled in [L10](../L10/objectives.md)**
-  — only there the `while`/`if` was plain Python, and in L14 it's a graph edge.
-- diagram: side by side — L10's `while` loop pseudocode and L14's cyclic graph — captioned "same
+  — only there the `while`/`if` was plain Python, and in L11 it's a graph edge.
+- diagram: side by side — L10's `while` loop pseudocode and L11's cyclic graph — captioned "same
   loop, now expressed as a graph."
-- So L14 is not a new world: it's **L04/L05's primitives + L10's loop**, written as one back-edge.
+- So L11 is not a new world: it's **L04/L05's primitives + L10's loop**, written as one back-edge.
 
 ### slide 2.3 A conditional edge is still not "the model is an agent" by itself
 
@@ -83,7 +83,7 @@ estimated duration: 12
 | (most production "AI features") | (the minority — but the loud minority) |
 
 - **Determinism is a feature, not a limitation.** A workflow takes the same path on the same input:
-  predictable, cheaper, lower-latency, and trivially testable (which is why the L12 eval set drops
+  predictable, cheaper, lower-latency, and trivially testable (which is why the L13 eval set drops
   straight onto it).
 
 ### slide 3.2 The common failure mode
@@ -93,13 +93,13 @@ estimated duration: 12
 - The engineering skill is choosing the **simplest shape that solves the task** — and that is
   usually a workflow. (This is the thesis of Anthropic's *Building Effective Agents*.)
 
-## section 4. Bridge to L14
+## section 4. Bridge to L11
 
 ### slide 4.1 What carries forward
 
 - Everything. `StateGraph`, nodes, edges, typed state, reducers, `compile`/`invoke`, and the
-  Langfuse hookup all reappear in L14 **unchanged**.
-- L14 also re-teaches the primitives from scratch so the agent lesson stands alone — treat the
+  Langfuse hookup all reappear in L11 **unchanged**.
+- L11 also re-teaches the primitives from scratch so the agent lesson stands alone — treat the
   overlap as deliberate **reinforcement**, not repetition. The vocabulary is identical on purpose.
 
 ### slide 4.2 The one sentence to leave with

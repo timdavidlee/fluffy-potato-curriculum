@@ -99,7 +99,7 @@ Times are rough and assume a semi-technical student with basic Python who comple
 
 - **Common gotchas:** answering only "so it's neat"; missing the core idea that it makes the
   response *programmatic* (indexable) rather than *conversational* (prose you must read).
-- **Unblockers:** acceptable points: it's the precondition for evals (L12), tool calling (L07), and
+- **Unblockers:** acceptable points: it's the precondition for evals (L13), tool calling (L07), and
   multi-step pipelines; L07 adds tool-use-as-schema to *force* conformance, but defensive parsing
   still applies because tool-call arguments can be malformed too.
 - **Time:** ~5 min.

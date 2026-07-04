@@ -124,7 +124,7 @@ estimated duration: 80
 
 - **Parseability** — your code reads a field, not a paragraph.
 - **UX** — you can show the user the answer and hide (or collapse) the reasoning.
-- **Evals & tracing** — a clean answer field is what L11 (tracing) and L12 (evaluation) score against;
+- **Evals & tracing** — a clean answer field is what L12 (tracing) and L13 (evaluation) score against;
   reasoning logged separately is debugging gold without polluting the metric.
 
 [↑ Back to top](#teaching-an-llm-to-think-chain-of-thought-scratchpads-and-self-critique)
@@ -155,7 +155,7 @@ estimated duration: 80
 | Mitigation | What new information it injects |
 | --- | --- |
 | Different **framing** | *"You are a skeptical reviewer; find the flaw."* shifts the prior toward disagreement |
-| Different **model** | a second model has different failure modes (revisited rigorously in L12) |
+| Different **model** | a second model has different failure modes (revisited rigorously in L13) |
 | **Adversarial role** | force the critic to argue the answer is wrong before deciding |
 | **Ground-truth check** | compare against a known answer, a tool result, or retrieved evidence |
 
@@ -179,7 +179,7 @@ estimated duration: 80
 - Every CoT, scratchpad, or critique token is **paid for** (L01's per-token cost), **adds latency**,
   and **competes for the context window**. None of that is hypothetical — the demos print the numbers.
 - L06 is the first lesson where you must consciously weigh reasoning *quality* against *cost*. That
-  trade-off returns in L12 (model power) and L16 (context management).
+  trade-off returns in L13 (model power) and L16 (context management).
 
 ### slide 5.2 Three cases where it backfires
 

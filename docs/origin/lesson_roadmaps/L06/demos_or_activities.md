@@ -22,7 +22,7 @@ The teacher should have, before the first demo starts:
 
 - A working REPL or notebook with the project's Claude SDK setup (per the project's `uv` env).
 - The four demo prompts below pre-loaded as variables or cells, so each demo is a *single keystroke* to run. Live-typing prompts during demos eats time and breaks pacing.
-- A second model client configured for Demo 3's "different-model critic" beat. **Primary model: Claude Sonnet 4.6** (the course's anchor). **Cheap critic: Claude Haiku 4.5** (introduced briefly here as a different-model critic; treated more rigorously in L12).
+- A second model client configured for Demo 3's "different-model critic" beat. **Primary model: Claude Sonnet 4.6** (the course's anchor). **Cheap critic: Claude Haiku 4.5** (introduced briefly here as a different-model critic; treated more rigorously in L13).
 - A way to project token counts and latency alongside outputs (a small wrapper that prints `input_tokens`, `output_tokens`, and wall-clock time after every call). This is essential for Demo 4, where the *cost* of reasoning is the punchline.
 
 > Why pre-loaded prompts: L06 lives or dies on contrast — same input, different framing, different output. If the teacher mistypes a prompt mid-demo, the contrast breaks and the lesson lands as "the model is unpredictable" instead of "this technique caused this change."
@@ -111,7 +111,7 @@ The teacher should have, before the first demo starts:
 
 - Sycophancy is the failure mode to remember. Name it explicitly. If framing (1) catches the error this run, do framing (1) again with a slightly different problem and let the audience watch sycophancy happen live. (This is one of the few demos worth running twice.)
 - A critic that has *no new information* is a weak critic. Adversarial framing, different model, retrieved evidence — these are all ways of injecting new information.
-- Foreshadow that L13 (models & providers) revisits the "use a small cheap model as critic" pattern more rigorously.
+- Foreshadow that L14 (models & providers) revisits the "use a small cheap model as critic" pattern more rigorously.
 
 **If the demo misbehaves:**
 
@@ -139,7 +139,7 @@ The teacher should have, before the first demo starts:
 
 - The decision to use CoT/scratchpad/self-critique is a *trade-off*, not a default. By the end of L06, students should be making this trade-off consciously.
 - Latency-sensitive flows (chat UIs, real-time agents) often can't afford CoT on every call even when accuracy would benefit.
-- Bridge to L12: choosing the right *model* for a step is a sibling decision to choosing the right *reasoning depth* for a step.
+- Bridge to L13: choosing the right *model* for a step is a sibling decision to choosing the right *reasoning depth* for a step.
 
 **If the demo misbehaves:**
 
@@ -160,6 +160,6 @@ If time allows, run one final demo that previews L07: ask the model the same Tas
 ## Open authoring questions
 
 - <!-- *NEED INPUT*: are the demos run in a Jupyter notebook the teacher projects, or in a slide-embedded REPL, or via a custom demo runner script? Affects how prompts are pre-loaded. -->
-- <!-- *NEED INPUT*: should Demo 3 introduce different-model critique here, or defer to L13 (models & providers)? Mirrors the same open question in [objectives.md](objectives.md). -->
+- <!-- *NEED INPUT*: should Demo 3 introduce different-model critique here, or defer to L14 (models & providers)? Mirrors the same open question in [objectives.md](objectives.md). -->
 - <!-- *NEED INPUT*: should this lesson use Anthropic's extended-thinking API anywhere, or stay strictly prompt-only? Mirrored from [objectives.md](objectives.md). -->
 - <!-- *NEED INPUT*: a pointer/link to where the demo prompts live as code (a `demos/` subdir? inline in a notebook?) — not yet decided in non-draft docs. -->

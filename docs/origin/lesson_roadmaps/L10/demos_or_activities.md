@@ -26,8 +26,8 @@ The teacher should have, before the first demo starts:
   - `lookup(key: str) -> str` — returns a value from a tiny in-memory dict (e.g. mapping product names to prices, or city names to populations). Has a couple of keys present and a couple deliberately missing, so "key not found" is reachable.
 - A third tool that will *fail on demand*, used only in Demo 3:
   - `flaky_fetch(url: str) -> str` — has a flag the teacher flips to make it raise an exception, return a structured error, or return malformed output. <!-- *NEED INPUT*: confirm whether this is implemented as a single tool with a global flag, three distinct tools, or a tool whose behavior depends on the `url` argument. Recommendation: one tool keyed on the URL — `https://ok` returns a value, `https://error` returns a structured error, `https://crash` raises, `https://garbage` returns malformed JSON. Keeps the demo prompt natural. -->
-- A loop function `agent_loop.run(...)` that the teacher will *write live* in Demo 1 and *reuse unchanged* through Demos 2 and 3. Keep a "completed" version in a sibling file the teacher can paste in if live-coding falls behind. <!-- *NEED INPUT*: confirm naming with [objectives.md](objectives.md) open question on `agent_loop.run` API shape. Same name should be used in lectures, labs, and L11. -->
-- A small wrapper that prints, after each model call: iteration number, tool calls requested, tool results returned, cumulative input/output tokens, and wall-clock latency. This is the closest thing to a "trace" the lesson exposes; L11 replaces it with something structured. Foreshadow that.
+- A loop function `agent_loop.run(...)` that the teacher will *write live* in Demo 1 and *reuse unchanged* through Demos 2 and 3. Keep a "completed" version in a sibling file the teacher can paste in if live-coding falls behind. <!-- *NEED INPUT*: confirm naming with [objectives.md](objectives.md) open question on `agent_loop.run` API shape. Same name should be used in lectures, labs, and L12. -->
+- A small wrapper that prints, after each model call: iteration number, tool calls requested, tool results returned, cumulative input/output tokens, and wall-clock latency. This is the closest thing to a "trace" the lesson exposes; L12 replaces it with something structured. Foreshadow that.
 - A second model configured for Demo 4's framework comparison. <!-- *NEED INPUT*: confirm which Claude model anchors L10's demos — the loop is model-agnostic but chaining depth varies. Mirrors the open question in [objectives.md](objectives.md). -->
 
 > Why pre-defined tools: the lesson is about the *loop*, not about tool design. L08 already covered tool design. Re-litigating tool schemas mid-demo eats time and dilutes the message. Spend tool-design time only on `flaky_fetch` (Demo 3), where the failure modes *are* the point.
@@ -127,12 +127,12 @@ The teacher should have, before the first demo starts:
 
 ## Demo 4 — Hand-rolled vs. framework: a one-screen contrast (Objective 4)
 
-**Goal:** show the same task running on the hand-rolled loop and on a minimal framework loop side by side. Land that *every framework students will see (L14, L18) is a fancier version of this loop.*
+**Goal:** show the same task running on the hand-rolled loop and on a minimal framework loop side by side. Land that *every framework students will see (L11, L18) is a fancier version of this loop.*
 
 **Pre-flight:**
 
 - The Demo 1+2+3 loop, now with iteration cap and exception-to-`ToolMessage(status="error")` conversion built in (~50 lines of Python).
-- A LangGraph "minimum viable" agent doing the same thing, pre-written. <!-- *NEED INPUT*: confirm whether L10 should preview LangGraph here at all, or stay strictly framework-free and defer the comparison to L13's opening. Recommendation: a 60-second preview here is high-value because it makes "hand-rolled" feel like a real choice, not a default. But the *lecture* should not teach LangGraph mechanics — that's L13's job. -->
+- A LangGraph "minimum viable" agent doing the same thing, pre-written. <!-- *NEED INPUT*: confirm whether L10 should preview LangGraph here at all, or stay strictly framework-free and defer the comparison to L14's opening. Recommendation: a 60-second preview here is high-value because it makes "hand-rolled" feel like a real choice, not a default. But the *lecture* should not teach LangGraph mechanics — that's L14's job. -->
 - The starter task from Demo 1, runnable against both implementations.
 
 **Live script:**
@@ -141,24 +141,24 @@ The teacher should have, before the first demo starts:
 2. Run the *same task* on both. Identical final answer (or close enough). Identical tool-call sequence. Different code shape.
 3. Discuss: when does the framework's overhead pay off? Three specific cases — graph-shaped control flow (parallel branches, conditional routing), built-in observability/tracing, persistent state across runs.
 4. Discuss: when does it *not* pay off? Three specific cases — small surface area (this lesson's loop), one-off scripts, debugging a behavior the framework abstracts.
-5. Foreshadow: L11 will instrument *this exact hand-rolled loop* with structured tracing. L13 will reframe *this exact loop* as a LangGraph graph. The loop itself doesn't change — the wrapper around it does.
+5. Foreshadow: L12 will instrument *this exact hand-rolled loop* with structured tracing. L14 will reframe *this exact loop* as a LangGraph graph. The loop itself doesn't change — the wrapper around it does.
 
 **What to highlight:**
 
 - The framework decision is a real engineering choice with real trade-offs. Students who only ever see frameworks tend to over-reach for them; students who only ever hand-roll tend to under-reach. Both extremes are bugs.
-- Tracing (L11) is the most common reason teams *do* reach for a framework — and it's exactly what the next lesson will start adding to the hand-rolled version. Set the expectation now.
+- Tracing (L12) is the most common reason teams *do* reach for a framework — and it's exactly what the next lesson will start adding to the hand-rolled version. Set the expectation now.
 
 **If the demo misbehaves:**
 
 - If the LangGraph install or the framework demo flakes on the day, skip the live run and walk through the *code shape* on the slide. The point is the contrast in shape, not a live race.
 
-## Optional bridge demo — toward tracing (L11)
+## Optional bridge demo — toward tracing (L12)
 
-If time allows, run one final beat that previews L11: take the print-wrapper from pre-flight and replace one `print()` with a structured dict (`{"event": "tool_call", "iteration": i, "tool": name, "args": args}`) appended to a list. Show the list at the end of a run. That's the simplest possible trace.
+If time allows, run one final beat that previews L12: take the print-wrapper from pre-flight and replace one `print()` with a structured dict (`{"event": "tool_call", "iteration": i, "tool": name, "args": args}`) appended to a list. Show the list at the end of a run. That's the simplest possible trace.
 
-Don't teach trace analysis here — that's L11. Just show the *shape* of what's about to come, so students see the next lesson as a natural extension of this one rather than a new topic.
+Don't teach trace analysis here — that's L12. Just show the *shape* of what's about to come, so students see the next lesson as a natural extension of this one rather than a new topic.
 
-<!-- *NEED INPUT*: include this bridge demo, or save it as the opener for L11? -->
+<!-- *NEED INPUT*: include this bridge demo, or save it as the opener for L12? -->
 
 ## Pacing notes for the teacher
 
@@ -171,7 +171,7 @@ Don't teach trace analysis here — that's L11. Just show the *shape* of what's 
 
 - <!-- *NEED INPUT*: which model class anchors the demos — see pre-flight. Mirrors the open question in [objectives.md](objectives.md). -->
 - <!-- *NEED INPUT*: are demos run in a Jupyter notebook the teacher projects, or a slide-embedded REPL, or a custom demo runner script? Affects how `agent_loop.run` is structured for live-code in Demo 1. -->
-- <!-- *NEED INPUT*: should Demo 4's LangGraph preview happen here, or be deferred entirely to L13? Recommendation in the demo above; final call is the author's. -->
+- <!-- *NEED INPUT*: should Demo 4's LangGraph preview happen here, or be deferred entirely to L14? Recommendation in the demo above; final call is the author's. -->
 - <!-- *NEED INPUT*: should Demo 3 use one of L09's MCP-exposed tools as the failing tool, to reinforce "the loop runs both kinds"? Adds setup overhead; reinforces the L09 framing. Trade-off worth deciding. -->
 - <!-- *NEED INPUT*: a pointer/link to where the demo prompts and the `flaky_fetch` tool live as code (a `demos/` subdir? inline in a notebook?) — not yet decided. -->
 - <!-- *NEED INPUT*: are *parallel tool calls* (multiple `.tool_calls` entries in one assistant `AIMessage`) shown in Demo 1 as planned, or deferred to the lab? Mirrors the same open question in [objectives.md](objectives.md). -->

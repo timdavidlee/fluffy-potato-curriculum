@@ -19,7 +19,7 @@ estimated duration: 10
 [L03](../L03/objectives.md) wrapped a *single* LLM call as a typed node. L04 wires **several**
 nodes into a fixed, **directed acyclic graph (DAG)** — a **workflow**, where *you* wire the path
 and the model never decides what runs next. [L05](../L05/objectives.md) then adds a **conditional**
-edge (routing) on top of the same primitives; L14 later adds the one thing that turns a workflow
+edge (routing) on top of the same primitives; L11 later adds the one thing that turns a workflow
 into an agent: a cycle.
 
 Up to here you have written control flow as plain Python: a single call (L01–L02), one wrapped
@@ -32,7 +32,7 @@ you laid out, not by the model.
 If you remember nothing else from L04, remember this: **several nodes, wired in a fixed order, is
 a pipeline you can inspect as data.** Said a few ways:
 
-1. A **workflow** runs through predefined paths *you* laid out. An **agent** (L14) lets the *model*
+1. A **workflow** runs through predefined paths *you* laid out. An **agent** (L11) lets the *model*
    direct its own process. (The industry distinction from Anthropic's *Building Effective Agents*.)
 2. **Prompt chaining** decomposes one task into a fixed sequence of focused steps — each a
    separate, small model call, not one mega-prompt doing everything.
@@ -66,7 +66,7 @@ the hand-rolled `potato_llm` seam from L01–L02 — no new departure here, just
 
 L04's demo also gives you a first, optional **taste** of watching a workflow run in Langfuse — but
 the full tracing skill (reading a structured trace, comparing runs, diagnosing failures) is
-**L11's** job, still several lessons away. If Langfuse isn't configured, the demo runs exactly the
+**L12's** job, still several lessons away. If Langfuse isn't configured, the demo runs exactly the
 same; you just won't see the spans.
 
 The single sentence to leave L04 with: **"You just wired several steps together — next lesson, one

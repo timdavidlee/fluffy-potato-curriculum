@@ -111,7 +111,7 @@ A small multi-turn script for the second half of the demo: a 4-turn conversation
 **What to highlight:**
 
 - The model *agreed* to a contract. The model did not *enforce* the contract. The parser is the enforcement.
-- "Fail loudly" is the right design principle. Silent fallbacks (e.g. returning an empty dict on parse failure) hide bugs that compound in agent loops (foreshadow L10/L11).
+- "Fail loudly" is the right design principle. Silent fallbacks (e.g. returning an empty dict on parse failure) hide bugs that compound in agent loops (foreshadow L10/L12).
 - Structured output composes with everything that follows. Tool calling (L07) is structured output where the schema is a function signature. Reasoning (L06) often wraps a structured `<answer>...</answer>` around free-form thinking. The discipline starts here.
 - Cost callback (L01): asking for a tight schema typically *reduces* output tokens vs. asking for prose. Structured output is often a cost win as well as a parseability win.
 
@@ -143,7 +143,7 @@ A small multi-turn script for the second half of the demo: a 4-turn conversation
 3. Run all five through variant (3) — diverse few-shot, with examples placed as alternating turns. Show the improvement. Highlight that the model now correctly uses the team's exact label wording.
 4. Re-run variant (3) with examples as a single block in the user message. Compare — typically similar quality, slightly different cost profile (more verbose framing). Discuss the trade-off out loud.
 5. Show the input token count for variants (1), (2), and (3) side by side. Variant (3) is markedly more expensive *every call*. This is the cost-of-few-shot beat (L01 callback).
-6. Final beat: take the off-distribution ticket and add a sixth few-shot example that resembles it. Re-run. Show the model now handling it. Then make the philosophical point: few-shot is *editable* — every time you find a failure, you can add an example. That is its power *and* its trap (the example list grows, the cost grows, and at some point you should reach for a different tool — fine-tuning, retrieval (L21), or a different model class (L13)).
+6. Final beat: take the off-distribution ticket and add a sixth few-shot example that resembles it. Re-run. Show the model now handling it. Then make the philosophical point: few-shot is *editable* — every time you find a failure, you can add an example. That is its power *and* its trap (the example list grows, the cost grows, and at some point you should reach for a different tool — fine-tuning, retrieval (L21), or a different model class (L14)).
 
 **What to highlight:**
 

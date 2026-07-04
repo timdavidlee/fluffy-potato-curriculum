@@ -119,7 +119,7 @@ Show `tiktoken` counts on screen; run Anthropic's count-tokens endpoint on **Cla
 
 ## Demo 3.5 — A bigger model is a sharper predictor (Objective 3, model-scale beat)
 
-**Goal:** show, mechanistically, that a more capable model concentrates more probability on the sensible next token — *not* how to choose a model (that is L13).
+**Goal:** show, mechanistically, that a more capable model concentrates more probability on the sensible next token — *not* how to choose a model (that is L14).
 
 **Pre-flight:**
 
@@ -130,7 +130,7 @@ Show `tiktoken` counts on screen; run Anthropic's count-tokens endpoint on **Cla
 1. Reuse Demo 1's seed. Run all three models on the *same* string and print each one's top-5 next-token probabilities side by side.
 2. Read the trend aloud: as the model grows, probability mass **concentrates** on the right continuation (` oxygen` climbs ~0.46 → ~0.63 → ~0.84 across 124M → 355M → 774M) and the long tail of noise thins out. (These numbers are validated on the current `transformers`/`gpt2*` weights; re-run once before class in case weights update.)
 3. Run the harder seed. The small model spreads its bets or picks something wrong; the large model commits correctly. Same loop, better predictor.
-4. Draw the boundary explicitly: "more capable = sharper distribution. *Which* model or provider you'd actually pick for a given capability — a vision model for OCR, a strong reasoner for planning, a cheap fast model for execution, trading capability against cost and latency — is a real decision we make in **L13**. Today we're only establishing *that* a more capable model sharpens prediction."
+4. Draw the boundary explicitly: "more capable = sharper distribution. *Which* model or provider you'd actually pick for a given capability — a vision model for OCR, a strong reasoner for planning, a cheap fast model for execution, trading capability against cost and latency — is a real decision we make in **L14**. Today we're only establishing *that* a more capable model sharpens prediction."
 
 **What to highlight:**
 
