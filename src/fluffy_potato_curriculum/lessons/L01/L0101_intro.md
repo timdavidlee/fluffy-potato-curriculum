@@ -60,10 +60,15 @@ Claude or to an OpenAI model:
 from fluffy_potato_curriculum.potato_llm import AnthropicClient, Message
 
 client = AnthropicClient()  # reads ANTHROPIC_API_KEY from the environment
-reply = client.chat([Message.user("Say hello in one word.")])
+reply = await client.achat([Message.user("Say hello in one word.")])  # in a notebook cell
 print(reply.text)            # the assistant's answer
 print(reply.usage)           # input_tokens / output_tokens — the bill
 ```
+
+We `await client.achat(...)` — the **async** call. Every client also has a blocking
+`client.chat(...)`, but the course defaults to the async one, so you `await` model calls from the
+start (a notebook cell lets you `await` at the top level). *Why* async is the default — overlapping
+many model calls instead of waiting on each in turn — is covered in the **K05** prework.
 
 The `usage` field is the through-line of this whole lesson: it is the receipt for the call.
 
