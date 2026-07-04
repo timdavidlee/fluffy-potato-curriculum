@@ -4,6 +4,10 @@ The primary design document for this curriculum. AI agents generating lessons
 or labs should read this first to understand the course's intent, then drill
 into the per-lesson `objectives.md` files under `./lessons/L<NN>/`.
 
+> **Keep in sync:** the repo [`README.md`](../../README.md) surfaces the lesson plan below
+> (topics list) and links here. When you add, remove, retitle, or reorder a lesson, update the
+> README's Documentation → Topics list too — alongside `tracks.toml` / `SYLLABUS.md`.
+
 ## Course summary
 
 The goal of this course is to teach the fundamentals of AI agents, starting with LLM token basics, all the way to subagent architecture so that students can experience the full lifecycle of agent and tool design.
