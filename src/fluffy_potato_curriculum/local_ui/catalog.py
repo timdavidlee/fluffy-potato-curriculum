@@ -28,8 +28,9 @@ from fluffy_potato_curriculum.local_ui.models import (
 LESSONS_DIR = Path(__file__).resolve().parent.parent / "lessons"
 """The real lesson-materials root, resolved relative to this file."""
 
-# Item files are named ``L<NN><II>_<kind>.<ext>`` — e.g. ``L1102_lecture.ipynb``.
-_ITEM_RE = re.compile(r"^L(?P<lesson>\d{2})(?P<order>\d{2})_(?P<kind>[a-z_]+)$")
+# Item files are named ``<L|K><NN><II>_<kind>.<ext>`` — e.g. ``L1102_lecture.ipynb`` or the
+# prework ``K0302_demo.ipynb``. ``lesson`` captures the full id (letter + number).
+_ITEM_RE = re.compile(r"^(?P<lesson>[KL]\d{2})(?P<order>\d{2})_(?P<kind>[a-z_]+)$")
 
 _EXT_TO_FORMAT: dict[str, ItemFormat] = {".md": "markdown", ".ipynb": "notebook"}
 
@@ -39,6 +40,8 @@ _KIND_LABELS: dict[ItemKind, str] = {
     "lab_empty": "Lab (empty)",
     "lab_solutions": "Lab (solutions)",
     "proctor_notes": "Proctor notes",
+    "guide": "Guide",
+    "demo": "Demo",
 }
 
 # The kinds that appear as the ``_<kind>`` suffix on numbered item files. Values
@@ -48,6 +51,8 @@ _NUMBERED_KINDS: dict[str, ItemKind] = {
     "lecture": "lecture",
     "lab_empty": "lab_empty",
     "lab_solutions": "lab_solutions",
+    "guide": "guide",
+    "demo": "demo",
 }
 
 # PROCTOR_NOTES.md has no numeric index; sort it after every numbered item.
@@ -134,7 +139,7 @@ def _scan_items(lesson_dir: Path, lesson_id: str) -> list[LessonItem]:
         if fmt is None:
             continue
         match = _ITEM_RE.match(path.stem)
-        if match is None or match.group("lesson") != lesson_id[1:]:
+        if match is None or match.group("lesson") != lesson_id:
             continue
         kind = _NUMBERED_KINDS.get(match.group("kind"))
         if kind is None:
@@ -191,7 +196,7 @@ def load_lessons(lessons_dir: Path = LESSONS_DIR) -> list[LessonSummary]:
     tracks = load_tracks(lessons_dir)
     summaries: list[LessonSummary] = []
     for path in sorted(lessons_dir.iterdir()):
-        if not path.is_dir() or not re.fullmatch(r"L\d{2}", path.name):
+        if not path.is_dir() or not re.fullmatch(r"[KL]\d{2}", path.name):
             continue
         lesson_id = path.name
         items = _scan_items(path, lesson_id)
@@ -210,7 +215,7 @@ def load_lessons(lessons_dir: Path = LESSONS_DIR) -> list[LessonSummary]:
 
 def load_lesson_detail(lesson_id: str, lessons_dir: Path = LESSONS_DIR) -> LessonDetail | None:
     """Full detail (items included) for one lesson, or ``None`` if it doesn't exist."""
-    if not re.fullmatch(r"L\d{2}", lesson_id):
+    if not re.fullmatch(r"[KL]\d{2}", lesson_id):
         return None
     lesson_dir = lessons_dir / lesson_id
     if not lesson_dir.is_dir():
