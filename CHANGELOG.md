@@ -1,3 +1,9 @@
+## v0.10.0 (2026-07-04)
+
+### Feat
+
+- **L08**: add Demo 5 anti-pattern capstone notebook (tool soup) (#94)
+
 ## v0.9.1 (2026-07-04)
 
 ### Refactor
