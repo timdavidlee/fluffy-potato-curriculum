@@ -233,10 +233,13 @@ Tags: `new-demo` (new material) > `add-coda`+flag (coda **and** a drift to recon
 None of the codas need a new fixture — L08 is the only lesson requiring genuinely new assets.
 
 **A. New material (do first)**
-1. **L08 — `new-demo`** → build `L0811_lecture.ipynb` (Demo 5). Only genuinely new asset: the
-   ~8-tool **soup-registry fixture** + a live "What's Alex's email?" selection-degradation run on
-   Sonnet 4.6 → Haiku 4.5. Reuse existing Demo 2–4 bad-design variants for the other three; the
-   4-name recap is already in `L0802` §8.1/§4.4. Keep the fixture lesson-local.
+1. **L08 — `new-demo` — DONE (2026-07-04).** Built `L0811_lecture.ipynb` (Demo 5): the ~8-tool
+   **soup-registry fixture** (six overlapping user-lookup tools + two distractors, lesson-local) +
+   the "What's Alex's email?" selection-degradation beat — offline-by-default on the scripted
+   `FakeModel` (unstable picks across runs + a chained-two), with an optional `if LIVE:` cell on real
+   Sonnet 4.6 → Haiku 4.5. Beats 2–4 are the existing Demo 2–4 bad-design variants *named* (recap);
+   the 4-name recap in `L0802` §8.1/§4.4 was cross-referenced (not duplicated). Added a `PROCTOR_NOTES.md`
+   L0811 section and updated the L0802 demo list. Restart-run-all passes keyless; full gate green.
 
 **B. Coda + a drift to reconcile (decide the drift as you go)**
 2. **L04 — `add-coda` (2 of 4) + flag** → once L04 stage-2 regenerates *sequential-only*, add a coda
