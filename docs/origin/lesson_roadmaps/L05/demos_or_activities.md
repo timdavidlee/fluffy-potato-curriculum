@@ -154,6 +154,31 @@ The teacher should have, before the first demo starts:
 
 - This demo is low-risk (no live code to break). If a student pushes back with "but the classifier in Demo 2 already feels like the model deciding," reach back to Demo 2 and Demo 3's framing together: the model produced a *label*; a *user* produced a *value with no model at all*; in both cases a developer-written routing function did the actual choosing. Only in the L11 sketch does the *model's own tool-call decision* get read directly by the routing function, with no developer-authored label in between.
 
+## Common pitfalls coda — naming L05's three gotchas
+
+**Shape note:** a short **"common pitfalls" coda**, not a new live demo — L05 already *touches* each of these across Demos 1, 2, and 4. Its job is to **name** them as portable gotchas, restate the cure in a line, and pin each back to where the room saw it. Budget ~5 minutes as a recap slide. Follows the [L23 Demo 5](../L23/demos_or_activities.md#demo-5--the-three-composition-anti-patterns-objective-5) anti-pattern-beat template (name it → show it break → state the cure → tie to the payoff), like the [L01](../L01/demos_or_activities.md#common-pitfalls-coda--naming-l01s-four-gotchas) and [L04](../L04/demos_or_activities.md#common-pitfalls-coda--naming-l04s-two-gotchas) codas. Two of these three — the workflow-vs-agent and brittle-branch gotchas — are the ones the [L04/L05 split](objectives.md) moved *out* of L04's coda and into L05, which now owns the routing material; L05 adds the third (the decider slip) on top.
+
+**Goal:** turn the workflow-vs-agent close (Demo 4) and the router/fallback beat (Demo 2) into three named routing gotchas a student can catch when they wire their own conditional edge.
+
+**Pre-flight:**
+
+- Nothing new to load. One recap slide; the Demo 2 router diagram and the Demo 4 L11 back-edge sketch still on screen to point back at.
+
+**Live script (recap — point back, don't re-run):**
+
+1. **Workflow where an agent is needed — or the reverse.** ❌ Reaching for an agent when the task has a known shape (more cost, less predictability, harder to debug), or forcing a rigid routed DAG when the steps genuinely can't be known in advance. Point back at Demo 4 ("what L11 changes"). **Cure:** default to the simplest shape that fits — a router is right whenever the set of possible paths is known ahead of time and picking among them is a classification, lookup, or user choice; a back-edge (agency) is a deliberate choice, not a nicety.
+2. **Brittle branch conditions.** ❌ A routing function that assumes the classifier returns one of the expected labels and `KeyError`s (or silently mis-routes) when the model returns something off-menu. Point back at Demo 2's ambiguous ticket. **Cure:** validate the label is in the allowed set (L02's [enum-as-contract](../L02/objectives.md)) and always wire a default / `END` branch — a router that only knows how to succeed isn't done.
+3. **Letting the model own the branch by accident.** ❌ Wiring the routing function to route on a *raw model output* — the model's free-form reply used as the destination — instead of on a small **validated label** your plain-Python code branches on. That quietly hands the *model* the choice of path: the L05→L11 line crossed without deciding to. Point back at Demo 1's five-hop trace (the routing function *reads* state **you** control) and Demo 4's precise L05-vs-L11 delta. **Cure:** the classifier writes a constrained label (again L02's enum-as-contract); the developer's routing function reads *that* and owns the branch. If you actually want the model to choose the path, build an agent ([L11](../L11/objectives.md)) on purpose — don't back into one.
+
+**What to highlight:**
+
+- **#1 and #3 are the workflow-vs-agent line at two altitudes**, and keeping that line sharp is L05's whole spine (Demo 4): #1 is choosing the wrong *shape* on purpose (an agent where a router would do); #3 is the *mechanism* slipping — the model taking the wheel by accident because the routing function read the model's raw output instead of a label you validated. #2 is the different axis: routing *robustness*, not who decides.
+- **#3 points straight forward to [L11](../L11/objectives.md)** (where reading the model's own decision is the whole point, on purpose) and **#2's cure leans back on [L02](../L02/objectives.md)** (the structured-output-by-instruction discipline). Name the links, **don't re-teach them here.**
+
+**If a student pushes back:**
+
+- "The Demo 2 classifier is a model — isn't that the model deciding (gotcha #3)?" No — the model produced a *label*; the developer's plain-Python routing function read that label and picked the edge (Demo 1's trace). #3 only bites when you skip the validated-label step and let the model's raw output *be* the branch. The model doing work inside a node is fine; the model owning the edge is the line.
+
 ## Optional demo — evaluate the router (carry L04's eval habit forward)
 
 If time allows, close by reinforcing the same habit L04's optional demo introduced, now applied to routing instead of chaining. A router is, if anything, an *easier* eval target than a linear chain — every case is "given this input, was the branch correct?"
