@@ -100,7 +100,7 @@ estimated duration: 22
   hand-rolled loop became LangGraph's `create_agent`; **the `load_skill` tool + catalog you added
   to that agent is Agent Skills.** You met the mechanism before the product, so the product reads
   as familiar, not magic.
-- We are **not** teaching the Agent SDK's mechanics here — just landing that the concept and the
+- You're not learning the Agent SDK's mechanics here — just landing that the concept and the
   product are the same idea.
 
 ## section 5. Capstone — and where you go next
