@@ -1,3 +1,9 @@
+## v0.16.0 (2026-07-05)
+
+### Feat
+
+- **L01**: add missing diagram directives to lecture outline
+
 ## v0.15.0 (2026-07-05)
 
 ### Feat
