@@ -7,8 +7,8 @@ estimated duration: 110
 ```
 
 > **Lesson:** L02. **Roadmap:** [objectives.md](../../../../docs/origin/lesson_roadmaps/L02/objectives.md).
-> This is the written reference lecture — thorough on purpose, so a student who missed the verbal
-> delivery can rebuild the lesson from the page. The live demos are split one per lever
+> This page is your written reference — thorough on purpose, so if you missed the live session you can
+> rebuild the whole lesson from the page. The live demos are split one per lever
 > ([L0203](L0203_lecture.ipynb) roles, [L0205](L0205_lecture.ipynb) structured output,
 > [L0207](L0207_lecture.ipynb) few-shot); hands-on practice is in the L02 labs
 > (L0204 / L0206 / L0208).
@@ -99,8 +99,8 @@ estimated duration: 110
   "always-true context," not "inviolable rules."
 - Anything close to a **security or policy guarantee belongs outside the model** (in your code),
   not inside the system prompt. The system prompt is not a sandbox.
-- Common confusion to kill now: *"the system message is enforced; the user can't override it."* No —
-  strongly weighted ≠ enforced.
+- A misconception worth dropping right now: *"the system message is enforced; the user can't override
+  it."* It isn't — strongly weighted ≠ enforced.
 
 ### slide 2.5 Multi-turn, and the first-call vs. Nth-call axis
 
@@ -130,7 +130,7 @@ estimated duration: 110
 - In L02 we get structure **by instruction alone**: we *tell* the model the exact shape in the
   prompt ("Return a single JSON object with exactly these keys, no prose") and then parse the reply.
 - diagram: prompt with an explicit schema spec → model reply (hopefully JSON) → `parse()` → dict.
-- One-line foreshadow (do not teach here): *in production you'd use Anthropic's **tool-use-as-schema**
+- A quick look ahead — you won't need it yet: *in production you'd use Anthropic's **tool-use-as-schema**
   to force schema-conformant output — that's L07. The parsing discipline below still applies there,
   because tool-call arguments can also be malformed.*
 
@@ -188,8 +188,8 @@ estimated duration: 110
   input, to show the model the desired output shape or behavior.
 - Few-shot is **behavior conditioning, not teaching.** The model's underlying capabilities don't
   change; you are shifting the *in-context distribution*. Frame it as **showing, not teaching**.
-- Common confusion to kill: *"few-shot teaches the model new things."* No — it conditions this one
-  call's behavior; nothing about the model is updated.
+- A misconception worth dropping: *"few-shot teaches the model new things."* It doesn't — it conditions
+  this one call's behavior; nothing about the model is updated.
 
 ### slide 4.2 Two placements, one trade-off
 
@@ -260,7 +260,7 @@ estimated duration: 110
 - **Mixed-schema:** pull a *list* of heterogeneous items whose fields differ (e.g. line-items where a
   product row has `sku` + `qty` and a discount row has `code` + `percent`). Ask for a JSON array of
   objects and validate each item against the shape it claims to be.
-- Failure to name out loud: the model **invents** a field it wasn't asked for, or **drops** one that
+- The failure to watch for: the model **invents** a field it wasn't asked for, or **drops** one that
   was in the text — the required-keys check from section 3 is exactly what catches it.
 
 ### slide 5.3 Classification — sort into a fixed label set
@@ -300,8 +300,8 @@ estimated duration: 110
 - The contract to validate: the count is exactly N, and each item respects the bound (e.g.
   `≤ 8 words`). **A constraint you don't check is a constraint the model is free to miss** — and it
   will, some runs.
-- Failure to name: the model returns 4 or 6 items, or one item blows the length cap. The validator
-  turns that into a caught error instead of a downstream surprise.
+- The failure to watch for: the model returns 4 or 6 items, or one item blows the length cap. The
+  validator turns that into a caught error instead of a downstream surprise.
 
 ### slide 5.6 Summarization and the transformation family
 
@@ -347,7 +347,7 @@ estimated duration: 110
 
 ### slide 6.2 Four prompting anti-patterns to catch yourself committing
 
-- The demos showed each of these break; naming them makes them catchable in your *own* prompts. All
+- You saw each of these break in the demos; putting a name to them makes them easy to catch in your *own* prompts. All
   four share one root: **treating a strong nudge as a hard guarantee.** A role's weighting, a JSON
   contract, an example's pull, a system prompt's authority — each is *best-effort*, and L02's whole
   job is building the validate-don't-assume reflex.

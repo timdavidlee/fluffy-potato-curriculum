@@ -16,6 +16,37 @@ The goal of this course is to teach the fundamentals of AI agents, starting with
 
 The target audience will be semi-techical students that have basic python familiarity.
 
+### Voice & point of view
+
+All student-facing materials (lectures, labs, prework guides) are written **to the student**, in
+the second person ("you"). The student is the reader — not a proctor, not the author. Two rules
+follow:
+
+- **Address the learner, not the presenter.** Write what the *student* should understand or do, and
+  keep presenter/author meta-instructions out of the material — no "Teach X so you can debug it,"
+  "name them now," "Defend the choice against…," or "(do not teach here)." State the point; don't
+  narrate the act of teaching it.
+- **Match the register to the material type.** The point of view is always the student; the
+  *register* differs by artifact:
+
+| Material | Register | Reads like |
+| --- | --- | --- |
+| **Lecture** (`_lecture.md` / `.ipynb`) | **Coach** — warm, mentor tone, medium length | someone guiding you through the idea ("here's the one line to hold onto…"), not reciting at you |
+| **Lab** (`_lab_*.ipynb`) | **Punchy** — terse, energetic, high-signal | short, direct task prompts with momentum ("Now break it on purpose.") |
+| **Prework guide** (`K<NN><II>_guide.md`) | **Runbook** — procedural, "do this → here's why" | numbered steps a student follows alone, with concept callouts inline |
+
+Register controls *how the material reads*, not *how much it teaches*. A lecture stays thorough
+(see **Lecture Materials** below) while sounding like a coach; a lab stays complete while sounding
+punchy. Depth is set by the content; register is set by the tone.
+
+- **Keep table-related text as concise as possible — in both lectures and labs.** The `table:`
+  lead-in description *and* the cells themselves should be short noun phrases or fragments, not full
+  sentences. A table is a scannable reference, so trim it hard: if a cell wants a full sentence, the
+  point usually belongs in the surrounding prose, not the table.
+
+Per-format specifics and before/after exemplars belong in [LECTURES.md](LECTURES.md) (Coach) and
+[LAB_DESIGN.md](LAB_DESIGN.md) (Punchy); this section is the course-wide rule they inherit.
+
 ## Lecture Materials
 
 The expectation is that students will not verbally be able to absorb all the taught
