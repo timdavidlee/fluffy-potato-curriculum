@@ -90,7 +90,7 @@ agent = create_agent(model, [calculator, lookup, flaky_fetch], system_prompt=...
 ### slide 3.2 Map every piece back to what you wired in L10
 
 - table: each piece you wired **by hand** in L10's `StateGraph`, and what `create_agent` gives you
-  for it. If a student can't do this mapping, slow down — *this mapping is the objective.* Two rows
+  for it. If you can't make this mapping yet, slow down — *this mapping is the objective.* Two rows
   are the payoff: your hand-written `route` **is** the prebuilt `tools_condition`, and your
   `ToolNode` is the *same* `ToolNode` — the framework just packaged what you already wrote.
 
@@ -146,9 +146,9 @@ agent = create_agent(model, [calculator, lookup, flaky_fetch], system_prompt=...
 - Next demo ([L1103](L1103_lecture.ipynb)): *build* this agent in one `create_agent` call, run it on
   the two L10 tasks for behavioral equivalence, read the returned messages, and render this exact
   graph from the real agent — it matches the sketch above.
-- Forward pointer (don't teach it): the shallow agent `create_agent` gives you *is* a named pattern —
-  **ReAct** (reason, act, repeat). L15 drops below the one-liner to build that graph explicitly and
-  surveys the others (plan-and-execute, supervisor, …). Today you have the one-liner and a picture
-  of what it wraps.
+- A quick look ahead, no need to chase it yet: the shallow agent `create_agent` gives you *is* a
+  named pattern — **ReAct** (reason, act, repeat). L15 drops below the one-liner to build that
+  graph explicitly and surveys the others (plan-and-execute, supervisor, …). Today you have the
+  one-liner and a picture of what it wraps.
 
 [↑ Back to top](#from-loop-to-graph-draw-what-create_agent-wraps)
