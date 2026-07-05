@@ -17,25 +17,25 @@ estimated duration: 10
 
 ## Where this lesson sits
 
-L02 was about the *shape* of a prompt — roles, structured output, few-shot. It taught you to ask
-the model for what you want, in the form you want. L06 is about a different lever: the *content* of
-the prompt, specifically prompting techniques that make the model produce **visibly better answers
+In L02 you worked on the *shape* of a prompt — roles, structured output, few-shot. That taught you
+to ask the model for what you want, in the form you want. Here you pick up a different lever: the
+*content* of the prompt — prompting techniques that make the model produce **visibly better answers
 on harder problems** by surfacing intermediate reasoning before it commits to a final answer.
 
-The whole lesson rests on one claim, which the demos make concrete:
+The whole lesson rests on one claim, and the demos will make it concrete for you:
 
 > *Reasoning is a tokens-on-the-page phenomenon, not a separate model mode. The model isn't
 > "thinking harder" — it is generating intermediate tokens that condition the tokens that come
 > after.*
 
-That single framing explains both why these techniques **help** (more intermediate steps draw the
-final answer from a better distribution) *and* why they sometimes **hurt** (more tokens means more
-chances to drift, more latency, more cost).
+That single framing explains both why these techniques **help** you (more intermediate steps draw
+the final answer from a better distribution) *and* why they sometimes **hurt** (more tokens means
+more chances to drift, more latency, more cost).
 
 ## The four techniques, in one breath
 
-L06 hands you four tools for shaping reasoning. They are the bridge between "prompting" (L02) and
-"the model decides whether to call a tool" (L07 — that decision is itself a reasoning step).
+You'll pick up four tools here for shaping reasoning — the bridge between "prompting" (L02) and
+"the model decides whether to call a tool" (L07, where that decision is itself a reasoning step).
 
 - **Chain-of-thought (CoT)** — ask for step-by-step reasoning before the answer. The trigger can be
   a plain *"let's think step by step,"* an explicit numbered scaffold, or a worked-example few-shot
@@ -48,12 +48,12 @@ L06 hands you four tools for shaping reasoning. They are the bridge between "pro
   *sampling technique, not a correctness oracle*: it works only when the critic has information the
   first pass lacked (a different framing, a different model, retrieved context, ground truth).
 - **Knowing when *not* to reason** — CoT on a two-token classification is pure overhead; on some
-  tasks the model "talks itself into" a wrong answer. The skill L06 builds is making this trade-off
-  *consciously*.
+  tasks the model "talks itself into" a wrong answer. The skill you're building here is making this
+  trade-off *consciously*.
 
 ## Three mental models to carry out of L06
 
-Each demo lands one sentence. If you remember nothing else, remember these:
+Each demo lands one sentence for you. If you remember nothing else, hold onto these:
 
 1. **Reasoning is just more tokens.** CoT works because predicting *"the answer is X"* after
    *"step 1, step 2, step 3"* draws from a different distribution than predicting it cold. Nothing
@@ -67,10 +67,10 @@ Each demo lands one sentence. If you remember nothing else, remember these:
 
 ## How L01 and L02 carry forward
 
-Every L06 technique has an L01 cost shadow, and we keep printing the numbers:
+Every L06 technique has an L01 cost shadow, and you'll keep seeing the numbers:
 
 - **Reasoning is not free.** Every CoT or scratchpad token is paid for (L01's per-token cost), adds
-  latency, and competes for the context window. L06 is the first lesson where you must consciously
+  latency, and competes for the context window. Here's the first place you'll need to consciously
   weigh reasoning *quality* against *cost*.
 - **The scratchpad contract is L02's structured-output discipline reused.** You ask for
   `<thinking>…</thinking><answer>…</answer>`, and you **parse defensively** — the model agreed to the
@@ -80,13 +80,14 @@ Every L06 technique has an L01 cost shadow, and we keep printing the numbers:
 
 ## What L06 deliberately does *not* teach
 
-This lesson is scoped to **prompt-only** reasoning:
+This lesson stays scoped to **prompt-only** reasoning:
 
 - **Not extended-thinking / thinking-mode APIs.** Some providers expose a dedicated reasoning mode.
-  L06 stays prompt-only on purpose — the point is to see that reasoning *is* tokens, which a
-  built-in mode would hide. <!-- *NEED INPUT*: confirm extended-thinking stays out of scope, per the open question in objectives.md. -->
+  You're staying prompt-only on purpose here — the point is to see that reasoning *is* tokens, which
+  a built-in mode would hide. <!-- *NEED INPUT*: confirm extended-thinking stays out of scope, per the open question in objectives.md. -->
 - **Not tool calling.** Deciding *whether* to call a tool is a reasoning step, but the tool-calling
-  protocol itself is **L07**. L06 hands L07 a model that already reasons before it answers.
+  protocol itself is **L07** — you'll carry a model that already reasons before it answers straight
+  into that lesson.
 
 The one sentence to leave L06 with:
 
