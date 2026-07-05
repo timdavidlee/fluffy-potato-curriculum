@@ -35,8 +35,9 @@ used as the filename prefix (so `L01` → files `L01<NN>_...`).
 **1. Course context + specs (the rubric):**
 
 - `docs/origin/CURRICULUM_PRD.md` — course intent, target audience, "Lecture Materials"
-  depth-bias, and the lesson-plan row for `L<NN>` (title + subgoals). This row is the contract
-  the lesson must satisfy.
+  depth-bias, the lesson-plan row for `L<NN>` (title + subgoals), and `### Voice & point of
+  view` — the register each artifact type must be written in (the rubric for lens 6 below).
+  This row is the contract the lesson must satisfy.
 - `docs/origin/CLAUDE.md` — roadmap folder conventions and the one-line spec for each roadmap
   artifact.
 - `docs/origin/LECTURES.md` — lecture + intro format spec (metadata, slide-outline vs. notebook,
@@ -123,12 +124,21 @@ Evaluate the lesson along these lenses (all by default, or just the one named in
    differing; `_empty` outputs cleared; slide-outlines use exactly three heading levels;
    notebooks within the length cap; `PROCTOR_NOTES.md` has a section per lab problem.
 
-6. **Neighbor hand-off.** Reinforcing an earlier lesson's concept by name + link is good;
+6. **Voice / point of view.** Against `CURRICULUM_PRD.md` `### Voice & point of view`: is every
+   student-facing artifact written in second person, addressed to the student (lectures/intros in
+   Coach register per `LECTURES.md` `## Voice`; labs in Punchy register per `LAB_DESIGN.md`
+   `## Voice`)? Flag third-person asides about "the student"/"students," presenter/author
+   meta-instructions ("Teach *what the invariant is*," "name them now," "(do not teach here)"),
+   and reference-header or notebook-header language that talks *about* the reader instead of *to*
+   them (e.g. "teacher demo N" headers). Register is a tone issue, not a depth issue — don't flag
+   thoroughness as a violation, and don't suggest trimming content to "fix" voice.
+
+7. **Neighbor hand-off.** Reinforcing an earlier lesson's concept by name + link is good;
    re-teaching it end-to-end is a bug, as is pre-empting the next lesson's material. Flag full
    double-coverage in either direction, and a bridge sentence that doesn't match what the
    neighbor actually does.
 
-7. **Code / reproducibility (spot-check, don't run).** Teaching code should model the strict
+8. **Code / reproducibility (spot-check, don't run).** Teaching code should model the strict
    style (typed defs, `potato_llm` seam not raw SDKs, clarity over cleverness). Notebooks should
    be authored for linear restart-run-all. Flag obvious violations from reading; note that a live
    restart-run-all / `uv` gate was *not* executed (this skill is read-only) so the user can run

@@ -44,7 +44,9 @@ If `lesson` is missing, or its roadmap directory doesn't exist, ask before doing
 ## Read first, in order
 
 1. **`docs/origin/CURRICULUM_PRD.md`** — course intent, target audience, the "Lecture Materials"
-   depth-bias, and the lesson-plan row for the requested lesson (title + subgoals).
+   depth-bias, the lesson-plan row for the requested lesson (title + subgoals), and
+   `### Voice & point of view` — the register every artifact must be authored in from the start
+   (see step 3 below).
 2. **The lesson's roadmap docs** — `objectives.md`, then `demos_or_activities.md`, then
    `external_or_additional_resources.md` if present. These define *what* to build.
 3. **The format guides** — `docs/origin/LECTURES.md` (lecture + intro conventions, slide-outline
@@ -87,7 +89,13 @@ draft-ignore rule governs lesson content, not the specs that say how to shape it
    `L0101_intro.md`, `L0102_lecture.ipynb`, `L0103_lab_empty.ipynb` + `L0103_lab_solutions.ipynb`,
    etc. `LL` is the zero-padded lesson number.
 
-3. **Author each artifact** to its format guide:
+3. **Author each artifact** to its format guide, **in the register CURRICULUM_PRD.md's
+   `### Voice & point of view` assigns to its type** — second person, addressed to the student,
+   from the first draft (lectures/intros → Coach per `LECTURES.md` `## Voice`; labs → Punchy per
+   `LAB_DESIGN.md` `## Voice`). Do not write presenter/author meta-instructions ("Teach *what the
+   invariant is*," "name them now," "(do not teach here)," third-person asides like "so a student
+   who missed the verbal delivery…") anywhere in student-facing prose — register controls *how it
+   reads*, not *how much it teaches*, so keep the same depth, just addressed to the reader:
    - **Metadata first.** Every lecture and lab declares `title` / `keywords` / `estimated
      duration` — a fenced YAML block under the `#` title for `.md`, or the first markdown cell for
      `.ipynb`. `title` must match the `H1`.
