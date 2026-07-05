@@ -1,3 +1,9 @@
+## v0.17.0 (2026-07-05)
+
+### Feat
+
+- **L01**: build L0102 lecture HTML deck (Graph Canvas)
+
 ## v0.16.0 (2026-07-05)
 
 ### Feat
