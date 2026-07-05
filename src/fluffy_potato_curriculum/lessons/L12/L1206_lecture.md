@@ -21,7 +21,7 @@ estimated duration: 20
 
 ### slide 1.2 The tool for this course: self-hosted Langfuse
 
-- text: **Langfuse** is an open-source (MIT) LLM observability platform. The cohort runs **one shared instructor instance** — you get a base URL + project keys, no per-student signup, no seat cost.
+- text: **Langfuse** is an open-source (MIT) LLM observability platform. The cohort runs **one shared instructor instance** — you get a base URL + project keys, no signup, no seat cost.
 - text: it ingests **OpenTelemetry** spans. That is *why* `TraceEvent` was shaped the way it was in `common/tracing.py` — an approximate OTel/Langfuse shape — so exporting is a natural step, not a rewrite.
 - text: keys load through `common/config.py` (the pydantic-settings seam), **never hard-coded** — the same stance as every other live call in the course.
 - diagram: a box "your instrumented `agent_graph.run(...)`" with an arrow labeled "export (langfuse SDK / OTLP)" pointing to a box "shared Langfuse dashboard"; a second arrow from "L11 LangGraph agent" pointing at the *same* dashboard, to foreshadow that later traces land here too.
@@ -75,7 +75,7 @@ estimated duration: 20
 
 - text: filter the project to the failing run, expand the offending observation, read its `inputs` and `error`.
 - text: it's the *same reading* you did on the `.jsonl` in `L1203_lab` — wrong arguments, a runaway's repeated calls, a tool error — only faster to find at scale.
-- text: the dashboard does not replace the skill; it accelerates a skill you already have. A student who never read a raw trace would treat the dashboard as a mystery.
+- text: the dashboard does not replace the skill; it accelerates a skill you already have. Without that reading practice, the dashboard would just look like a mystery — you've already put in the work that makes it legible.
 
 ### slide 4.2 Compare two runs (objective 4), now visual
 
@@ -88,7 +88,7 @@ estimated duration: 20
 
 ### slide 5.1 It's additive, never a gate
 
-- text: a student without the Langfuse instance configured **already finished** objectives 1–4 on the in-memory / `.to_jsonl()` trace. This step is the payoff, not a prerequisite.
+- text: without the Langfuse instance configured, you've **already finished** objectives 1–4 on the in-memory / `.to_jsonl()` trace. This step is the payoff, not a prerequisite.
 - text: if the instance is unreachable on the day, a screenshot walk-through of the timeline, a GENERATION, and a two-run comparison teaches the same mapping. The live click-through is a bonus.
 
 ### slide 5.2 This is the cohort's one observability home
@@ -105,7 +105,7 @@ estimated duration: 20
 
 - text: you just sent your trace to Langfuse. That is the **observability plane** — sampled, TTL'd, keyed by `trace_id`, read by you and the eval harness to answer *"what did the run do?"*
 - text: it is **not** where the data your agent *produces* should live. If a run extracts an invoice, scrapes a table, or generates a record, that hard data is a **deliverable** — the **data plane** — and it answers a different question: *"what did the run make?"*
-- text: this is the last artifact from the intro's map — **extracts / new records** — and the one place students most often get the architecture wrong.
+- text: this is the last artifact from the intro's map — **extracts / new records** — and the one place it's easiest to get the architecture wrong.
 - diagram: one tool call fanning out to two destinations — an arrow "observe" to a box "trace → Langfuse (TTL'd, for debugging)", and a *separate* arrow "persist" to a box "database or S3 (durable, for downstream)". Same result, two homes.
 
 ### slide 6.2 Two calls at the boundary, two homes
