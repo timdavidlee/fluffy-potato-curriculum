@@ -67,8 +67,8 @@ estimated duration: 8
 
 ### slide 4.1 The five — and the brittle scorer that cuts across them
 
-- text: the demos showed each of these break; name them now as portable anti-patterns you can catch
-  when you write your *own* eval set. Two families run underneath: **#1 and #4 are the same discipline
+- text: the demos showed each of these break; let's name them now as portable anti-patterns you can
+  catch when you write your *own* eval set. Two families run underneath: **#1 and #4 are the same discipline
   — eval design starts in the trace** (L12's side); **#2, #3, and #5 are the "don't trust one number"
   family** — one run, one judge, one terminal table are each a single point you shouldn't build on.
 - table: the five anti-patterns, the one-line cure, and where you saw it.
