@@ -1,13 +1,13 @@
 # Handoff: re-review & revoice all lesson materials to the student-POV registers
 
-**Status: IN PROGRESS** (conventions, L10 reference, and 9 of 15 lessons landed; the rest of the
-checklist remains)
+**Status: IN PROGRESS** (conventions, L10 reference, and 13 of 15 lessons landed; only L22, L23 plus
+K01–K06 remain)
 **Date:** 2026-07-04
 **Branch:** direct commits/merges on local `main`. Landed so far: `06a920e` L10, `8d5dc0b` L03,
-`dc60c90` L04, `d088b4c` L05, `bbcd198` L02 (pushed to origin at `763e558`), then `c402559` L01,
-`7a7c2fd` L08, `efdff16` L07, `9d796ad` L06 (local only as of this update, not yet pushed). The
-`student-pov-lectures` worktree/branch this doc originally pointed at no longer exists — the work
-landed straight on `main` instead; treat that branch reference as stale.
+`dc60c90` L04, `d088b4c` L05, `bbcd198` L02 (pushed to origin at `3f10a66`, along with L01/L06/L07/
+L08), then `c53cdaa` L13, `12e0af3` L11, `c31392a` L09, `e39272a` L12 (local only as of this update,
+not yet pushed). The `student-pov-lectures` worktree/branch this doc originally pointed at no longer
+exists — the work landed straight on `main` instead; treat that branch reference as stale.
 
 ---
 
@@ -81,6 +81,18 @@ possible, otherwise a merge commit with an explicit Conventional-Commit `-m` mes
 default auto-generated merge message fails the repo's `cz check` commit-msg hook). This fully
 eliminated the shared-working-tree races from the first batch.
 
+- ✅ **L13 — fully done** (`c53cdaa`). Was already largely in-register; only one presenter tell
+  ("name them now") fixed in `L1307_lecture.md`.
+- ✅ **L11 — fully done** (`12e0af3`, merge commit). Two small tells fixed (`L1102`, `L1103`); the
+  intro, `L1105`, and the lab pair were already clean.
+- ✅ **L09 — fully done** (`c31392a`, merge commit). Several "teacher demo N" / "teacher-narration"
+  tells fixed across `L0902`/`L0903`/`L0905`/`L0906`; both lab pairs already clean.
+- ✅ **L12 — fully done** (`e39272a`, merge commit). The tracing (Langfuse) lesson; already largely
+  clean — a handful of third-person "student(s)" tells fixed in `L1201`/`L1204`/`L1206`. Both lab
+  pairs already clean.
+
+L09/L11/L12/L13 ran as a third batch, also with per-agent worktree isolation.
+
 ## 4. What REMAINS (the checklist)
 
 Per-lesson counts of student-facing artifacts to revoice. **Lectures + intros → Coach; labs →
@@ -97,18 +109,18 @@ is **teacher-facing and OUT OF SCOPE** — leave it in presenter voice.
 | L06 | ✅ done (`9d796ad`) | ✅ | ✅ | one lab pair (`L0608`) already clean, untouched |
 | L07 | ✅ done (`efdff16`) | ✅ | ✅ | light touch-up, mostly already clean |
 | L08 | ✅ done (`7a7c2fd`) | ✅ | ✅ | light touch-up, mostly already clean |
-| L09 | 4 | 1 | 2 | |
+| L09 | ✅ done (`c31392a`) | ✅ | ✅ | several "teacher demo N" tells fixed |
 | L10 | ✅ done (`06a920e`) | ✅ | ✅ | reference example other lessons copy |
-| L11 | 3 | 1 | 1 | |
-| L12 | 3 | 1 | 2 | |
-| L13 | 4 | 1 | 2 | |
+| L11 | ✅ done (`12e0af3`) | ✅ | ✅ | light touch-up, mostly already clean |
+| L12 | ✅ done (`e39272a`) | ✅ | ✅ | tracing (Langfuse) lesson; light touch-up, mostly already clean |
+| L13 | ✅ done (`c53cdaa`) | ✅ | ✅ | light touch-up, mostly already clean |
 | L22 | 3 | 1 | 2 | |
 | L23 | 3 | 1 | 2 | |
 | K01–K06 | — | — | — | 6 `_guide.md`; verify Runbook + student POV (light touch, low priority) |
 
-**Remaining totals:** L09, L11–L13, L22, L23 — 17 lecture files, 5 intros, 9 lab pairs (18
-notebooks) — plus the 6 K-guides. `.md` lectures are straight `Edit`s; `.ipynb`
-lectures/labs need `NotebookEdit` on **markdown cells only**.
+**Remaining totals:** L22, L23 — 6 lecture files, 2 intros, 4 lab pairs (8 notebooks) — plus the 6
+K-guides. `.md` lectures are straight `Edit`s; `.ipynb` lectures/labs need `NotebookEdit` on
+**markdown cells only**.
 
 L10/L02/L03/L04/L05 are done — use `L10/L1002_lecture.md` (Coach) and `L10/L1004_lab_empty.ipynb`
 (Punchy) as the concrete models for the rest.
