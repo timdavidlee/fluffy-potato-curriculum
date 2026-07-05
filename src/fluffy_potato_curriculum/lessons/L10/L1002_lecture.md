@@ -288,7 +288,27 @@ estimated duration: 75
 | "the model needs my Python traceback" | it doesn't — a short error `ToolMessage` is better signal and cheaper |
 | "my agent is broken because the model called the same tool 3×" | maybe — or it's correctly exploring; loop-detection needs *args + progress*, not just counts |
 
-### slide 5.4 The minimum-viable trace, and the bridge to L11 and L12
+### slide 5.4 Three agent-loop gotchas, named
+
+- text: the loop's failure modes were shown across the build — name them now as portable gotchas
+  you'll hit the first time you hand-roll (or misuse) a loop. The first two are the axes this lecture
+  stresses on purpose (*when does it stop?* and *what happens when a tool breaks?*); the third is the
+  quiet one — nothing errors, the bill just climbs. (Distinct from slide 5.3's *misconceptions* — these
+  are the mistakes, not the misreadings.)
+- table: the three gotchas, the one-line cure, and where you saw it.
+
+| Gotcha | Cure | Where you saw it |
+| --- | --- | --- |
+| **No termination guard (infinite loop)** — a cycle with no cap and no `END` branch runs forever on one confused turn | every agent gets an iteration cap on `invoke`; **hitting it is a signal to investigate** (hard task → raise it; misbehaving → fix prompt/tools/model), never noise to swallow | section 3 — `recursion_limit` caught the runaway; natural termination is `route` returning `END` |
+| **Not handling tool failures** — a raised exception escapes `ToolNode` and crashes the whole `invoke` | `ToolNode(handle_tool_errors=True)` turns the raise into a `ToolMessage(status="error")` the back-edge hands back — and don't dump tracebacks at the model | section 4 (slides 4.2–4.3) |
+| **Unbounded context growth** — `add_messages` **appends every turn**, so the history plus re-sent tool schemas inflate cost and drift toward the window limit | watch cumulative tokens across turns; trimming / summarizing the history is **L19** (context management, full course) — name it, don't build it here | slide 2.2 (the `add_messages` reducer) |
+
+- text: the first two are crashes/runaways you can *see*; **#3 is silent** — the same
+  no-memory / re-send cost from L01 and L07, now compounding once per loop iteration. And note the cap
+  bounds the *number* of turns, not the *size* of each turn's history — a short run on a huge context
+  still overflows. Different budgets.
+
+### slide 5.5 The minimum-viable trace, and the bridge to L11 and L12
 
 - text: by the end of L10 you can read the returned `messages` and narrate the run turn by turn —
   `agent`, `tools`, `agent`, `tools`, `agent` — and state the termination cause. That narration is a

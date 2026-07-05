@@ -112,4 +112,21 @@ agent = create_agent(
   **L15** builds on top of. Ask its opening question and stop there: *what do you build when a
   single tool-calling loop isn't the right shape?*
 
+### slide 3.5 Three shallow-agent gotchas, named
+
+- Before you leave, name the three ways `create_agent` lulls you into forgetting the L10 machinery is
+  still underneath. All three are the same trap: **the convenience hides the machinery, but the
+  machinery is still there** — having built the L10 loop by hand, read `create_agent` as *that,
+  packaged.*
+- table: the three gotchas, the one-line cure, and where you saw it.
+
+| Gotcha | Cure | Where you saw it |
+| --- | --- | --- |
+| **Assuming the one-liner can't run away** — trusting a prebuilt agent not to loop forever "because it's prebuilt" | the step cap didn't vanish, it moved behind the constructor — know where it lives and treat hitting it as a **signal**, exactly as in L10 | slide 2.2 (the step cap is still there, just a default) |
+| **Treating `create_agent` as un-debuggable magic** — can't map the one-liner back to agent → tools → back-edge, so a bad run is unexplainable | debug the shallow agent *as the L10 loop it is* — read the returned `messages`, find the turn that went wrong; the framework hid the wiring, not the behavior | section 2 + slide 1.1 (every knob has an L10 twin) |
+| **Wrong altitude** — hand-building a `StateGraph` when the one-liner fits (over-engineering), *or* clinging to it after the flow outgrows a single loop (under-engineering) | stay on `create_agent` until the control flow stops being one loop (a second model, a non-tool branch, custom state) — then drop to an explicit graph (**L15**) | section 3 (the ceiling) — this whole discussion |
+
+- Knowing where the ceiling is *is* the shallow-agent skill — neither reflex (always hand-build, or
+  never leave the one-liner) is right.
+
 [↑ Back to top](#the-config-surface-and-where-the-one-liner-ends)

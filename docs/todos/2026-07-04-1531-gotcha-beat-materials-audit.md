@@ -228,6 +228,12 @@ lessons last.
 
 ### Carry-over roll-up (gap-ordered — do top-to-bottom)
 
+> **Progress (2026-07-04, batch 2).** Landed the 6 naming-recap codas (**L01, L02, L10, L11, L12,
+> L13**) and both reconciliations (**L04** pre-split demos file, **L22** stale mini-cut line — the
+> latter already fixed by commit `8e29a5a`). Full pre-commit gate green. Still open (out of this
+> batch's scope): the **L04 coda** (waits on L04 stage-2 sequential-only regen), the **L22 §3 coda
+> expansion**, and the spun-off **L05 coda** (`task_b39acfac`). See per-item DONE tags below.
+
 Tags: `new-demo` (new material) > `add-coda`+flag (coda **and** a drift to reconcile) >
 `add-coda` (naming recap, no new fixture) > `add-coda (light)` / `covered` (near/already done).
 None of the codas need a new fixture — L08 is the only lesson requiring genuinely new assets.
@@ -242,28 +248,36 @@ None of the codas need a new fixture — L08 is the only lesson requiring genuin
    L0811 section and updated the L0802 demo list. Restart-run-all passes keyless; full gate green.
 
 **B. Coda + a drift to reconcile (decide the drift as you go)**
-2. **L04 — `add-coda` (2 of 4) + flag** → once L04 stage-2 regenerates *sequential-only*, add a coda
-   naming just #2 (deterministic-DAG) + #3 (per-node model). Trim the still-pre-split
-   `L04/demos_or_activities.md` to match `objectives.md`. #1/#4 → **L05** (already spun off:
-   task `task_b39acfac`, "Add L05 gotcha coda", running).
-3. **L22 — `add-coda` (expand `L2205` §3) + flag** → expand §3 into the 4-item beat (pull #1/#2 up
-   from `L2202` §4.2; add the skill→tool direction) + add the L23 Demo 5 handoff. **Separately fix**
-   `L2205` §5.2's stale "the mini cut ends here" (mini cut is `… L22, L23, L50` per `tracks.toml`) →
-   point to L23 then L50.
+2. **L04 — `add-coda` (2 of 4) + flag — reconciliation DONE (2026-07-04); coda still pending.** Added
+   a split-note header to `L04/demos_or_activities.md` mirroring `objectives.md`'s — it flags Demos 2–3
+   (routing / user-input branching) as transitional L05 material and notes the built L04 materials
+   (`L0401`–`L0404`) are already sequential-only. **Non-destructive on purpose:** `objectives.md` also
+   keeps its routing objectives (flagged, not deleted), so deletion is the stage-2 regen's job for both
+   files together. **Still pending:** the coda naming #2 (deterministic-DAG) + #3 (per-node model),
+   once L04 stage-2 regenerates *sequential-only*. #1/#4 → **L05** (spun off: task `task_b39acfac`).
+3. **L22 — mini-cut line DONE (commit `8e29a5a`); §3 coda expansion still pending.** The stale
+   `L2205` §5.2 "the mini cut ends here" was already fixed (→ L23 then L50, per `tracks.toml`), along
+   with `L2201_intro.md` and `PROCTOR_NOTES.md`. **Still pending (out of batch-2 scope):** expand
+   `L2205` §3 into the 4-item beat (pull #1/#2 up from `L2202` §4.2; add the skill→tool direction) +
+   add the L23 Demo 5 handoff.
 
 **C. Straight naming coda (no new fixture)**
-4. **L01 — `add-coda`** → append recap section to end of `L0110_lecture.ipynb` (+ 1-line
-   `PROCTOR_NOTES.md` pointer).
-5. **L10 — `add-coda`** → new section in `L1002_lecture.md` after §5.3 (#3's cure = forward-link to
-   L19 only).
-6. **L12 — `add-coda`** → end of `L1204_lecture.ipynb` (preserve the L13 handoff line).
-7. **L13 — `add-coda`** → recap section in `L1307_lecture.md` (fold in the brittle-scorer as the
-   cross-cutting one).
+4. **L01 — `add-coda` — DONE (2026-07-04).** Appended §5 "Common pitfalls: L01's four gotchas" recap
+   to `L0110_lecture.ipynb` (name/cure/point-back table, forward-links L13 + L19/L21 in prose, TOC
+   synced) + a `PROCTOR_NOTES.md` L0110 pointer.
+5. **L10 — `add-coda` — DONE (2026-07-04).** New slide 5.4 "Three agent-loop gotchas, named" in
+   `L1002_lecture.md` between §5.3 and the bridge (renumbered bridge → 5.5); #3's cure is a forward-
+   link to L19 only.
+6. **L12 — `add-coda` — DONE (2026-07-04).** Appended §5 "Common pitfalls: L12's four anti-patterns"
+   to `L1204_lecture.ipynb` (TOC synced); preserves the #3/#4 = L13-first-eval-cases handoff line.
+7. **L13 — `add-coda` — DONE (2026-07-04).** New section 4 "Five eval anti-patterns, named" in
+   `L1307_lecture.md`, folding in the brittle-scorer as the cross-cutting one.
 
 **D. Light / already covered (lowest priority — consolidate existing naming)**
-8. **L02 — `add-coda (light)`** → recap slide in `L0202_lecture.md` §6; explicitly name #4
-   (bloated always-on system prompt), which is currently only implicit.
-9. **L11 — `add-coda (light)`** → closing consolidation in `L1105_lecture.md` after §3.4.
+8. **L02 — `add-coda (light)` — DONE (2026-07-04).** New slide 6.2 "Four prompting anti-patterns…" in
+   `L0202_lecture.md` §6 (renumbered 6.3/6.4); #4 (bloated always-on system prompt) now explicitly named.
+9. **L11 — `add-coda (light)` — DONE (2026-07-04).** New slide 3.5 "Three shallow-agent gotchas,
+   named" in `L1105_lecture.md` after §3.4.
 10. **L07 — `covered`** → optional light merge into `L0702` §6.1 (add a cure column + a
     "schema rides in every request" row).
 11. **L23 — `covered`** → reference/control, the bar. No action.
