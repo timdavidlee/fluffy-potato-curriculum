@@ -1,12 +1,13 @@
 # Handoff: re-review & revoice all lesson materials to the student-POV registers
 
-**Status: IN PROGRESS** (conventions, L10 reference, and a 5-lesson pilot batch landed; the rest of
-the checklist remains)
+**Status: IN PROGRESS** (conventions, L10 reference, and 8 of 15 lessons landed; L06 in flight, the
+rest of the checklist remains)
 **Date:** 2026-07-04
-**Branch:** direct commits on `main` (5 commits ahead of `origin/main` as of this update: `06a920e`
-L10, `8d5dc0b` L03, `dc60c90` L04, `d088b4c` L05, `bbcd198` L02). The `student-pov-lectures`
-worktree/branch this doc originally pointed at no longer exists — the work landed straight on
-`main` instead; treat that branch reference as stale.
+**Branch:** direct commits/merges on local `main`, not yet pushed to `origin/main`. Landed so far:
+`06a920e` L10, `8d5dc0b` L03, `dc60c90` L04, `d088b4c` L05, `bbcd198` L02 (pushed to origin at
+`763e558`), then `c402559` L01, `7a7c2fd` L08, `efdff16` L07 (local only, not yet pushed). The
+`student-pov-lectures` worktree/branch this doc originally pointed at no longer exists — the work
+landed straight on `main` instead; treat that branch reference as stale.
 
 ---
 
@@ -58,8 +59,23 @@ this work so they can be cited as authority.
 These 5 lessons were done by concurrent Sonnet subagents sharing one working tree (no worktree
 isolation) — it mostly worked but caused a couple of near-miss races (agents transiently reverting
 each other's in-progress edits before recognizing the pattern and re-verifying). No data was lost,
-but future concurrent batches should either scope `ruff format`/`ruff check` to each agent's own
-lesson path, or use per-agent git worktrees, to remove the race outright.
+but the next batch switched to per-agent git worktree isolation to remove the race outright (see
+below).
+
+- ✅ **L01 — fully done** (`c402559`). Notebook-heavy as flagged; found and fixed several "teacher
+  demo N" tells across `L0103`/`L0104`/`L0106`/`L0107`/`L0109`/`L0110`. All 3 lab pairs were already
+  clean Punchy, untouched.
+- ✅ **L08 — fully done** (`7a7c2fd`, merge commit). Light touch-up pass — material was already close
+  to Coach/Punchy. All 4 lab pairs were already clean, untouched.
+- ✅ **L07 — fully done** (`efdff16`, merge commit). Light touch-up pass; only `L0705_lab_solutions`
+  needed a one-word fix, the other 2 lab pairs were already clean.
+
+L01/L06/L07/L08 ran as a second batch with **per-agent worktree isolation** (`isolation: "worktree"`
+on the Agent tool) — each agent worked in its own git worktree/branch and committed there, then the
+orchestrating session merged each branch back into local `main` one at a time (fast-forward when
+possible, otherwise a merge commit with an explicit Conventional-Commit `-m` message, since the
+default auto-generated merge message fails the repo's `cz check` commit-msg hook). This fully
+eliminated the shared-working-tree races from the first batch.
 
 ## 4. What REMAINS (the checklist)
 
@@ -69,14 +85,14 @@ is **teacher-facing and OUT OF SCOPE** — leave it in presenter voice.
 
 | Lesson | Lectures (Coach) | Intro (Coach) | Lab pairs (Punchy, ×2 files) | Notes |
 | --- | --- | --- | --- | --- |
-| L01 | 7 | 1 | 3 | notebook-heavy; check "teacher demo N" headers |
+| L01 | ✅ done (`c402559`) | ✅ | ✅ | notebook-heavy; several "teacher demo N" tells fixed |
 | L02 | ✅ done (`bbcd198`) | ✅ | ✅ | |
 | L03 | ✅ done (`8d5dc0b`) | ✅ | ✅ | |
 | L04 | ✅ done (`dc60c90`) | ✅ | ✅ | missing `[↑ Back to top]` anchors in `L0402` — pre-existing, not fixed here |
 | L05 | ✅ done (`d088b4c`) | ✅ | ✅ | |
-| L06 | 5 | 1 | 4 | |
-| L07 | 5 | 1 | 3 | |
-| L08 | 6 | 1 | 4 | |
+| L06 | 🔄 in progress | 🔄 | 🔄 | third agent of the worktree-isolated batch, not yet landed |
+| L07 | ✅ done (`efdff16`) | ✅ | ✅ | light touch-up, mostly already clean |
+| L08 | ✅ done (`7a7c2fd`) | ✅ | ✅ | light touch-up, mostly already clean |
 | L09 | 4 | 1 | 2 | |
 | L10 | ✅ done (`06a920e`) | ✅ | ✅ | reference example other lessons copy |
 | L11 | 3 | 1 | 1 | |
@@ -86,9 +102,9 @@ is **teacher-facing and OUT OF SCOPE** — leave it in presenter voice.
 | L23 | 3 | 1 | 2 | |
 | K01–K06 | — | — | — | 6 `_guide.md`; verify Runbook + student POV (light touch, low priority) |
 
-**Remaining totals:** L01, L06–L09, L11–L13, L22, L23 — 38 lecture files, 9 intros, 20 lab pairs (40
-notebooks) — plus the 6 K-guides. `.md` lectures are straight `Edit`s; `.ipynb` lectures/labs need
-`NotebookEdit` on **markdown cells only**.
+**Remaining totals:** L06 (in flight), L09, L11–L13, L22, L23 — 22 lecture files, 6 intros, 12 lab
+pairs (24 notebooks) — plus the 6 K-guides. `.md` lectures are straight `Edit`s; `.ipynb`
+lectures/labs need `NotebookEdit` on **markdown cells only**.
 
 L10/L02/L03/L04/L05 are done — use `L10/L1002_lecture.md` (Coach) and `L10/L1004_lab_empty.ipynb`
 (Punchy) as the concrete models for the rest.
