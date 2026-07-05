@@ -1,9 +1,12 @@
 # Handoff: re-review & revoice all lesson materials to the student-POV registers
 
-**Status: IN PROGRESS** (pilot + conventions landed; the bulk revoicing remains)
+**Status: IN PROGRESS** (conventions, L10 reference, and a 5-lesson pilot batch landed; the rest of
+the checklist remains)
 **Date:** 2026-07-04
-**Branch / worktree:** `student-pov-lectures` at `.claude/worktrees/student-pov-lectures` (not yet
-PR'd). All work below lives on this branch; diff against `main` to see everything done so far.
+**Branch:** direct commits on `main` (5 commits ahead of `origin/main` as of this update: `06a920e`
+L10, `8d5dc0b` L03, `dc60c90` L04, `d088b4c` L05, `bbcd198` L02). The `student-pov-lectures`
+worktree/branch this doc originally pointed at no longer exists — the work landed straight on
+`main` instead; treat that branch reference as stale.
 
 ---
 
@@ -41,13 +44,22 @@ this work so they can be cited as authority.
 ## 3. What is DONE
 
 - ✅ Conventions codified (PRD + both format guides, §2 above).
-- ✅ **L10 pilot, partial** — the reference example the guides point to:
-  - `L10/L1002_lecture.md` → **Coach** (full rewrite; the heaviest teacher-voice file — good model
-    for what "remove the meta-instructions" looks like).
-  - `L10/L1004_lab_empty.ipynb` → **Punchy** (markdown cells only; code + `# TODO`s untouched).
-- ⚠️ **L02 early pilot (needs a re-pass)** — `L02/L0202_lecture.md` got a *light* student-POV touch-up
-  **before** the Coach register was chosen. It is student-addressed but not fully Coach. Treat it as
-  **not done**: give it a proper Coach pass like L1002.
+- ✅ **L10 — fully done** (`06a920e`, on top of the earlier partial pilot). All 3 lectures, the intro,
+  and both lab pairs are Coach/Punchy. This is the reference example — `L10/L1002_lecture.md`
+  (Coach) and `L10/L1004_lab_empty.ipynb` (Punchy) are the concrete models to copy.
+- ✅ **L02 — fully done** (`bbcd198`), including the proper Coach re-pass on `L0202_lecture.md` that
+  the earlier light touch-up needed.
+- ✅ **L03 — fully done** (`8d5dc0b`). Mostly already clean; only 2 small presenter-tell fixes needed.
+- ✅ **L04 — fully done** (`dc60c90`). Flags a pre-existing gap worth a follow-up: `L0402_lecture.md`
+  has **no `[↑ Back to top]` anchors at all** (unlike the L10 model) — a structural gap, not a voice
+  issue, left alone since this effort is voice-only.
+- ✅ **L05 — fully done** (`d088b4c`). Lab pair (`L0504`) was already clean Punchy, untouched.
+
+These 5 lessons were done by concurrent Sonnet subagents sharing one working tree (no worktree
+isolation) — it mostly worked but caused a couple of near-miss races (agents transiently reverting
+each other's in-progress edits before recognizing the pattern and re-verifying). No data was lost,
+but future concurrent batches should either scope `ruff format`/`ruff check` to each agent's own
+lesson path, or use per-agent git worktrees, to remove the race outright.
 
 ## 4. What REMAINS (the checklist)
 
@@ -58,15 +70,15 @@ is **teacher-facing and OUT OF SCOPE** — leave it in presenter voice.
 | Lesson | Lectures (Coach) | Intro (Coach) | Lab pairs (Punchy, ×2 files) | Notes |
 | --- | --- | --- | --- | --- |
 | L01 | 7 | 1 | 3 | notebook-heavy; check "teacher demo N" headers |
-| L02 | 5 | 1 | 4 | L0202 needs a Coach re-pass (see §3) |
-| L03 | 2 | 1 | 1 | |
-| L04 | 2 | 1 | 1 | |
-| L05 | 3 | 1 | 1 | |
+| L02 | ✅ done (`bbcd198`) | ✅ | ✅ | |
+| L03 | ✅ done (`8d5dc0b`) | ✅ | ✅ | |
+| L04 | ✅ done (`dc60c90`) | ✅ | ✅ | missing `[↑ Back to top]` anchors in `L0402` — pre-existing, not fixed here |
+| L05 | ✅ done (`d088b4c`) | ✅ | ✅ | |
 | L06 | 5 | 1 | 4 | |
 | L07 | 5 | 1 | 3 | |
 | L08 | 6 | 1 | 4 | |
 | L09 | 4 | 1 | 2 | |
-| L10 | 3 (1 done) | 1 | 2 (½ done) | **finish first** as the worked example |
+| L10 | ✅ done (`06a920e`) | ✅ | ✅ | reference example other lessons copy |
 | L11 | 3 | 1 | 1 | |
 | L12 | 3 | 1 | 2 | |
 | L13 | 4 | 1 | 2 | |
@@ -74,12 +86,12 @@ is **teacher-facing and OUT OF SCOPE** — leave it in presenter voice.
 | L23 | 3 | 1 | 2 | |
 | K01–K06 | — | — | — | 6 `_guide.md`; verify Runbook + student POV (light touch, low priority) |
 
-**Totals:** 58 lecture files, 15 intros, 34 lab pairs (68 notebooks), 6 K-guides. `.md` lectures are
-straight `Edit`s; `.ipynb` lectures/labs need `NotebookEdit` on **markdown cells only**.
+**Remaining totals:** L01, L06–L09, L11–L13, L22, L23 — 38 lecture files, 9 intros, 20 lab pairs (40
+notebooks) — plus the 6 K-guides. `.md` lectures are straight `Edit`s; `.ipynb` lectures/labs need
+`NotebookEdit` on **markdown cells only**.
 
-**Finish L10 first** (it's the reference the guides cite): `L1001_intro.md` (Coach),
-`L1003_lecture.ipynb` + `L1006_lecture.ipynb` (Coach), `L1004_lab_solutions.ipynb` (Punchy — mirror
-the already-done `_empty`), `L1005_lab_empty.ipynb` + `L1005_lab_solutions.ipynb` (Punchy).
+L10/L02/L03/L04/L05 are done — use `L10/L1002_lecture.md` (Coach) and `L10/L1004_lab_empty.ipynb`
+(Punchy) as the concrete models for the rest.
 
 ### Also open (make the convention self-enforcing)
 
