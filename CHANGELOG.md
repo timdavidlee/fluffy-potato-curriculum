@@ -1,3 +1,9 @@
+## v0.13.0 (2026-07-05)
+
+### Feat
+
+- **curriculum**: add L02 HTML lecture deck and reusable slide theme
+
 ## v0.12.0 (2026-07-05)
 
 ### Feat
