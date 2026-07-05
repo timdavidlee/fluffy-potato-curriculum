@@ -233,6 +233,12 @@ lessons last.
 > latter already fixed by commit `8e29a5a`). Full pre-commit gate green. Still open (out of this
 > batch's scope): the **L04 coda** (waits on L04 stage-2 sequential-only regen), the **L22 §3 coda
 > expansion**, and the spun-off **L05 coda** (`task_b39acfac`). See per-item DONE tags below.
+>
+> **Progress (2026-07-04, batch 3).** Landed the **L04 coda** (item 2). The "waits on L04 stage-2
+> sequential-only regen" blocker was **stale** — that regen already shipped in commit `9ce7227` (#18),
+> so the built L04 materials were sequential-only already and the coda was added manually like its 6
+> batch-2 siblings. Still open: **L22 §3 coda expansion** and the spun-off **L05 coda**
+> (`task_b39acfac`).
 
 Tags: `new-demo` (new material) > `add-coda`+flag (coda **and** a drift to reconcile) >
 `add-coda` (naming recap, no new fixture) > `add-coda (light)` / `covered` (near/already done).
@@ -248,13 +254,22 @@ None of the codas need a new fixture — L08 is the only lesson requiring genuin
    L0811 section and updated the L0802 demo list. Restart-run-all passes keyless; full gate green.
 
 **B. Coda + a drift to reconcile (decide the drift as you go)**
-2. **L04 — `add-coda` (2 of 4) + flag — reconciliation DONE (2026-07-04); coda still pending.** Added
-   a split-note header to `L04/demos_or_activities.md` mirroring `objectives.md`'s — it flags Demos 2–3
-   (routing / user-input branching) as transitional L05 material and notes the built L04 materials
-   (`L0401`–`L0404`) are already sequential-only. **Non-destructive on purpose:** `objectives.md` also
-   keeps its routing objectives (flagged, not deleted), so deletion is the stage-2 regen's job for both
-   files together. **Still pending:** the coda naming #2 (deterministic-DAG) + #3 (per-node model),
-   once L04 stage-2 regenerates *sequential-only*. #1/#4 → **L05** (spun off: task `task_b39acfac`).
+2. **L04 — `add-coda` (2 of 4) + flag — reconciliation DONE (2026-07-04); coda DONE (2026-07-04, batch 3).**
+   Reconciliation: added a split-note header to `L04/demos_or_activities.md` mirroring `objectives.md`'s —
+   it flags Demos 2–3 (routing / user-input branching) as transitional L05 material and notes the built L04
+   materials (`L0401`–`L0404`) are already sequential-only. **Non-destructive on purpose:** `objectives.md`
+   also keeps its routing objectives (flagged, not deleted), so deletion is the stage-2 regen's job for both
+   files together.
+   **Coda: the "waits on L04 stage-2 sequential-only regen" premise was stale** — that regen already landed
+   in commit `9ce7227` ("split routing out of L04", #18); the built materials (`L0402`/`L0403`) are
+   sequential-chaining-only with **zero** routing content, so the coda went into already-final materials
+   exactly like its 6 siblings (added manually, not via a future regen). Added **`## section 6. Two DAG
+   gotchas, named`** to `L0402_lecture.md` before the bridge (renumbered Bridge → §7), naming #2
+   (deterministic-DAG / accidental back-edge) + #3 (per-node model) with cures and point-backs **rewritten
+   to the built sections** (§5.3 / §2.5 / slide 1.2 / §4 / `L0403`) — *not* the roadmap coda's stale
+   "Demo 2 / Demo 4" refs, which never existed in the materials. #1/#4 routing gotchas → **L05** (spun off:
+   task `task_b39acfac`); the coda points at `L05/objectives.md` in prose (soft link — L05's own material
+   coda has not landed yet, so no hard anchor into a nonexistent section).
 3. **L22 — mini-cut line DONE (commit `8e29a5a`); §3 coda expansion still pending.** The stale
    `L2205` §5.2 "the mini cut ends here" was already fixed (→ L23 then L50, per `tracks.toml`), along
    with `L2201_intro.md` and `PROCTOR_NOTES.md`. **Still pending (out of batch-2 scope):** expand
