@@ -103,11 +103,15 @@ universal, gated prereq supersedes that framing. When this lands, update:
 - `docs/origin/lesson_roadmaps/L12/objectives.md` — the "graceful/no-Docker" beats.
 - `docs/origin/CURRICULUM_PRD.md` — add the `K<NN>` prework track to the plan.
 
+## Decisions (resolved 2026-07-04)
+
+- **Mini track requires the full K01–K06** (provisional — "for now assume full"). The mini cut
+  reaches the agent arc (K04/K05 mental models) and self-hosts/persists (K02 keys, K06 Docker), so
+  it takes the same gated prework as the full track; no reduced K subset. Revisit only if the mini
+  budget forces a trim.
+
 ## Open questions
 
-- `<need input: does the mini track require the full K01–K06, or a reduced prework set? Docker
-  (K06) + keys (K02) are needed by any track that self-hosts or persists; K04/K05 gate the agent
-  arc which the mini also reaches.>`
 - `<need input: confirm the shared-instructor-Langfuse path still exists alongside mandatory
   Docker — i.e. K06 stands up the DB + agent services locally, but tracing may point at the
   shared instance rather than a local Langfuse. Affects how heavy the local Compose stack is.>`
