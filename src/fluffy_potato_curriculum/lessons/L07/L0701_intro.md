@@ -59,7 +59,7 @@ back. Said five ways, because it reshapes how you debug, secure, and scale every
 
 ## Vocabulary this lesson lands
 
-These five terms recur all the way through L08–L20, so we pin them now:
+These five terms recur all the way through L08–L20, so let's pin them now:
 
 - **Tool** — a callable in your application (here, a plain Python function) that the model can
   *request* via the tool-call protocol.
@@ -85,7 +85,7 @@ L07 is scoped tight on purpose, the same way L06 stayed prompt-only:
 - **Mechanics, not judgment.** L07's job is to make the protocol mechanically obvious — to let you
   *build* a tool-using exchange that works. **L08 ("Designing good tools")** asks the design
   questions: should this be a tool at all, what should it be named, what should the schema look
-  like, how should it report failure? We share vocabulary with L08 exactly so you don't relearn
+  like, how should it report failure? The vocabulary carries over exactly so you don't relearn
   terms.
 
 ## A note on the code you'll see
