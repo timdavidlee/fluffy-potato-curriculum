@@ -1,3 +1,9 @@
+## v0.11.0 (2026-07-05)
+
+### Feat
+
+- **local-ui**: color-code sidebar items by kind
+
 ## v0.10.1 (2026-07-05)
 
 ### Refactor
