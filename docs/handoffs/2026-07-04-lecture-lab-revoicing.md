@@ -1,13 +1,15 @@
 # Handoff: re-review & revoice all lesson materials to the student-POV registers
 
-**Status: IN PROGRESS** (conventions, L10 reference, and 13 of 15 lessons landed; only L22, L23 plus
-K01–K06 remain)
+**Status: IN PROGRESS** (all 15 lessons + the K-series checklist are revoiced; only the two
+"Also open" self-enforcement skill edits and a deck-build spot-check remain before this can be
+marked DONE)
 **Date:** 2026-07-04
 **Branch:** direct commits/merges on local `main`. Landed so far: `06a920e` L10, `8d5dc0b` L03,
 `dc60c90` L04, `d088b4c` L05, `bbcd198` L02 (pushed to origin at `3f10a66`, along with L01/L06/L07/
-L08), then `c53cdaa` L13, `12e0af3` L11, `c31392a` L09, `e39272a` L12 (local only as of this update,
-not yet pushed). The `student-pov-lectures` worktree/branch this doc originally pointed at no longer
-exists — the work landed straight on `main` instead; treat that branch reference as stale.
+L08), then `c53cdaa` L13, `12e0af3` L11, `c31392a` L09, `e39272a` L12, `3465a38` L22, `e0ce885` L23
+(local only as of this update, not yet pushed). K01–K06 were spot-checked and found already clean —
+no commit needed. The `student-pov-lectures` worktree/branch this doc originally pointed at no
+longer exists — the work landed straight on `main` instead; treat that branch reference as stale.
 
 ---
 
@@ -93,6 +95,18 @@ eliminated the shared-working-tree races from the first batch.
 
 L09/L11/L12/L13 ran as a third batch, also with per-agent worktree isolation.
 
+- ✅ **L22 — fully done** (`3465a38`, merge commit). Mostly already clean; 3 small tells fixed
+  (`L2202`, `L2203`, `L2205`). Both lab pairs already clean.
+- ✅ **L23 — fully done** (`e0ce885`, merge commit). Almost entirely already clean — only one
+  "Teacher demo notebook" tell fixed in `L2304_lecture.ipynb`. Everything else, including both lab
+  pairs, was already clean.
+- ✅ **K01–K06 — spot-checked, no changes needed.** All 6 `_guide.md` files and the 2 demo notebooks
+  (`K03`/`K05`) were already in clean Runbook/second-person voice. No commit made (nothing to
+  change).
+
+L22/L23/K01-K06 ran as a fourth and final batch, also with per-agent worktree isolation. This
+completes every lesson row in the §4 checklist table.
+
 ## 4. What REMAINS (the checklist)
 
 Per-lesson counts of student-facing artifacts to revoice. **Lectures + intros → Coach; labs →
@@ -114,16 +128,15 @@ is **teacher-facing and OUT OF SCOPE** — leave it in presenter voice.
 | L11 | ✅ done (`12e0af3`) | ✅ | ✅ | light touch-up, mostly already clean |
 | L12 | ✅ done (`e39272a`) | ✅ | ✅ | tracing (Langfuse) lesson; light touch-up, mostly already clean |
 | L13 | ✅ done (`c53cdaa`) | ✅ | ✅ | light touch-up, mostly already clean |
-| L22 | 3 | 1 | 2 | |
-| L23 | 3 | 1 | 2 | |
-| K01–K06 | — | — | — | 6 `_guide.md`; verify Runbook + student POV (light touch, low priority) |
+| L22 | ✅ done (`3465a38`) | ✅ | ✅ | light touch-up, mostly already clean |
+| L23 | ✅ done (`e0ce885`) | ✅ | ✅ | almost entirely already clean, one tell fixed |
+| K01–K06 | ✅ spot-checked | ✅ | n/a | all 6 guides + 2 demo notebooks already clean, no commit needed |
 
-**Remaining totals:** L22, L23 — 6 lecture files, 2 intros, 4 lab pairs (8 notebooks) — plus the 6
-K-guides. `.md` lectures are straight `Edit`s; `.ipynb` lectures/labs need `NotebookEdit` on
-**markdown cells only**.
+**Remaining totals:** none — every lesson row above is done. What's left is the "Also open" section
+below (skill wiring) and a deck-build spot-check, not more lesson content.
 
-L10/L02/L03/L04/L05 are done — use `L10/L1002_lecture.md` (Coach) and `L10/L1004_lab_empty.ipynb`
-(Punchy) as the concrete models for the rest.
+L10/L1002_lecture.md (Coach) and L10/L1004_lab_empty.ipynb (Punchy) remain the concrete reference
+models, for anyone auditing the finished work or authoring new lessons going forward.
 
 ### Also open (make the convention self-enforcing)
 
