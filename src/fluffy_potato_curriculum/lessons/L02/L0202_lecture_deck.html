@@ -657,7 +657,7 @@ table.ledger td.warn-cell { color: var(--coral); }
             <path d="M 270 348 C 390 340, 400 180, 500 176" fill="none" stroke="var(--cyan)" stroke-width="2" opacity="0.5" stroke-dasharray="5 5"/>
         </svg>
     </div>
-    <div class="chrome-page">01 / 37</div>
+    <div class="chrome-page">01 / 38</div>
     <div class="chrome-nav">L0202 &middot; lecture reference</div>
 </section>
 
@@ -670,7 +670,7 @@ table.ledger td.warn-cell { color: var(--coral); }
     <div class="chapter-eyebrow reveal">Section 1</div>
     <div class="chapter-title reveal">The lesson in <span style="color:var(--cyan); font-style:normal;">one claim</span></div>
     <div class="chapter-sub reveal">L01 gave you the container; L02 fills it. The same content, arranged differently, produces a different answer.</div>
-    <div class="chrome-page">02 / 37</div>
+    <div class="chrome-page">02 / 38</div>
 </section>
 
 <!-- ============================================================ -->
@@ -708,7 +708,7 @@ table.ledger td.warn-cell { color: var(--coral); }
             <li class="point">Section 5 is the <b>catalog</b> of single-step task shapes those levers unlock: extract, classify, rank, generate-to-a-constraint, summarize.</li>
         </ul>
     </div>
-    <div class="chrome-page">03 / 37</div>
+    <div class="chrome-page">03 / 38</div>
     <div class="chrome-nav">← → navigate</div>
 </section>
 
@@ -732,7 +732,7 @@ table.ledger td.warn-cell { color: var(--coral); }
         </table>
         <div class="callout reveal" style="margin-top:34px;"><p style="font-size:27px;">The three levers are <i>mechanics</i>; section 5 turns them on the five everyday <b style="font-style:normal;">task shapes</b>.</p></div>
     </div>
-    <div class="chrome-page">04 / 37</div>
+    <div class="chrome-page">04 / 38</div>
     <div class="chrome-nav">← → navigate</div>
 </section>
 
@@ -771,7 +771,7 @@ table.ledger td.warn-cell { color: var(--coral); }
             <li class="point"><b>Not orchestration</b> &mdash; one node's menu here; wiring nodes is L03&ndash;L05.</li>
         </ul>
     </div>
-    <div class="chrome-page">05 / 37</div>
+    <div class="chrome-page">05 / 38</div>
     <div class="chrome-nav">← → navigate</div>
 </section>
 
@@ -784,7 +784,7 @@ table.ledger td.warn-cell { color: var(--coral); }
     <div class="chapter-eyebrow reveal">Section 2</div>
     <div class="chapter-title reveal">Roles: <span style="color:var(--cyan); font-style:normal;">who said what</span></div>
     <div class="chapter-sub reveal">The conversation is a list your code owns &mdash; and where you put content changes how the model weights it.</div>
-    <div class="chrome-page">06 / 37</div>
+    <div class="chrome-page">06 / 38</div>
 </section>
 
 <!-- ============================================================ -->
@@ -814,7 +814,7 @@ table.ledger td.warn-cell { color: var(--coral); }
             <div class="diagram-caption" style="margin-top:6px;">The caller builds and re-sends this <b style="color:var(--ink); font-style:normal;">whole list</b> every turn.</div>
         </div>
     </div>
-    <div class="chrome-page">07 / 37</div>
+    <div class="chrome-page">07 / 38</div>
     <div class="chrome-nav">← → navigate</div>
 </section>
 
@@ -843,17 +843,49 @@ table.ledger td.warn-cell { color: var(--coral); }
             </div>
         </div>
     </div>
-    <div class="chrome-page">08 / 37</div>
+    <div class="chrome-page">08 / 38</div>
     <div class="chrome-nav">← → navigate</div>
 </section>
 
 <!-- ============================================================ -->
-<!-- SLIDE 8 — 2.3 The two mis-attribution footguns (table)     -->
+<!-- SLIDE 8 — 2.3 Persona: the durable "who you are" (diagram)  -->
 <!-- ============================================================ -->
 <section class="slide">
     <div class="chrome-tag">L02 &middot; <b>PROMPTING</b></div>
     <div class="topbar reveal">
         <div class="eyebrow">Slide 2.3</div>
+        <h2 class="headline">Persona: the durable <span class="it">&ldquo;who you are&rdquo;</span></h2>
+    </div>
+    <div class="body-area" style="display:flex; gap:48px; align-items:center;">
+        <ul class="points reveal" style="flex:1.2; max-width:730px;">
+            <li class="point">A <b>persona</b> is the <code>system</code> slice naming <i>who the model is and how it speaks</i> &mdash; role, tone / register, standing policy. Slide 2.2's always-true content, given a name.</li>
+            <li class="point"><b>A voice nudge, <span class="warn">not a capability unlock</span>.</b> <i>&ldquo;Expert oncologist&rdquo;</i> changes the register, not the medicine &mdash; accuracy comes from context, reasoning (L06), or model choice (L14).</li>
+            <li class="point">Keep it <b>lean</b> &mdash; a bloated persona is the always-on-token footgun again. From <b>L11</b> on, an agent's persona <i>is</i> its <code>system</code> prompt (&rarr; L19).</li>
+        </ul>
+        <div class="reveal" style="flex:0.9; display:flex; flex-direction:column; gap:14px;">
+            <div style="color:var(--ink-faint); font-size:20px;">system message</div>
+            <div class="dbox">
+                <div class="dbox-label">persona <span style="color:var(--ink-faint);">&mdash; true on every call</span></div>
+                <div class="dbox-body">role &middot; tone / register &middot; standing policy<br>&ldquo;You are a triage assistant &middot; warm, two short paragraphs &middot; no dosage advice.&rdquo;</div>
+            </div>
+            <div class="dbox neutral">
+                <div class="dbox-label" style="color:var(--ink-dim);">the rest of system</div>
+                <div class="dbox-body">durable context this prompt always carries</div>
+            </div>
+            <div class="diagram-caption" style="margin-top:2px;">Shapes <b style="color:var(--ink); font-style:normal;">how</b> it answers &mdash; not whether the facts are right.</div>
+        </div>
+    </div>
+    <div class="chrome-page">09 / 38</div>
+    <div class="chrome-nav">← → navigate</div>
+</section>
+
+<!-- ============================================================ -->
+<!-- SLIDE 9 — 2.4 The two mis-attribution footguns (table)     -->
+<!-- ============================================================ -->
+<section class="slide">
+    <div class="chrome-tag">L02 &middot; <b>PROMPTING</b></div>
+    <div class="topbar reveal">
+        <div class="eyebrow">Slide 2.4</div>
         <h2 class="headline">The two <span class="it">mis-attribution footguns</span></h2>
     </div>
     <div class="body-area">
@@ -870,17 +902,17 @@ table.ledger td.warn-cell { color: var(--coral); }
             </tbody>
         </table>
     </div>
-    <div class="chrome-page">09 / 37</div>
+    <div class="chrome-page">10 / 38</div>
     <div class="chrome-nav">← → navigate</div>
 </section>
 
 <!-- ============================================================ -->
-<!-- SLIDE 9 — 2.4 The system message is weighted, not enforced (diagram) -->
+<!-- SLIDE 10 — 2.5 The system message is weighted, not enforced (diagram) -->
 <!-- ============================================================ -->
 <section class="slide">
     <div class="chrome-tag">L02 &middot; <b>PROMPTING</b></div>
     <div class="topbar reveal">
-        <div class="eyebrow">Slide 2.4</div>
+        <div class="eyebrow">Slide 2.5</div>
         <h2 class="headline">The system message is <span class="it">weighted, not enforced</span></h2>
     </div>
     <div class="body-area" style="display:flex; gap:56px; align-items:center;">
@@ -912,17 +944,17 @@ table.ledger td.warn-cell { color: var(--coral); }
         </div>
     </div>
     <div class="diagram-caption reveal" style="position:absolute; left:var(--edge-x); bottom:96px; font-size:20px;">Privileged label &ne; enforced.</div>
-    <div class="chrome-page">10 / 37</div>
+    <div class="chrome-page">11 / 38</div>
     <div class="chrome-nav">← → navigate</div>
 </section>
 
 <!-- ============================================================ -->
-<!-- SLIDE 10 — 2.5 Multi-turn, first-call vs Nth-call (diagram) -->
+<!-- SLIDE 11 — 2.6 Multi-turn, first-call vs Nth-call (diagram) -->
 <!-- ============================================================ -->
 <section class="slide">
     <div class="chrome-tag">L02 &middot; <b>PROMPTING</b></div>
     <div class="topbar reveal">
-        <div class="eyebrow">Slide 2.5</div>
+        <div class="eyebrow">Slide 2.6</div>
         <h2 class="headline">Multi-turn, and the <span class="it">first-call vs. Nth-call</span> axis</h2>
     </div>
     <div class="body-area" style="display:flex; gap:52px; align-items:center;">
@@ -956,7 +988,7 @@ table.ledger td.warn-cell { color: var(--coral); }
             </svg>
         </div>
     </div>
-    <div class="chrome-page">11 / 37</div>
+    <div class="chrome-page">12 / 38</div>
     <div class="chrome-nav">← → navigate</div>
 </section>
 
@@ -969,7 +1001,7 @@ table.ledger td.warn-cell { color: var(--coral); }
     <div class="chapter-eyebrow reveal">Section 3</div>
     <div class="chapter-title reveal">Structured output: <span style="color:var(--cyan); font-style:normal;">a negotiation</span></div>
     <div class="chapter-sub reveal">You ask for a shape; the model agrees to the contract but does not enforce it. So: ask, parse defensively, fail loudly.</div>
-    <div class="chrome-page">12 / 37</div>
+    <div class="chrome-page">13 / 38</div>
 </section>
 
 <!-- ============================================================ -->
@@ -1010,7 +1042,7 @@ table.ledger td.warn-cell { color: var(--coral); }
             </svg>
         </div>
     </div>
-    <div class="chrome-page">13 / 37</div>
+    <div class="chrome-page">14 / 38</div>
     <div class="chrome-nav">← → navigate</div>
 </section>
 
@@ -1038,7 +1070,7 @@ table.ledger td.warn-cell { color: var(--coral); }
             <div class="stack-node">{ dict }</div>
         </div>
     </div>
-    <div class="chrome-page">14 / 37</div>
+    <div class="chrome-page">15 / 38</div>
     <div class="chrome-nav">← → navigate</div>
 </section>
 
@@ -1085,7 +1117,7 @@ table.ledger td.warn-cell { color: var(--coral); }
             <li class="point">The mental model: <span class="k">ask for structure, parse defensively, fail loudly.</span></li>
         </ul>
     </div>
-    <div class="chrome-page">15 / 37</div>
+    <div class="chrome-page">16 / 38</div>
     <div class="chrome-nav">← → navigate</div>
 </section>
 
@@ -1145,7 +1177,7 @@ table.ledger td.warn-cell { color: var(--coral); }
             <li class="point">Validate the <i>contents</i>: required keys present? enum in the allowed set? Decide null-tolerance <b>on purpose.</b></li>
         </ul>
     </div>
-    <div class="chrome-page">16 / 37</div>
+    <div class="chrome-page">17 / 38</div>
     <div class="chrome-nav">← → navigate</div>
 </section>
 
@@ -1185,7 +1217,7 @@ table.ledger td.warn-cell { color: var(--coral); }
         </div>
     </div>
     <div class="diagram-caption reveal" style="position:absolute; left:var(--edge-x); bottom:96px; font-size:20px;">Structured output is often a <b style="color:var(--ink); font-style:normal;">cost win</b> too.</div>
-    <div class="chrome-page">17 / 37</div>
+    <div class="chrome-page">18 / 38</div>
     <div class="chrome-nav">← → navigate</div>
 </section>
 
@@ -1228,7 +1260,7 @@ table.ledger td.warn-cell { color: var(--coral); }
             <li class="point"><span class="k">Mini-track:</span> mini skips L06 — your one look at the thinking channel.</li>
         </ul>
     </div>
-    <div class="chrome-page">18 / 37</div>
+    <div class="chrome-page">19 / 38</div>
     <div class="chrome-nav">← → navigate</div>
 </section>
 
@@ -1241,7 +1273,7 @@ table.ledger td.warn-cell { color: var(--coral); }
     <div class="chapter-eyebrow reveal">Section 4</div>
     <div class="chapter-title reveal">Few-shot examples: <span style="color:var(--cyan); font-style:normal;">a precision tool</span></div>
     <div class="chapter-sub reveal">Showing, not teaching &mdash; example pairs that condition this one call's behavior, priced in tokens, where diversity beats volume.</div>
-    <div class="chrome-page">19 / 37</div>
+    <div class="chrome-page">20 / 38</div>
 </section>
 
 <!-- ============================================================ -->
@@ -1275,7 +1307,7 @@ table.ledger td.warn-cell { color: var(--coral); }
             <div class="diagram-caption" style="text-align:center; margin-top:6px; font-size:16px;">weights unchanged &mdash; conditioning (showing), not training (teaching)</div>
         </div>
     </div>
-    <div class="chrome-page">20 / 37</div>
+    <div class="chrome-page">21 / 38</div>
     <div class="chrome-nav">← → navigate</div>
 </section>
 
@@ -1315,7 +1347,7 @@ table.ledger td.warn-cell { color: var(--coral); }
             <li class="point">Placement matters <b>less than content</b> &mdash; pick what your parser or cache prefers.</li>
         </ul>
     </div>
-    <div class="chrome-page">21 / 37</div>
+    <div class="chrome-page">22 / 38</div>
     <div class="chrome-nav">← → navigate</div>
 </section>
 
@@ -1357,7 +1389,7 @@ table.ledger td.warn-cell { color: var(--coral); }
             <li class="point">Distinguish few-shot <b>for format</b> (output shape) from <b>for behavior</b> (judgment) &mdash; both work, they fail differently.</li>
         </ul>
     </div>
-    <div class="chrome-page">22 / 37</div>
+    <div class="chrome-page">23 / 38</div>
     <div class="chrome-nav">← → navigate</div>
 </section>
 
@@ -1385,7 +1417,7 @@ table.ledger td.warn-cell { color: var(--coral); }
             </tbody>
         </table>
     </div>
-    <div class="chrome-page">23 / 37</div>
+    <div class="chrome-page">24 / 38</div>
     <div class="chrome-nav">← → navigate</div>
 </section>
 
@@ -1398,7 +1430,7 @@ table.ledger td.warn-cell { color: var(--coral); }
     <div class="chapter-eyebrow reveal">Section 5</div>
     <div class="chapter-title reveal">The single-step <span style="color:var(--cyan); font-style:normal;">task shapes</span></div>
     <div class="chapter-sub reveal">Point the three levers at a goal and you get the everyday jobs one call does. Name the shape &mdash; it tells you which lever and what to validate.</div>
-    <div class="chrome-page">24 / 37</div>
+    <div class="chrome-page">25 / 38</div>
 </section>
 
 <!-- ============================================================ -->
@@ -1422,7 +1454,7 @@ table.ledger td.warn-cell { color: var(--coral); }
             </tbody>
         </table>
     </div>
-    <div class="chrome-page">25 / 37</div>
+    <div class="chrome-page">26 / 38</div>
     <div class="chrome-nav">← → navigate</div>
 </section>
 
@@ -1463,7 +1495,7 @@ table.ledger td.warn-cell { color: var(--coral); }
             </svg>
         </div>
     </div>
-    <div class="chrome-page">26 / 37</div>
+    <div class="chrome-page">27 / 38</div>
     <div class="chrome-nav">← → navigate</div>
 </section>
 
@@ -1508,7 +1540,7 @@ table.ledger td.warn-cell { color: var(--coral); }
             </svg>
         </div>
     </div>
-    <div class="chrome-page">27 / 37</div>
+    <div class="chrome-page">28 / 38</div>
     <div class="chrome-nav">← → navigate</div>
 </section>
 
@@ -1534,7 +1566,7 @@ table.ledger td.warn-cell { color: var(--coral); }
             </tbody>
         </table>
     </div>
-    <div class="chrome-page">28 / 37</div>
+    <div class="chrome-page">29 / 38</div>
     <div class="chrome-nav">← → navigate</div>
 </section>
 
@@ -1578,7 +1610,7 @@ table.ledger td.warn-cell { color: var(--coral); }
             </svg>
         </div>
     </div>
-    <div class="chrome-page">29 / 37</div>
+    <div class="chrome-page">30 / 38</div>
     <div class="chrome-nav">← → navigate</div>
 </section>
 
@@ -1611,7 +1643,7 @@ table.ledger td.warn-cell { color: var(--coral); }
             <div class="diagram-caption" style="text-align:center; margin-top:4px; font-size:16px;">swap the system policy to restyle without touching the user text</div>
         </div>
     </div>
-    <div class="chrome-page">30 / 37</div>
+    <div class="chrome-page">31 / 38</div>
     <div class="chrome-nav">← → navigate</div>
 </section>
 
@@ -1639,7 +1671,7 @@ table.ledger td.warn-cell { color: var(--coral); }
         </div>
         <div class="diagram-caption reveal" style="margin-top:14px; font-size:19px;">A hard task is a pipeline of single steps &mdash; that seam is L03&ndash;L05.</div>
     </div>
-    <div class="chrome-page">31 / 37</div>
+    <div class="chrome-page">32 / 38</div>
     <div class="chrome-nav">← → navigate</div>
 </section>
 
@@ -1652,7 +1684,7 @@ table.ledger td.warn-cell { color: var(--coral); }
     <div class="chapter-eyebrow reveal">Section 6</div>
     <div class="chapter-title reveal">Wrap-up and the <span style="color:var(--cyan); font-style:normal;">bridge to L06</span></div>
     <div class="chapter-sub reveal">Same toolkit, five output contracts &mdash; and the three levers are exactly what reasoning is built on next.</div>
-    <div class="chrome-page">32 / 37</div>
+    <div class="chrome-page">33 / 38</div>
 </section>
 
 <!-- ============================================================ -->
@@ -1699,7 +1731,7 @@ table.ledger td.warn-cell { color: var(--coral); }
             </svg>
         </div>
     </div>
-    <div class="chrome-page">33 / 37</div>
+    <div class="chrome-page">34 / 38</div>
     <div class="chrome-nav">← → navigate</div>
 </section>
 
@@ -1716,15 +1748,15 @@ table.ledger td.warn-cell { color: var(--coral); }
         <table class="ledger">
             <thead><tr><th>Anti-pattern</th><th>Cure</th><th>Where you saw it</th></tr></thead>
             <tbody>
-                <tr><td class="warn-cell"><b>Instructions in the wrong role</b> &mdash; policy in <code>user</code>, or per-call data in <code>system</code></td><td>system = always-true, user = per-call</td><td class="tag">slide 2.3</td></tr>
+                <tr><td class="warn-cell"><b>Instructions in the wrong role</b> &mdash; policy in <code>user</code>, or per-call data in <code>system</code></td><td>system = always-true, user = per-call</td><td class="tag">slide 2.4</td></tr>
                 <tr><td class="warn-cell"><b>Trusting structured output</b> &mdash; <code>json.loads</code> on the raw reply, assuming it holds</td><td>the parser <i>is</i> the enforcement &mdash; try / validate / fail loudly</td><td class="tag">slides 3.3&ndash;3.4</td></tr>
                 <tr><td class="warn-cell"><b>Few-shot that leaks format or biases</b> &mdash; under-diverse examples</td><td>diversity over volume; cover the label set</td><td class="tag">slide 4.3</td></tr>
-                <tr><td class="warn-cell"><b>Bloated always-on system prompt</b> &mdash; every rule crammed in, re-sent each call</td><td>keep <code>system</code> lean and durable</td><td class="tag">slides 2.2 / 2.5 / 4.4</td></tr>
+                <tr><td class="warn-cell"><b>Bloated always-on system prompt</b> &mdash; every rule crammed in, re-sent each call</td><td>keep <code>system</code> lean and durable</td><td class="tag">slides 2.2 / 2.6 / 4.4</td></tr>
             </tbody>
         </table>
         <div class="callout reveal" style="margin-top:28px;"><p style="font-size:25px;">All four share one root: <b style="font-style:normal;">treating a strong nudge as a hard guarantee.</b></p></div>
     </div>
-    <div class="chrome-page">34 / 37</div>
+    <div class="chrome-page">35 / 38</div>
     <div class="chrome-nav">← → navigate</div>
 </section>
 
@@ -1753,7 +1785,7 @@ table.ledger td.warn-cell { color: var(--coral); }
         </div>
         <div class="diagram-caption reveal" style="margin-top:16px; font-size:19px;">L03 is the immediate next step &mdash; the same discipline, now inside a graph node.</div>
     </div>
-    <div class="chrome-page">35 / 37</div>
+    <div class="chrome-page">36 / 38</div>
     <div class="chrome-nav">← → navigate</div>
 </section>
 
@@ -1790,7 +1822,7 @@ table.ledger td.warn-cell { color: var(--coral); }
             <li class="point"><span class="k">L06 = make the model think harder</span> &mdash; built entirely on the three levers you now own.</li>
         </ul>
     </div>
-    <div class="chrome-page">36 / 37</div>
+    <div class="chrome-page">37 / 38</div>
     <div class="chrome-nav">← → navigate</div>
 </section>
 
@@ -1814,7 +1846,7 @@ table.ledger td.warn-cell { color: var(--coral); }
             <div class="val"><b>L0203</b> roles<br><b>L0205</b> structured output<br><b>L0207</b> few-shot</div>
         </div>
     </div>
-    <div class="chrome-page">37 / 37</div>
+    <div class="chrome-page">38 / 38</div>
 </section>
 
 </main>
