@@ -8,7 +8,7 @@ keywords: langgraph, node, pure function, composability, testability, break-even
 estimated duration: 9
 ```
 
-> **Lesson:** L03 — Single-node operations. Teacher-led wrap-up (Demo 3 in the
+> **Lesson:** L03 — Single-node operations. Wrap-up discussion (Demo 3 in the
 > [roadmap](../../../../docs/origin/lesson_roadmaps/L03/demos_or_activities.md)).
 > This is a **discussion beat, not a build** — no new code. It reuses the `extract_node` from the
 > build demo ([L0302_lecture.ipynb](L0302_lecture.ipynb)) as one side of a comparison.
