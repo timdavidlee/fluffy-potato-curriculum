@@ -48,7 +48,7 @@ estimated duration: 25
 | **System prompt** | *always sees* it | paid on **every** call | always-true behavior, persona, rules |
 | **Skill** | *reads* it on demand | mostly **absent** until loaded | occasionally-needed, possibly multi-step know-how |
 
-- Say it out loud until students can classify on sight: **a tool is *called*, a skill is *read*, the
+- Say it out loud until you can classify on sight: **a tool is *called*, a skill is *read*, the
   system prompt is *always seen*.**
 
 ### slide 2.2 What a skill actually is
