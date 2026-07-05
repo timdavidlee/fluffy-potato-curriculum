@@ -17,9 +17,10 @@ recurring drift risk below.
 
 | Lesson item | Deck? | Scale | Note |
 | --- | --- | --- | --- |
+| L0102 | ✅ | classroom | done + consistent with outline (13 diagrams built, 36 total) |
 | L0202 | ✅ | classroom | done + consistent with outline (persona slide, 38 total) |
 | L1002 | ⚠️ | **OLD** | **known off** — built pre-classroom-scale; needs the rescale below |
-| L0102, L0304, L0402, L0502, L0505, L0602, L0702, L0802, L0902, L0905, L1102, L1105, L1206, L1307, L2202, L2205, L2302 | ❌ | — | no deck yet (17 outlines) |
+| L0304, L0402, L0502, L0505, L0602, L0702, L0802, L0902, L0905, L1102, L1105, L1206, L1307, L2202, L2205, L2302 | ❌ | — | no deck yet (16 outlines) |
 
 ## Open items
 
@@ -30,9 +31,9 @@ recurring drift risk below.
   L10-specific diagram-helper classes + inline SVG `font-size="N"` attributes, then **verify no slide
   overflows** the stage (L10 has a 7-row arc table + several SVG diagrams — the dense ones to watch).
   L10's diagrams are hand-crafted and good; **hand-scale, don't regenerate** (preserves the art).
-- **Build decks for the 17 remaining outlines.** Each via the `build-lecture-deck` skill (copy the
+- **Build decks for the 16 remaining outlines.** Each via the `build-lecture-deck` skill (copy the
   sample, map the outline, build diagrams, verify). Rough priority: the built-out core arc first
-  (L01, L03–L09, L11–L13), then the mini/standalone items (L22, L23). No hard dependency between
+  (L03–L09, L11–L13), then the mini/standalone items (L22, L23). No hard dependency between
   them — can be done incrementally, one lesson at a time.
 
 ## Verify (per deck, before committing)
