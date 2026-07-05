@@ -62,3 +62,29 @@ estimated duration: 8
 - text: closing line: *"you built the vocabulary by hand, ran it on the real platform, and every agent you build from here comes with a dataset you can re-run."*
 
 [↑ Back to top](#l13-lecture-carry-the-eval-set-forward)
+
+## section 4. Five eval anti-patterns, named
+
+### slide 4.1 The five — and the brittle scorer that cuts across them
+
+- text: the demos showed each of these break; name them now as portable anti-patterns you can catch
+  when you write your *own* eval set. Two families run underneath: **#1 and #4 are the same discipline
+  — eval design starts in the trace** (L12's side); **#2, #3, and #5 are the "don't trust one number"
+  family** — one run, one judge, one terminal table are each a single point you shouldn't build on.
+- table: the five anti-patterns, the one-line cure, and where you saw it.
+
+| Anti-pattern | Cure | Where you saw it |
+| --- | --- | --- |
+| **Happy-path-only eval set** — cases you imagined passing, none drawn from real failures | trace a failure → add a case that fails-when-broken and passes-when-fixed → keep it forever | [`L1302`](L1302_lecture.ipynb) — cases come from observed traces, not imagination |
+| **Sample too small** — one green run treated as proof on a non-deterministic agent | a pass *rate* over K samples, not a single verdict | [`L1304`](L1304_lecture.ipynb) — "one run can be luck" |
+| **Over-trusting the LLM-as-judge** — a judge's verdict taken as ground truth | place it on the cost/judgment spectrum (assertion → fuzzy → judge → human), cross-check it, never treat it as an oracle | [`L1306`](L1306_lecture.ipynb) — the scorer spectrum |
+| **Not targeting failure modes seen in traces** — scoring generic quality instead of the specific bugs **L12** surfaced | one regression case per observed trace failure (runaway, wrong-args, premature termination) | [`L1302`](L1302_lecture.ipynb) — the trace is the source of truth |
+| **Regressions that slip through** — no durable before/after comparison, so a fix that breaks something else goes unnoticed | keep every experiment run (the Langfuse ratchet); compare today vs. last week, not vs. memory | [`L1304`](L1304_lecture.ipynb) — run comparison + slide 1.2 above |
+
+- text: and one cross-cutting fault that sits *inside* the scorers — the **over-tight (brittle)
+  check**: an exact-string match red-flagging a correct-but-reworded answer. It trains you to ignore
+  reds, which is worse than no check. **Cure:** use the *loosest check that still catches the bug*
+  (the `L1302` brittleness beat and the `L1303` "loosen a brittle check" lab). A single green on an
+  imagined happy-path case is anti-patterns #1, #2, and #5 at once.
+
+[↑ Back to top](#l13-lecture-carry-the-eval-set-forward)

@@ -44,7 +44,11 @@ Python).
 - **L0110 — budgeting.** The payoff: the overhead you built (preamble + history) hits two budgets —
   the 200k window (space) and per-token cost (money). Watch the window meter fill, the cost
   asymmetry (output ~5× input), and the conversation staircase. **Rates in the notebook are
-  illustrative — pull live Claude pricing before quoting a real figure.**
+  illustrative — pull live Claude pricing before quoting a real figure.** Close on §5's
+  **"Common pitfalls: L01's four gotchas"** recap — a ~5-minute naming beat (word≠token, temperature,
+  output cost, silent overflow) that turns the whole lesson into portable pitfalls; point back at the
+  demos, don't re-run them. (These are the four *content* gotchas — distinct from the setup gotchas
+  above, which are about model downloads and keys.)
 
 ## L0105_lab problem 1 — Count tokens
 

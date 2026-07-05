@@ -345,7 +345,27 @@ estimated duration: 110
 - The sentence to leave with: *you now know how to ask the model for what you want, in the shape you
   want.*
 
-### slide 6.2 Where this goes next
+### slide 6.2 Four prompting anti-patterns to catch yourself committing
+
+- The demos showed each of these break; naming them makes them catchable in your *own* prompts. All
+  four share one root: **treating a strong nudge as a hard guarantee.** A role's weighting, a JSON
+  contract, an example's pull, a system prompt's authority — each is *best-effort*, and L02's whole
+  job is building the validate-don't-assume reflex.
+- table: the four anti-patterns, the one-line cure, and where you saw it.
+
+| Anti-pattern | Cure | Where you saw it |
+| --- | --- | --- |
+| **Instructions in the wrong role** — policy buried in `user`, or per-call data pinned in `system` | *system = always-true, user = per-call* | slide 2.3 (the two mis-attribution footguns) |
+| **Trusting structured output as a guarantee** — `json.loads` on the raw reply, assuming it holds | the parser *is* the enforcement — try / validate / fail loudly, never silently return `{}` | slides 3.3–3.4 |
+| **Few-shot that leaks format or biases the answer** — under-diverse examples that make the model overfit | diversity over volume; cover the label set | slide 4.3 ("all examples look like the easy case") |
+| **Bloated always-on system prompt** — every rule and example crammed into `system`, re-sent on every call | keep `system` lean and durable; move occasional guidance to the `user` turn | slides 2.2 / 2.5 / 4.4 (the per-turn token staircase) |
+
+- Two of the four point straight forward — **name the link, don't re-teach it here**: defensive
+  parsing carries into **L07** (tool-call arguments can be malformed too), and the lean-`system`
+  discipline is the seed of context management (**L19**) and the skill-vs-system-prompt call in
+  **L22**.
+
+### slide 6.3 Where this goes next
 
 - **Immediate next lesson: [L03](../../../../docs/origin/lesson_roadmaps/L03/objectives.md)
   (single-node operations).** It takes one task shape from section 5 — **extraction** — and wraps it as
@@ -354,7 +374,7 @@ estimated duration: 110
 - **Later: L06 (reasoning).** The three levers are also what L06 builds chain-of-thought on — that
   hand-off is the next slide.
 
-### slide 6.3 What L06 does with this
+### slide 6.4 What L06 does with this
 
 - L06 (teaching an LLM to think) sends its chain-of-thought prompts through **the same role
   structure** you just learned — a `system` message that licenses reasoning plus a `user` message
