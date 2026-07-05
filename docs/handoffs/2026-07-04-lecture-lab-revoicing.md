@@ -1,15 +1,16 @@
 # Handoff: re-review & revoice all lesson materials to the student-POV registers
 
-**Status: IN PROGRESS** (all 15 lessons + the K-series checklist are revoiced; only the two
-"Also open" self-enforcement skill edits and a deck-build spot-check remain before this can be
-marked DONE)
+**Status: DONE**
 **Date:** 2026-07-04
-**Branch:** direct commits/merges on local `main`. Landed so far: `06a920e` L10, `8d5dc0b` L03,
-`dc60c90` L04, `d088b4c` L05, `bbcd198` L02 (pushed to origin at `3f10a66`, along with L01/L06/L07/
-L08), then `c53cdaa` L13, `12e0af3` L11, `c31392a` L09, `e39272a` L12, `3465a38` L22, `e0ce885` L23
-(local only as of this update, not yet pushed). K01–K06 were spot-checked and found already clean —
-no commit needed. The `student-pov-lectures` worktree/branch this doc originally pointed at no
-longer exists — the work landed straight on `main` instead; treat that branch reference as stale.
+**Branch:** direct commits/merges on local `main`, pushed to `origin/main`. Landed: `06a920e` L10,
+`8d5dc0b` L03, `dc60c90` L04, `d088b4c` L05, `bbcd198` L02, `c402559` L01, `7a7c2fd` L08, `efdff16`
+L07, `9d796ad` L06, `c53cdaa` L13, `12e0af3` L11, `c31392a` L09, `e39272a` L12, `3465a38` L22,
+`e0ce885` L23. K01–K06 were spot-checked and found already clean — no commit needed. The two
+"Also open" skill edits (`generate-materials-from-roadmap/SKILL.md`, `review-lesson/SKILL.md`) and
+a deck-build spot-check on `L10/L1002_lecture.md` (29 slides — 5 sections + 23 content, matching
+the outline exactly) round this out. The `student-pov-lectures` worktree/branch this doc originally
+pointed at no longer exists — the work landed straight on `main` instead; treat that branch
+reference as stale.
 
 ---
 
@@ -138,13 +139,14 @@ below (skill wiring) and a deck-build spot-check, not more lesson content.
 L10/L1002_lecture.md (Coach) and L10/L1004_lab_empty.ipynb (Punchy) remain the concrete reference
 models, for anyone auditing the finished work or authoring new lessons going forward.
 
-### Also open (make the convention self-enforcing)
+### Also open (make the convention self-enforcing) — ✅ done
 
-- **`generate-materials-from-roadmap/SKILL.md`** — add an explicit "apply the register assigned in
-  CURRICULUM_PRD.md `### Voice & point of view`" line so **new** lessons are authored in-voice, not
-  just existing ones revoiced.
-- **`review-lesson/SKILL.md`** — add a voice check to its audit (student POV? correct register? no
-  presenter meta? tables terse?).
+- ✅ **`generate-materials-from-roadmap/SKILL.md`** — now points at `CURRICULUM_PRD.md`'s
+  `### Voice & point of view` in its "Read first" list and requires the assigned register
+  (Coach/Punchy) from the first draft in its "Author each artifact" step.
+- ✅ **`review-lesson/SKILL.md`** — added lens 6, "Voice / point of view," checking student POV,
+  correct register, and no presenter meta-instructions; renumbered the neighbor-hand-off and
+  code/reproducibility lenses to 7/8.
 
 ## 5. The transformation, precisely
 
@@ -208,7 +210,9 @@ the quick reference.
 - The two format guides were **un-drafted** in this effort. If anyone objects to treating the rest of
   those docs as authoritative, that's the one reversible decision to revisit.
 
-## 9. Definition of done
+## 9. Definition of done — ✅ met
 
-Every file in the §4 table revoiced to its register, the two skills wired (§4 "Also open"), the full
-gate green, one deck spot-checked, and this handoff marked **Status: DONE** (or deleted).
+Every file in the §4 table revoiced to its register (✅), the two skills wired (✅ §4 "Also open"),
+the full gate green (✅, re-run after every merge across all four batches), one deck spot-checked
+(✅ `L10/L1002_lecture.md` → 29 slides, 5 sections + 23 content, matching the outline exactly), and
+this handoff marked **Status: DONE** (✅, see top).
