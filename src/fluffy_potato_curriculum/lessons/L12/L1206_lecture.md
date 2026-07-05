@@ -1,8 +1,8 @@
-# L12 lecture: Seeing your trace in Langfuse
+# Seeing your trace in Langfuse
 
 ```yaml
-title: "L12 lecture: Seeing your trace in Langfuse"
-keywords: langfuse, observability, trace, span, generation, observation, OpenTelemetry, export
+title: "Seeing your trace in Langfuse"
+keywords: Langfuse, observability, trace, span, generation, observation, OpenTelemetry, export
 estimated duration: 20
 ```
 
@@ -26,7 +26,7 @@ estimated duration: 20
 - text: keys load through `common/config.py` (the pydantic-settings seam), **never hard-coded** — the same stance as every other live call in the course.
 - diagram: a box "your instrumented `agent_graph.run(...)`" with an arrow labeled "export (langfuse SDK / OTLP)" pointing to a box "shared Langfuse dashboard"; a second arrow from "L11 LangGraph agent" pointing at the *same* dashboard, to foreshadow that later traces land here too.
 
-[↑ Back to top](#l12-lecture-seeing-your-trace-in-langfuse)
+[↑ Back to top](#seeing-your-trace-in-langfuse)
 
 ## section 2. The vocabulary mapping (the whole lecture in one table)
 
@@ -51,7 +51,7 @@ estimated duration: 20
 - text: OpenTelemetry says "span," Langfuse says "observation," LangSmith says "run" — three names, one structure. You learned the structure; the names are just vocabulary.
 - text: exact field-name fidelity to one vendor is **not** the goal — approximate OTel-ish structure is. If a field doesn't map perfectly, that mismatch is a useful aside, not a bug.
 
-[↑ Back to top](#l12-lecture-seeing-your-trace-in-langfuse)
+[↑ Back to top](#seeing-your-trace-in-langfuse)
 
 ## section 3. Exporting a run
 
@@ -67,7 +67,7 @@ estimated duration: 20
 - text: **OTLP export** — emit the OTel-shaped spans over the OpenTelemetry protocol; Langfuse ingests them. More moving parts, but reinforces "this was OTel-shaped all along."
 - text: either way the `langfuse` dependency is already in the project (`uv add` was run when the course infra was set up) — there is no install step in class.
 
-[↑ Back to top](#l12-lecture-seeing-your-trace-in-langfuse)
+[↑ Back to top](#seeing-your-trace-in-langfuse)
 
 ## section 4. Re-doing L12's reading skills in the dashboard
 
@@ -82,7 +82,7 @@ estimated duration: 20
 - text: open two runs of the same task side by side; compare token usage, latency, and the span timeline.
 - text: same comparison as `L1205_lab`'s diff helper — signal (a real behavior change) vs. noise (a few tokens, a few milliseconds) — now read off a waterfall instead of two printed lists.
 
-[↑ Back to top](#l12-lecture-seeing-your-trace-in-langfuse)
+[↑ Back to top](#seeing-your-trace-in-langfuse)
 
 ## section 5. Graceful degradation and what's next
 
@@ -97,7 +97,7 @@ estimated duration: 20
 - text: it also has a datasets/experiments feature that **L13** name-drops for evaluation — the platform version of the eval harness you'll hand-build next lesson.
 - text: closing line: *"you built the minimal version by hand, so the real tool is just your trace, rendered."*
 
-[↑ Back to top](#l12-lecture-seeing-your-trace-in-langfuse)
+[↑ Back to top](#seeing-your-trace-in-langfuse)
 
 ## section 6. What does *not* go in here: extracts (the data plane)
 
@@ -129,4 +129,4 @@ estimated duration: 20
 - text: treat the trace store **as** your database → you can't serve, join, back up, or access-control the data.
 - text: neither tool is wrong; each is being used for the other's job. The rule, one line to carry out of L12: **observe the run in the trace; persist the product to the datastore.**
 
-[↑ Back to top](#l12-lecture-seeing-your-trace-in-langfuse)
+[↑ Back to top](#seeing-your-trace-in-langfuse)

@@ -1,5 +1,11 @@
 # K05 — Async concepts
 
+```yaml
+title: K05 — Async concepts
+keywords: async, asyncio, coroutine, async def, await, event loop, asyncio.gather, concurrency, top-level await, ainvoke vs invoke, prework
+estimated duration: 22
+```
+
 ## How to read this file
 
 Work top to bottom; budget ~20–25 minutes. The finish line is the **gather-vs-sequential timing

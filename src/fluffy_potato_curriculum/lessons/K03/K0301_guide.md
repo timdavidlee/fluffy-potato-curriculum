@@ -1,5 +1,11 @@
 # K03 — Jupyter workflow
 
+```yaml
+title: K03 — Jupyter workflow
+keywords: jupyter, jupyterlab, pinned kernel, restart and run all, reproducibility, top-level await, clear output, notebook workflow, prework
+estimated duration: 18
+```
+
 ## How to read this file
 
 Work top to bottom; budget ~15–20 minutes. The finish line is a clean **Restart Kernel and Run

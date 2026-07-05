@@ -2,7 +2,7 @@
 
 ```yaml
 title: "From loop to graph: draw what create_agent wraps"
-keywords: shallow agent, create_agent, langgraph, MessagesState, tools_condition, agent node, tools node, back-edge, cycle, conditional exit, workflow vs agent, acyclic, recursion_limit, ToolNode, add_messages, L10 graph mapping, L15 stategraph, ReAct
+keywords: shallow agent, create_agent, langgraph, MessagesState, tools_condition, agent node, tools node, back-edge, cycle, conditional exit, workflow vs agent, acyclic, recursion_limit, ToolNode, add_messages, L10 graph mapping, L15 StateGraph, ReAct
 estimated duration: 15
 ```
 

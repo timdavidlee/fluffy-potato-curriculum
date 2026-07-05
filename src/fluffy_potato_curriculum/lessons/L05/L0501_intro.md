@@ -2,7 +2,7 @@
 
 ```yaml
 title: "Conditional graphs: routing & branching — one new primitive, the same graph"
-keywords: langgraph, conditional edge, routing, classifier, user-input branching, deterministic, decider, workflow vs agent, chatanthropic, mixed models
+keywords: langgraph, conditional edge, routing, classifier, user-input branching, deterministic, decider, workflow vs agent, ChatAnthropic, mixed models
 estimated duration: 10
 ```
 

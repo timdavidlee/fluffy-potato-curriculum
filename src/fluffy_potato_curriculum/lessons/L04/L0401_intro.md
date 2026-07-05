@@ -2,7 +2,7 @@
 
 ```yaml
 title: "Sequential chaining: wire several nodes into a fixed pipeline"
-keywords: langgraph, workflow, dag, directed acyclic graph, stategraph, node, edge, state, reducer, prompt chaining, control flow as data, chatanthropic, mixed models
+keywords: langgraph, workflow, dag, directed acyclic graph, StateGraph, node, edge, state, reducer, prompt chaining, control flow as data, ChatAnthropic, mixed models
 estimated duration: 10
 ```
 

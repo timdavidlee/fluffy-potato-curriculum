@@ -1,5 +1,11 @@
 # K01 — Environment & tooling
 
+```yaml
+title: K01 — Environment & tooling
+keywords: uv, virtual environment, uv sync, uv run, pinned dependencies, lockfile, src layout, pytest, environment setup, git clone, commit hook, prework
+estimated duration: 25
+```
+
 This is the first thing you do in the course — before `L01`, before any other unit. By the end
 you'll have a working local checkout with the project's pinned environment, and you'll be able to
 run any project command through `uv`.

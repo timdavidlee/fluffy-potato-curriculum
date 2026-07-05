@@ -2,7 +2,7 @@
 
 ```yaml
 title: "A node is one LLM call you wire: state goes in, state comes out"
-keywords: langgraph, stategraph, node, state, typed state, typeddict, compile, invoke, pure function, chatanthropic, single node, extract, first framework
+keywords: langgraph, StateGraph, node, state, typed state, typeddict, compile, invoke, pure function, ChatAnthropic, single node, extract, first framework
 estimated duration: 8
 ```
 

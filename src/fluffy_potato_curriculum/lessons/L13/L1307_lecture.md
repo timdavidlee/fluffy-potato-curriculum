@@ -1,8 +1,8 @@
-# L13 lecture: Carry the eval set forward
+# Carry the eval set forward
 
 ```yaml
-title: "L13 lecture: Carry the eval set forward"
-keywords: evaluation, practice, ratchet, carry forward, langgraph, L04, L11, llm-as-judge, langfuse dataset, experiment, run comparison
+title: "Carry the eval set forward"
+keywords: evaluation, practice, ratchet, carry forward, langgraph, L04, L11, LLM-as-judge, Langfuse dataset, experiment, run comparison
 estimated duration: 8
 ```
 
@@ -23,7 +23,7 @@ estimated duration: 8
 - text: a unit test pins a deterministic output once. An eval set is a *ratchet*: once a case passes, any later change that breaks it is a regression you catch **before** shipping — re-run the dataset as an experiment and Langfuse's run comparison flags the pass→fail.
 - text: the cost of *not* having it is asymmetric: writing the case is minutes; rediscovering the bug in production is hours plus the damage it did in between.
 
-[↑ Back to top](#l13-lecture-carry-the-eval-set-forward)
+[↑ Back to top](#carry-the-eval-set-forward)
 
 ## section 2. The very next lessons
 
@@ -37,7 +37,7 @@ estimated duration: 8
 - text: *same dataset, different implementation — did anything regress?* Two dataset runs — L13's reference L10 graph (`agent_graph`) and L11's `create_agent` agent — line up in Langfuse's **run-comparison view**, the cleanest possible demonstration of the ratchet. (L11 itself comes *before* L13 and checks its L10-equivalence by eye; the repeatable experiment is what you add here and carry forward — L11's own lab doesn't run it.)
 - diagram: two boxes — "L13 reference graph (`agent_graph`)" and "L11 `create_agent` agent" — both run as experiments over the *same* `l13-agent-evals` dataset, producing two dataset runs compared side by side in Langfuse.
 
-[↑ Back to top](#l13-lecture-carry-the-eval-set-forward)
+[↑ Back to top](#carry-the-eval-set-forward)
 
 ## section 3. Where this scales (and where it stops)
 
@@ -61,7 +61,7 @@ estimated duration: 8
 - text: a later at-scale eval lesson doesn't introduce the platform — it deepens what you run on it: multi-step graphs, retrieval quality, judges done properly, and multi-agent systems.
 - text: closing line: *"you built the vocabulary by hand, ran it on the real platform, and every agent you build from here comes with a dataset you can re-run."*
 
-[↑ Back to top](#l13-lecture-carry-the-eval-set-forward)
+[↑ Back to top](#carry-the-eval-set-forward)
 
 ## section 4. Five eval anti-patterns, named
 
@@ -87,4 +87,4 @@ estimated duration: 8
   (the `L1302` brittleness beat and the `L1303` "loosen a brittle check" lab). A single green on an
   imagined happy-path case is anti-patterns #1, #2, and #5 at once.
 
-[↑ Back to top](#l13-lecture-carry-the-eval-set-forward)
+[↑ Back to top](#carry-the-eval-set-forward)
