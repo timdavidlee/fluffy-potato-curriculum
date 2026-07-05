@@ -172,16 +172,33 @@ body {
   padding: 0 0 8px;
 }
 
+/* Color-code each item into three groups so the submenu is scannable at a glance:
+   intro/notes, lecture, and labs. The kind name already leads the item title, so a
+   colored left stripe + faint tint is the key for it. --kind is set per group below
+   and inherited by the button, which reads it for the resting tint. (guide/demo are
+   the K-prework kinds, folded into the reading and lecture groups respectively.) */
+.item-list li {
+  border-left: 3px solid var(--kind, var(--line));
+}
+.item-list li.kind-intro,
+.item-list li.kind-proctor_notes,
+.item-list li.kind-guide         { --kind: #c678dd; } /* purple — intro & notes */
+.item-list li.kind-lecture,
+.item-list li.kind-demo          { --kind: #61afef; } /* blue — lecture */
+.item-list li.kind-lab_empty,
+.item-list li.kind-lab_solutions { --kind: #98c379; } /* green — labs */
+
 .item-list button {
   width: 100%;
   text-align: left;
   border: 0;
-  background: none;
-  padding: 6px 18px 6px 34px;
+  /* 31px + the li's 3px stripe = 34px text indent (matches the un-striped look). */
+  padding: 6px 18px 6px 31px;
   font: inherit;
   font-size: 14px;
   color: var(--ink);
   cursor: pointer;
+  background: color-mix(in srgb, var(--kind, transparent) 8%, transparent);
 }
 
 .item-list button:hover {
