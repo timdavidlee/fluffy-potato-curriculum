@@ -1,3 +1,9 @@
+## v0.15.0 (2026-07-05)
+
+### Feat
+
+- **L02**: add persona slide to lecture deck
+
 ## v0.14.0 (2026-07-05)
 
 ### Feat
