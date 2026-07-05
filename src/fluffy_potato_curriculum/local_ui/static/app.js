@@ -119,6 +119,8 @@ function renderLesson(lesson) {
 
 function renderItemLink(lessonId, item) {
   const li = document.createElement("li");
+  // Color-code the row by kind (lecture / lab / intro / …); see .kind-* in style.css.
+  li.className = `kind-${item.kind}`;
   const btn = document.createElement("button");
   const key = `${lessonId}/${item.item_id}`;
   btn.innerHTML =
