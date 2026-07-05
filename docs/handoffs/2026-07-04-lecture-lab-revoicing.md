@@ -1,11 +1,11 @@
 # Handoff: re-review & revoice all lesson materials to the student-POV registers
 
-**Status: IN PROGRESS** (conventions, L10 reference, and 8 of 15 lessons landed; L06 in flight, the
-rest of the checklist remains)
+**Status: IN PROGRESS** (conventions, L10 reference, and 9 of 15 lessons landed; the rest of the
+checklist remains)
 **Date:** 2026-07-04
-**Branch:** direct commits/merges on local `main`, not yet pushed to `origin/main`. Landed so far:
-`06a920e` L10, `8d5dc0b` L03, `dc60c90` L04, `d088b4c` L05, `bbcd198` L02 (pushed to origin at
-`763e558`), then `c402559` L01, `7a7c2fd` L08, `efdff16` L07 (local only, not yet pushed). The
+**Branch:** direct commits/merges on local `main`. Landed so far: `06a920e` L10, `8d5dc0b` L03,
+`dc60c90` L04, `d088b4c` L05, `bbcd198` L02 (pushed to origin at `763e558`), then `c402559` L01,
+`7a7c2fd` L08, `efdff16` L07, `9d796ad` L06 (local only as of this update, not yet pushed). The
 `student-pov-lectures` worktree/branch this doc originally pointed at no longer exists — the work
 landed straight on `main` instead; treat that branch reference as stale.
 
@@ -69,6 +69,10 @@ below).
   to Coach/Punchy. All 4 lab pairs were already clean, untouched.
 - ✅ **L07 — fully done** (`efdff16`, merge commit). Light touch-up pass; only `L0705_lab_solutions`
   needed a one-word fix, the other 2 lab pairs were already clean.
+- ✅ **L06 — fully done** (`9d796ad`, merge commit). One lab pair (`L0608`) was already clean and
+  left untouched; caught and fixed an inconsistency where 3 of 4 lecture notebooks still had
+  "Teacher demo — Demo N" headers after a first pass, plus a stray HTML-escaped anchor tag
+  introduced then self-corrected mid-task.
 
 L01/L06/L07/L08 ran as a second batch with **per-agent worktree isolation** (`isolation: "worktree"`
 on the Agent tool) — each agent worked in its own git worktree/branch and committed there, then the
@@ -90,7 +94,7 @@ is **teacher-facing and OUT OF SCOPE** — leave it in presenter voice.
 | L03 | ✅ done (`8d5dc0b`) | ✅ | ✅ | |
 | L04 | ✅ done (`dc60c90`) | ✅ | ✅ | missing `[↑ Back to top]` anchors in `L0402` — pre-existing, not fixed here |
 | L05 | ✅ done (`d088b4c`) | ✅ | ✅ | |
-| L06 | 🔄 in progress | 🔄 | 🔄 | third agent of the worktree-isolated batch, not yet landed |
+| L06 | ✅ done (`9d796ad`) | ✅ | ✅ | one lab pair (`L0608`) already clean, untouched |
 | L07 | ✅ done (`efdff16`) | ✅ | ✅ | light touch-up, mostly already clean |
 | L08 | ✅ done (`7a7c2fd`) | ✅ | ✅ | light touch-up, mostly already clean |
 | L09 | 4 | 1 | 2 | |
@@ -102,8 +106,8 @@ is **teacher-facing and OUT OF SCOPE** — leave it in presenter voice.
 | L23 | 3 | 1 | 2 | |
 | K01–K06 | — | — | — | 6 `_guide.md`; verify Runbook + student POV (light touch, low priority) |
 
-**Remaining totals:** L06 (in flight), L09, L11–L13, L22, L23 — 22 lecture files, 6 intros, 12 lab
-pairs (24 notebooks) — plus the 6 K-guides. `.md` lectures are straight `Edit`s; `.ipynb`
+**Remaining totals:** L09, L11–L13, L22, L23 — 17 lecture files, 5 intros, 9 lab pairs (18
+notebooks) — plus the 6 K-guides. `.md` lectures are straight `Edit`s; `.ipynb`
 lectures/labs need `NotebookEdit` on **markdown cells only**.
 
 L10/L02/L03/L04/L05 are done — use `L10/L1002_lecture.md` (Coach) and `L10/L1004_lab_empty.ipynb`
