@@ -12,10 +12,9 @@ This folder is the theme's home:
   flow, and a closing slide). It is the copy-from starting point and the living proof of the tokens
   below. Open it in a browser; copy it to start a new deck.
 
-> This is the **HTML-deck** style. It is separate from the `build-lecture-deck` skill, which emits a
-> plain, unstyled `.pptx` from the same `L<NN><II>_lecture.md` outline. The `.md` outline is the
-> source of truth for *content* (sections, slides, bullets, tables, and `diagram:` directives); this
-> doc governs how a hand-built or generated **HTML** deck should *look*.
+> This is the **HTML-deck** style. The `L<NN><II>_lecture.md` outline is the source of truth for
+> *content* (sections, slides, bullets, tables, and `diagram:` directives); this doc governs how the
+> **HTML** deck rendered from that outline should *look*.
 
 **To re-theme the whole curriculum**, change the tokens in §2 here and in `sample_deck.html`, then
 re-verify the sample renders — every deck copies from the sample, so they move together. Nothing in
@@ -65,7 +64,7 @@ variables so a re-theme is one edit.
 
     --edge-x: 130px;         /* left/right content margin */
     --edge-top: 96px;
-    --edge-bottom: 90px;
+    --edge-bottom: 64px;     /* trimmed to buy vertical room for the classroom type scale */
     --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
     --duration-normal: 0.7s;
 }
@@ -78,6 +77,15 @@ same two families — **Fraunces (display serif) + IBM Plex Mono (body/mono)** i
 `--cyan` = normal / happy path / "this is the point." `--coral` = failure, warning, the error branch,
 the thing to avoid. `--ink-faint` = neutral/plumbing edges. Never use coral decoratively — a coral
 arrow *means* "this path is the failure."
+
+**Type scale — sized for the room.** These decks are shown in a **large-ish classroom (25–40 seats)
+and must read from the back row**, so the body scale runs large for a 1920×1080 canvas: bullets 29px,
+table cells 24px, diagram captions 25px, headlines 62px, SVG/diagram labels ~20–27px. That is bigger
+than a typical on-screen slide — it is deliberate. The trade-off with **reading-first** density is
+real: at this scale a slide only holds ~4 tight bullets or a ~4–6 row table before it hits the stage
+floor. If content won't fit, **cut it or split the slide — never shrink the type back down.** (A
+lecture-hall of hundreds would need even larger type and far less per slide; that's a sparser deck,
+not this one.)
 
 ### The permanent canvas
 
@@ -135,13 +143,13 @@ Four kinds of slide, each a `<section class="slide …">`. The first slide adds 
 
 ## 4. Content components
 
-- **`ul.points > li.point`** — the default body. Cyan ring bullet, 25px. Emphasis: `<b>`/`.k` = ink,
+- **`ul.points > li.point`** — the default body. Cyan ring bullet, 29px. Emphasis: `<b>`/`.k` = ink,
   `<code>` = cyan-on-faint inline code, `.warn` = coral. Keep to ~4 tight points; reading-first, but
   never overflow.
-- **`.callout`** — one emphasis sentence, cyan left-border, Fraunces italic 32px. Use for a slide's
+- **`.callout`** — one emphasis sentence, cyan left-border, Fraunces italic 38px. Use for a slide's
   single load-bearing claim.
-- **`table.ledger`** — for any markdown table or `table:` directive. Uppercase-cyan `th`, 21px `td`,
-  first column `td.tag` (cyan, `nowrap`). `td.warn-cell` for coral cells.
+- **`table.ledger`** — for any markdown table or `table:` directive. Uppercase-cyan `th` (19px), 24px
+  `td`, first column `td.tag` (cyan, `nowrap`). `td.warn-cell` for coral cells.
 - **`.diagram-frame` + `.diagram-caption`** — for any `diagram:` directive. See §5.
 
 Reveal animation: add `reveal` to top-level blocks for a staggered fade-and-rise on slide entry;
@@ -158,9 +166,11 @@ A `diagram:` directive in the outline is a *visual to build*, never text to prin
   More robust than hand-plotted SVG; use for nested boxes, two-up contrasts, pill lists, stacked
   message blocks, bipartite lists.
 - **SVG** (for anything with arrows, curves, or a cycle) — `<circle>` nodes, `<path>` edges with
-  `marker-end` arrowheads, `class="node-label"` (`--font-body`, 600, 24px, `fill:var(--ink)`) and
-  `class="edge-label"` (`--font-body`, 18px). Animate a flow with a `<circle>` + `<animateMotion>`
-  along the edge path. Define arrowhead `<marker>`s in `<defs>` (one cyan, one coral).
+  `marker-end` arrowheads, `class="node-label"` (`--font-body`, 600, 27px, `fill:var(--ink)`) and
+  `class="edge-label"` (`--font-body`, 20px). Animate a flow with a `<circle>` + `<animateMotion>`
+  along the edge path. Define arrowhead `<marker>`s in `<defs>` (one cyan, one coral). Size SVG
+  containers generously — a diagram whose labels read from the back row matters more than one that
+  leaves whitespace.
 
 **Box vocabulary:**
 
@@ -208,5 +218,6 @@ Start a new deck by copying [`sample_deck.html`](sample_deck.html), then change 
 Everything else — tokens, canvas, type primitives, components, nav JS — stays byte-for-byte identical
 so the decks stay a set.
 
-**`.pptx` decks are build artifacts (gitignored); the HTML decks are committed source.** Keep the deck
-self-contained (all CSS/JS inline, fonts from Google Fonts) so a single file opens anywhere.
+**The HTML decks are the committed slide source, rendered from the `.md` outline** — the
+`build-lecture-deck` skill automates this copy-and-fill. Keep the deck self-contained (all CSS/JS
+inline, fonts from Google Fonts) so a single file opens anywhere.

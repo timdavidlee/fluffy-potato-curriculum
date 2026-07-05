@@ -31,7 +31,7 @@
 
     --edge-x: 130px;
     --edge-top: 96px;
-    --edge-bottom: 90px;
+    --edge-bottom: 64px;
 
     --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
     --duration-normal: 0.7s;
@@ -147,7 +147,7 @@ img, video, canvas, svg { max-width: 100%; max-height: 100%; }
    TYPOGRAPHY PRIMITIVES
    =========================================== */
 .eyebrow {
-    font-size: 19px;
+    font-size: 22px;
     letter-spacing: 0.16em;
     text-transform: uppercase;
     color: var(--cyan);
@@ -176,8 +176,8 @@ img, video, canvas, svg { max-width: 100%; max-height: 100%; }
 h2.headline {
     font-family: var(--font-display);
     font-weight: 600;
-    font-size: 58px;
-    line-height: 1.12;
+    font-size: 62px;
+    line-height: 1.1;
     color: var(--ink);
     letter-spacing: -0.005em;
     margin-top: 18px;
@@ -185,8 +185,8 @@ h2.headline {
 h2.headline .it { font-style: italic; font-weight: 500; color: var(--cyan); }
 
 .lede {
-    font-size: 24px;
-    line-height: 1.6;
+    font-size: 29px;
+    line-height: 1.5;
     color: var(--ink-dim);
     max-width: 1200px;
     margin-top: 22px;
@@ -195,7 +195,7 @@ h2.headline .it { font-style: italic; font-weight: 500; color: var(--cyan); }
 
 .body-area {
     position: absolute;
-    top: 322px;
+    top: 312px;
     left: var(--edge-x);
     right: var(--edge-x);
     bottom: var(--edge-bottom);
@@ -204,11 +204,11 @@ h2.headline .it { font-style: italic; font-weight: 500; color: var(--cyan); }
 .points { list-style: none; max-width: 1420px; }
 .points .point {
     position: relative;
-    padding-left: 38px;
-    font-size: 25px;
-    line-height: 1.55;
+    padding-left: 40px;
+    font-size: 29px;
+    line-height: 1.5;
     color: var(--ink-dim);
-    margin-bottom: 22px;
+    margin-bottom: 15px;
 }
 .points .point::before {
     content: "";
@@ -233,7 +233,7 @@ h2.headline .it { font-style: italic; font-weight: 500; color: var(--cyan); }
 
 /* callout — emphasis statement */
 .callout {
-    margin-top: 40px;
+    margin-top: 28px;
     padding: 28px 36px;
     border-left: 3px solid var(--cyan);
     background: rgba(82,232,200,0.05);
@@ -242,8 +242,8 @@ h2.headline .it { font-style: italic; font-weight: 500; color: var(--cyan); }
 .callout p {
     font-family: var(--font-display);
     font-style: italic;
-    font-size: 32px;
-    line-height: 1.4;
+    font-size: 38px;
+    line-height: 1.32;
     color: var(--ink);
 }
 
@@ -252,7 +252,7 @@ h2.headline .it { font-style: italic; font-weight: 500; color: var(--cyan); }
    =========================================== */
 table.ledger { width: 100%; border-collapse: collapse; max-width: 1660px; }
 table.ledger th {
-    font-size: 16px;
+    font-size: 19px;
     letter-spacing: 0.1em;
     text-transform: uppercase;
     color: var(--cyan);
@@ -262,16 +262,16 @@ table.ledger th {
     font-weight: 600;
 }
 table.ledger td {
-    font-size: 21px;
-    line-height: 1.45;
+    font-size: 24px;
+    line-height: 1.38;
     color: var(--ink-dim);
-    padding: 18px 22px 18px 0;
+    padding: 11px 20px 11px 0;
     border-bottom: 1px solid rgba(82,232,200,0.10);
     vertical-align: top;
 }
 table.ledger tr:last-child td { border-bottom: none; }
 table.ledger td.tag {
-    font-size: 20px;
+    font-size: 23px;
     color: var(--cyan);
     font-weight: 500;
     white-space: nowrap;
@@ -295,15 +295,15 @@ table.ledger td.warn-cell { color: var(--coral); }
     justify-content: center;
 }
 .diagram-caption {
-    font-size: 21px;
+    font-size: 25px;
     line-height: 1.6;
     color: var(--ink-dim);
     font-style: italic;
     max-width: 1300px;
     margin-top: 18px;
 }
-.node-label { font-family: var(--font-body); font-weight: 600; font-size: 24px; fill: var(--ink); }
-.edge-label { font-family: var(--font-body); font-size: 18px; }
+.node-label { font-family: var(--font-body); font-weight: 600; font-size: 27px; fill: var(--ink); }
+.edge-label { font-family: var(--font-body); font-size: 20px; }
 
 /* ===========================================
    CHAPTER (section divider) SLIDES — sparse
@@ -346,8 +346,8 @@ table.ledger td.warn-cell { color: var(--coral); }
 .chapter-sub {
     position: absolute;
     left: var(--edge-x);
-    top: 700px;
-    font-size: 25px;
+    top: 690px;
+    font-size: 29px;
     color: var(--ink-dim);
     max-width: 1100px;
     line-height: 1.6;
@@ -375,8 +375,8 @@ table.ledger td.warn-cell { color: var(--coral); }
     position: absolute;
     top: 636px;
     left: var(--edge-x);
-    width: 880px;
-    font-size: 25px;
+    width: 920px;
+    font-size: 29px;
     line-height: 1.6;
     color: var(--ink-dim);
 }
@@ -387,7 +387,7 @@ table.ledger td.warn-cell { color: var(--coral); }
     left: var(--edge-x);
     display: flex;
     gap: 44px;
-    font-size: 18px;
+    font-size: 21px;
     color: var(--ink-dim);
 }
 .slide-cover .meta-row span b { color: var(--cyan); }
@@ -405,7 +405,7 @@ table.ledger td.warn-cell { color: var(--coral); }
     font-family: var(--font-display);
     font-style: italic;
     font-weight: 500;
-    font-size: 52px;
+    font-size: 56px;
     line-height: 1.35;
     color: var(--ink);
 }
@@ -422,14 +422,14 @@ table.ledger td.warn-cell { color: var(--coral); }
     padding-top: 30px;
 }
 .closing-grid .col .label {
-    font-size: 15px;
+    font-size: 18px;
     letter-spacing: 0.12em;
     text-transform: uppercase;
     color: var(--cyan);
     margin-bottom: 10px;
 }
 .closing-grid .col .val {
-    font-size: 20px;
+    font-size: 24px;
     color: var(--ink-dim);
     line-height: 1.5;
 }
@@ -532,7 +532,7 @@ table.ledger td.warn-cell { color: var(--coral); }
 .dbox.coral { border: 2px solid var(--coral); background: rgba(255,107,87,0.05); }
 .dbox.neutral { border: 2px solid var(--ink-faint); background: #12181a; }
 .dbox-label {
-    font-size: 15px;
+    font-size: 17px;
     letter-spacing: 0.12em;
     text-transform: uppercase;
     color: var(--cyan);
@@ -541,7 +541,7 @@ table.ledger td.warn-cell { color: var(--coral); }
 }
 .dbox.coral .dbox-label { color: var(--coral); }
 .dbox.ghost .dbox-label { color: var(--ink-faint); }
-.dbox-body { font-size: 21px; color: var(--ink-dim); line-height: 1.5; }
+.dbox-body { font-size: 24px; color: var(--ink-dim); line-height: 1.5; }
 .dbox-body code {
     font-family: var(--font-body);
     color: var(--cyan);
@@ -552,7 +552,7 @@ table.ledger td.warn-cell { color: var(--coral); }
 }
 .chips { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 12px; }
 .chip {
-    font-size: 18px;
+    font-size: 20px;
     color: var(--ink-dim);
     border: 1px solid var(--cyan-rule);
     border-radius: 20px;
@@ -566,7 +566,7 @@ table.ledger td.warn-cell { color: var(--coral); }
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    font-size: 18px;
+    font-size: 20px;
     padding: 10px 18px;
     border-radius: 8px;
     border: 1.5px solid var(--ink-faint);
@@ -577,7 +577,7 @@ table.ledger td.warn-cell { color: var(--coral); }
 .pill.system { border-color: var(--cyan); color: var(--cyan); background: rgba(82,232,200,0.08); }
 .pill.user { border-color: var(--ink-faint); color: var(--ink); }
 .pill.assistant { border-color: var(--coral); color: var(--coral); background: rgba(255,107,87,0.06); }
-.flow-arrow { color: var(--cyan); font-size: 30px; display: flex; align-items: center; }
+.flow-arrow { color: var(--cyan); font-size: 33px; display: flex; align-items: center; }
 .flow-arrow.coral { color: var(--coral); }
 .flow-arrow.neutral { color: var(--ink-faint); }
 .stack-node {
@@ -587,7 +587,7 @@ table.ledger td.warn-cell { color: var(--coral); }
     padding: 18px 24px;
     text-align: center;
     color: var(--ink);
-    font-size: 22px;
+    font-size: 25px;
     font-weight: 600;
 }
 .stack-node.coral { border-color: var(--coral); }
@@ -626,15 +626,15 @@ table.ledger td.warn-cell { color: var(--coral); }
             <text x="150" y="60" text-anchor="middle" class="edge-label" fill="var(--cyan-dim)" letter-spacing="2">3 LEVERS</text>
             <g>
                 <rect x="30" y="90" width="240" height="76" rx="10" fill="#12181a" stroke="var(--cyan)" stroke-width="2"/>
-                <text x="150" y="136" text-anchor="middle" class="node-label" font-size="22">roles</text>
+                <text x="150" y="136" text-anchor="middle" class="node-label" font-size="24">roles</text>
                 <rect x="30" y="200" width="240" height="76" rx="10" fill="#12181a" stroke="var(--cyan)" stroke-width="2"/>
-                <text x="150" y="246" text-anchor="middle" class="node-label" font-size="20">structured out</text>
+                <text x="150" y="246" text-anchor="middle" class="node-label" font-size="22">structured out</text>
                 <rect x="30" y="310" width="240" height="76" rx="10" fill="#12181a" stroke="var(--cyan)" stroke-width="2"/>
-                <text x="150" y="356" text-anchor="middle" class="node-label" font-size="22">few-shot</text>
+                <text x="150" y="356" text-anchor="middle" class="node-label" font-size="24">few-shot</text>
             </g>
             <!-- five shapes (right) -->
             <text x="600" y="40" text-anchor="middle" class="edge-label" fill="var(--cyan-dim)" letter-spacing="2">5 SHAPES</text>
-            <g fill="var(--ink-dim)" font-family="IBM Plex Mono" font-size="18">
+            <g fill="var(--ink-dim)" font-family="IBM Plex Mono" font-size="20">
                 <rect x="500" y="62" width="210" height="52" rx="8" fill="#0f1519" stroke="var(--ink-faint)" stroke-width="1.5"/>
                 <text x="605" y="94" text-anchor="middle">extraction</text>
                 <rect x="500" y="146" width="210" height="52" rx="8" fill="#0f1519" stroke="var(--ink-faint)" stroke-width="1.5"/>
@@ -994,19 +994,19 @@ table.ledger td.warn-cell { color: var(--coral); }
                     <marker id="s31c" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="var(--cyan)"/></marker>
                 </defs>
                 <rect x="20" y="160" width="150" height="70" rx="10" fill="#12181a" stroke="var(--ink)" stroke-width="2"/>
-                <text x="95" y="202" text-anchor="middle" class="node-label" font-size="20">model reply</text>
+                <text x="95" y="202" text-anchor="middle" class="node-label" font-size="22">model reply</text>
                 <!-- top lane: conversational -->
                 <path d="M 170 180 C 250 120, 300 90, 380 90" fill="none" stroke="var(--ink-faint)" stroke-width="2.5" marker-end="url(#s31a)"/>
                 <rect x="380" y="55" width="240" height="66" rx="10" fill="#0f1519" stroke="var(--ink-faint)" stroke-width="1.5"/>
                 <text x="500" y="82" text-anchor="middle" class="edge-label" fill="var(--ink-dim)">conversational</text>
-                <text x="500" y="105" text-anchor="middle" class="edge-label" fill="var(--ink-faint)" font-size="15">a paragraph a human reads</text>
+                <text x="500" y="105" text-anchor="middle" class="edge-label" fill="var(--ink-faint)" font-size="17">a paragraph a human reads</text>
                 <!-- bottom lane: programmatic -->
                 <path d="M 170 210 C 250 270, 300 300, 380 300" fill="none" stroke="var(--cyan)" stroke-width="3" marker-end="url(#s31c)"/>
                 <rect x="380" y="266" width="240" height="66" rx="10" fill="#12181a" stroke="var(--cyan)" stroke-width="2"/>
                 <text x="500" y="293" text-anchor="middle" class="edge-label" fill="var(--cyan)" font-weight="600">programmatic</text>
-                <text x="500" y="316" text-anchor="middle" class="edge-label" fill="var(--ink-dim)" font-size="15">a dict your code indexes</text>
+                <text x="500" y="316" text-anchor="middle" class="edge-label" fill="var(--ink-dim)" font-size="17">a dict your code indexes</text>
                 <!-- downstream chips -->
-                <text x="500" y="365" text-anchor="middle" class="edge-label" fill="var(--cyan-dim)" font-size="15">evals L13 &middot; tools L07 &middot; pipelines</text>
+                <text x="500" y="365" text-anchor="middle" class="edge-label" fill="var(--cyan-dim)" font-size="17">evals L13 &middot; tools L07 &middot; pipelines</text>
             </svg>
         </div>
     </div>
@@ -1058,9 +1058,9 @@ table.ledger td.warn-cell { color: var(--coral); }
                     <marker id="s33" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="var(--coral)"/></marker>
                 </defs>
                 <rect x="20" y="180" width="180" height="70" rx="10" fill="#12181a" stroke="var(--cyan)" stroke-width="2"/>
-                <text x="110" y="222" text-anchor="middle" class="node-label" font-size="21">return JSON only</text>
+                <text x="110" y="222" text-anchor="middle" class="node-label" font-size="23">return JSON only</text>
                 <!-- 5 coral cards -->
-                <g font-family="IBM Plex Mono" font-size="16" fill="var(--coral)">
+                <g font-family="IBM Plex Mono" font-size="18" fill="var(--coral)">
                     <rect x="330" y="20" width="360" height="54" rx="8" fill="rgba(255,107,87,0.05)" stroke="var(--coral)" stroke-width="1.5"/>
                     <text x="350" y="52">extra prose around the JSON</text>
                     <rect x="330" y="100" width="360" height="54" rx="8" fill="rgba(255,107,87,0.05)" stroke="var(--coral)" stroke-width="1.5"/>
@@ -1114,28 +1114,28 @@ table.ledger td.warn-cell { color: var(--coral); }
                 <text x="160" y="128" text-anchor="middle" class="edge-label" fill="var(--cyan)">① json.loads(whole)</text>
                 <!-- ok to dict (right) -->
                 <path d="M 280 122 L 400 122" stroke="var(--cyan)" stroke-width="2.5" marker-end="url(#s34ok)"/>
-                <text x="330" y="112" text-anchor="middle" class="edge-label" fill="var(--cyan)" font-size="14">ok</text>
+                <text x="330" y="112" text-anchor="middle" class="edge-label" fill="var(--cyan)" font-size="16">ok</text>
                 <!-- fail down -->
                 <path d="M 160 150 L 160 186" stroke="var(--coral)" stroke-width="2.5" marker-end="url(#s34fail)"/>
-                <text x="188" y="174" class="edge-label" fill="var(--coral)" font-size="14">fail</text>
+                <text x="188" y="174" class="edge-label" fill="var(--coral)" font-size="16">fail</text>
                 <!-- step 2 -->
                 <rect x="40" y="188" width="240" height="56" rx="8" fill="#12181a" stroke="var(--cyan)" stroke-width="2"/>
                 <text x="160" y="222" text-anchor="middle" class="edge-label" fill="var(--cyan)">② regex first {…}, retry</text>
                 <path d="M 280 216 L 400 216" stroke="var(--cyan)" stroke-width="2.5" marker-end="url(#s34ok)"/>
-                <text x="330" y="206" text-anchor="middle" class="edge-label" fill="var(--cyan)" font-size="14">ok</text>
+                <text x="330" y="206" text-anchor="middle" class="edge-label" fill="var(--cyan)" font-size="16">ok</text>
                 <path d="M 160 244 L 160 280" stroke="var(--coral)" stroke-width="2.5" marker-end="url(#s34fail)"/>
-                <text x="188" y="268" class="edge-label" fill="var(--coral)" font-size="14">fail</text>
+                <text x="188" y="268" class="edge-label" fill="var(--coral)" font-size="16">fail</text>
                 <!-- step 3 raise -->
                 <rect x="40" y="282" width="240" height="56" rx="8" fill="rgba(255,107,87,0.06)" stroke="var(--coral)" stroke-width="2"/>
                 <text x="160" y="316" text-anchor="middle" class="edge-label" fill="var(--coral)">③ raise loudly</text>
-                <text x="160" y="360" text-anchor="middle" class="edge-label" fill="var(--coral)" font-size="14">never a silent { }</text>
+                <text x="160" y="360" text-anchor="middle" class="edge-label" fill="var(--coral)" font-size="16">never a silent { }</text>
                 <!-- dict node -->
                 <rect x="400" y="150" width="130" height="50" rx="8" fill="#12181a" stroke="var(--cyan)" stroke-width="2"/>
                 <text x="465" y="181" text-anchor="middle" class="edge-label" fill="var(--ink)">{ dict }</text>
                 <!-- validate gate -->
                 <path d="M 465 200 L 465 400" stroke="var(--cyan)" stroke-width="2" marker-end="url(#s34ok)"/>
                 <rect x="330" y="402" width="200" height="58" rx="8" fill="#0f1519" stroke="var(--cyan-rule)" stroke-width="1.5"/>
-                <text x="430" y="428" text-anchor="middle" class="edge-label" fill="var(--cyan)" font-size="15">validate contents</text>
+                <text x="430" y="428" text-anchor="middle" class="edge-label" fill="var(--cyan)" font-size="17">validate contents</text>
                 <text x="430" y="448" text-anchor="middle" class="edge-label" fill="var(--ink-dim)" font-size="13">keys? enum in ALLOWED?</text>
             </svg>
         </div>
@@ -1172,15 +1172,15 @@ table.ledger td.warn-cell { color: var(--coral); }
                 <!-- needle near 0 (left) -->
                 <line x1="130" y1="180" x2="58" y2="130" stroke="var(--cyan)" stroke-width="5"/>
                 <circle cx="130" cy="180" r="9" fill="var(--cyan)"/>
-                <text x="42" y="205" class="edge-label" fill="var(--cyan)" font-size="15">0</text>
-                <text x="205" y="205" class="edge-label" fill="var(--ink-faint)" font-size="15">1</text>
-                <text x="130" y="230" text-anchor="middle" class="edge-label" fill="var(--ink-dim)" font-size="15">pinned near 0</text>
+                <text x="42" y="205" class="edge-label" fill="var(--cyan)" font-size="17">0</text>
+                <text x="205" y="205" class="edge-label" fill="var(--ink-faint)" font-size="17">1</text>
+                <text x="130" y="230" text-anchor="middle" class="edge-label" fill="var(--ink-dim)" font-size="17">pinned near 0</text>
                 <!-- token bars -->
                 <text x="410" y="40" text-anchor="middle" class="edge-label" fill="var(--cyan-dim)">OUTPUT TOKENS</text>
                 <rect x="300" y="80" width="120" height="34" rx="4" fill="var(--cyan)" opacity="0.85"/>
-                <text x="300" y="140" class="edge-label" fill="var(--cyan)" font-size="14">tight schema</text>
+                <text x="300" y="140" class="edge-label" fill="var(--cyan)" font-size="16">tight schema</text>
                 <rect x="300" y="180" width="240" height="34" rx="4" fill="var(--ink-faint)"/>
-                <text x="300" y="240" class="edge-label" fill="var(--ink-dim)" font-size="14">chatty answer</text>
+                <text x="300" y="240" class="edge-label" fill="var(--ink-dim)" font-size="16">chatty answer</text>
             </svg>
         </div>
     </div>
@@ -1208,23 +1208,24 @@ table.ledger td.warn-cell { color: var(--coral); }
                 <!-- thinking block (dim) -->
                 <rect x="30" y="60" width="300" height="120" rx="10" fill="rgba(76,86,82,0.08)" stroke="var(--ink-faint)" stroke-width="2" stroke-dasharray="6 5"/>
                 <text x="180" y="110" text-anchor="middle" class="edge-label" fill="var(--ink-dim)">&lt;thinking&gt; … scratchpad …</text>
-                <text x="180" y="140" text-anchor="middle" class="edge-label" fill="var(--ink-faint)" font-size="15">&lt;/thinking&gt;</text>
-                <text x="180" y="168" text-anchor="middle" class="edge-label" fill="var(--ink-faint)" font-size="14">L06 owns this channel</text>
+                <text x="180" y="140" text-anchor="middle" class="edge-label" fill="var(--ink-faint)" font-size="17">&lt;/thinking&gt;</text>
+                <text x="180" y="168" text-anchor="middle" class="edge-label" fill="var(--ink-faint)" font-size="16">L06 owns this channel</text>
                 <!-- answer block (cyan) -->
                 <rect x="30" y="200" width="300" height="110" rx="10" fill="#12181a" stroke="var(--cyan)" stroke-width="2.5"/>
-                <text x="180" y="250" text-anchor="middle" class="node-label" font-size="22" fill="var(--cyan)">&lt;answer&gt;{…}&lt;/answer&gt;</text>
-                <text x="180" y="288" text-anchor="middle" class="edge-label" fill="var(--ink-dim)" font-size="15">L02 owns the answer</text>
+                <text x="180" y="250" text-anchor="middle" class="node-label" font-size="24" fill="var(--cyan)">&lt;answer&gt;{…}&lt;/answer&gt;</text>
+                <text x="180" y="288" text-anchor="middle" class="edge-label" fill="var(--ink-dim)" font-size="17">L02 owns the answer</text>
                 <!-- parser arrow reaching PAST thinking to answer -->
                 <path d="M 400 100 C 470 100, 470 255, 340 255" fill="none" stroke="var(--cyan)" stroke-width="2.5" marker-end="url(#s36)"/>
-                <text x="480" y="180" text-anchor="middle" class="edge-label" fill="var(--cyan)" font-size="15">parser</text>
+                <text x="480" y="180" text-anchor="middle" class="edge-label" fill="var(--cyan)" font-size="17">parser</text>
                 <text x="480" y="205" text-anchor="middle" class="edge-label" fill="var(--ink-dim)" font-size="13">reaches past</text>
                 <text x="480" y="228" text-anchor="middle" class="edge-label" fill="var(--ink-dim)" font-size="13">thinking</text>
             </svg>
         </div>
         <ul class="points reveal" style="flex:1; max-width:560px;">
-            <li class="point">A reply can carry more than the answer: a <code>&lt;thinking&gt;</code> scratchpad <i>then</i> a structured <code>&lt;answer&gt;{…}&lt;/answer&gt;</code>. Tag-match the answer, then reuse the parser from 3.4.</li>
-            <li class="point"><b>L02 owns the answer channel; L06 owns the thinking channel.</b> Here you only see that the two <b>compose.</b></li>
-            <li class="point"><span class="k">Mini-track note:</span> the mini skips L06, so this is your one look at the thinking channel.</li>
+            <li class="point">A <b>channel</b> = a <i>labeled slice of one reply</i> (a <code>&lt;tag&gt;…&lt;/tag&gt;</code> pair) — text you asked for, <b>not</b> a special API field.</li>
+            <li class="point">The parser reaches <i>past</i> <code>&lt;thinking&gt;</code>: tag-match <code>&lt;answer&gt;</code>, then the same defensive parser from 3.4.</li>
+            <li class="point"><b>L02 owns the answer channel; L06 owns the thinking channel</b> — here they just <b>compose.</b></li>
+            <li class="point"><span class="k">Mini-track:</span> mini skips L06 — your one look at the thinking channel.</li>
         </ul>
     </div>
     <div class="chrome-page">18 / 37</div>
@@ -1457,8 +1458,8 @@ table.ledger td.warn-cell { color: var(--coral); }
                 <text x="470" y="152" text-anchor="middle" class="edge-label" fill="var(--cyan)">customer_name</text>
                 <text x="470" y="182" text-anchor="middle" class="edge-label" fill="var(--cyan)">order_id</text>
                 <text x="470" y="212" text-anchor="middle" class="edge-label" fill="var(--cyan)">intent</text>
-                <text x="470" y="242" text-anchor="middle" class="edge-label" fill="var(--coral)" font-size="14">✗ dropped &middot; ✗ hallucinated</text>
-                <text x="470" y="300" text-anchor="middle" class="edge-label" fill="var(--ink-dim)" font-size="15">validator flags both</text>
+                <text x="470" y="242" text-anchor="middle" class="edge-label" fill="var(--coral)" font-size="16">✗ dropped &middot; ✗ hallucinated</text>
+                <text x="470" y="300" text-anchor="middle" class="edge-label" fill="var(--ink-dim)" font-size="17">validator flags both</text>
             </svg>
         </div>
     </div>
@@ -1493,13 +1494,13 @@ table.ledger td.warn-cell { color: var(--coral); }
                 <!-- flat label -->
                 <rect x="200" y="150" width="140" height="70" rx="10" fill="#12181a" stroke="var(--cyan)" stroke-width="2"/>
                 <text x="270" y="182" text-anchor="middle" class="edge-label" fill="var(--cyan)">flat label</text>
-                <text x="270" y="205" text-anchor="middle" class="edge-label" fill="var(--ink-dim)" font-size="14">billing</text>
+                <text x="270" y="205" text-anchor="middle" class="edge-label" fill="var(--ink-dim)" font-size="16">billing</text>
                 <path d="M 340 185 L 395 185" stroke="var(--cyan)" stroke-width="2.5" marker-end="url(#s53)"/>
                 <!-- taxonomy -->
                 <rect x="400" y="140" width="150" height="90" rx="10" fill="#12181a" stroke="var(--cyan)" stroke-width="2"/>
-                <text x="475" y="172" text-anchor="middle" class="edge-label" fill="var(--cyan)" font-size="16">category</text>
-                <text x="475" y="192" text-anchor="middle" class="edge-label" fill="var(--ink-faint)" font-size="14">&darr;</text>
-                <text x="475" y="212" text-anchor="middle" class="edge-label" fill="var(--cyan)" font-size="16">subcategory</text>
+                <text x="475" y="172" text-anchor="middle" class="edge-label" fill="var(--cyan)" font-size="18">category</text>
+                <text x="475" y="192" text-anchor="middle" class="edge-label" fill="var(--ink-faint)" font-size="16">&darr;</text>
+                <text x="475" y="212" text-anchor="middle" class="edge-label" fill="var(--cyan)" font-size="18">subcategory</text>
                 <!-- reject out-of-set -->
                 <rect x="200" y="270" width="220" height="56" rx="8" fill="rgba(255,107,87,0.05)" stroke="var(--coral)" stroke-width="1.8"/>
                 <text x="310" y="304" text-anchor="middle" class="edge-label" fill="var(--coral)">✗ out-of-set label rejected</text>
@@ -1567,8 +1568,8 @@ table.ledger td.warn-cell { color: var(--coral); }
                 <path d="M 145 194 L 145 234" stroke="var(--cyan)" stroke-width="2.5" marker-end="url(#s55)"/>
                 <!-- validator gate -->
                 <rect x="40" y="236" width="210" height="70" rx="10" fill="#0f1519" stroke="var(--cyan-rule)" stroke-width="1.8"/>
-                <text x="145" y="266" text-anchor="middle" class="edge-label" fill="var(--cyan)" font-size="15">len == N?</text>
-                <text x="145" y="290" text-anchor="middle" class="edge-label" fill="var(--cyan)" font-size="15">each ≤ bound?</text>
+                <text x="145" y="266" text-anchor="middle" class="edge-label" fill="var(--cyan)" font-size="17">len == N?</text>
+                <text x="145" y="290" text-anchor="middle" class="edge-label" fill="var(--cyan)" font-size="17">each ≤ bound?</text>
                 <!-- pass / fail -->
                 <path d="M 250 260 L 340 235" stroke="var(--cyan)" stroke-width="2.5" marker-end="url(#s55)"/>
                 <text x="360" y="238" class="edge-label" fill="var(--cyan)">pass ✓</text>
@@ -1673,13 +1674,13 @@ table.ledger td.warn-cell { color: var(--coral); }
             <svg viewBox="0 0 660 400" width="100%" height="100%">
                 <!-- levers left -->
                 <rect x="20" y="60" width="200" height="56" rx="10" fill="#12181a" stroke="var(--cyan)" stroke-width="2"/>
-                <text x="120" y="94" text-anchor="middle" class="edge-label" fill="var(--cyan)" font-size="20">roles</text>
+                <text x="120" y="94" text-anchor="middle" class="edge-label" fill="var(--cyan)" font-size="22">roles</text>
                 <rect x="20" y="170" width="200" height="56" rx="10" fill="#12181a" stroke="var(--cyan)" stroke-width="2"/>
-                <text x="120" y="204" text-anchor="middle" class="edge-label" fill="var(--cyan)" font-size="18">structured output</text>
+                <text x="120" y="204" text-anchor="middle" class="edge-label" fill="var(--cyan)" font-size="20">structured output</text>
                 <rect x="20" y="280" width="200" height="56" rx="10" fill="#12181a" stroke="var(--cyan)" stroke-width="2"/>
-                <text x="120" y="314" text-anchor="middle" class="edge-label" fill="var(--cyan)" font-size="20">few-shot</text>
+                <text x="120" y="314" text-anchor="middle" class="edge-label" fill="var(--cyan)" font-size="22">few-shot</text>
                 <!-- shapes right -->
-                <g font-family="IBM Plex Mono" font-size="16" fill="var(--ink-dim)">
+                <g font-family="IBM Plex Mono" font-size="18" fill="var(--ink-dim)">
                     <rect x="450" y="20" width="190" height="44" rx="8" fill="#0f1519" stroke="var(--ink-faint)" stroke-width="1.3"/><text x="545" y="47" text-anchor="middle">extraction</text>
                     <rect x="450" y="90" width="190" height="44" rx="8" fill="#0f1519" stroke="var(--ink-faint)" stroke-width="1.3"/><text x="545" y="117" text-anchor="middle">classification</text>
                     <rect x="450" y="160" width="190" height="44" rx="8" fill="#0f1519" stroke="var(--ink-faint)" stroke-width="1.3"/><text x="545" y="187" text-anchor="middle">ranking</text>

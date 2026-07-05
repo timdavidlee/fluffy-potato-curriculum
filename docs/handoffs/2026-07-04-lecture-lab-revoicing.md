@@ -196,8 +196,9 @@ the quick reference.
 - **Full gate** before committing (from CLAUDE.md):
   `uv run ruff format && uv run ruff check && uv run pyright && uv run pytest`. (Prose-only changes
   won't move these, but run them.)
-- **Deck build** still works for a revoiced `.md` lecture (the `build-lecture-deck` skill) — the
-  directives were preserved, so it should; spot-check one.
+- **Deck build:** the `.md` outline's directives were preserved, so a deck still renders from it.
+  *(Decks are HTML-first now — the `build-lecture-deck` skill outputs an HTML deck in the Graph
+  Canvas theme; the old python-pptx version was retired.)*
 
 ## 8. Gotchas / decisions already made
 

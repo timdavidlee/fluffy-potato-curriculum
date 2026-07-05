@@ -31,7 +31,7 @@
 
     --edge-x: 130px;
     --edge-top: 96px;
-    --edge-bottom: 90px;
+    --edge-bottom: 64px;
 
     --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
     --duration-normal: 0.7s;
@@ -147,7 +147,7 @@ img, video, canvas, svg { max-width: 100%; max-height: 100%; }
    TYPOGRAPHY PRIMITIVES
    =========================================== */
 .eyebrow {
-    font-size: 19px;
+    font-size: 22px;
     letter-spacing: 0.16em;
     text-transform: uppercase;
     color: var(--cyan);
@@ -176,8 +176,8 @@ img, video, canvas, svg { max-width: 100%; max-height: 100%; }
 h2.headline {
     font-family: var(--font-display);
     font-weight: 600;
-    font-size: 58px;
-    line-height: 1.12;
+    font-size: 62px;
+    line-height: 1.1;
     color: var(--ink);
     letter-spacing: -0.005em;
     margin-top: 18px;
@@ -185,8 +185,8 @@ h2.headline {
 h2.headline .it { font-style: italic; font-weight: 500; color: var(--cyan); }
 
 .lede {
-    font-size: 24px;
-    line-height: 1.6;
+    font-size: 29px;
+    line-height: 1.5;
     color: var(--ink-dim);
     max-width: 1200px;
     margin-top: 22px;
@@ -195,7 +195,7 @@ h2.headline .it { font-style: italic; font-weight: 500; color: var(--cyan); }
 
 .body-area {
     position: absolute;
-    top: 322px;
+    top: 312px;
     left: var(--edge-x);
     right: var(--edge-x);
     bottom: var(--edge-bottom);
@@ -204,11 +204,11 @@ h2.headline .it { font-style: italic; font-weight: 500; color: var(--cyan); }
 .points { list-style: none; max-width: 1420px; }
 .points .point {
     position: relative;
-    padding-left: 38px;
-    font-size: 25px;
-    line-height: 1.55;
+    padding-left: 40px;
+    font-size: 29px;
+    line-height: 1.5;
     color: var(--ink-dim);
-    margin-bottom: 22px;
+    margin-bottom: 15px;
 }
 .points .point::before {
     content: "";
@@ -233,7 +233,7 @@ h2.headline .it { font-style: italic; font-weight: 500; color: var(--cyan); }
 
 /* callout — emphasis statement */
 .callout {
-    margin-top: 40px;
+    margin-top: 28px;
     padding: 28px 36px;
     border-left: 3px solid var(--cyan);
     background: rgba(82,232,200,0.05);
@@ -242,8 +242,8 @@ h2.headline .it { font-style: italic; font-weight: 500; color: var(--cyan); }
 .callout p {
     font-family: var(--font-display);
     font-style: italic;
-    font-size: 32px;
-    line-height: 1.4;
+    font-size: 38px;
+    line-height: 1.32;
     color: var(--ink);
 }
 
@@ -252,7 +252,7 @@ h2.headline .it { font-style: italic; font-weight: 500; color: var(--cyan); }
    =========================================== */
 table.ledger { width: 100%; border-collapse: collapse; max-width: 1660px; }
 table.ledger th {
-    font-size: 16px;
+    font-size: 19px;
     letter-spacing: 0.1em;
     text-transform: uppercase;
     color: var(--cyan);
@@ -262,16 +262,16 @@ table.ledger th {
     font-weight: 600;
 }
 table.ledger td {
-    font-size: 21px;
-    line-height: 1.45;
+    font-size: 24px;
+    line-height: 1.38;
     color: var(--ink-dim);
-    padding: 18px 22px 18px 0;
+    padding: 11px 20px 11px 0;
     border-bottom: 1px solid rgba(82,232,200,0.10);
     vertical-align: top;
 }
 table.ledger tr:last-child td { border-bottom: none; }
 table.ledger td.tag {
-    font-size: 20px;
+    font-size: 23px;
     color: var(--cyan);
     font-weight: 500;
     white-space: nowrap;
@@ -295,15 +295,15 @@ table.ledger td.warn-cell { color: var(--coral); }
     justify-content: center;
 }
 .diagram-caption {
-    font-size: 21px;
+    font-size: 25px;
     line-height: 1.6;
     color: var(--ink-dim);
     font-style: italic;
     max-width: 1300px;
     margin-top: 18px;
 }
-.node-label { font-family: var(--font-body); font-weight: 600; font-size: 24px; fill: var(--ink); }
-.edge-label { font-family: var(--font-body); font-size: 18px; }
+.node-label { font-family: var(--font-body); font-weight: 600; font-size: 27px; fill: var(--ink); }
+.edge-label { font-family: var(--font-body); font-size: 20px; }
 
 /* ===========================================
    CHAPTER (section divider) SLIDES — sparse
@@ -346,8 +346,8 @@ table.ledger td.warn-cell { color: var(--coral); }
 .chapter-sub {
     position: absolute;
     left: var(--edge-x);
-    top: 700px;
-    font-size: 25px;
+    top: 690px;
+    font-size: 29px;
     color: var(--ink-dim);
     max-width: 1100px;
     line-height: 1.6;
@@ -375,8 +375,8 @@ table.ledger td.warn-cell { color: var(--coral); }
     position: absolute;
     top: 636px;
     left: var(--edge-x);
-    width: 880px;
-    font-size: 25px;
+    width: 920px;
+    font-size: 29px;
     line-height: 1.6;
     color: var(--ink-dim);
 }
@@ -387,7 +387,7 @@ table.ledger td.warn-cell { color: var(--coral); }
     left: var(--edge-x);
     display: flex;
     gap: 44px;
-    font-size: 18px;
+    font-size: 21px;
     color: var(--ink-dim);
 }
 .slide-cover .meta-row span b { color: var(--cyan); }
@@ -405,7 +405,7 @@ table.ledger td.warn-cell { color: var(--coral); }
     font-family: var(--font-display);
     font-style: italic;
     font-weight: 500;
-    font-size: 52px;
+    font-size: 56px;
     line-height: 1.35;
     color: var(--ink);
 }
@@ -422,14 +422,14 @@ table.ledger td.warn-cell { color: var(--coral); }
     padding-top: 30px;
 }
 .closing-grid .col .label {
-    font-size: 15px;
+    font-size: 18px;
     letter-spacing: 0.12em;
     text-transform: uppercase;
     color: var(--cyan);
     margin-bottom: 10px;
 }
 .closing-grid .col .val {
-    font-size: 20px;
+    font-size: 24px;
     color: var(--ink-dim);
     line-height: 1.5;
 }
