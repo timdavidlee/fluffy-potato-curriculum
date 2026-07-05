@@ -7,7 +7,7 @@ estimated duration: 20
 ```
 
 > **Lesson:** L09. **Roadmap:** Demo 2 in the [demos_or_activities.md](../../../../docs/origin/lesson_roadmaps/L09/demos_or_activities.md).
-> A slide outline (teacher-presented) covering **connecting a client to an already-published MCP
+> A slide outline walking you through **connecting a client to an already-published MCP
 > server** and reading the discovery handshake.
 >
 > **⚠️ NOT RUNNABLE in this environment.** The Python `mcp` package is **not installed** in the course
@@ -83,8 +83,8 @@ async with connect_stdio(server_config) as session:
 | `description` | `"Book a meeting on the user's calendar. Use when the user asks to schedule…"` | the L08 description, written for the model |
 | `inputSchema` | `{"type": "object", "properties": {…}, "required": ["attendee", "start"]}` | the L08 parameter schema (JSON Schema) |
 
-- The teacher-narration point: the client now "knows about tools it did not ship with." Ownership of the
-  tool list has moved to the **server author** (reinforce [L0902 lecture](L0902_lecture.md) slide 2.3).
+- The point worth sitting with: the client now "knows about tools it did not ship with." Ownership of
+  the tool list has moved to the **server author** ([L0902 lecture](L0902_lecture.md) slide 2.3).
 
 [↑ Back to top](#connecting-to-an-existing-mcp-server-wire-shape-walkthrough)
 
@@ -125,8 +125,8 @@ print(result.content)  # the server's structured tool result, fed back to the mo
 
 ### slide 4.1 Stop the server, watch the boundary fail
 
-- The teacher-demo move: stop the server process mid-conversation and re-issue the prompt. The client
-  surfaces a **transport error** to the model — a failure mode an inline tool *cannot* have.
+- Watch what happens if the server process stops mid-conversation and the prompt gets re-issued: the
+  client surfaces a **transport error** to the model — a failure mode an inline tool *cannot* have.
 - table: the boundary-specific failures (mirrors [L0902 lecture](L0902_lecture.md) slide 3.4) and how
   the model reacts.
 
