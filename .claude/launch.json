@@ -7,6 +7,20 @@
       "runtimeArgs": ["run", "python", "-m", "fluffy_potato_curriculum.local_ui"],
       "port": 8000,
       "autoPort": true
+    },
+    {
+      "name": "static-preview",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": ["-m", "http.server", "8123", "--directory", "src/fluffy_potato_curriculum/lessons/L10"],
+      "port": 8123,
+      "autoPort": true
+    },
+    {
+      "name": "static-preview-l02",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": ["-m", "http.server", "8124", "--directory", "src/fluffy_potato_curriculum/lessons/L02"],
+      "port": 8124,
+      "autoPort": true
     }
   ]
 }

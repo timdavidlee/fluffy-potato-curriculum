@@ -81,7 +81,31 @@ estimated duration: 110
 - diagram: two boxes — `system: "You are a triage assistant. Answer in two short paragraphs…"`
   (stamped "always true") and `user: "My head has hurt for three days."` (stamped "this call only").
 
-### slide 2.3 The two mis-attribution footguns
+### slide 2.3 Persona: the durable "who you are"
+
+- A **persona** is the slice of the `system` message that says *who the model is, how it speaks,
+  and what it always does* — its **role** ("You are a triage assistant"), its **tone / register**
+  (terse, warm, formal), and any **standing format or policy** ("answer in two short paragraphs;
+  never give dosage advice"). It's the reusable identity that fronts every `user` request
+  unchanged — the "always-true" content from slide 2.2, given a name.
+- **A persona is a behavior-and-voice nudge, not a capability unlock.** It reliably steers *how*
+  the model answers — register, format, what it declines to do — but *"You are an expert
+  oncologist"* does **not** make the medical facts more correct. Reach for a persona to fix
+  **voice, tone, and adherence**; accuracy comes from better context, reasoning (L06), or a
+  stronger model (L14), not from a flattering job title.
+- Keep it **lean and durable** (slide 2.2 again): a persona earns its permanent seat in `system`
+  only because it's true on *every* call. Per-call specifics still belong in `user` — a bloated
+  persona is the same always-on-token footgun by another name.
+- This is the seed of a much bigger idea. **From L11 on, an agent's persona *is* its `system`
+  prompt** — its role, its guardrails, and its job within a multi-agent split. You'll meet it again
+  as the shallow agent's system prompt (L11) and as "static system prompt vs. context management"
+  (L19). Same lever you're learning now, higher stakes later.
+- diagram: a `system` message split into two stacked bands — a durable **persona** band (role ·
+  tone/register · standing policy: "You are a triage assistant · warm, plain language · two short
+  paragraphs · no dosage advice") over the rest — stamped "true on every call"; a side caption
+  "shapes *how* it answers (voice · format · adherence), **not** whether the facts are right."
+
+### slide 2.4 The two mis-attribution footguns
 
 - **Instructions buried in the user message** get re-sent and re-stated every turn — that's more
   tokens, and now the policy competes with the actual request for the model's attention.
@@ -96,7 +120,7 @@ estimated duration: 110
 | This call's question, document, or data | `user` | changes every call |
 | A worked example you're planting | `assistant` (or a labeled block in `user`) | see section 4 |
 
-### slide 2.4 The system message is weighted, not enforced
+### slide 2.5 The system message is weighted, not enforced
 
 - The model treats `system` as conversational context with a **privileged label** — it tends to
   follow it, but it's **not invulnerable** to instructions in user messages. Frame it for yourself
@@ -107,7 +131,7 @@ estimated duration: 110
   it."* It isn't — strongly weighted ≠ enforced.
 - diagram: a "nudge, not a wall" contrast — the system message drawn as a thick *weighted* arrow biasing the model (not a solid barrier), a thinner user-message arrow still able to push against it, and a separate hard wall labeled "real guarantees live in your code, outside the model." Caption: "privileged label ≠ enforced."
 
-### slide 2.5 Multi-turn, and the first-call vs. Nth-call axis
+### slide 2.6 Multi-turn, and the first-call vs. Nth-call axis
 
 - A multi-turn conversation is just appending alternating `user`/`assistant` messages and
   re-sending the **whole list**. Every continued turn re-bills the history — that's the L01
@@ -198,6 +222,10 @@ estimated duration: 110
 
 ### slide 3.6 The thinking/answer channel split (mini-essential)
 
+- **First, the word:** a **channel** is a *labeled region of a single reply* — a `<tag>…</tag>`
+  pair that carves the model's one text stream into named parts you can pull out separately. The
+  tags are plain text you asked for in the prompt, **not** a special API field or token — which is
+  exactly why the same defensive parser (slide 3.4) reads them.
 - An assistant reply can carry **more than the answer**: a `<thinking>…</thinking>` scratchpad
   *then* a structured `<answer>{…}</answer>`. This is just structured output with a reasoning block
   in front — you extract the `<answer>` (a tag-match), then reuse the same defensive parser from
@@ -424,10 +452,10 @@ estimated duration: 110
 
 | Anti-pattern | Cure | Where you saw it |
 | --- | --- | --- |
-| **Instructions in the wrong role** — policy buried in `user`, or per-call data pinned in `system` | *system = always-true, user = per-call* | slide 2.3 (the two mis-attribution footguns) |
+| **Instructions in the wrong role** — policy buried in `user`, or per-call data pinned in `system` | *system = always-true, user = per-call* | slide 2.4 (the two mis-attribution footguns) |
 | **Trusting structured output as a guarantee** — `json.loads` on the raw reply, assuming it holds | the parser *is* the enforcement — try / validate / fail loudly, never silently return `{}` | slides 3.3–3.4 |
 | **Few-shot that leaks format or biases the answer** — under-diverse examples that make the model overfit | diversity over volume; cover the label set | slide 4.3 ("all examples look like the easy case") |
-| **Bloated always-on system prompt** — every rule and example crammed into `system`, re-sent on every call | keep `system` lean and durable; move occasional guidance to the `user` turn | slides 2.2 / 2.5 / 4.4 (the per-turn token staircase) |
+| **Bloated always-on system prompt** — every rule and example crammed into `system`, re-sent on every call | keep `system` lean and durable; move occasional guidance to the `user` turn | slides 2.2 / 2.6 / 4.4 (the per-turn token staircase) |
 
 - Two of the four point straight forward — **naming the link is enough, no need to re-teach it
   here**: defensive parsing carries into **L07** (tool-call arguments can be malformed too), and

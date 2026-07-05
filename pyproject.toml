@@ -41,7 +41,6 @@ dev = [
     "pyright>=1.1.409",
     "pytest>=9.0.3",
     "pytest-asyncio>=1.4.0",
-    "python-pptx>=1.0.2",
     "ruff>=0.15.12",
     "types-markdown>=3.10.2.20260518",
 ]

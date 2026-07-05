@@ -213,6 +213,7 @@ A small multi-turn script for the second half of the demo: a 4-turn conversation
 
 **What to highlight:**
 
+- **Define the term first:** a *channel* here is a **labeled region of one assistant reply** — a `<tag>…</tag>` pair that carves the model's single text stream into named parts (a reasoning part, an answer part) you extract separately. The tags are plain text you asked for in the prompt, **not** a special API field or token — which is exactly why the same defensive parser reads them.
 - Structured output and a thinking block **compose** — the `<thinking>` text is just assistant output *before* the answer.
 - The parser is unchanged: extract the `<answer>` tag, then the Demo 2 parser. Defensive parsing carries straight over.
 - Boundary: *what* to reason about, and when reasoning helps vs. hurts, is **L06** — not taught here.

@@ -44,8 +44,5 @@ coverage.xml
 # Jupyter
 .ipynb_checkpoints/
 
-# Generated slide decks (build artifacts from .claude/skills/build-lecture-deck)
-*.pptx
-
 # Claude Code (local-only settings)
 .claude/settings.local.json
