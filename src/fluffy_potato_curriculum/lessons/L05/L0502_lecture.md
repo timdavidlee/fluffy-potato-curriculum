@@ -18,21 +18,22 @@ estimated duration: 45
 
 ### slide 1.1 Fixed edge vs. conditional edge
 
-- [L04](../L04/objectives.md) used only **fixed** edges: `add_edge("parse", "draft")`, taken every
-  time, no exceptions.
-- L05 adds the **conditional edge**: a **routing function** reads state at runtime and returns the
-  *name* of the next node, wired with `add_conditional_edges("classify", route, {...})`.
+- In [L04](../L04/objectives.md) you only used **fixed** edges: `add_edge("parse", "draft")`,
+  taken every time, no exceptions.
+- Now you're adding the **conditional edge**: a **routing function** reads state at runtime and
+  returns the *name* of the next node, wired with `add_conditional_edges("classify", route,
+  {...})`.
 - diagram: `classify` fanning out via a dashed conditional edge to `billing` / `technical` /
   `general`, all three arrows converging into `END`.
 
-### slide 1.2 The decider — what a routing function is allowed to read
+### slide 1.2 The decider — what your routing function is allowed to read
 
-- Three things a conditional edge's routing function may read in this lesson: **derived/computed
-  data** already in state, a **model classification result** (a label a node wrote to state), or
-  **direct user input** (a value supplied as part of the initial state).
-- One thing it is never allowed to read: whether **the model asked for a tool**. That's L11.
-- Say the line every time: **here you (the developer) own the branch; in an agent, the model
-  owns it.**
+- Here are the three things a conditional edge's routing function can read in this lesson:
+  **derived/computed data** already in state, a **model classification result** (a label a node
+  wrote to state), or **direct user input** (a value supplied as part of the initial state).
+- One thing it's never allowed to read: whether **the model asked for a tool**. That's L11.
+- Say this line every time you write one: **here you (the developer) own the branch; in an agent,
+  the model owns it.**
 
 ```python
 def route(state: TicketState) -> str:
@@ -49,28 +50,28 @@ builder.add_conditional_edges("classify", route,
 
 - **Routing**: an entry **classifier** node labels the input, and a **conditional edge** sends it
   down one of several specialized branches that converge to an exit.
-- Example: a ticket is classified **billing / technical / general**; each branch has its own
+- Example: a ticket gets classified **billing / technical / general**; each branch has its own
   focused prompt; all three converge to `END`.
-- Per-node models, reused from L04: `classify` only needs to emit a label, so it runs on the
-  **cheap, fast model** (Haiku 4.5); the branches do the real reasoning, so they run on the
-  **capable model** (Sonnet 4.6). This is the *mechanism* of mixed-model design — the full
-  decision framework is **[L14's](../L14/objectives.md)** job.
+- Per-node models, reused from L04: `classify` only needs to emit a label, so run it on the
+  **cheap, fast model** (Haiku 4.5); the branches do the real reasoning, so run those on the
+  **capable model** (Sonnet 4.6). This is the *mechanism* of mixed-model design — you'll get the
+  full decision framework in **[L14](../L14/objectives.md)**.
 
 ### slide 2.2 Determinism: the workhorse proof
 
-- Re-run the same ticket through the router and confirm the **same branch** executes every time.
+- Re-run the same ticket through your router and confirm the **same branch** executes every time.
   The branch *wording* may vary (the model is still non-deterministic inside a node); the **path**
-  does not.
-- This is what separates a workflow's routing from an agent's: a conditional edge, even though it
-  is "runtime-chosen," is a deterministic function of state, not a coin flip.
+  doesn't.
+- This is what separates a workflow's routing from an agent's: a conditional edge, even though
+  it's "runtime-chosen," is a deterministic function of state, not a coin flip.
 
 ### slide 2.3 The fallback / default branch
 
-- A router needs a **defined behavior for every possible label**, not just the expected ones. When
-  a classification doesn't cleanly match a branch, route it to a default/`general` fallback rather
-  than letting the routing function raise.
-- Treat this as a first-class design requirement, not an afterthought — a habit worth installing
-  before students meet messier real-world classifiers.
+- Your router needs a **defined behavior for every possible label**, not just the expected ones.
+  When a classification doesn't cleanly match a branch, route it to a default/`general` fallback
+  rather than letting the routing function raise.
+- Treat this as a first-class design requirement, not an afterthought — it's a habit worth having
+  before you run into messier real-world classifiers.
 
 ## section 3. Branch on the user, not the model
 
@@ -80,19 +81,19 @@ builder.add_conditional_edges("classify", route,
   form field — rather than a model classification: `if state["user_choice"] == "escalate": return
   "human_review"`.
 - **No model is involved in the routing decision at all.** This is the sharpest possible contrast
-  with an agent: the user picked the path, the developer wired the options.
-- In L05 this user input arrives **as part of the initial state**; the graph then runs straight
+  with an agent: the user picked the path, you wired the options.
+- Here this user input arrives **as part of the initial state**; the graph then runs straight
   through. The *interactive* version — a graph that **pauses mid-run to ask** and resumes on the
-  answer — needs LangGraph's `interrupt` plus a checkpointer, and is **[L17's](../L17/objectives.md)**
-  job (human-in-the-loop).
+  answer — needs LangGraph's `interrupt` plus a checkpointer, and you'll get that in
+  **[L17](../L17/objectives.md)** (human-in-the-loop).
 
 ### slide 3.2 Same shape, different decider — and they compose
 
 - Put model-classification routing (section 2) and user-input routing side by side: *same graph
   shape — an entry point, a conditional edge, converging branches — different decider.*
 - The general pattern for most real conditional workflows: route on the user's choice first, then
-  run a model-driven **node** inside the chosen branch. Rule: **the user (or developer logic) owns
-  the edge; the model can still do work inside a node.**
+  run a model-driven **node** inside the chosen branch. Keep this rule in mind: **the user (or your
+  own logic) owns the edge; the model can still do work inside a node.**
 
 ## section 4. When developer-controlled branching is enough
 
@@ -102,12 +103,12 @@ builder.add_conditional_edges("classify", route,
   picking among them is a classification, lookup, or user choice — cheap, predictable, testable.
 - Reach for an agent only when the model must decide *which and how many* steps to take, and that
   set of steps isn't enumerable ahead of time.
-- Name the common failure mode: building an agent to do what a two-branch router would do just as
-  well, at a fraction of the cost and unpredictability.
+- Watch for the common failure mode: building an agent to do what a two-branch router would do
+  just as well, at a fraction of the cost and unpredictability.
 
 ### slide 4.2 Bridge to L0505
 
-- L05 never builds a cycle — every graph in this lesson is still a DAG, still a workflow, no
+- You haven't built a cycle yet — every graph in this lesson is still a DAG, still a workflow, no
   matter how many branches it has.
-- The full workflow-vs-agent recap and close — what carries into L11, what precisely changes, and
-  when to reach for which — is [L0505_lecture.md](L0505_lecture.md).
+- You'll get the full workflow-vs-agent recap and close — what carries into L11, what precisely
+  changes, and when to reach for which — in [L0505_lecture.md](L0505_lecture.md).

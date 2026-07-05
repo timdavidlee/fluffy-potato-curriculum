@@ -17,62 +17,62 @@ estimated duration: 10
 
 ## Where this lesson sits
 
-L05 is the **third graph lesson**. [L03](../L03/objectives.md) wrapped a *single* LLM call as a
-typed node; [L04](../L04/objectives.md) wired **several** nodes into a fixed sequence where the
-developer hard-codes what runs next. L05 adds the one remaining primitive needed before the course
-can talk about agents: the **conditional edge** — a transition chosen at *runtime* by a routing
-function that inspects state and returns the name of the next node. With L05, the **L03–L05 graph
-ramp is complete**: single node → fixed sequence → runtime-chosen branch, all still without tools
-([L07](../L07/objectives.md)) and without an agent loop ([L10](../L10/objectives.md) /
-[L11](../L11/objectives.md)).
+You're on the **third graph lesson**. In [L03](../L03/objectives.md) you wrapped a *single* LLM
+call as a typed node; in [L04](../L04/objectives.md) you wired **several** nodes into a fixed
+sequence where you hard-coded what runs next. Here you add the one remaining primitive you need
+before you can talk about agents: the **conditional edge** — a transition chosen at *runtime* by a
+routing function that inspects state and returns the name of the next node. With L05 done, you've
+completed the **L03–L05 graph ramp**: single node → fixed sequence → runtime-chosen branch, all
+still without tools ([L07](../L07/objectives.md)) and without an agent loop
+([L10](../L10/objectives.md) / [L11](../L11/objectives.md)).
 
-L05 does **not** re-teach L04's sequential chaining — you arrive already able to build a fixed-edge
-`StateGraph`; L05's entire job is the one new primitive, the conditional edge, and what can decide
-it.
+You won't re-cover L04's sequential chaining here — you already know how to build a fixed-edge
+`StateGraph`. This lesson's entire job is the one new primitive, the conditional edge, and what
+gets to decide it.
 
 ## The one idea, said a few ways
 
-If you remember nothing else from L05, remember: **a conditional edge is not the model deciding.**
-Said a few ways:
+If you remember nothing else from this lesson, remember this: **a conditional edge is not the
+model deciding.** Here it is said a few ways:
 
 1. A **conditional edge** — wired with `add_conditional_edges` — reads **state** and returns the
    name of the next node, at runtime. L04 used only **fixed** edges (`A → B`, always); this is the
    second, runtime-chosen kind.
 2. The decider can be **derived data**, a **model classification label**, or **direct user
-   input** — never whether the model asked for a tool. That last case is the agent, taught at
-   [L11](../L11/objectives.md).
-3. **"Runtime-chosen" does not mean "unpredictable."** Re-run the same input and it takes the
+   input** — never whether the model asked for a tool. That last case is the agent, and you'll
+   meet it at [L11](../L11/objectives.md).
+3. **"Runtime-chosen" doesn't mean "unpredictable."** Re-run the same input and you'll get the
    **same** branch, every time — a conditional edge is still a deterministic function of state.
 4. **User-input branching is the purest contrast with an agent.** No model is anywhere near the
-   routing decision — the user (or the developer's code) picked the path.
-5. **Same mechanism, different decider, is the whole story.** L05's conditional edge and L11's
-   conditional edge use the identical LangGraph API; only *what the routing function is allowed to
-   read* changes.
+   routing decision — you (or the code you wrote) picked the path.
+5. **Same mechanism, different decider — that's the whole story.** This lesson's conditional edge
+   and L11's conditional edge use the identical LangGraph API; only *what the routing function is
+   allowed to read* changes.
 
-## Vocabulary this lesson lands
+## Vocabulary you're picking up here
 
-Reuses L03/L04's vocabulary (graph, node, state, edge, reducer, entry point/END, DAG, workflow vs.
-agent) and adds:
+You already have L03/L04's vocabulary (graph, node, state, edge, reducer, entry point/END, DAG,
+workflow vs. agent). Here's what you're adding:
 
 - **Conditional edge** — a runtime-chosen transition: a routing function reads **state** and
-  returns the next node's name, wired with `add_conditional_edges`. In L05 the routing function
-  reads developer-owned inputs to state; in L11 it reads whether the model asked for a tool.
+  returns the next node's name, wired with `add_conditional_edges`. Here the routing function reads
+  inputs to state that you own; in L11 it reads whether the model asked for a tool.
 - **Routing function** — the plain Python function (an `if`/`match`, not a model call) that
   implements a conditional edge's decision.
 - **Router / switch** — the recurring shape: one entry node (often a classifier) whose conditional
   edge fans out to several specialized branch nodes that converge to a single exit.
 - **Classification label** — a small structured value a node writes into state for a routing
-  function to read. Produced with L02's structured-output-by-instruction discipline.
+  function to read. You'll produce it with L02's structured-output-by-instruction discipline.
 - **User-input branching** — a conditional edge whose routing function branches on a value the
   *user* supplied, arriving in the **initial state** (no mid-run pause; that's L17's `interrupt`).
-- **Fallback / default branch** — the node execution goes to when a classification label doesn't
-  match any known branch. A router must define behavior for the unmatched case.
+- **Fallback / default branch** — where execution goes when a classification label doesn't match
+  any known branch. Any router you build needs a defined behavior for the unmatched case.
 
-## A note on the client and tracing: no new departures
+## The client and tracing: nothing new yet
 
-Like L03/L04, L05's nodes call the native LangChain **`ChatAnthropic`** — no new departure here.
-Tracing is still a forward reference: the full skill is **[L12's](../L12/objectives.md)** job.
+Like in L03/L04, your nodes call the native LangChain **`ChatAnthropic`** — no new departure here.
+Tracing is still a forward reference: you'll get the full skill in **[L12](../L12/objectives.md)**.
 
-The single sentence to leave L05 with: **"L04 showed you a graph with no branches; L05 showed you
-a graph with developer-owned branches; L11 shows you a graph whose branches the model owns. Same
-primitives throughout — the only thing that ever changes is who decides."**
+Here's the one sentence to leave this lesson with: **"L04 showed you a graph with no branches;
+L05 showed you a graph with branches you own; L11 shows you a graph whose branches the model owns.
+Same primitives throughout — the only thing that ever changes is who decides."**

@@ -23,8 +23,8 @@ estimated duration: 12
   `END`.
 - diagram: L04's chain `parse → draft → policy_check → END` with a finger-trace arrow showing
   "forward only, always terminates."
-- The model did real work *inside* the nodes (parse, classify, draft), but **the developer wired
-  every edge.** That is the definition of a workflow.
+- The model did real work *inside* the nodes (parse, classify, draft), but **you wired every
+  edge.** That's the definition of a workflow.
 
 ### slide 1.2 The primitives you now own
 
@@ -52,21 +52,22 @@ estimated duration: 12
 - That single back-edge hands the **model** control of the path: *it* decides whether to call a
   tool and go again, or stop. The acyclic **workflow** becomes a cyclic, model-driven **agent**.
 
-### slide 2.2 You have seen this cycle before
+### slide 2.2 You've seen this cycle before
 
 - That model → tools → model loop is exactly the one you **hand-rolled in [L10](../L10/objectives.md)**
   — only there the `while`/`if` was plain Python, and in L11 it's a graph edge.
 - diagram: side by side — L10's `while` loop pseudocode and L11's cyclic graph — captioned "same
   loop, now expressed as a graph."
-- So L11 is not a new world: it's **L04/L05's primitives + L10's loop**, written as one back-edge.
+- So L11 isn't a new world for you: it's **L04/L05's primitives + L10's loop**, written as one
+  back-edge.
 
 ### slide 2.3 A conditional edge is still not "the model is an agent" by itself
 
-- Be precise: a conditional edge in this course has so far **always** branched on **state the
-  developer set** (L05's classifier label, or direct user input). It is an **agent** only when the
-  conditional edge branches on **the model's own decision to keep going** *and* that edge **loops**.
-- If a student says "but the classifier was the model deciding" — no: the model produced a *label
-  in state*; the developer's routing function read that label and chose the edge. The model never
+- Be precise: a conditional edge in this course has so far **always** branched on **state you
+  set** (L05's classifier label, or direct user input). It's an **agent** only when the conditional
+  edge branches on **the model's own decision to keep going** *and* that edge **loops**.
+- You might think "but the classifier was the model deciding" — it wasn't: the model produced a
+  *label in state*; your routing function read that label and chose the edge. The model never
   chose the edge, and **it never looped.**
 
 ## section 3. When to use which
@@ -88,9 +89,10 @@ estimated duration: 12
 
 ### slide 3.2 The common failure mode
 
-- Name it out loud: **reaching for an agent when a workflow would do.** It costs more, is less
-  predictable, and is harder to debug — you handed the model control you never needed to give away.
-- The engineering skill is choosing the **simplest shape that solves the task** — and that is
+- Watch for this failure mode: **reaching for an agent when a workflow would do.** It costs more,
+  is less predictable, and is harder to debug — you'd be handing the model control you never
+  needed to give away.
+- The engineering skill is choosing the **simplest shape that solves the task** — and that's
   usually a workflow. (This is the thesis of Anthropic's *Building Effective Agents*.)
 
 ## section 4. Bridge to L11
@@ -99,11 +101,11 @@ estimated duration: 12
 
 - Everything. `StateGraph`, nodes, edges, typed state, reducers, `compile`/`invoke`, and the
   Langfuse hookup all reappear in L11 **unchanged**.
-- L11 also re-teaches the primitives from scratch so the agent lesson stands alone — treat the
-  overlap as deliberate **reinforcement**, not repetition. The vocabulary is identical on purpose.
+- L11 also re-teaches the primitives from scratch so that lesson stands alone — take the overlap
+  as deliberate **reinforcement**, not repetition. The vocabulary is identical on purpose.
 
 ### slide 4.2 The one sentence to leave with
 
-- **A workflow is a graph whose path the developer wires (acyclic); an agent is a graph whose path
-  the model drives (cyclic). The line between them is a single back-edge.**
+- **A workflow is a graph whose path you wire (acyclic); an agent is a graph whose path the model
+  drives (cyclic). The line between them is a single back-edge.**
 - Next lesson, you draw that edge. Everything else, you already built.
