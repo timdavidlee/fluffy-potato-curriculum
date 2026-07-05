@@ -17,8 +17,8 @@ estimated duration: 10
 
 ## Where this lesson sits
 
-[L07](../L07/objectives.md) taught the **mechanics** of a tool call — the `tool_use` / `tool_result`
-round-trip, who runs what, and why the application validates. [L08](../L08/objectives.md) taught the
+[L07](../L07/objectives.md) taught the **mechanics** of a tool call — the `AIMessage.tool_calls` /
+`ToolMessage` round-trip, who runs what, and why the application validates. [L08](../L08/objectives.md) taught the
 **design** of a good tool — naming, descriptions written for the model's eyes, tight schemas,
 informative errors, named side effects. In both lessons the tool was a Python function living inside
 **one process**: your code registered it, your code ran it when the model asked.
@@ -49,8 +49,8 @@ more (or less) than it does:
    at code-write time. With MCP, the client *asks* the server at connect time: "what tools do you
    expose?" The server's published tool list becomes an external API the server author owns.
 4. **The model can't tell the difference.** From the model's seat, an MCP tool call is the same
-   `tool_use` / `tool_result` round-trip as [L07](../L07/objectives.md). MCP is invisible to the
-   model — it shows up only in the *client's* implementation and the *operator's* config.
+   `AIMessage.tool_calls` / `ToolMessage` round-trip as [L07](../L07/objectives.md). MCP is invisible
+   to the model — it shows up only in the *client's* implementation and the *operator's* config.
 5. **MCP earns its overhead when a second consumer appears.** One agent, one tool, one place — inline
    wins. The moment a different agent, team, or app wants the same tool, MCP's portability starts
    paying for its tax.
