@@ -190,9 +190,34 @@ def parse(state: TicketState) -> dict[str, object]:
 - Note the model *inside* a node is still non-deterministic — a draft's wording varies. The
   **path** is what's stable, and the path is the lesson.
 
-## section 6. Bridge to L05
+## section 6. Two DAG gotchas, named
 
-### slide 6.1 One more primitive, then the workflow-vs-agent close
+### slide 6.1 The two pitfalls to catch when you wire your own workflow
+
+- text: L04 showed both of these *positively* — determinism as a feature (§5) and per-node model
+  binding (§4). Name them now as portable pitfalls you can catch yourself committing the first time
+  you wire your own graph. Both share one root: **in a workflow you own two things the model does
+  not — the path, and which model runs each node — and each gotcha is forgetting that you own one of
+  them.**
+- text: these are L04's two *sequential-DAG* gotchas. The two *routing* pitfalls — reaching for an
+  agent where a workflow fits, and brittle branch conditions — belong to
+  [L05](../L05/objectives.md), which owns the conditional edge; name the split, don't chase them
+  here.
+- table: the two gotchas, the one-line cure, and where you saw it.
+
+| Gotcha | Cure | Where you saw it |
+| --- | --- | --- |
+| **"My DAG is deterministic"** — trusting the *whole* workflow to reproduce, or quietly adding a back-edge without deciding to | the **path** is fixed; the model's output *inside* each node still varies. Keep the graph acyclic **on purpose** — the moment you loop on the model's own output you have built an agent ([L10](../L10/objectives.md)/[L11](../L11/objectives.md)), so name the crossing instead of sliding into it | §5.3 (determinism is the *path*, not the wording) + §2.5 (a DAG is exactly "no back-edge") + slide 1.2 (acyclic workflow vs. cyclic agent) |
+| **Wrong model per node** — Sonnet on the label step (overpaying), or Haiku on the hard reasoning step (underpowering) | cheap model for classify / extract, capable model for reasoning. The *mechanism* is per-node `ChatAnthropic(model=...)` (§4); the *which-model decision framework* is [L14](../L14/objectives.md) — name the link, don't re-teach it here | §4 (each node binds its own model) + the `parse`=Haiku / `draft`=Sonnet chain in the [L0403](L0403_lecture.ipynb) demo |
+
+- text: the first gotcha is where L04's spine blurs — **confusing "the developer owns the path" (a
+  workflow) with "the model owns the path" (an agent).** A model *inside* a node is not agency;
+  agency is the model choosing the *path*, which is exactly the back-edge L11 adds. Keeping that
+  line sharp is the whole lesson.
+
+## section 7. Bridge to L05
+
+### slide 7.1 One more primitive, then the workflow-vs-agent close
 
 - Everything you built here — `StateGraph`, nodes, fixed edges, typed state, reducers,
   compile/invoke — carries into [L05](../L05/objectives.md) **unchanged**. L05 adds exactly one
