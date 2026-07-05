@@ -51,6 +51,9 @@ estimated duration: 85
 - This one fact is the thread tying the whole lesson together: it is *why* front-loading context
   works, *why* a reusable preamble is overhead, *why* the context window fills, and *why* a
   conversation's cost climbs. Write it down now.
+- diagram: two sequential API calls to the same model with a "🚫 no server-side memory" gap between
+  them — call 2's request box visibly *re-contains* all of call 1's text plus the new turn, an arrow
+  from the client labeled "re-sends the entire history every call."
 
 ## section 2. Why the pieces are sub-word tokens
 
@@ -60,6 +63,9 @@ estimated duration: 85
   `running` may be one token; a rare or invented word splits into several (`fli|bber|ti|gib|beting`).
 - So "predict the next word" is really "predict the next *token*." Everything downstream — window,
   cost — is counted in tokens, so you need to know what one is.
+- diagram: two words as token blocks — `running` as one solid block (1 token) beside
+  `flibbertigibbeting` broken into five differently-colored pieces `fli|bber|ti|gib|beting` (5
+  tokens) — a common word costs one token, a rare word fragments into many.
 
 ### slide 2.2 Why sub-word — not whole words, not characters
 
@@ -78,6 +84,8 @@ estimated duration: 85
   readable "pieces" shown here are a decoding of those IDs for *your* benefit.
 - The takeaway to hold onto: the tokenizer is a *chosen* encoding, not a natural fact about language.
   That choice is exactly why the next section's strings fragment the way they do.
+- diagram: a left-to-right pipeline `running` → pieces `run|ning` → integer IDs `[16, 5143]`, with a
+  caption "the readable pieces are for you; the model only ever sees the integers."
 
 ## section 3. What tokenization does to real strings
 
@@ -182,6 +190,9 @@ estimated duration: 85
 - Same model, same task, two prompts — a bare `Summarize this.` versus a front-loaded version with a
   role, an audience, a format, and one worked example — produce visibly different quality. The
   front-loaded context did the work.
+- diagram: two prompt cards feeding the same model — a bare `Summarize this.` yielding a short,
+  flat-quality output bar, and a front-loaded card (role + audience + format + one example) yielding
+  a taller "on-target" output bar — same model, the context did the work.
 
 ### slide 6.2 Reusable preambles — and the sting in the tail
 
