@@ -36,8 +36,8 @@ extra process to run, a transport to keep healthy, failures that can now happen 
 ## The one idea, said five ways
 
 If you remember nothing else from L09, remember this: **MCP changes where the tool lives and how it is
-reached — not how it should be designed.** Said five ways, because students keep expecting MCP to do
-more (or less) than it does:
+reached — not how it should be designed.** Here it is said five ways, because it's easy to expect MCP
+to do more (or less) than it does:
 
 1. MCP is a **protocol, not a framework**. It specifies how a client and server *talk* about tools.
    It does not prescribe an SDK, a language, or a hosting model. Any process that speaks the protocol
@@ -74,8 +74,8 @@ These terms recur whenever tools are packaged for reuse:
 
 ## A note on the code you'll see (read this carefully)
 
-The official Python **`mcp` package is not installed in this course environment**, and we do not add
-it. That has a deliberate consequence for how L09 is built:
+The official Python **`mcp` package is not installed in this course environment**, and it isn't going
+to be. That has a deliberate consequence for how L09 is built:
 
 - The **offline** material — the spec-translation demo ([L0903](L0903_lecture.ipynb)) and all three
   labs ([L0904](L0904_lab_empty.ipynb), [L0907](L0907_lab_empty.ipynb), and the validator lab) — uses
