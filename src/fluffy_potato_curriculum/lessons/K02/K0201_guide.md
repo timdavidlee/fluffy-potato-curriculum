@@ -1,5 +1,11 @@
 # K02 — Keys & the config seam
 
+```yaml
+title: K02 — Keys & the config seam
+keywords: api key, .env, dotenv, gitignore, anthropic, config seam, pydantic-settings, Settings, environment variables, smoke check, secrets, prework
+estimated duration: 15
+```
+
 Work top to bottom; budget ~15 minutes. The finish line is a smoke check that proves your key is
 reachable through the project's config seam (Step 4). **Reminder:** every command is `uv run …`
 (K01, Step 4).

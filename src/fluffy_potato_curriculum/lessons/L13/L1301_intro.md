@@ -1,7 +1,7 @@
-# L13 intro: Evaluation — first pass
+# Evaluation — first pass
 
 ```yaml
-title: "L13 intro: Evaluation — first pass"
+title: "Evaluation — first pass"
 keywords: evaluation, eval set, dataset, experiment, score, scorer, case, pass rate, regression, ratchet, Langfuse, LLM-as-judge, agent, trace
 estimated duration: 10
 ```

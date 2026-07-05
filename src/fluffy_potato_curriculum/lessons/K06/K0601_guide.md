@@ -1,5 +1,11 @@
 # K06 — Docker & the multi-container stack
 
+```yaml
+title: K06 — Docker & the multi-container stack
+keywords: docker, docker desktop, docker compose, containers, multi-container stack, healthcheck, compose up, compose down, go/no-go gate, Langfuse, prework
+estimated duration: 35
+```
+
 This is the **last prework unit** — the finish line (Step 6) is the go/no-go gate for starting `L01`.
 
 ## How to read this file

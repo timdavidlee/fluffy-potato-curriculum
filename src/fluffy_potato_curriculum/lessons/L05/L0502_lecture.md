@@ -2,7 +2,7 @@
 
 ```yaml
 title: "Conditional graphs: the routing pattern and who gets to decide"
-keywords: langgraph, routing, conditional edge, classifier, mixed models, per-node model, user-input branching, deterministic, decider, chatanthropic
+keywords: langgraph, routing, conditional edge, classifier, mixed models, per-node model, user-input branching, deterministic, decider, ChatAnthropic
 estimated duration: 45
 ```
 

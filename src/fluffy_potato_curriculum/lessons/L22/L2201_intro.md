@@ -2,7 +2,7 @@
 
 ```yaml
 title: "Skills: capabilities the agent loads just in time"
-keywords: skill, just-in-time, jit loading, progressive disclosure, description, trigger, tool vs skill vs system prompt, always-on context, SKILL.md, agent skills, capstone, where should capability live
+keywords: skill, just-in-time, JIT loading, progressive disclosure, description, trigger, tool vs skill vs system prompt, always-on context, SKILL.md, agent skills, capstone, where should capability live
 estimated duration: 8
 ```
 

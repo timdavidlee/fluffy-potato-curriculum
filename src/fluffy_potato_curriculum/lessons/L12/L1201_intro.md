@@ -1,8 +1,8 @@
-# L12 intro: What an agent generates — state, logs, traces & extracts
+# What an agent generates — state, logs, traces & extracts
 
 ```yaml
-title: "L12 intro: What an agent generates — state, logs, traces & extracts"
-keywords: tracing, trace, span, state, logs, extracts, observability, data plane, agent graph, langfuse, debugging
+title: "What an agent generates — state, logs, traces & extracts"
+keywords: tracing, trace, span, state, logs, extracts, observability, data plane, agent graph, Langfuse, debugging
 estimated duration: 10
 ```
 
