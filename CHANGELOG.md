@@ -1,3 +1,9 @@
+## v0.14.0 (2026-07-05)
+
+### Feat
+
+- **curriculum**: standardize HTML lecture decks; define L02 channel term
+
 ## v0.13.0 (2026-07-05)
 
 ### Feat
