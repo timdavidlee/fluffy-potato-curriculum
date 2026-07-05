@@ -7,8 +7,8 @@ estimated duration: 75
 ```
 
 > **Lesson:** L07. **Roadmap:** [objectives.md](../../../../docs/origin/lesson_roadmaps/L07/objectives.md).
-> This is the written reference lecture — thorough on purpose, so a student who missed the verbal
-> delivery can rebuild the lesson from the page. The live demos are split one per beat
+> This is your written reference lecture — thorough on purpose, so if you missed the live session
+> you can rebuild the whole lesson from the page. The live demos are split one per beat
 > ([L0703](L0703_lecture.ipynb) a tool call is tokens, [L0704](L0704_lecture.ipynb) one wired
 > round-trip, [L0706](L0706_lecture.ipynb) trace the round-trip, [L0708](L0708_lecture.ipynb)
 > three outcomes); hands-on practice is in the L07 labs (L0705 / L0707 / L0709).
@@ -95,19 +95,19 @@ estimated duration: 75
   - force the model to call the tool (it may answer directly instead),
   - validate the arguments at generation time (the model can pass nonsense),
   - stop the model from inventing a tool name that doesn't exist.
-- **The application validates; the model proposes.** This is the single sentence to repeat whenever
-  a student expects the schema to *enforce* anything.
+- **The application validates; the model proposes.** Come back to this sentence any time you catch
+  yourself expecting the schema to *enforce* something.
 
 ### slide 2.4 The model decides whether to call — that's a reasoning step
 
 - Handing the model a tool is an *offer*, never a *command*. Whether the model reaches for the tool
   is a sampling decision conditioned on the prompt, the conversation, and the tool's description.
 - That decision is itself a **reasoning step** — exactly the kind [L06](../L06/objectives.md) was
-  about. A vague tool the model can't tell when to use is a tool it will skip. (Reinforce L06; we do
-  not re-teach chain-of-thought here.)
-- *Foreshadow [L08](../L08/objectives.md):* "what makes a tool worth adding, well-named, and
-  well-described?" is L08's whole job. L07 only needs you to see that the description visibly moves
-  behavior.
+  about. A vague tool the model can't tell when to use is a tool it will skip. You've already built
+  the chain-of-thought instincts in L06; this is that same skill, aimed at a new kind of choice.
+- A quick look ahead — you won't need it yet: "what makes a tool worth adding, well-named, and
+  well-described?" is [L08](../L08/objectives.md)'s whole job. For now, just notice that the
+  description visibly moves behavior.
 
 [↑ Back to top](#tool-calling-the-protocol-the-round-trip-and-who-runs-what)
 
@@ -213,8 +213,8 @@ estimated duration: 75
 
 - The schema did not stop any of this at generation time: wrong argument *types*, a *missing*
   required argument, an *extra* invented argument, even a tool *name that doesn't exist*.
-- This is the L07 analogue of [L06](../L06/objectives.md)'s tag-violation moment: **showing one
-  hallucination teaches more than ten clean runs**, because it proves the contract is best-effort.
+- This is the L07 analogue of [L06](../L06/objectives.md)'s tag-violation moment: **one hallucinated
+  call will teach you more than ten clean runs**, because it proves the contract is best-effort.
 - The remedy is not a better schema (that's an L08 conversation) — it is that **the application
   validates; the model proposes.** Validation is not optional.
 
@@ -232,8 +232,8 @@ estimated duration: 75
 - But even *forcing* a call does not guarantee **well-formed arguments** — it only guarantees that
   *some* tool call is attempted. Forcing changes whether the model calls, not whether it calls
   *correctly*.
-- We mention it and move on: the deeper `tool_choice` design conversation belongs to
-  [L08](../L08/objectives.md).
+- Worth knowing it exists, but the deeper `tool_choice` design conversation belongs to
+  [L08](../L08/objectives.md) — you'll get there.
 
 [↑ Back to top](#tool-calling-the-protocol-the-round-trip-and-who-runs-what)
 
