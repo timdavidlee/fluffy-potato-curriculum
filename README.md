@@ -22,6 +22,23 @@ uv run python -m fluffy_potato_curriculum.local_ui   # serves http://127.0.0.1:8
 `HOST` / `PORT` env vars override the bind address. See
 [local_ui/CLAUDE.md](src/fluffy_potato_curriculum/local_ui/CLAUDE.md) for details.
 
+## MCP servers
+
+Claude Code can connect to [MCP](https://modelcontextprotocol.io) servers for extra tools
+(e.g. design/asset tools, ticket trackers). Add one with:
+
+```sh
+claude mcp add <name> -s <scope> -- <command> [args...]
+```
+
+- `-s local` (default) — only you, only in this project.
+- `-s user` — only you, across every project on this machine. Use this for personal tools
+  that aren't specific to this repo (e.g. Canva).
+- `-s project` — written to a checked-in `.mcp.json`, shared with anyone who clones the repo.
+  Only use this for servers the whole team needs for curriculum work.
+
+List configured servers with `claude mcp list`; remove one with `claude mcp remove <name>`.
+
 ## Documentation
 
 - [Curriculum PRD](docs/origin/CURRICULUM_PRD.md) — the primary design doc: course intent,

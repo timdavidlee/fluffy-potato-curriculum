@@ -26,6 +26,7 @@ estimated duration: 110
   **catalog** of the single-step task shapes they unlock (extract, classify, rank,
   generate-to-a-constraint, summarize). The levers are the minimum toolkit L06 (reasoning) and L07
   (tools) assume you already have; the catalog (section 5) is what one call can *do* with them.
+- diagram: a zoom-in / nesting block — an outer box "L01: the container (tokens · context window · temperature · cost)" with an inner box "L02: the contents = the prompt (roles · structured output · few-shot)", and a magnifier arrow from outer to inner captioned "same call — now we fill what goes inside."
 
 ### slide 1.2 The three levers at a glance
 
@@ -52,6 +53,7 @@ estimated duration: 110
   catalog is the menu of what *one* node can do; wiring nodes together comes with the graph ramp.
 - Resist broadening past these shapes for now — no reasoning, no tools, no multi-step control yet.
   Your job in L02 is the prompting toolkit and the single-step tasks it unlocks.
+- diagram: a scope fence — a solid "IN L02" box (roles · structured output · few-shot · the five single-step task shapes) beside a dashed "NOT YET" box whose three chips point to their lessons: chain-of-thought → L06, tool calling → L07, orchestration / pipelines → L03–L05.
 
 [↑ Back to top](#prompting-fundamentals-roles-structured-output-few-shot)
 
@@ -103,6 +105,7 @@ estimated duration: 110
   not inside the system prompt. The system prompt is not a sandbox.
 - A misconception worth dropping right now: *"the system message is enforced; the user can't override
   it."* It isn't — strongly weighted ≠ enforced.
+- diagram: a "nudge, not a wall" contrast — the system message drawn as a thick *weighted* arrow biasing the model (not a solid barrier), a thinner user-message arrow still able to push against it, and a separate hard wall labeled "real guarantees live in your code, outside the model." Caption: "privileged label ≠ enforced."
 
 ### slide 2.5 Multi-turn, and the first-call vs. Nth-call axis
 
@@ -114,6 +117,7 @@ estimated duration: 110
   usually the first place you'll feel "the model got worse" with nothing obviously changed.
 - Decide deliberately: **continue** when the history is load-bearing context; **start fresh** when
   it isn't, so you dodge both the cost staircase and accumulated drift.
+- diagram: a turn-by-turn staircase — the `messages` list growing `[u, a, u, a, u, a…]` across calls 1→5, each step taller (re-billed history = the L01 cost staircase), with a dashed "quality" line drifting downward by call 5; a fork at the end labeled "continue (history is load-bearing) vs. start fresh (dodge cost + drift)."
 
 [↑ Back to top](#prompting-fundamentals-roles-structured-output-few-shot)
 
@@ -127,6 +131,7 @@ estimated duration: 110
   multi-step pipelines all need the model's output to be *machine-readable*.
 - The shapes you'll ask for: a **JSON object**, a **fixed list of fields**, or **XML-ish tags**
   like `<answer>…</answer>`.
+- diagram: one model reply splitting into two lanes — top lane "conversational: a paragraph a human must read", bottom lane "programmatic: a dict your code can index" — with the bottom lane flowing on to downstream chips (evals L13 · tools L07 · pipelines) that all *require* machine-readable output.
 
 ### slide 3.2 The L02 method: prompt-instruction-only
 
@@ -147,6 +152,7 @@ estimated duration: 110
   one; it doesn't stop the model from inventing a new one.
 - The mental model to hold onto: **ask for structure, parse defensively, fail loudly on parse
   failure.**
+- diagram: a fan-out — one request box "return JSON only" branching to five bad-output cards: extra prose around the JSON · mismatched field names · missing required field · invented enum value · fully-malformed blob. Caption: "an enum is a contract, not a constraint — ask, then verify."
 
 ### slide 3.4 The defensive parser
 
@@ -161,6 +167,22 @@ estimated duration: 110
 - Validate the *contents*, not just "did it parse": are the required keys present? Is the enum
   value in the allowed set? You decide whether a missing optional field is `null`-tolerant or an
   error — and make that call on purpose.
+- diagram: a three-step parser flowchart with fallbacks — `json.loads` the whole reply → on failure, regex out the first `{…}` block and retry → on failure again, raise loudly with the raw response — then a "validate contents" gate (required keys present? enum in the allowed set?). Never a silent `{}` fallback.
+
+```text
+  raw reply
+     │
+     ▼
+  ① json.loads(whole reply) ──ok──▶ dict
+     │ fail
+     ▼
+  ② regex first {…} block, retry ──ok──▶ dict
+     │ fail
+     ▼
+  ③ raise loudly (raw response in the error)   ← never a silent {}
+
+  then, on any dict: validate contents — required keys present? enum in ALLOWED?
+```
 
 ### slide 3.5 Temperature, verbosity, and cost for structured output
 
@@ -172,6 +194,7 @@ estimated duration: 110
 - Keep input and output *shapes consistent*: a labeled, structured request yields cleaner
   structured output than the same request phrased in flowing English. Consistency reduces the
   model's degrees of freedom — and therefore your parse failures.
+- diagram: two small gauges side by side — a temperature dial pinned near 0 for extraction / classification (the single repeatable answer), beside a token-size comparison "tight schema, no prose → fewer output tokens" vs. a chatty answer. Caption: "structured output is often a cost win too — output is the pricey direction."
 
 ### slide 3.6 The thinking/answer channel split (mini-essential)
 
@@ -185,6 +208,16 @@ estimated duration: 110
 - **Mini-track note:** the mini course skips L06, so this is your one look at the thinking
   channel — enough to recognize the `<thinking>`/`<answer>` shape and parse it. The reasoning craft
   waits for L06.
+- diagram: one assistant reply drawn as two stacked blocks — `<thinking>…scratchpad…</thinking>` then `<answer>{…}</answer>` — with a parser arrow reaching *past* the thinking block to tag-match `<answer>` and hand it to the same defensive parser from slide 3.4. Label the split "L06 owns thinking · L02 owns the answer."
+
+```text
+  assistant reply
+  ┌─────────────────────────────┐
+  │ <thinking> … scratchpad … │   ◀ L06 owns this channel
+  ├─────────────────────────────┤
+  │ <answer> { … } </answer>    │   ◀ L02: tag-match, then defensive-parse (slide 3.4)
+  └─────────────────────────────┘
+```
 
 [↑ Back to top](#prompting-fundamentals-roles-structured-output-few-shot)
 
@@ -199,6 +232,7 @@ estimated duration: 110
   teaching**.
 - A misconception worth dropping: *"few-shot teaches the model new things."* It doesn't — it
   conditions this one call's behavior; nothing about the model itself is updated.
+- diagram: a stack feeding one call — example pairs `[in₁→out₁] [in₂→out₂] [in₃→out₃]` placed before the real input, all flowing into a single model call; a side note "model weights unchanged — this conditions *this call's* behavior (showing), it does not train (teaching)."
 
 ### slide 4.2 Two placements, one trade-off
 
@@ -221,6 +255,7 @@ estimated duration: 110
   calling everything a P0 bug.
 - Distinguish **few-shot for format** (showing the desired output *shape*) from **few-shot for
   behavior** (showing the desired *judgment*). Both work; they fail differently.
+- diagram: a two-panel contrast — left "4× the same easy case (all `P0-bug`)" → the model overfits the surface pattern and starts calling everything P0; right "4 diverse examples covering the label set" → the model generalizes. Caption: "diversity > volume — watch for 'all examples look like the easy case.'"
 
 ### slide 4.4 Few-shot is priced on every call
 
@@ -271,6 +306,7 @@ estimated duration: 110
   of objects and validate each item against the shape it claims to be.
 - The failure to watch for: the model **invents** a field it wasn't asked for, or **drops** one
   that was in the text — the required-keys check from section 3 is exactly what catches it.
+- diagram: an extraction flow — a free-text blob → the model → a JSON object with named fields (`customer_name` · `order_id` · `intent`); a validator gate flags a **dropped** field (was in the text) and a **hallucinated** field (never asked for), tying straight back to the required-keys check from section 3.
 
 ### slide 5.3 Classification — sort into a fixed label set
 
@@ -313,6 +349,7 @@ estimated duration: 110
   will, some runs.
 - The failure to watch for: the model returns 4 or 6 items, or one item blows the length cap. Your
   validator turns that into a caught error instead of a downstream surprise.
+- diagram: a generate-then-check flow — prompt "exactly N items, ≤ 8 words each" → model → JSON array → a validator gate: `len(array) == N`? each item within the bound? → pass ✓ / caught error ✗. Caption: "a constraint you don't check is one the model is free to miss."
 
 ### slide 5.6 Summarization and the transformation family
 
@@ -339,6 +376,14 @@ estimated duration: 110
   summarize. That's exactly the seam **L03–L05** pick up, where each step becomes one **node** in a
   graph. L02 gives you the vocabulary of the single step; the graph ramp is where you wire several
   together.
+- diagram: a three-node pipeline — extract → classify → summarize, the output of each box feeding the next; label each box "= one node" and caption "a hard task is a pipeline of single steps — that seam is L03–L05."
+
+```text
+  ┌─────────┐     ┌──────────┐     ┌───────────┐
+  │ extract │ ──▶ │ classify │ ──▶ │ summarize │
+  └─────────┘     └──────────┘     └───────────┘
+   each box = one single-step shape = one node (L03–L05 wires them together)
+```
 
 [↑ Back to top](#prompting-fundamentals-roles-structured-output-few-shot)
 
@@ -358,6 +403,16 @@ estimated duration: 110
   instruction alone won't cut it.
 - The sentence to leave with: *you now know how to ask the model for what you want, in the shape
   you want.*
+- diagram: a bipartite map — three levers on the left (roles · structured output · few-shot) with edges to the five task shapes on the right (extraction · classification · ranking · constrained generation · summarization), each edge showing which lever a shape leans on.
+
+```text
+  levers                     task shapes
+  ─────────                  ─────────────────────────────
+  roles ───────────────────▶ summarization  (system-message policy)
+  structured output ───────▶ extraction · classification
+                       └───▶ ranking · constrained generation  (+ a checkable rule)
+  few-shot ────────────────▶ classification  (idiosyncratic labels)
+```
 
 ### slide 6.2 Four prompting anti-patterns to catch yourself committing
 
@@ -387,6 +442,7 @@ estimated duration: 110
   framework-managed function. L03–L05 then chain several single-step shapes into a graph.
 - **Later: L06 (reasoning).** The three levers are also what L06 builds chain-of-thought on —
   that hand-off is the next slide.
+- diagram: a forward roadmap arrow — L02 (single-step toolkit) → L03 (wrap extraction as a reusable node) → L04–L05 (chain nodes into a graph) → L06 (reasoning on the same three levers); mark L03 "immediate next."
 
 ### slide 6.4 What L06 does with this
 
@@ -401,5 +457,6 @@ estimated duration: 110
   L06 shows you one application of it.
 - The hand-off sentence: *L06 is about making the model think harder before it answers — built
   entirely on the three levers you now own.*
+- diagram: a hand-off map — the three L02 levers each feeding one L06 use: roles → a `system` message that licenses reasoning; structured output → the `<thinking>`/`<answer>` split; few-shot → worked-example chains-of-thought. Caption: "L06 = make the model think harder, built entirely on the three levers you now own."
 
 [↑ Back to top](#prompting-fundamentals-roles-structured-output-few-shot)
