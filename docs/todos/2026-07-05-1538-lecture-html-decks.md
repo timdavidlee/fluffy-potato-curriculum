@@ -15,6 +15,8 @@ recurring drift risk below.
 
 ## Status (19 lecture outlines)
 
+**Progress: 2 built (L0102, L0202) · 1 needs rescale (L1002) · 16 pending.**
+
 | Lesson item | Deck? | Scale | Note |
 | --- | --- | --- | --- |
 | L0102 | ✅ | classroom | done + consistent with outline (13 diagrams built, 36 total) |
@@ -35,6 +37,10 @@ recurring drift risk below.
   sample, map the outline, build diagrams, verify). Rough priority: the built-out core arc first
   (L03–L09, L11–L13), then the mini/standalone items (L22, L23). No hard dependency between
   them — can be done incrementally, one lesson at a time.
+  - **First, review the outline's `diagram:` coverage** — an outline may under-specify diagrams on
+    visual slides, and the deck is only as good as its directives. L01 needed 4 added (slides 1.3,
+    2.1, 2.3, 6.1) before building; expect similar gaps elsewhere. Enhance the `.md` outline first
+    (a normal materials edit), then build.
 
 ## Verify (per deck, before committing)
 
