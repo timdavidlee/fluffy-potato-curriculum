@@ -47,16 +47,16 @@ The teacher should have, before the first demo starts:
 1. Recall L04 in one line: *"you wired an **acyclic** workflow — the developer owned the path. An agent adds one thing: a **back-edge** that hands the path to the model."* Put L04's DAG up, then draw the cycle.
 2. Draw the shallow-agent graph piece by piece, naming each and its L10 twin:
    - an **`agent`** (model-call) node — the L10 "call the model" step;
-   - a **`tools`** node — the L10 "execute every `tool_use`, append a matching `tool_result`" step;
+   - a **`tools`** node — the L10 "run every tool call, append a matching `ToolMessage`" step;
    - a fixed **edge** `tools → agent` — the L10 "loop back after running tools";
-   - a **conditional exit** out of `agent` → `tools` (the model emitted a `tool_use`) or → finish (natural termination) — the L10 `if there's a tool_use: … else: return` branch.
-3. Trace a run on the diagram with your finger: agent → (tool_use?) → tools → agent → (no tool_use) → done. Point at the **back-edge** and say: *that cycle is the agent.*
+   - a **conditional exit** out of `agent` → `tools` (the model's `AIMessage` has `tool_calls`) or → finish (natural termination) — the L10 `if the AIMessage has tool_calls: … else: return` branch.
+3. Trace a run on the diagram with your finger: agent → (tool_calls?) → tools → agent → (no tool_calls) → done. Point at the **back-edge** and say: *that cycle is the agent.*
 4. Say the punchline: *"`create_agent` builds exactly this — you won't wire it by hand. Wiring it by hand is L15, for when this one shape isn't enough."*
 
 **What to highlight:**
 
 - **Same loop, new picture.** If a student can't map each graph piece back to an L10 line, slow down and do the mapping explicitly — that mapping *is* objective 1.
-- **The conditional exit is the L10 branch.** "Is there a `tool_use`?" used to be an `if` in your Python; `create_agent` makes it a routing decision inside the agent. The decision is identical; only who writes it changed.
+- **The conditional exit is the L10 branch.** "Are there `tool_calls`?" used to be an `if` in your Python; `create_agent` makes it a routing decision inside the agent. The decision is identical; only who writes it changed.
 - **"Shallow" is a deliberate scope, defined now:** one model, one tool set, one decision point that either calls a tool or finishes. *Not* a deep agent (planning / memory / reflection — L18). Shallow ≠ lesser; most production agents are shallow.
 
 **If the demo misbehaves:**
@@ -76,11 +76,11 @@ The teacher should have, before the first demo starts:
 **Live script:**
 
 1. Build the model: `model = ChatAnthropic(model=<Sonnet 4.6 id from config>)`.
-2. Build the agent in **one line**: `agent = create_agent(model, [calculator, lookup, flaky_fetch], system_prompt=…)`. Say out loud what you did *not* write: no `while` loop, no `if tool_use` branch, no message-list bookkeeping, no step counter.
+2. Build the agent in **one line**: `agent = create_agent(model, [calculator, lookup, flaky_fetch], system_prompt=…)`. Say out loud what you did *not* write: no `while` loop, no `if ai.tool_calls` branch, no message-list bookkeeping, no step counter.
 3. **Run for equivalence.** Invoke the agent on the **chaining task** (`agent.invoke({"messages": [{"role": "user", "content": …}]})`) → watch it issue `calculator` then `lookup` and terminate naturally — the *same sequence* L10 produced. Then invoke on the **`flaky_fetch` failure task** → confirm tool-failure handling still works.
-4. **Read the result.** Print the returned `messages` list — the same user / assistant-with-`tool_use` / tool-result / assistant sequence L10 built by hand — and pull the final answer off the last message.
+4. **Read the result.** Print the returned `messages` list — the same user / assistant-with-`tool_calls` / `ToolMessage` / assistant sequence L10 built by hand — and pull the final answer off the last message.
 5. **Render what it wrapped.** `agent.get_graph().draw_mermaid_png()` (or the Mermaid text) and put it next to Demo 1's hand-drawn diagram — they match. The one-liner *is* the graph you drew.
-6. **Name the freebies against their L10 twins:** the run-driver loop (L10's `while`), the tool-call routing (L10's `if tool_use`), the message-history append (L10's manual `messages.append`), a **recursion/step limit** (L10's `max_steps` cap — show where it lives), and tool execution (L10's dispatch-and-catch).
+6. **Name the freebies against their L10 twins:** the run-driver loop (L10's `while`), the tool-call routing (L10's `if ai.tool_calls`), the message-history append (L10's manual `messages.append`), a **recursion/step limit** (L10's `max_steps` cap — show where it lives), and tool execution (L10's dispatch-and-catch).
 
 **What to highlight:**
 

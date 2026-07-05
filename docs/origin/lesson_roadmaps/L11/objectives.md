@@ -20,9 +20,9 @@ The title word **"shallow"** is load-bearing and should be defined early: a *sha
 
 Students arriving at L11 should already be able to:
 
-- Build and run a model→tool→model loop in plain Python, maintain the message-history invariant (every `tool_use` answered by a matching `tool_result`), and read a `RunResult` ([L10](../L10/objectives.md), objectives 1–2). `create_agent` automates each of these pieces — a student who hasn't internalized the loop can't see what the one-liner is replacing.
+- Build and run a model→tool→model loop in plain Python, maintain the message-history invariant (every `AIMessage` tool call answered by a matching `ToolMessage`), and read a `RunResult` ([L10](../L10/objectives.md), objectives 1–2). `create_agent` automates each of these pieces — a student who hasn't internalized the loop can't see what the one-liner is replacing.
 - Reason about termination as a *design decision* — natural vs. `max_steps`, plus token-budget and loop-detection as extensions (L10, objective 2). `create_agent` supplies its own recursion/step limit; students should recognize it as the framework's `max_steps`.
-- Handle loop-level tool failures by converting them into `tool_result`s with `is_error: true` (L10, objective 3) — `create_agent` does the same inside its tool step.
+- Handle loop-level tool failures by converting them into `ToolMessage`s with `status="error"` (L10, objective 3) — `create_agent` does the same inside its tool step.
 - Design and bind plain-Python tools to a model ([L07](../L07/objectives.md)/[L08](../L08/objectives.md)); LangChain wraps the same plain functions, so the L10 tools bind straight into `create_agent`.
 
 If a student is shaky on the L10 loop, redirect there first — L11 is a *re-expression* of that loop, and the whole lesson lands only if the original is solid.
@@ -41,7 +41,7 @@ By the end of L11, a student should be able to:
 2. **Build and run a shallow agent with `create_agent`.** Concretely:
    - Use `from langchain.agents import create_agent` to construct an agent from a **model** (native LangChain `ChatAnthropic`, Sonnet 4.6) and the **L10 tools** (`calculator`, `lookup`, `flaky_fetch`), plus a system prompt — the whole agent in one call, returning a runnable.
    - Invoke it on the **L10 chaining task** and watch it issue the same tool sequence (`calculator` then `lookup`) and terminate naturally — behavioral equivalence to the hand-rolled loop, with none of the loop written by hand. Then invoke it on the **`flaky_fetch` failure task** and confirm tool-failure handling still works.
-   - Read the agent's result: the returned **message history** (the same `tool_use`/`tool_result` sequence L10 produced), and pull the final answer out of it.
+   - Read the agent's result: the returned **message history** (the same `AIMessage`/`ToolMessage` sequence L10 produced), and pull the final answer out of it.
    - Name what `create_agent` gave you for free that L10 made you write by hand — the run/loop driver, the tool-call routing, the message-history bookkeeping, a recursion/step limit (the framework's `max_steps`), and tool execution — each against the L10 hand-rolled equivalent it replaces.
 
 3. **Know the boundary of `create_agent` — and when you'd drop below it.** Concretely:

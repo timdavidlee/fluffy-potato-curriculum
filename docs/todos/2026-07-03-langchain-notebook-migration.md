@@ -1,5 +1,9 @@
 # 2026-07-03 — LangChain notebook migration (code done; L09/L11/L14 prose follow-up)
 
+**Status: closed 2026-07-04.** All code batches plus the final prose follow-up (L09 MCP lectures + the
+L11 roadmap) are aligned to `AIMessage.tool_calls` / `ToolMessage`. See the resolution note at the
+bottom. A separate, newly-spotted roadmap drift (L04/L05/L12) is tracked in its own todo.
+
 **Decision (user):** the tool/agent lessons go **fully model-agnostic via LangChain** — the raw
 Anthropic SDK is retired from the curriculum's loop/tool code in favor of a LangChain chat model
 (`ChatAnthropic` / `init_chat_model("provider:model")`, `.bind_tools()`, `AIMessage.tool_calls`,
@@ -54,18 +58,22 @@ symbol — verified zero hits for `tool_use_block` / `text_block(` / `client.mes
 teaching arc (L07, L08, L10, L11, L12, L14, L22) and the L07/L08/L10 roadmaps now use LangChain
 vocabulary throughout.
 
-## Follow-up (out of this migration's scope)
+## Follow-up (resolved 2026-07-04)
 
-`tool_use` / `tool_result` still appear as **conceptual / protocol prose** (not code) in a few
-downstream lessons that back-reference "the L10 pairing invariant":
+`tool_use` / `tool_result` appeared as **conceptual / protocol prose** (not code) in a few downstream
+lessons back-referencing "the L10 pairing invariant". Status after the 2026-07-04 consistency pass:
 
-- **L09** (MCP) — `L0901_intro.md`, `L0902_lecture.md`, `L0905_lecture.md`. MCP genuinely returns a
-  `tool_result` block over the wire, but the "same `tool_use`/`tool_result` round-trip as L07"
-  back-references now read against L07's `AIMessage.tool_calls`/`ToolMessage` framing.
-- **L14** (LangGraph) — `L1401`–`L1406` prose calls the invariant "`tool_use`/`tool_result` pairing";
-  the *code* is already migrated (`ToolMessage(status="error")`), only the wording drifts.
-- **L11 & L14 roadmaps** — `objectives.md` / `demos_or_activities.md` describe the L10 loop in
-  `tool_use`/`tool_result` terms.
+- **L09** (MCP) — ✅ done. `L0901_intro.md`, `L0902_lecture.md`, `L0905_lecture.md` re-vocabularized:
+  the model emits an `AIMessage` with `tool_calls`; the client feeds the server's structured result
+  back as a `ToolMessage`. The MCP wire step is now described as "returns a structured result" rather
+  than borrowing Anthropic's `tool_result` block name (MCP's response is a `CallToolResult`, which the
+  LangChain client wraps into a `ToolMessage` anyway).
+- **L14** (LangGraph) — ✅ already clean; no `tool_use`/`tool_result` prose remains in `L1401`–`L1406`.
+- **L11 roadmap** — ✅ done. `objectives.md` / `demos_or_activities.md` now describe the L10 loop as
+  `AIMessage.tool_calls` → `ToolMessage` (tool failures → `ToolMessage(status="error")`).
+- **L14 roadmap** — ✅ already clean.
 
-A small consistency pass could align this prose to `AIMessage.tool_calls` → `ToolMessage` (noting
-that MCP's wire format legitimately uses `tool_result`). None of it is broken code.
+**Migration follow-up closed.** A *separate*, newly-spotted drift — **out of this migration's scope** —
+remains and is tracked in [`2026-07-04-1716-roadmap-tool-use-prose-drift.md`](2026-07-04-1716-roadmap-tool-use-prose-drift.md):
+the **L04 / L05 / L12 roadmaps** still use `tool_use`/`tool_result` prose (L04 even still says L07–L08
+"reach under the seam to the raw Anthropic SDK for `tool_use` blocks", contradicting this migration).

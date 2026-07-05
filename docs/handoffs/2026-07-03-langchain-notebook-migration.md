@@ -1,6 +1,11 @@
 # Handoff — migrate the tool/agent lesson notebooks to LangChain
 
-**Status: IN PROGRESS.** Foundation landed ([PR #19](https://github.com/timdavidlee/fluffy-potato-curriculum/pull/19), commit `2377969`); ~35 notebooks across 7 lessons remain.
+**Status: DONE (2026-07-04).** All batches (A/B/C) landed — the `common/` runtime, every tool/agent
+notebook (L07, L08, L10, L11, L12, L14, L22), and the L07/L08/L10 roadmaps are on LangChain. The final
+prose follow-up also landed (L09 MCP lectures + the L11 roadmap: `tool_use`/`tool_result` →
+`AIMessage.tool_calls`/`ToolMessage`). One *out-of-scope* straggler remains, tracked separately in
+`docs/todos/2026-07-04-1716-roadmap-tool-use-prose-drift.md` (L04/L05/L12 roadmap prose). The
+in-progress detail below is kept as the historical record of how the work was staged.
 **Date:** 2026-07-03 · **Slug owner:** curriculum LangChain migration
 
 ---

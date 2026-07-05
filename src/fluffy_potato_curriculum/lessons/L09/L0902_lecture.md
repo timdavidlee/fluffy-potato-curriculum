@@ -159,18 +159,19 @@ estimated duration: 80
 
 ### slide 3.3 The model can't tell it's MCP
 
-- Once the specs are registered, the model emits a `tool_use` block exactly as in
+- Once the specs are registered, the model emits an `AIMessage` with a tool call exactly as in
   [L07](../L07/objectives.md). The client notices the tool belongs to an MCP server and routes the call
-  over the transport; the server runs the tool; the result comes back as a `tool_result` block.
+  over the transport; the server runs the tool and returns a structured result; the client feeds that
+  back to the model as a `ToolMessage`.
 - table: the round-trip phases, now with the MCP hop made explicit.
 
 | # | Who | What happens |
 | --- | --- | --- |
-| 1 | model | emits a `tool_use` block (name + args + id) — same as L07 |
+| 1 | model | emits an `AIMessage` with a tool call (name + args + id) — same as L07 |
 | 2 | **client** | recognizes the tool is MCP-served; sends the call over the transport |
 | 3 | **server** | runs the tool function; returns a structured result |
-| 4 | **client** | wraps the result as a `tool_result` block and continues the conversation |
-| 5 | model | reads the `tool_result` and produces its final answer — same as L07 |
+| 4 | **client** | wraps the result as a `ToolMessage` (paired by `tool_call_id`) and continues the conversation |
+| 5 | model | reads the `ToolMessage` and produces its final answer — same as L07 |
 
 - The model's view is **identical to L07**. MCP is invisible to it — it lives entirely in steps 2–4,
   which are the *client's* job and the *operator's* config. The slide-outline lecture
