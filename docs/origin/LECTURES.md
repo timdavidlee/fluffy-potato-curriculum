@@ -1,5 +1,3 @@
-<!-- llm-status: draft, do not consume for now -->
-
 # Lecture Material Guidelines
 
 A **lecture** is teacher-presented material *within a lesson*, in the form of:
@@ -9,6 +7,37 @@ A **lecture** is teacher-presented material *within a lesson*, in the form of:
 - the files are provided to the students for reference
 
 (See [CURRICULUM_PRD.md](CURRICULUM_PRD.md) for the lesson-vs-lecture distinction: a *lesson* is the high-level `L<NN>/` unit and one row in the lesson plan; a *lecture* is one teacher-presented artifact inside it.)
+
+## Voice
+
+Lectures are written **to the student, in the second person** — the reader is the learner, not a
+proctor and not the author. That is the course-wide rule in
+[CURRICULUM_PRD.md](CURRICULUM_PRD.md#voice--point-of-view); the lecture-specific register is
+**Coach**: warm and mentor-like, guiding the reader through the idea instead of reciting at them or
+narrating the act of teaching.
+
+**Coach in practice**
+
+- Speak to the student ("you"), and when you land a takeaway, hand it over — "here's the one line to
+  hold onto," not "students should note…".
+- Delete presenter/author meta-instructions on sight. These are the tells, each with its Coach rewrite:
+
+| ✗ Presenter/author voice | ✓ Coach voice |
+| --- | --- |
+| "**Teach** *what the invariant is* so you can debug it." | "It's still worth understanding *what* the invariant is, so you can debug it when something breaks it." |
+| "**Defend the choice against** *who consumes the result*." | "Which one's right comes down to *who consumes the result*." |
+| "…**name them now** as portable gotchas." | "…**let's** name them now as portable gotchas." |
+| "**Before any Python**, the entire agent fits in two nodes." | "Before *we write* any Python, notice the entire agent fits in two nodes." |
+| "One-line foreshadow **(do not teach here)**: …" | "A quick look ahead — you won't need it yet: …" |
+
+- **Coach sets tone, not depth.** Lectures stay thorough (see the PRD's "when in doubt, include more
+  detail") — Coach just makes that thoroughness sound like a person guiding you, not a transcript.
+- **Table-related text stays terse** (course-wide rule): the `table:` lead-in and the cells are short
+  fragments, not sentences. The warm connective tissue lives in the prose *around* the table, never
+  inside it.
+- **Revoicing changes prose, not scaffolding.** Preserve the `## section` / `### slide` skeleton, the
+  `text:` / `diagram:` / `table:` directives, the YAML metadata, and the TOC + `[↑ Back to top]`
+  anchors exactly.
 
 ## File layout
 
