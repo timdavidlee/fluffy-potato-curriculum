@@ -1,3 +1,9 @@
+## v0.10.1 (2026-07-05)
+
+### Refactor
+
+- **L02**: convert live notebook cells to async client.achat
+
 ## v0.10.0 (2026-07-04)
 
 ### Feat
