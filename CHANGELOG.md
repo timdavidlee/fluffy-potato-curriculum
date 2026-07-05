@@ -1,3 +1,9 @@
+## v0.12.0 (2026-07-05)
+
+### Feat
+
+- **skills**: add build-lecture-deck skill for markdown-to-pptx
+
 ## v0.11.0 (2026-07-05)
 
 ### Feat
