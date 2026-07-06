@@ -96,6 +96,10 @@ estimated duration: 80
 - For any task, ask: *does the answer depend on data I can't have memorized, need precise computation,
   cause a side effect, or require verification?* If yes → tool. If the model nails it cold and the
   round-trip isn't worth it → no tool.
+- diagram: a small decision flow — a task box feeding the question "unmemorizable data · precise
+  computation · side effect · verification?"; the "yes" branch (cyan) lands on "tool", the "no"
+  branch asks "model nails it cold & round-trip not worth it?" and lands on "no tool" (neutral) —
+  with a footer note: "either way, defend the call in one sentence."
 - Then **defend the call in one sentence.** "Tool: needs the live clock." / "No tool: general
   knowledge the model has cold." That one sentence is the deliverable — naming *why* is the skill.
 
@@ -285,6 +289,11 @@ estimated duration: 80
   the model fires it, a record is created it never intended, because the description hid the effect.
   Add one sentence — *"if the user does not exist, this tool creates one"* — and the model pauses to
   ask first.
+- diagram: the same `lookup_user_by_email` tool in two panels — left, a description that omits the
+  create side effect: the model calls it and a coral "user record created (unintended)" appears; right,
+  the description with the one added sentence naming the effect: the model pauses at a cyan "asks the
+  user first" step before any record exists — caption: "an unnamed side effect is one the model can't
+  reason about; one sentence in the description changes the behavior."
 - Forward link: **L11 (human-in-the-loop / approval gates)** revisits this exact tension for
   high-stakes side effects. L08 plants the seed; L11 builds the structure.
 
