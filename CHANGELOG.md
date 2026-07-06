@@ -1,3 +1,9 @@
+## v0.18.0 (2026-07-06)
+
+### Feat
+
+- **L03**: add LangChain/LangGraph primer (L0302) + build L0305 deck
+
 ## v0.17.0 (2026-07-05)
 
 ### Feat
