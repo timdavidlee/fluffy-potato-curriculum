@@ -1,0 +1,1160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>L05 — Conditional graphs: routing &amp; branching</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500;1,9..144,600&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+/* ===========================================
+   THEME — Graph Canvas system
+   Fraunces (display serif) + IBM Plex Mono (everything else)
+   =========================================== */
+:root {
+    --stage-bg: #05070a;
+    --slide-bg: #0a0e13;
+    --cyan: #52e8c8;
+    --cyan-dim: #1f6f60;
+    --cyan-faint: rgba(82, 232, 200, 0.16);
+    --cyan-rule: rgba(82, 232, 200, 0.22);
+    --coral: #ff6b57;
+    --coral-dim: #7a3229;
+    --ink: #eef2f0;
+    --ink-dim: #8a9490;
+    --ink-faint: #4c5652;
+
+    --font-display: 'Fraunces', Georgia, serif;
+    --font-body: 'IBM Plex Mono', ui-monospace, monospace;
+
+    --edge-x: 130px;
+    --edge-top: 96px;
+    --edge-bottom: 64px;
+
+    --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+    --duration-normal: 0.7s;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body { font-family: var(--font-body); }
+
+/* ===========================================
+   FIXED 16:9 STAGE: MANDATORY BASE STYLES
+   (viewport-base.css, included in full)
+   =========================================== */
+html, body { width: 100%; height: 100%; margin: 0; overflow: hidden; background: var(--stage-bg, #000); }
+.deck-viewport { position: fixed; inset: 0; overflow: hidden; background: var(--stage-bg, #000); }
+.deck-stage { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; overflow: hidden; transform-origin: 0 0; background: var(--slide-bg, #fff); }
+.slide { position: absolute; inset: 0; width: 1920px; height: 1080px; overflow: hidden; display: block; visibility: hidden; opacity: 0; pointer-events: none; background: var(--slide-bg, #fff); }
+.slide.active, .slide.visible { visibility: visible; opacity: 1; pointer-events: auto; z-index: 1; }
+img, video, canvas, svg { max-width: 100%; max-height: 100%; }
+.deck-controls { position: fixed; left: 50%; bottom: 22px; transform: translateX(-50%); z-index: 1000; }
+@media print {
+    html, body { width: 1920px; height: auto; overflow: visible; background: #fff; }
+    .deck-viewport { position: static; overflow: visible; background: #fff; }
+    .deck-stage { position: static; width: auto; height: auto; transform: none !important; background: none; }
+    .slide { position: relative; display: block !important; visibility: visible !important; opacity: 1 !important; pointer-events: auto !important; width: 1920px; height: 1080px; break-after: page; page-break-after: always; }
+    .slide:last-child { break-after: auto; page-break-after: auto; }
+    .deck-controls { display: none !important; }
+}
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.2s !important; }
+}
+
+/* ===========================================
+   PERMANENT CANVAS TREATMENT
+   Dot-grid + corner glows live on the stage itself so every
+   slide (transparent bg) shows the same atmosphere underneath.
+   =========================================== */
+.deck-stage {
+    background:
+        radial-gradient(ellipse 900px 700px at 82% 12%, rgba(82,232,200,0.10) 0%, transparent 60%),
+        radial-gradient(ellipse 900px 700px at 10% 92%, rgba(255,107,87,0.07) 0%, transparent 60%),
+        var(--slide-bg);
+}
+.deck-stage::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(rgba(82,232,200,0.14) 1.4px, transparent 1.4px);
+    background-size: 64px 64px;
+    z-index: 0;
+}
+.slide { background: transparent; z-index: 1; }
+.slide.active, .slide.visible { z-index: 2; }
+
+/* ===========================================
+   REVEAL ANIMATION — staggered fade + rise
+   =========================================== */
+.reveal {
+    opacity: 0;
+    transform: translateY(22px);
+    transition: opacity var(--duration-normal) var(--ease-out-expo),
+                transform var(--duration-normal) var(--ease-out-expo);
+}
+.slide.visible .reveal { opacity: 1; transform: translateY(0); }
+.slide.visible .reveal:nth-child(1) { transition-delay: 0.05s; }
+.slide.visible .reveal:nth-child(2) { transition-delay: 0.15s; }
+.slide.visible .reveal:nth-child(3) { transition-delay: 0.25s; }
+.slide.visible .reveal:nth-child(4) { transition-delay: 0.35s; }
+.slide.visible .points.reveal .point:nth-child(1) { transition-delay: 0.30s; }
+.slide.visible .points.reveal .point:nth-child(2) { transition-delay: 0.38s; }
+.slide.visible .points.reveal .point:nth-child(3) { transition-delay: 0.46s; }
+.slide.visible .points.reveal .point:nth-child(4) { transition-delay: 0.54s; }
+.slide.visible .points.reveal .point:nth-child(5) { transition-delay: 0.62s; }
+.slide.visible .points .point {
+    opacity: 0;
+    transform: translateY(14px);
+    transition: opacity 0.5s var(--ease-out-expo), transform 0.5s var(--ease-out-expo);
+}
+.slide.visible .points.reveal .point { opacity: 1; transform: translateY(0); }
+
+/* ===========================================
+   CHROME — applies inside every slide
+   =========================================== */
+.chrome-tag {
+    position: absolute;
+    top: 52px;
+    left: var(--edge-x);
+    font-size: 16px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--cyan-dim);
+}
+.chrome-tag b { color: var(--cyan); font-weight: 500; }
+.chrome-page {
+    position: absolute;
+    bottom: 48px;
+    right: var(--edge-x);
+    font-size: 16px;
+    color: var(--ink-faint);
+    letter-spacing: 0.05em;
+}
+.chrome-nav {
+    position: absolute;
+    bottom: 48px;
+    left: var(--edge-x);
+    font-size: 15px;
+    color: var(--ink-faint);
+    letter-spacing: 0.06em;
+    opacity: 0.55;
+}
+
+/* ===========================================
+   TYPOGRAPHY PRIMITIVES
+   =========================================== */
+.eyebrow {
+    font-size: 22px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--cyan);
+    font-weight: 500;
+}
+.eyebrow::before { content: "◆ "; }
+
+.slide-index {
+    position: absolute;
+    top: var(--edge-top);
+    right: var(--edge-x);
+    font-size: 18px;
+    color: var(--ink-faint);
+    letter-spacing: 0.05em;
+}
+
+.topbar {
+    position: absolute;
+    top: var(--edge-top);
+    left: var(--edge-x);
+    right: var(--edge-x);
+    padding-bottom: 26px;
+    border-bottom: 1px solid var(--cyan-rule);
+}
+
+h2.headline {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 62px;
+    line-height: 1.1;
+    color: var(--ink);
+    letter-spacing: -0.005em;
+    margin-top: 18px;
+}
+h2.headline .it { font-style: italic; font-weight: 500; color: var(--cyan); }
+
+.lede {
+    font-size: 29px;
+    line-height: 1.5;
+    color: var(--ink-dim);
+    max-width: 1200px;
+    margin-top: 22px;
+}
+.lede b { color: var(--ink); font-weight: 500; }
+
+.body-area {
+    position: absolute;
+    top: 312px;
+    left: var(--edge-x);
+    right: var(--edge-x);
+    bottom: var(--edge-bottom);
+}
+
+.points { list-style: none; max-width: 1420px; }
+.points .point {
+    position: relative;
+    padding-left: 40px;
+    font-size: 29px;
+    line-height: 1.5;
+    color: var(--ink-dim);
+    margin-bottom: 15px;
+}
+.points .point::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 9px;
+    width: 12px;
+    height: 12px;
+    border: 2px solid var(--cyan);
+    border-radius: 50%;
+}
+.points .point b, .points .point .k { color: var(--ink); font-weight: 600; }
+.points .point code {
+    font-family: var(--font-body);
+    color: var(--cyan);
+    background: rgba(82,232,200,0.08);
+    padding: 1px 8px;
+    border-radius: 3px;
+    font-size: 0.9em;
+}
+.points .point .warn { color: var(--coral); font-weight: 600; }
+
+/* callout — emphasis statement */
+.callout {
+    margin-top: 28px;
+    padding: 28px 36px;
+    border-left: 3px solid var(--cyan);
+    background: rgba(82,232,200,0.05);
+    max-width: 1200px;
+}
+.callout p {
+    font-family: var(--font-display);
+    font-style: italic;
+    font-size: 38px;
+    line-height: 1.32;
+    color: var(--ink);
+}
+
+/* ===========================================
+   TABLE — ledger style
+   =========================================== */
+table.ledger { width: 100%; border-collapse: collapse; max-width: 1660px; }
+table.ledger th {
+    font-size: 19px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--cyan);
+    text-align: left;
+    padding: 0 22px 16px 0;
+    border-bottom: 1.5px solid var(--cyan-rule);
+    font-weight: 600;
+}
+table.ledger td {
+    font-size: 24px;
+    line-height: 1.38;
+    color: var(--ink-dim);
+    padding: 11px 20px 11px 0;
+    border-bottom: 1px solid rgba(82,232,200,0.10);
+    vertical-align: top;
+}
+table.ledger tr:last-child td { border-bottom: none; }
+table.ledger td.tag {
+    font-size: 23px;
+    color: var(--cyan);
+    font-weight: 500;
+    white-space: nowrap;
+}
+table.ledger td b { color: var(--ink); font-weight: 600; }
+table.ledger td code {
+    color: var(--cyan);
+    background: rgba(82,232,200,0.08);
+    padding: 1px 7px;
+    border-radius: 3px;
+    font-size: 0.92em;
+}
+table.ledger td.warn-cell { color: var(--coral); }
+
+/* ===========================================
+   DIAGRAM CONTAINERS
+   =========================================== */
+.diagram-frame {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.diagram-caption {
+    font-size: 25px;
+    line-height: 1.6;
+    color: var(--ink-dim);
+    font-style: italic;
+    max-width: 1300px;
+    margin-top: 18px;
+}
+.node-label { font-family: var(--font-body); font-weight: 600; font-size: 27px; fill: var(--ink); }
+.edge-label { font-family: var(--font-body); font-size: 20px; }
+
+/* ===========================================
+   CHAPTER (section divider) SLIDES — sparse
+   =========================================== */
+.slide-chapter { display: flex; flex-direction: column; justify-content: center; }
+.chapter-ghost {
+    position: absolute;
+    top: -40px;
+    right: 90px;
+    font-family: var(--font-display);
+    font-size: 480px;
+    font-weight: 600;
+    color: var(--cyan);
+    opacity: 0.07;
+    line-height: 1;
+    user-select: none;
+}
+.chapter-eyebrow {
+    position: absolute;
+    left: var(--edge-x);
+    top: 420px;
+    font-size: 20px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--cyan);
+}
+.chapter-eyebrow::before { content: "◆ "; }
+.chapter-title {
+    position: absolute;
+    left: var(--edge-x);
+    top: 468px;
+    right: 260px;
+    font-family: var(--font-display);
+    font-style: italic;
+    font-weight: 500;
+    font-size: 96px;
+    line-height: 1.08;
+    color: var(--ink);
+}
+.chapter-sub {
+    position: absolute;
+    left: var(--edge-x);
+    top: 690px;
+    font-size: 29px;
+    color: var(--ink-dim);
+    max-width: 1100px;
+    line-height: 1.6;
+    border-left: 2px solid var(--cyan-dim);
+    padding-left: 28px;
+}
+
+/* ===========================================
+   COVER SLIDE
+   =========================================== */
+.slide-cover .eyebrow { position: absolute; top: 108px; left: var(--edge-x); }
+.slide-cover h1 {
+    position: absolute;
+    top: 190px;
+    left: var(--edge-x);
+    width: 980px;
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 116px;
+    line-height: 1.05;
+    color: var(--ink);
+}
+.slide-cover h1 .it { font-style: italic; font-weight: 500; color: var(--cyan); }
+.slide-cover .claim {
+    position: absolute;
+    top: 636px;
+    left: var(--edge-x);
+    width: 920px;
+    font-size: 29px;
+    line-height: 1.6;
+    color: var(--ink-dim);
+}
+.slide-cover .claim b { color: var(--ink); font-weight: 600; }
+.slide-cover .meta-row {
+    position: absolute;
+    bottom: 100px;
+    left: var(--edge-x);
+    display: flex;
+    gap: 44px;
+    font-size: 21px;
+    color: var(--ink-dim);
+}
+.slide-cover .meta-row span b { color: var(--cyan); }
+.cover-diagram { position: absolute; right: 90px; top: 280px; width: 740px; height: 540px; }
+
+/* ===========================================
+   CLOSING SLIDE
+   =========================================== */
+.slide-closing { display: flex; flex-direction: column; justify-content: center; }
+.closing-statement {
+    position: absolute;
+    left: var(--edge-x);
+    top: 300px;
+    right: 260px;
+    font-family: var(--font-display);
+    font-style: italic;
+    font-weight: 500;
+    font-size: 56px;
+    line-height: 1.35;
+    color: var(--ink);
+}
+.closing-statement .k { color: var(--cyan); font-style: normal; font-weight: 600; }
+.closing-grid {
+    position: absolute;
+    left: var(--edge-x);
+    right: var(--edge-x);
+    bottom: 190px;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 40px;
+    border-top: 1px solid var(--cyan-rule);
+    padding-top: 30px;
+}
+.closing-grid .col .label {
+    font-size: 18px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--cyan);
+    margin-bottom: 10px;
+}
+.closing-grid .col .val {
+    font-size: 24px;
+    color: var(--ink-dim);
+    line-height: 1.5;
+}
+.closing-grid .col .val b { color: var(--ink); }
+
+/* ===========================================
+   OUTSIDE-STAGE UI: progress + nav buttons
+   (kept outside .deck-stage per skill rules)
+   =========================================== */
+.deck-progress {
+    position: fixed;
+    left: 0; right: 0; bottom: 0;
+    height: 3px;
+    background: rgba(82,232,200,0.08);
+    z-index: 500;
+}
+.deck-progress-bar {
+    height: 100%;
+    background: var(--cyan);
+    width: 0%;
+    transition: width 0.35s var(--ease-out-expo);
+}
+.deck-arrow {
+    position: fixed;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 52px; height: 52px;
+    border-radius: 50%;
+    border: 1px solid var(--cyan-rule);
+    background: rgba(10,14,19,0.6);
+    color: var(--cyan);
+    font-size: 20px;
+    cursor: pointer;
+    z-index: 500;
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.2s, border-color 0.2s;
+}
+.deck-arrow:hover { background: rgba(82,232,200,0.12); border-color: var(--cyan); }
+.deck-arrow.prev { left: 22px; }
+.deck-arrow.next { right: 22px; }
+
+/* Mobile/portrait: arrows can collide with the letterboxed stage; swipe covers nav there. */
+@media (max-width: 600px), (orientation: portrait) {
+    .deck-arrow { display: none; }
+}
+
+/* ===========================================
+   INLINE EDITING
+   =========================================== */
+.edit-hotzone { position: fixed; top: 0; left: 0; width: 80px; height: 80px; z-index: 10000; cursor: pointer; }
+.edit-toggle {
+    position: fixed; top: 14px; left: 14px;
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    border: 1px solid var(--cyan-rule);
+    background: rgba(10,14,19,0.85);
+    font-size: 17px;
+    cursor: pointer;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+    z-index: 10001;
+}
+.edit-toggle.show, .edit-toggle.active { opacity: 1; pointer-events: auto; }
+.edit-toggle.active { background: var(--cyan); }
+[contenteditable="true"] {
+    outline: 1px dashed var(--cyan-rule);
+    outline-offset: 4px;
+    cursor: text;
+}
+.save-toast {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--cyan);
+    color: #05070a;
+    font-family: var(--font-body);
+    font-size: 14px;
+    font-weight: 600;
+    padding: 10px 20px;
+    border-radius: 4px;
+    opacity: 0;
+    transition: opacity 0.3s, transform 0.3s;
+    z-index: 10002;
+    pointer-events: none;
+}
+.save-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* ===========================================
+   PER-DECK DIAGRAM HELPERS (L0502)
+   appended per FRONTEND-STYLE §5 — shared rules above are untouched
+   =========================================== */
+/* box vocabulary */
+.dg-node {
+    border: 2px solid var(--cyan); border-radius: 10px;
+    background: #12181a; padding: 18px 24px; text-align: center;
+    font-family: var(--font-body); color: var(--ink);
+}
+.dg-node.capable { border-color: var(--cyan); }
+.dg-node.cheap { border-color: var(--cyan); }
+.dg-node.bad { border-color: var(--coral); }
+.dg-node.ghost { border-style: dashed; border-color: var(--ink-faint); background: transparent; }
+.dg-title { font-family: var(--font-display); font-size: 27px; color: var(--ink); }
+.dg-sub { font-size: 17px; color: var(--ink-dim); margin-top: 6px; }
+.dg-badge {
+    display: inline-block; margin-top: 9px; font-size: 15px; letter-spacing: 0.08em;
+    text-transform: uppercase; color: var(--cyan); border: 1px solid var(--cyan-rule);
+    border-radius: 999px; padding: 2px 12px;
+}
+.dg-badge.coral { color: var(--coral); border-color: var(--coral-dim); }
+.dg-arrow { color: var(--ink-faint); font-size: 34px; align-self: center; }
+.dg-tag {
+    font-size: 16px; letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--ink-faint); margin-top: 8px;
+}
+.dg-tag.cyan { color: var(--cyan); }
+.dg-tag.coral { color: var(--coral); }
+.dg-strike { text-decoration: line-through; text-decoration-color: var(--coral); color: var(--ink-dim); }
+
+/* compact themed code block */
+pre.codeblock {
+    background: #12181a; border: 1px solid var(--cyan-rule); border-radius: 10px;
+    padding: 22px 28px; overflow: hidden; max-width: 1400px;
+}
+pre.codeblock code {
+    font-family: var(--font-body); font-size: 22px; line-height: 1.5;
+    color: var(--cyan); white-space: pre; display: block;
+}
+pre.codeblock code .cm { color: var(--ink-faint); }
+pre.codeblock code .kw { color: var(--ink); font-weight: 600; }
+pre.codeblock code .st { color: var(--ink-dim); }
+</style>
+</head>
+<body>
+
+<div class="deck-viewport">
+<main class="deck-stage" id="deckStage">
+
+<!-- ============================================================ -->
+<!-- 01 — COVER                                                   -->
+<!-- ============================================================ -->
+<section class="slide slide-cover active">
+    <div class="eyebrow reveal">L05 &middot; Conditional graphs</div>
+    <h1 class="reveal">Routing &amp; <span class="it">branching</span>:<br>who gets to decide</h1>
+    <div class="claim reveal"><b>One new primitive &mdash; the conditional edge &mdash; lets a routing function pick the next node at runtime.</b> Here <i>you</i> own the branch; in an agent, the model does.</div>
+    <div class="meta-row reveal">
+        <span>Lesson <b>L05</b></span>
+        <span>~<b>45 min</b></span>
+        <span>branch nodes <b>Sonnet 4.6</b> &middot; classifier <b>Haiku 4.5</b></span>
+    </div>
+    <div class="cover-diagram reveal">
+        <svg viewBox="0 0 760 560" width="100%" height="100%">
+            <!-- classify node forks to three branches, reconverges to END -->
+            <circle cx="150" cy="280" r="78" fill="#12181a" stroke="var(--cyan)" stroke-width="2.5"/>
+            <text x="150" y="289" text-anchor="middle" class="node-label">classify</text>
+            <path d="M 232 250 C 340 150, 430 120, 540 120" fill="none" stroke="var(--cyan)" stroke-width="3" stroke-dasharray="9 8" marker-end="url(#cvc)"/>
+            <path d="M 236 280 L 540 280" fill="none" stroke="var(--cyan)" stroke-width="3" stroke-dasharray="9 8" marker-end="url(#cvc)"/>
+            <path d="M 232 310 C 340 410, 430 440, 540 440" fill="none" stroke="var(--cyan)" stroke-width="3" stroke-dasharray="9 8" marker-end="url(#cvc)"/>
+            <text x="360" y="165" text-anchor="middle" class="edge-label" fill="var(--cyan)">route(state)</text>
+            <rect x="540" y="88" width="150" height="64" rx="10" fill="#12181a" stroke="var(--ink-faint)" stroke-width="2"/>
+            <text x="615" y="127" text-anchor="middle" class="node-label" font-size="22">billing</text>
+            <rect x="540" y="248" width="150" height="64" rx="10" fill="#12181a" stroke="var(--ink-faint)" stroke-width="2"/>
+            <text x="615" y="287" text-anchor="middle" class="node-label" font-size="22">technical</text>
+            <rect x="540" y="408" width="150" height="64" rx="10" fill="#12181a" stroke="var(--ink-faint)" stroke-width="2"/>
+            <text x="615" y="447" text-anchor="middle" class="node-label" font-size="22">general</text>
+            <circle r="8" fill="var(--cyan)">
+                <animateMotion dur="3.2s" repeatCount="indefinite" path="M 236 280 L 540 280"/>
+            </circle>
+            <defs>
+                <marker id="cvc" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="var(--cyan)"/></marker>
+            </defs>
+        </svg>
+    </div>
+    <div class="chrome-page">01 / 15</div>
+    <div class="chrome-nav">L05 &middot; routing lecture</div>
+</section>
+
+<!-- ============================================================ -->
+<!-- 02 — SECTION DIVIDER 1                                       -->
+<!-- ============================================================ -->
+<section class="slide slide-chapter">
+    <div class="chrome-tag reveal">L05 &middot; <b>ROUTING</b></div>
+    <div class="chapter-ghost reveal">01</div>
+    <div class="chapter-eyebrow reveal">Section 1</div>
+    <div class="chapter-title reveal">The one new <span style="color:var(--cyan); font-style:normal;">primitive</span></div>
+    <div class="chapter-sub reveal">L04 gave you fixed edges taken every time. L05 adds exactly one thing: the conditional edge, and a routing function that chooses at runtime.</div>
+    <div class="chrome-page">02 / 15</div>
+</section>
+
+<!-- ============================================================ -->
+<!-- 03 — SLIDE 1.1 Fixed edge vs. conditional edge              -->
+<!-- ============================================================ -->
+<section class="slide">
+    <div class="chrome-tag">L05 &middot; <b>ROUTING</b></div>
+    <div class="topbar reveal">
+        <div class="eyebrow">Slide 1.1</div>
+        <h2 class="headline">Fixed edge vs. <span class="it">conditional</span> edge</h2>
+    </div>
+    <div class="body-area">
+        <ul class="points reveal">
+            <li class="point">In <b>L04</b> you only used <b>fixed</b> edges: <code>add_edge("parse", "draft")</code> &mdash; taken every time, no exceptions.</li>
+            <li class="point">Now you add the <b>conditional edge</b>: a <b>routing function</b> reads state at runtime and returns the <i>name</i> of the next node.</li>
+            <li class="point">Wired with <code>add_conditional_edges("classify", route, {...})</code>.</li>
+        </ul>
+        <div class="diagram-frame reveal" style="margin-top:26px; gap:120px; align-items:flex-start;">
+            <!-- LEFT: fixed edge A -> B -->
+            <svg viewBox="0 0 560 300" width="620" height="300">
+                <text x="20" y="34" class="edge-label" fill="var(--ink-faint)" style="text-transform:uppercase; letter-spacing:0.1em;">L04 &middot; fixed</text>
+                <circle cx="120" cy="150" r="62" fill="#12181a" stroke="var(--cyan)" stroke-width="2.5"/>
+                <text x="120" y="159" text-anchor="middle" class="node-label">A</text>
+                <path d="M 184 150 L 396 150" stroke="var(--cyan)" stroke-width="3.5" marker-end="url(#f11c)"/>
+                <text x="290" y="128" text-anchor="middle" class="edge-label" fill="var(--cyan)">every time</text>
+                <circle cx="460" cy="150" r="62" fill="#12181a" stroke="var(--cyan)" stroke-width="2.5"/>
+                <text x="460" y="159" text-anchor="middle" class="node-label">B</text>
+            </svg>
+            <!-- RIGHT: conditional edge classify -> 3 branches -> END -->
+            <svg viewBox="0 0 620 300" width="700" height="300">
+                <text x="20" y="34" class="edge-label" fill="var(--cyan)" style="text-transform:uppercase; letter-spacing:0.1em;">new &middot; conditional</text>
+                <circle cx="90" cy="150" r="56" fill="#12181a" stroke="var(--cyan)" stroke-width="2.5"/>
+                <text x="90" y="159" text-anchor="middle" class="node-label" font-size="22">classify</text>
+                <path d="M 148 128 C 240 70, 300 60, 360 60" fill="none" stroke="var(--cyan)" stroke-width="3" stroke-dasharray="8 7" marker-end="url(#f11c)"/>
+                <path d="M 150 150 L 360 150" fill="none" stroke="var(--cyan)" stroke-width="3" stroke-dasharray="8 7" marker-end="url(#f11c)"/>
+                <path d="M 148 172 C 240 230, 300 240, 360 240" fill="none" stroke="var(--cyan)" stroke-width="3" stroke-dasharray="8 7" marker-end="url(#f11c)"/>
+                <rect x="360" y="36" width="96" height="48" rx="8" fill="#12181a" stroke="var(--ink-faint)" stroke-width="2"/>
+                <rect x="360" y="126" width="96" height="48" rx="8" fill="#12181a" stroke="var(--ink-faint)" stroke-width="2"/>
+                <rect x="360" y="216" width="96" height="48" rx="8" fill="#12181a" stroke="var(--ink-faint)" stroke-width="2"/>
+                <path d="M 456 60 C 510 60, 540 130, 548 148" fill="none" stroke="var(--ink-faint)" stroke-width="2.5" marker-end="url(#f11n)"/>
+                <path d="M 456 150 L 548 150" fill="none" stroke="var(--ink-faint)" stroke-width="2.5" marker-end="url(#f11n)"/>
+                <path d="M 456 240 C 510 240, 540 170, 548 152" fill="none" stroke="var(--ink-faint)" stroke-width="2.5" marker-end="url(#f11n)"/>
+                <text x="560" y="157" class="node-label" font-size="20" fill="var(--ink)">END</text>
+                <text x="255" y="196" text-anchor="middle" class="edge-label" fill="var(--cyan)" font-size="17">route() picks the branch</text>
+                <defs>
+                    <marker id="f11c" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="var(--cyan)"/></marker>
+                    <marker id="f11n" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="var(--ink-faint)"/></marker>
+                </defs>
+            </svg>
+        </div>
+        <div class="diagram-caption reveal">One fixed edge is always taken; a conditional edge (dashed) lets a runtime routing function fork to one of several branches that reconverge at <code>END</code>.</div>
+    </div>
+    <div class="chrome-page">03 / 15</div>
+    <div class="chrome-nav">&larr; &rarr; navigate</div>
+</section>
+
+<!-- ============================================================ -->
+<!-- 04 — SLIDE 1.2 The decider — what route() may read           -->
+<!-- ============================================================ -->
+<section class="slide">
+    <div class="chrome-tag">L05 &middot; <b>ROUTING</b></div>
+    <div class="topbar reveal">
+        <div class="eyebrow">Slide 1.2</div>
+        <h2 class="headline">The decider &mdash; what <span class="it">route()</span> may read</h2>
+    </div>
+    <div class="body-area" style="display:flex; gap:56px; align-items:flex-start;">
+        <!-- LEFT: code + rule -->
+        <div style="flex:1 1 0; min-width:0;">
+            <pre class="codeblock reveal"><code><span class="kw">def</span> route(state: TicketState) -&gt; <span class="kw">str</span>:
+    <span class="cm"># branches on a label already in state,</span>
+    <span class="cm"># not on the model choosing a tool</span>
+    <span class="kw">return</span> state[<span class="st">"category"</span>]  <span class="cm"># billing|technical|general</span>
+
+builder.add_conditional_edges(<span class="st">"classify"</span>, route,
+    {<span class="st">"billing"</span>: <span class="st">"billing"</span>, <span class="st">"technical"</span>: <span class="st">"technical"</span>,
+     <span class="st">"general"</span>: <span class="st">"general"</span>})</code></pre>
+            <div class="callout reveal" style="margin-top:26px; padding:20px 28px;"><p style="font-size:31px;">Here <span class="k" style="color:var(--cyan); font-style:normal;">you</span> own the branch; in an agent, the <span class="k" style="color:var(--cyan); font-style:normal;">model</span> owns it.</p></div>
+        </div>
+        <!-- RIGHT: three allowed inputs (cyan) + one forbidden (coral) -->
+        <div class="diagram-frame reveal" style="flex:0 0 620px; flex-direction:column; align-items:stretch; gap:12px;">
+            <div class="dg-node" style="padding:12px 20px; text-align:left;"><span style="color:var(--cyan);">&#9679;</span> derived / computed state</div>
+            <div class="dg-node" style="padding:12px 20px; text-align:left;"><span style="color:var(--cyan);">&#9679;</span> a model's classification label</div>
+            <div class="dg-node" style="padding:12px 20px; text-align:left;"><span style="color:var(--cyan);">&#9679;</span> direct user input</div>
+            <div style="text-align:center; color:var(--ink-faint); font-size:22px;">&#8595;&nbsp; feed into &nbsp;<code style="color:var(--cyan);">route(state)</code></div>
+            <div class="dg-node bad" style="padding:12px 20px; text-align:left;"><span style="color:var(--coral);">&#10007;</span> <span class="dg-strike">did the model ask for a tool?</span> <span class="dg-tag coral" style="display:inline; margin:0;">L11 only</span></div>
+            <div class="diagram-caption reveal" style="margin-top:2px; font-size:22px;">Three things the decider may read; one it may not.</div>
+        </div>
+    </div>
+    <div class="chrome-page">04 / 15</div>
+    <div class="chrome-nav">&larr; &rarr; navigate</div>
+</section>
+
+<!-- ============================================================ -->
+<!-- 05 — SECTION DIVIDER 2                                       -->
+<!-- ============================================================ -->
+<section class="slide slide-chapter">
+    <div class="chrome-tag reveal">L05 &middot; <b>ROUTING</b></div>
+    <div class="chapter-ghost reveal">02</div>
+    <div class="chapter-eyebrow reveal">Section 2</div>
+    <div class="chapter-title reveal">Classify, then <span style="color:var(--cyan); font-style:normal;">branch</span></div>
+    <div class="chapter-sub reveal">The routing pattern: an entry classifier labels the input, a conditional edge fans out to specialized branches, and every branch converges to one exit.</div>
+    <div class="chrome-page">05 / 15</div>
+</section>
+
+<!-- ============================================================ -->
+<!-- 06 — SLIDE 2.1 An entry classifier that fans out             -->
+<!-- ============================================================ -->
+<section class="slide">
+    <div class="chrome-tag">L05 &middot; <b>ROUTING</b></div>
+    <div class="topbar reveal">
+        <div class="eyebrow">Slide 2.1</div>
+        <h2 class="headline">An entry classifier that <span class="it">fans out</span></h2>
+    </div>
+    <div class="body-area" style="display:flex; gap:48px; align-items:center;">
+        <ul class="points reveal" style="flex:0 0 720px;">
+            <li class="point"><b>Routing</b>: an entry <b>classifier</b> labels the input; a <b>conditional edge</b> sends it down one specialized branch.</li>
+            <li class="point">A ticket &rarr; <b>billing / technical / general</b>; each branch has its own focused prompt; all converge to <code>END</code>.</li>
+            <li class="point">Per-node models: <code>classify</code> just emits a label &rarr; <b>Haiku 4.5</b>; branches do the reasoning &rarr; <b>Sonnet 4.6</b>. Full framework in <b>L14</b>.</li>
+        </ul>
+        <div class="diagram-frame reveal" style="flex:1 1 0; min-width:0;">
+            <svg viewBox="0 0 700 460" width="100%" height="460">
+                <!-- classify node, Haiku badge -->
+                <circle cx="120" cy="230" r="72" fill="#12181a" stroke="var(--cyan)" stroke-width="2.5"/>
+                <text x="120" y="228" text-anchor="middle" class="node-label" font-size="23">classify</text>
+                <text x="120" y="330" text-anchor="middle" class="edge-label" fill="var(--cyan)" font-size="17">Haiku 4.5</text>
+                <text x="120" y="352" text-anchor="middle" class="edge-label" fill="var(--ink-dim)" font-size="15">cheap: just a label</text>
+                <!-- dashed conditional fan-out -->
+                <path d="M 194 195 C 300 100, 360 80, 430 80" fill="none" stroke="var(--cyan)" stroke-width="3" stroke-dasharray="9 8" marker-end="url(#s21c)"/>
+                <path d="M 196 230 L 430 230" fill="none" stroke="var(--cyan)" stroke-width="3" stroke-dasharray="9 8" marker-end="url(#s21c)"/>
+                <path d="M 194 265 C 300 360, 360 380, 430 380" fill="none" stroke="var(--cyan)" stroke-width="3" stroke-dasharray="9 8" marker-end="url(#s21c)"/>
+                <!-- branch nodes, Sonnet badge -->
+                <rect x="430" y="46" width="168" height="68" rx="10" fill="#12181a" stroke="var(--cyan)" stroke-width="2"/>
+                <text x="514" y="78" text-anchor="middle" class="node-label" font-size="21">billing</text>
+                <text x="514" y="100" text-anchor="middle" class="edge-label" fill="var(--cyan)" font-size="14">Sonnet 4.6</text>
+                <rect x="430" y="196" width="168" height="68" rx="10" fill="#12181a" stroke="var(--cyan)" stroke-width="2"/>
+                <text x="514" y="228" text-anchor="middle" class="node-label" font-size="21">technical</text>
+                <text x="514" y="250" text-anchor="middle" class="edge-label" fill="var(--cyan)" font-size="14">Sonnet 4.6</text>
+                <rect x="430" y="346" width="168" height="68" rx="10" fill="#12181a" stroke="var(--cyan)" stroke-width="2"/>
+                <text x="514" y="378" text-anchor="middle" class="node-label" font-size="21">general</text>
+                <text x="514" y="400" text-anchor="middle" class="edge-label" fill="var(--cyan)" font-size="14">Sonnet 4.6</text>
+                <!-- converge to END -->
+                <path d="M 598 80 C 648 90, 662 200, 666 216" fill="none" stroke="var(--ink-faint)" stroke-width="2.5" marker-end="url(#s21n)"/>
+                <path d="M 598 230 L 636 230" fill="none" stroke="var(--ink-faint)" stroke-width="2.5" marker-end="url(#s21n)"/>
+                <path d="M 598 380 C 648 370, 662 260, 666 244" fill="none" stroke="var(--ink-faint)" stroke-width="2.5" marker-end="url(#s21n)"/>
+                <text x="648" y="236" class="node-label" font-size="20" fill="var(--ink)">END</text>
+                <circle r="8" fill="var(--cyan)">
+                    <animateMotion dur="2.8s" repeatCount="indefinite" path="M 196 230 L 430 230"/>
+                </circle>
+                <defs>
+                    <marker id="s21c" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="var(--cyan)"/></marker>
+                    <marker id="s21n" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="var(--ink-faint)"/></marker>
+                </defs>
+            </svg>
+        </div>
+    </div>
+    <div class="chrome-page">06 / 15</div>
+    <div class="chrome-nav">&larr; &rarr; navigate</div>
+</section>
+
+<!-- ============================================================ -->
+<!-- 07 — SLIDE 2.2 Determinism: the workhorse proof              -->
+<!-- ============================================================ -->
+<section class="slide">
+    <div class="chrome-tag">L05 &middot; <b>ROUTING</b></div>
+    <div class="topbar reveal">
+        <div class="eyebrow">Slide 2.2</div>
+        <h2 class="headline">Determinism: the <span class="it">workhorse</span> proof</h2>
+    </div>
+    <div class="body-area">
+        <ul class="points reveal">
+            <li class="point">Re-run the same ticket through your router and confirm the <b>same branch</b> executes every time.</li>
+            <li class="point">The branch <i>wording</i> may vary (the model is still non-deterministic inside a node); the <b>path</b> doesn't.</li>
+        </ul>
+        <div class="callout reveal"><p>A conditional edge is &ldquo;runtime-chosen,&rdquo; but it's a <span class="k">deterministic function of state</span> &mdash; not a coin flip. That's what separates a workflow's routing from an agent's.</p></div>
+    </div>
+    <div class="chrome-page">07 / 15</div>
+    <div class="chrome-nav">&larr; &rarr; navigate</div>
+</section>
+
+<!-- ============================================================ -->
+<!-- 08 — SLIDE 2.3 The fallback / default branch                 -->
+<!-- ============================================================ -->
+<section class="slide">
+    <div class="chrome-tag">L05 &middot; <b>ROUTING</b></div>
+    <div class="topbar reveal">
+        <div class="eyebrow">Slide 2.3</div>
+        <h2 class="headline">The fallback / <span class="it">default</span> branch</h2>
+    </div>
+    <div class="body-area">
+        <ul class="points reveal">
+            <li class="point">Your router needs a <b>defined behavior for every possible label</b> &mdash; not just the expected ones.</li>
+            <li class="point">When a classification doesn't cleanly match a branch, route it to a default <code>general</code> fallback rather than letting the routing function <span class="warn">raise</span>.</li>
+            <li class="point">Treat this as a <b>first-class design requirement</b>, not an afterthought &mdash; a habit worth having before messier real-world classifiers.</li>
+        </ul>
+    </div>
+    <div class="chrome-page">08 / 15</div>
+    <div class="chrome-nav">&larr; &rarr; navigate</div>
+</section>
+
+<!-- ============================================================ -->
+<!-- 09 — SECTION DIVIDER 3                                       -->
+<!-- ============================================================ -->
+<section class="slide slide-chapter">
+    <div class="chrome-tag reveal">L05 &middot; <b>ROUTING</b></div>
+    <div class="chapter-ghost reveal">03</div>
+    <div class="chapter-eyebrow reveal">Section 3</div>
+    <div class="chapter-title reveal">Branch on the <span style="color:var(--cyan); font-style:normal;">user</span>, not the model</div>
+    <div class="chapter-sub reveal">A conditional edge can branch on a value the user supplied directly &mdash; no model in the decision at all. The sharpest possible contrast with an agent.</div>
+    <div class="chrome-page">09 / 15</div>
+</section>
+
+<!-- ============================================================ -->
+<!-- 10 — SLIDE 3.1 The purest contrast with an agent             -->
+<!-- ============================================================ -->
+<section class="slide">
+    <div class="chrome-tag">L05 &middot; <b>ROUTING</b></div>
+    <div class="topbar reveal">
+        <div class="eyebrow">Slide 3.1</div>
+        <h2 class="headline">The purest <span class="it">contrast</span> with an agent</h2>
+    </div>
+    <div class="body-area">
+        <ul class="points reveal">
+            <li class="point">A conditional edge can branch on a value the <b>user</b> supplied &mdash; a menu choice, a form field: <code>if state["user_choice"] == "escalate": return "human_review"</code>.</li>
+            <li class="point"><b>No model is involved in the routing decision at all.</b> The user picked the path; you wired the options.</li>
+            <li class="point">Here the input arrives <b>as part of the initial state</b>, then the graph runs straight through.</li>
+            <li class="point">The <i>interactive</i> version &mdash; pause mid-run to ask, resume on the answer &mdash; needs <code>interrupt</code> + a checkpointer, in <b>L17</b>.</li>
+        </ul>
+    </div>
+    <div class="chrome-page">10 / 15</div>
+    <div class="chrome-nav">&larr; &rarr; navigate</div>
+</section>
+
+<!-- ============================================================ -->
+<!-- 11 — SLIDE 3.2 Same shape, different decider                 -->
+<!-- ============================================================ -->
+<section class="slide">
+    <div class="chrome-tag">L05 &middot; <b>ROUTING</b></div>
+    <div class="topbar reveal">
+        <div class="eyebrow">Slide 3.2</div>
+        <h2 class="headline">Same shape, <span class="it">different decider</span></h2>
+    </div>
+    <div class="body-area">
+        <div class="diagram-frame reveal" style="gap:110px; margin-top:10px; align-items:flex-start;">
+            <!-- LEFT: model-classification router -->
+            <svg viewBox="0 0 560 380" width="640" height="380">
+                <text x="20" y="30" class="edge-label" fill="var(--cyan)" style="text-transform:uppercase; letter-spacing:0.1em;">decider &middot; model classification (&sect;2)</text>
+                <circle cx="100" cy="200" r="58" fill="#12181a" stroke="var(--cyan)" stroke-width="2.5"/>
+                <text x="100" y="208" text-anchor="middle" class="node-label" font-size="21">entry</text>
+                <path d="M 158 172 C 250 100, 300 90, 360 90" fill="none" stroke="var(--cyan)" stroke-width="3" stroke-dasharray="8 7" marker-end="url(#s32ca)"/>
+                <path d="M 160 200 L 360 200" fill="none" stroke="var(--cyan)" stroke-width="3" stroke-dasharray="8 7" marker-end="url(#s32ca)"/>
+                <path d="M 158 228 C 250 300, 300 310, 360 310" fill="none" stroke="var(--cyan)" stroke-width="3" stroke-dasharray="8 7" marker-end="url(#s32ca)"/>
+                <text x="255" y="168" text-anchor="middle" class="edge-label" fill="var(--cyan)" font-size="16">route on label</text>
+                <rect x="360" y="62" width="120" height="56" rx="9" fill="#12181a" stroke="var(--ink-faint)" stroke-width="2"/>
+                <rect x="360" y="172" width="120" height="56" rx="9" fill="#12181a" stroke="var(--ink-faint)" stroke-width="2"/>
+                <rect x="360" y="282" width="120" height="56" rx="9" fill="#12181a" stroke="var(--ink-faint)" stroke-width="2"/>
+                <text x="420" y="96" text-anchor="middle" class="node-label" font-size="19">branch</text>
+                <text x="420" y="206" text-anchor="middle" class="node-label" font-size="19">branch</text>
+                <text x="420" y="316" text-anchor="middle" class="node-label" font-size="19">branch</text>
+                <defs>
+                    <marker id="s32ca" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="var(--cyan)"/></marker>
+                </defs>
+            </svg>
+            <!-- RIGHT: user-input router -->
+            <svg viewBox="0 0 560 380" width="640" height="380">
+                <text x="20" y="30" class="edge-label" fill="var(--cyan)" style="text-transform:uppercase; letter-spacing:0.1em;">decider &middot; direct user input (&sect;3)</text>
+                <circle cx="100" cy="200" r="58" fill="#12181a" stroke="var(--cyan)" stroke-width="2.5"/>
+                <text x="100" y="208" text-anchor="middle" class="node-label" font-size="21">entry</text>
+                <path d="M 158 172 C 250 100, 300 90, 360 90" fill="none" stroke="var(--cyan)" stroke-width="3" stroke-dasharray="8 7" marker-end="url(#s32cb)"/>
+                <path d="M 160 200 L 360 200" fill="none" stroke="var(--cyan)" stroke-width="3" stroke-dasharray="8 7" marker-end="url(#s32cb)"/>
+                <path d="M 158 228 C 250 300, 300 310, 360 310" fill="none" stroke="var(--cyan)" stroke-width="3" stroke-dasharray="8 7" marker-end="url(#s32cb)"/>
+                <text x="255" y="168" text-anchor="middle" class="edge-label" fill="var(--cyan)" font-size="16">route on choice</text>
+                <text x="255" y="255" text-anchor="middle" class="edge-label" fill="var(--ink-dim)" font-size="15">no model here</text>
+                <rect x="360" y="62" width="120" height="56" rx="9" fill="#12181a" stroke="var(--ink-faint)" stroke-width="2"/>
+                <rect x="360" y="172" width="120" height="56" rx="9" fill="#12181a" stroke="var(--ink-faint)" stroke-width="2"/>
+                <rect x="360" y="282" width="120" height="56" rx="9" fill="#12181a" stroke="var(--ink-faint)" stroke-width="2"/>
+                <text x="420" y="96" text-anchor="middle" class="node-label" font-size="19">branch</text>
+                <text x="420" y="206" text-anchor="middle" class="node-label" font-size="19">branch</text>
+                <text x="420" y="316" text-anchor="middle" class="node-label" font-size="19">branch</text>
+                <defs>
+                    <marker id="s32cb" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="var(--cyan)"/></marker>
+                </defs>
+            </svg>
+        </div>
+        <div class="diagram-caption reveal">Same shape &mdash; entry &rarr; conditional edge &rarr; converging branches &mdash; different decider. The user (or your logic) owns the edge; a model can still do work inside a node.</div>
+    </div>
+    <div class="chrome-page">11 / 15</div>
+    <div class="chrome-nav">&larr; &rarr; navigate</div>
+</section>
+
+<!-- ============================================================ -->
+<!-- 12 — SECTION DIVIDER 4                                       -->
+<!-- ============================================================ -->
+<section class="slide slide-chapter">
+    <div class="chrome-tag reveal">L05 &middot; <b>ROUTING</b></div>
+    <div class="chapter-ghost reveal">04</div>
+    <div class="chapter-eyebrow reveal">Section 4</div>
+    <div class="chapter-title reveal">When branching is <span style="color:var(--cyan); font-style:normal;">enough</span></div>
+    <div class="chapter-sub reveal">Reach for a router when the set of paths is known in advance. Reach for an agent only when the steps aren't enumerable ahead of time.</div>
+    <div class="chrome-page">12 / 15</div>
+</section>
+
+<!-- ============================================================ -->
+<!-- 13 — SLIDE 4.1 Reach for a router, not an agent              -->
+<!-- ============================================================ -->
+<section class="slide">
+    <div class="chrome-tag">L05 &middot; <b>ROUTING</b></div>
+    <div class="topbar reveal">
+        <div class="eyebrow">Slide 4.1</div>
+        <h2 class="headline">Router, not an agent, when paths are <span class="it">known</span></h2>
+    </div>
+    <div class="body-area">
+        <ul class="points reveal">
+            <li class="point">A router/switch is right whenever the <b>set of possible paths is known in advance</b> and picking among them is a classification, lookup, or user choice &mdash; cheap, predictable, testable.</li>
+            <li class="point">Reach for an <b>agent</b> only when the model must decide <i>which and how many</i> steps to take, and that set isn't enumerable ahead of time.</li>
+            <li class="point">Watch the common failure mode: <span class="warn">building an agent to do what a two-branch router would do just as well</span> &mdash; at a fraction of the cost and unpredictability.</li>
+        </ul>
+    </div>
+    <div class="chrome-page">13 / 15</div>
+    <div class="chrome-nav">&larr; &rarr; navigate</div>
+</section>
+
+<!-- ============================================================ -->
+<!-- 14 — SLIDE 4.2 Bridge to L0505                               -->
+<!-- ============================================================ -->
+<section class="slide">
+    <div class="chrome-tag">L05 &middot; <b>ROUTING</b></div>
+    <div class="topbar reveal">
+        <div class="eyebrow">Slide 4.2</div>
+        <h2 class="headline">Bridge to <span class="it">L0505</span></h2>
+    </div>
+    <div class="body-area">
+        <ul class="points reveal">
+            <li class="point">You haven't built a <b>cycle</b> yet &mdash; every graph in this lesson is still a <b>DAG</b>, still a workflow, no matter how many branches it has.</li>
+            <li class="point">The full <b>workflow-vs-agent</b> recap and close &mdash; what carries into <b>L11</b>, what precisely changes, and when to reach for which &mdash; is in <code>L0505_lecture.md</code>.</li>
+        </ul>
+        <div class="callout reveal"><p>Many branches, one shape: <span class="k">a DAG is still a workflow</span>. The cycle is what makes it an agent &mdash; and that's next.</p></div>
+    </div>
+    <div class="chrome-page">14 / 15</div>
+    <div class="chrome-nav">&larr; &rarr; navigate</div>
+</section>
+
+<!-- ============================================================ -->
+<!-- 15 — CLOSING                                                 -->
+<!-- ============================================================ -->
+<section class="slide slide-closing">
+    <div class="chrome-tag reveal">L05 &middot; <b>ROUTING</b></div>
+    <div class="closing-statement reveal">One conditional edge, and a routing function that reads state &mdash; <span class="k">you own the branch, the model can still work inside a node</span>.</div>
+    <div class="closing-grid reveal">
+        <div class="col">
+            <div class="label">Next</div>
+            <div class="val"><b>L0505</b> workflow-vs-agent<br>close &mdash; what carries into L11</div>
+        </div>
+        <div class="col">
+            <div class="label">Practice</div>
+            <div class="val"><b>L0503</b> live demo: routing<br><b>L0504</b> lab: build a router</div>
+        </div>
+        <div class="col">
+            <div class="label">Models</div>
+            <div class="val"><b>Haiku 4.5</b> classifier<br><b>Sonnet 4.6</b> branch nodes</div>
+        </div>
+    </div>
+    <div class="chrome-page">15 / 15</div>
+</section>
+
+</main>
+</div>
+
+<!-- Outside-stage UI: progress bar + arrow nav + editing controls -->
+<div class="deck-progress"><div class="deck-progress-bar" id="progressBar"></div></div>
+<button class="deck-arrow prev" id="prevBtn" aria-label="Previous slide">&#8592;</button>
+<button class="deck-arrow next" id="nextBtn" aria-label="Next slide">&#8594;</button>
+<div class="edit-hotzone" id="editHotzone"></div>
+<button class="edit-toggle" id="editToggle" title="Edit mode (E)">&#9998;</button>
+<div class="save-toast" id="saveToast">Saved</div>
+
+<script>
+/* ===========================================
+   SLIDE PRESENTATION CONTROLLER
+   =========================================== */
+class SlidePresentation {
+    constructor() {
+        this.slides = Array.from(document.querySelectorAll('.slide'));
+        this.currentSlide = 0;
+        this.stage = document.getElementById('deckStage');
+        this.progressBar = document.getElementById('progressBar');
+        this.setupStageScale();
+        this.setupKeyboardNav();
+        this.setupTouchNav();
+        this.setupWheelNav();
+        this.setupArrowButtons();
+        this.showSlide(0);
+    }
+
+    setupStageScale() {
+        const scale = () => {
+            const factor = Math.min(window.innerWidth / 1920, window.innerHeight / 1080);
+            const x = (window.innerWidth - 1920 * factor) / 2;
+            const y = (window.innerHeight - 1080 * factor) / 2;
+            this.stage.style.transform = `translate(${x}px, ${y}px) scale(${factor})`;
+        };
+        scale();
+        window.addEventListener('resize', scale);
+    }
+
+    setupKeyboardNav() {
+        document.addEventListener('keydown', (e) => {
+            if (e.target.getAttribute('contenteditable') === 'true') return;
+            if (['ArrowRight', 'ArrowDown', ' ', 'PageDown'].includes(e.key)) {
+                e.preventDefault();
+                this.next();
+            } else if (['ArrowLeft', 'ArrowUp', 'PageUp'].includes(e.key)) {
+                e.preventDefault();
+                this.prev();
+            } else if (e.key === 'Home') {
+                this.showSlide(0);
+            } else if (e.key === 'End') {
+                this.showSlide(this.slides.length - 1);
+            }
+        });
+    }
+
+    setupTouchNav() {
+        let startX = 0;
+        this.stage.addEventListener('touchstart', (e) => { startX = e.touches[0].clientX; }, { passive: true });
+        this.stage.addEventListener('touchend', (e) => {
+            const dx = e.changedTouches[0].clientX - startX;
+            if (Math.abs(dx) > 60) { dx < 0 ? this.next() : this.prev(); }
+        }, { passive: true });
+    }
+
+    setupWheelNav() {
+        let locked = false;
+        window.addEventListener('wheel', (e) => {
+            if (locked) return;
+            if (Math.abs(e.deltaY) < 24) return;
+            locked = true;
+            e.deltaY > 0 ? this.next() : this.prev();
+            setTimeout(() => { locked = false; }, 500);
+        }, { passive: true });
+    }
+
+    setupArrowButtons() {
+        document.getElementById('nextBtn').addEventListener('click', () => this.next());
+        document.getElementById('prevBtn').addEventListener('click', () => this.prev());
+    }
+
+    next() { this.showSlide(this.currentSlide + 1); }
+    prev() { this.showSlide(this.currentSlide - 1); }
+
+    showSlide(index) {
+        this.currentSlide = Math.max(0, Math.min(index, this.slides.length - 1));
+        this.slides.forEach((slide, i) => {
+            slide.classList.toggle('active', i === this.currentSlide);
+            slide.classList.toggle('visible', i === this.currentSlide);
+        });
+        this.progressBar.style.width = `${((this.currentSlide + 1) / this.slides.length) * 100}%`;
+    }
+}
+
+/* ===========================================
+   INLINE EDITING — hover hotzone + E key
+   =========================================== */
+class InlineEditor {
+    constructor() {
+        this.isActive = false;
+        this.toggle = document.getElementById('editToggle');
+        this.hotzone = document.getElementById('editHotzone');
+        this.toast = document.getElementById('saveToast');
+        this.editableSelector = 'h1, h2, h3, p, li, span, td, th, div.claim, div.lede, div.chapter-sub, div.diagram-caption';
+        this.hideTimeout = null;
+        this.bindEvents();
+        this.restore();
+    }
+
+    bindEvents() {
+        this.toggle.addEventListener('click', () => this.toggleEditMode());
+        this.hotzone.addEventListener('click', () => this.toggleEditMode());
+        this.hotzone.addEventListener('mouseenter', () => { clearTimeout(this.hideTimeout); this.toggle.classList.add('show'); });
+        this.hotzone.addEventListener('mouseleave', () => this.scheduleHide());
+        this.toggle.addEventListener('mouseenter', () => clearTimeout(this.hideTimeout));
+        this.toggle.addEventListener('mouseleave', () => this.scheduleHide());
+        document.addEventListener('keydown', (e) => {
+            if ((e.key === 'e' || e.key === 'E') && e.target.getAttribute('contenteditable') !== 'true') {
+                this.toggleEditMode();
+            }
+            if (e.key === 's' && (e.metaKey || e.ctrlKey) && this.isActive) {
+                e.preventDefault();
+                this.save();
+            }
+        });
+    }
+
+    scheduleHide() {
+        this.hideTimeout = setTimeout(() => {
+            if (!this.isActive) this.toggle.classList.remove('show');
+        }, 400);
+    }
+
+    toggleEditMode() {
+        this.isActive = !this.isActive;
+        this.toggle.classList.toggle('active', this.isActive);
+        const stage = document.getElementById('deckStage');
+        const editableEls = stage.querySelectorAll(this.editableSelector);
+        editableEls.forEach((el) => {
+            if (el.closest('svg')) return;
+            el.setAttribute('contenteditable', this.isActive ? 'true' : 'false');
+        });
+        if (!this.isActive) this.save();
+    }
+
+    save() {
+        try {
+            const html = document.getElementById('deckStage').innerHTML;
+            localStorage.setItem('l0502-deck-content', html);
+            this.showToast();
+        } catch (err) {
+            console.warn('Could not save deck content', err);
+        }
+    }
+
+    restore() {
+        try {
+            const saved = localStorage.getItem('l0502-deck-content');
+            if (saved) document.getElementById('deckStage').innerHTML = saved;
+        } catch (err) {
+            console.warn('Could not restore deck content', err);
+        }
+    }
+
+    showToast() {
+        this.toast.classList.add('show');
+        setTimeout(() => this.toast.classList.remove('show'), 1400);
+    }
+}
+
+new SlidePresentation();
+new InlineEditor();
+</script>
+</body>
+</html>
