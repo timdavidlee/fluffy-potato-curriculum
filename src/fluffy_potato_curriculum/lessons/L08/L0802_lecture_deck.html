@@ -1,0 +1,1519 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>L08 — Designing good tools: name, schema, and error as interface</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500;1,9..144,600&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+/* ===========================================
+   THEME — Graph Canvas system
+   Fraunces (display serif) + IBM Plex Mono (everything else)
+   =========================================== */
+:root {
+    --stage-bg: #05070a;
+    --slide-bg: #0a0e13;
+    --cyan: #52e8c8;
+    --cyan-dim: #1f6f60;
+    --cyan-faint: rgba(82, 232, 200, 0.16);
+    --cyan-rule: rgba(82, 232, 200, 0.22);
+    --coral: #ff6b57;
+    --coral-dim: #7a3229;
+    --ink: #eef2f0;
+    --ink-dim: #8a9490;
+    --ink-faint: #4c5652;
+
+    --font-display: 'Fraunces', Georgia, serif;
+    --font-body: 'IBM Plex Mono', ui-monospace, monospace;
+
+    --edge-x: 130px;
+    --edge-top: 96px;
+    --edge-bottom: 64px;
+
+    --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+    --duration-normal: 0.7s;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body { font-family: var(--font-body); }
+
+/* ===========================================
+   FIXED 16:9 STAGE: MANDATORY BASE STYLES
+   (viewport-base.css, included in full)
+   =========================================== */
+html, body { width: 100%; height: 100%; margin: 0; overflow: hidden; background: var(--stage-bg, #000); }
+.deck-viewport { position: fixed; inset: 0; overflow: hidden; background: var(--stage-bg, #000); }
+.deck-stage { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; overflow: hidden; transform-origin: 0 0; background: var(--slide-bg, #fff); }
+.slide { position: absolute; inset: 0; width: 1920px; height: 1080px; overflow: hidden; display: block; visibility: hidden; opacity: 0; pointer-events: none; background: var(--slide-bg, #fff); }
+.slide.active, .slide.visible { visibility: visible; opacity: 1; pointer-events: auto; z-index: 1; }
+img, video, canvas, svg { max-width: 100%; max-height: 100%; }
+.deck-controls { position: fixed; left: 50%; bottom: 22px; transform: translateX(-50%); z-index: 1000; }
+@media print {
+    html, body { width: 1920px; height: auto; overflow: visible; background: #fff; }
+    .deck-viewport { position: static; overflow: visible; background: #fff; }
+    .deck-stage { position: static; width: auto; height: auto; transform: none !important; background: none; }
+    .slide { position: relative; display: block !important; visibility: visible !important; opacity: 1 !important; pointer-events: auto !important; width: 1920px; height: 1080px; break-after: page; page-break-after: always; }
+    .slide:last-child { break-after: auto; page-break-after: auto; }
+    .deck-controls { display: none !important; }
+}
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.2s !important; }
+}
+
+/* ===========================================
+   PERMANENT CANVAS TREATMENT
+   Dot-grid + corner glows live on the stage itself so every
+   slide (transparent bg) shows the same atmosphere underneath.
+   =========================================== */
+.deck-stage {
+    background:
+        radial-gradient(ellipse 900px 700px at 82% 12%, rgba(82,232,200,0.10) 0%, transparent 60%),
+        radial-gradient(ellipse 900px 700px at 10% 92%, rgba(255,107,87,0.07) 0%, transparent 60%),
+        var(--slide-bg);
+}
+.deck-stage::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(rgba(82,232,200,0.14) 1.4px, transparent 1.4px);
+    background-size: 64px 64px;
+    z-index: 0;
+}
+.slide { background: transparent; z-index: 1; }
+.slide.active, .slide.visible { z-index: 2; }
+
+/* ===========================================
+   REVEAL ANIMATION — staggered fade + rise
+   =========================================== */
+.reveal {
+    opacity: 0;
+    transform: translateY(22px);
+    transition: opacity var(--duration-normal) var(--ease-out-expo),
+                transform var(--duration-normal) var(--ease-out-expo);
+}
+.slide.visible .reveal { opacity: 1; transform: translateY(0); }
+.slide.visible .reveal:nth-child(1) { transition-delay: 0.05s; }
+.slide.visible .reveal:nth-child(2) { transition-delay: 0.15s; }
+.slide.visible .reveal:nth-child(3) { transition-delay: 0.25s; }
+.slide.visible .reveal:nth-child(4) { transition-delay: 0.35s; }
+.slide.visible .points.reveal .point:nth-child(1) { transition-delay: 0.30s; }
+.slide.visible .points.reveal .point:nth-child(2) { transition-delay: 0.38s; }
+.slide.visible .points.reveal .point:nth-child(3) { transition-delay: 0.46s; }
+.slide.visible .points.reveal .point:nth-child(4) { transition-delay: 0.54s; }
+.slide.visible .points.reveal .point:nth-child(5) { transition-delay: 0.62s; }
+.slide.visible .points .point {
+    opacity: 0;
+    transform: translateY(14px);
+    transition: opacity 0.5s var(--ease-out-expo), transform 0.5s var(--ease-out-expo);
+}
+.slide.visible .points.reveal .point { opacity: 1; transform: translateY(0); }
+
+/* ===========================================
+   CHROME — applies inside every slide
+   =========================================== */
+.chrome-tag {
+    position: absolute;
+    top: 52px;
+    left: var(--edge-x);
+    font-size: 16px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--cyan-dim);
+}
+.chrome-tag b { color: var(--cyan); font-weight: 500; }
+.chrome-page {
+    position: absolute;
+    bottom: 48px;
+    right: var(--edge-x);
+    font-size: 16px;
+    color: var(--ink-faint);
+    letter-spacing: 0.05em;
+}
+.chrome-nav {
+    position: absolute;
+    bottom: 48px;
+    left: var(--edge-x);
+    font-size: 15px;
+    color: var(--ink-faint);
+    letter-spacing: 0.06em;
+    opacity: 0.55;
+}
+
+/* ===========================================
+   TYPOGRAPHY PRIMITIVES
+   =========================================== */
+.eyebrow {
+    font-size: 22px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--cyan);
+    font-weight: 500;
+}
+.eyebrow::before { content: "◆ "; }
+
+.slide-index {
+    position: absolute;
+    top: var(--edge-top);
+    right: var(--edge-x);
+    font-size: 18px;
+    color: var(--ink-faint);
+    letter-spacing: 0.05em;
+}
+
+.topbar {
+    position: absolute;
+    top: var(--edge-top);
+    left: var(--edge-x);
+    right: var(--edge-x);
+    padding-bottom: 26px;
+    border-bottom: 1px solid var(--cyan-rule);
+}
+
+h2.headline {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 62px;
+    line-height: 1.1;
+    color: var(--ink);
+    letter-spacing: -0.005em;
+    margin-top: 18px;
+}
+h2.headline .it { font-style: italic; font-weight: 500; color: var(--cyan); }
+
+.lede {
+    font-size: 29px;
+    line-height: 1.5;
+    color: var(--ink-dim);
+    max-width: 1200px;
+    margin-top: 22px;
+}
+.lede b { color: var(--ink); font-weight: 500; }
+
+.body-area {
+    position: absolute;
+    top: 312px;
+    left: var(--edge-x);
+    right: var(--edge-x);
+    bottom: var(--edge-bottom);
+}
+
+.points { list-style: none; max-width: 1420px; }
+.points .point {
+    position: relative;
+    padding-left: 40px;
+    font-size: 29px;
+    line-height: 1.5;
+    color: var(--ink-dim);
+    margin-bottom: 15px;
+}
+.points .point::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 9px;
+    width: 12px;
+    height: 12px;
+    border: 2px solid var(--cyan);
+    border-radius: 50%;
+}
+.points .point b, .points .point .k { color: var(--ink); font-weight: 600; }
+.points .point code {
+    font-family: var(--font-body);
+    color: var(--cyan);
+    background: rgba(82,232,200,0.08);
+    padding: 1px 8px;
+    border-radius: 3px;
+    font-size: 0.9em;
+}
+.points .point .warn { color: var(--coral); font-weight: 600; }
+
+/* callout — emphasis statement */
+.callout {
+    margin-top: 28px;
+    padding: 28px 36px;
+    border-left: 3px solid var(--cyan);
+    background: rgba(82,232,200,0.05);
+    max-width: 1200px;
+}
+.callout p {
+    font-family: var(--font-display);
+    font-style: italic;
+    font-size: 38px;
+    line-height: 1.32;
+    color: var(--ink);
+}
+
+/* ===========================================
+   TABLE — ledger style
+   =========================================== */
+table.ledger { width: 100%; border-collapse: collapse; max-width: 1660px; }
+table.ledger th {
+    font-size: 19px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--cyan);
+    text-align: left;
+    padding: 0 22px 16px 0;
+    border-bottom: 1.5px solid var(--cyan-rule);
+    font-weight: 600;
+}
+table.ledger td {
+    font-size: 24px;
+    line-height: 1.38;
+    color: var(--ink-dim);
+    padding: 11px 20px 11px 0;
+    border-bottom: 1px solid rgba(82,232,200,0.10);
+    vertical-align: top;
+}
+table.ledger tr:last-child td { border-bottom: none; }
+table.ledger td.tag {
+    font-size: 23px;
+    color: var(--cyan);
+    font-weight: 500;
+    white-space: nowrap;
+}
+table.ledger td b { color: var(--ink); font-weight: 600; }
+table.ledger td code {
+    color: var(--cyan);
+    background: rgba(82,232,200,0.08);
+    padding: 1px 7px;
+    border-radius: 3px;
+    font-size: 0.92em;
+}
+table.ledger td.warn-cell { color: var(--coral); }
+
+/* ===========================================
+   DIAGRAM CONTAINERS
+   =========================================== */
+.diagram-frame {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.diagram-caption {
+    font-size: 25px;
+    line-height: 1.6;
+    color: var(--ink-dim);
+    font-style: italic;
+    max-width: 1300px;
+    margin-top: 18px;
+}
+.node-label { font-family: var(--font-body); font-weight: 600; font-size: 27px; fill: var(--ink); }
+.edge-label { font-family: var(--font-body); font-size: 20px; }
+
+/* ===========================================
+   CHAPTER (section divider) SLIDES — sparse
+   =========================================== */
+.slide-chapter { display: flex; flex-direction: column; justify-content: center; }
+.chapter-ghost {
+    position: absolute;
+    top: -40px;
+    right: 90px;
+    font-family: var(--font-display);
+    font-size: 480px;
+    font-weight: 600;
+    color: var(--cyan);
+    opacity: 0.07;
+    line-height: 1;
+    user-select: none;
+}
+.chapter-eyebrow {
+    position: absolute;
+    left: var(--edge-x);
+    top: 420px;
+    font-size: 20px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--cyan);
+}
+.chapter-eyebrow::before { content: "◆ "; }
+.chapter-title {
+    position: absolute;
+    left: var(--edge-x);
+    top: 468px;
+    right: 260px;
+    font-family: var(--font-display);
+    font-style: italic;
+    font-weight: 500;
+    font-size: 96px;
+    line-height: 1.08;
+    color: var(--ink);
+}
+.chapter-sub {
+    position: absolute;
+    left: var(--edge-x);
+    top: 690px;
+    font-size: 29px;
+    color: var(--ink-dim);
+    max-width: 1100px;
+    line-height: 1.6;
+    border-left: 2px solid var(--cyan-dim);
+    padding-left: 28px;
+}
+
+/* ===========================================
+   COVER SLIDE
+   =========================================== */
+.slide-cover .eyebrow { position: absolute; top: 108px; left: var(--edge-x); }
+.slide-cover h1 {
+    position: absolute;
+    top: 190px;
+    left: var(--edge-x);
+    width: 980px;
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 116px;
+    line-height: 1.05;
+    color: var(--ink);
+}
+.slide-cover h1 .it { font-style: italic; font-weight: 500; color: var(--cyan); }
+.slide-cover .claim {
+    position: absolute;
+    top: 636px;
+    left: var(--edge-x);
+    width: 920px;
+    font-size: 29px;
+    line-height: 1.6;
+    color: var(--ink-dim);
+}
+.slide-cover .claim b { color: var(--ink); font-weight: 600; }
+.slide-cover .meta-row {
+    position: absolute;
+    bottom: 100px;
+    left: var(--edge-x);
+    display: flex;
+    gap: 44px;
+    font-size: 21px;
+    color: var(--ink-dim);
+}
+.slide-cover .meta-row span b { color: var(--cyan); }
+.cover-diagram { position: absolute; right: 90px; top: 280px; width: 740px; height: 540px; }
+
+/* ===========================================
+   CLOSING SLIDE
+   =========================================== */
+.slide-closing { display: flex; flex-direction: column; justify-content: center; }
+.closing-statement {
+    position: absolute;
+    left: var(--edge-x);
+    top: 300px;
+    right: 260px;
+    font-family: var(--font-display);
+    font-style: italic;
+    font-weight: 500;
+    font-size: 56px;
+    line-height: 1.35;
+    color: var(--ink);
+}
+.closing-statement .k { color: var(--cyan); font-style: normal; font-weight: 600; }
+.closing-grid {
+    position: absolute;
+    left: var(--edge-x);
+    right: var(--edge-x);
+    bottom: 190px;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 40px;
+    border-top: 1px solid var(--cyan-rule);
+    padding-top: 30px;
+}
+.closing-grid .col .label {
+    font-size: 18px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--cyan);
+    margin-bottom: 10px;
+}
+.closing-grid .col .val {
+    font-size: 24px;
+    color: var(--ink-dim);
+    line-height: 1.5;
+}
+.closing-grid .col .val b { color: var(--ink); }
+
+/* ===========================================
+   OUTSIDE-STAGE UI: progress + nav buttons
+   (kept outside .deck-stage per skill rules)
+   =========================================== */
+.deck-progress {
+    position: fixed;
+    left: 0; right: 0; bottom: 0;
+    height: 3px;
+    background: rgba(82,232,200,0.08);
+    z-index: 500;
+}
+.deck-progress-bar {
+    height: 100%;
+    background: var(--cyan);
+    width: 0%;
+    transition: width 0.35s var(--ease-out-expo);
+}
+.deck-arrow {
+    position: fixed;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 52px; height: 52px;
+    border-radius: 50%;
+    border: 1px solid var(--cyan-rule);
+    background: rgba(10,14,19,0.6);
+    color: var(--cyan);
+    font-size: 20px;
+    cursor: pointer;
+    z-index: 500;
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.2s, border-color 0.2s;
+}
+.deck-arrow:hover { background: rgba(82,232,200,0.12); border-color: var(--cyan); }
+.deck-arrow.prev { left: 22px; }
+.deck-arrow.next { right: 22px; }
+
+/* Mobile/portrait: arrows can collide with the letterboxed stage; swipe covers nav there. */
+@media (max-width: 600px), (orientation: portrait) {
+    .deck-arrow { display: none; }
+}
+
+/* ===========================================
+   INLINE EDITING
+   =========================================== */
+.edit-hotzone { position: fixed; top: 0; left: 0; width: 80px; height: 80px; z-index: 10000; cursor: pointer; }
+.edit-toggle {
+    position: fixed; top: 14px; left: 14px;
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    border: 1px solid var(--cyan-rule);
+    background: rgba(10,14,19,0.85);
+    font-size: 17px;
+    cursor: pointer;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+    z-index: 10001;
+}
+.edit-toggle.show, .edit-toggle.active { opacity: 1; pointer-events: auto; }
+.edit-toggle.active { background: var(--cyan); }
+[contenteditable="true"] {
+    outline: 1px dashed var(--cyan-rule);
+    outline-offset: 4px;
+    cursor: text;
+}
+.save-toast {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--cyan);
+    color: #05070a;
+    font-family: var(--font-body);
+    font-size: 14px;
+    font-weight: 600;
+    padding: 10px 20px;
+    border-radius: 4px;
+    opacity: 0;
+    transition: opacity 0.3s, transform 0.3s;
+    z-index: 10002;
+    pointer-events: none;
+}
+.save-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* ===========================================
+   PER-DECK HELPERS (appended per FRONTEND-STYLE §5)
+   =========================================== */
+.dg-box {
+    border: 2px solid var(--cyan);
+    border-radius: 10px;
+    background: #12181a;
+    padding: 22px 26px;
+}
+.dg-box.fail { border-color: var(--coral); }
+.dg-box.neutral { border-color: var(--ink-faint); }
+.dg-title { font-family: var(--font-display); font-size: 27px; color: var(--ink); }
+.dg-sub { font-size: 19px; color: var(--ink-dim); margin-top: 6px; }
+.dg-pill {
+    display: inline-block;
+    font-size: 20px;
+    color: var(--ink-dim);
+    border: 1px solid var(--cyan-rule);
+    border-radius: 999px;
+    padding: 5px 16px;
+    margin: 6px 6px 0 0;
+}
+.dg-head {
+    font-size: 18px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    font-weight: 600;
+    margin-bottom: 14px;
+}
+.dg-code { font-family: var(--font-body); font-size: 21px; line-height: 1.6; }
+</style>
+</head>
+<body>
+
+<div class="deck-viewport">
+<main class="deck-stage" id="deckStage">
+
+<!-- ============================================================ -->
+<!-- 01 — COVER                                                   -->
+<!-- ============================================================ -->
+<section class="slide slide-cover active">
+    <div class="eyebrow reveal">L08 &middot; name &middot; schema &middot; error as interface</div>
+    <h1 class="reveal">Designing <span class="it">good</span> tools</h1>
+    <div class="claim reveal"><b>A tool is an API designed for an LLM consumer, not a human consumer.</b> The model's entire understanding of your tool is the name, the description, the parameter schema, and what comes back.</div>
+    <div class="meta-row reveal">
+        <span>lesson &mdash; <b>L08</b></span>
+        <span>duration &mdash; <b>80 min</b></span>
+        <span>anchor &mdash; <b>Claude Sonnet 4.6</b></span>
+    </div>
+    <div class="cover-diagram reveal">
+        <svg viewBox="0 0 760 560" width="100%" height="100%">
+            <path d="M 180 170 C 380 60, 500 60, 610 170" fill="none" stroke="#3a4a46" stroke-width="3"/>
+            <text x="400" y="82" text-anchor="middle" class="edge-label" fill="var(--ink-dim)">name &middot; description &middot; schema</text>
+            <path d="M 610 390 C 500 500, 260 500, 150 390" fill="none" stroke="var(--cyan-dim)" stroke-width="3"/>
+            <circle cx="180" cy="170" r="86" fill="#12181a" stroke="var(--cyan)" stroke-width="2.5"/>
+            <text x="180" y="179" text-anchor="middle" class="node-label">tool</text>
+            <circle cx="610" cy="390" r="86" fill="#12181a" stroke="var(--ink-dim)" stroke-width="2.5"/>
+            <text x="610" y="399" text-anchor="middle" class="node-label">model</text>
+            <circle r="9" fill="var(--cyan)">
+                <animateMotion dur="3.4s" repeatCount="indefinite" path="M 610 390 C 500 500, 260 500, 150 390"/>
+            </circle>
+            <text x="380" y="490" text-anchor="middle" class="edge-label" fill="var(--cyan)">result / error &rarr; next turn</text>
+        </svg>
+    </div>
+    <div class="chrome-page">01 / 37</div>
+    <div class="chrome-nav">L08 &middot; designing good tools</div>
+</section>
+
+<!-- ============================================================ -->
+<!-- 02 — SECTION 1 DIVIDER                                       -->
+<!-- ============================================================ -->
+<section class="slide slide-chapter">
+    <div class="chrome-tag reveal">L08 &middot; <b>TOOL DESIGN</b></div>
+    <div class="chapter-ghost reveal">01</div>
+    <div class="chapter-eyebrow reveal">Section 1</div>
+    <div class="chapter-title reveal">The lesson in <span style="color:var(--cyan); font-style:normal;">one claim</span></div>
+    <div class="chapter-sub reveal">L07 made a tool work. L08 makes it good &mdash; and one sentence carries the whole lesson.</div>
+    <div class="chrome-page">02 / 37</div>
+</section>
+
+<!-- 03 — slide 1.1 -->
+<section class="slide">
+    <div class="chrome-tag">L08 &middot; <b>TOOL DESIGN</b></div>
+    <div class="topbar reveal">
+        <div class="eyebrow">Slide 1.1</div>
+        <h2 class="headline">From making it work to making it <span class="it">good</span></h2>
+    </div>
+    <div class="body-area">
+        <ul class="points reveal">
+            <li class="point"><b>L07 settled the mechanics</b> &mdash; how a tool wires to a model call, the round-trip on the wire, the protocol. By the end of L07 a tool <b>works</b>.</li>
+            <li class="point">L08 is a different thing: the protocol is fixed &mdash; the open questions are <b>what to expose, how to name and shape it, and how to fail gracefully</b>.</li>
+            <li class="point">The model has <span class="warn">no IDE, no autocomplete, no co-worker to ask</span> &mdash; its whole understanding is the name, the description, the schema, and what comes back.</li>
+        </ul>
+        <div class="callout reveal"><p>A tool is an API designed for an LLM consumer, not a human consumer.</p></div>
+    </div>
+    <div class="chrome-page">03 / 37</div>
+    <div class="chrome-nav">&larr; &rarr; navigate</div>
+</section>
+
+<!-- 04 — slide 1.2 -->
+<section class="slide">
+    <div class="chrome-tag">L08 &middot; <b>TOOL DESIGN</b></div>
+    <div class="topbar reveal">
+        <div class="eyebrow">Slide 1.2</div>
+        <h2 class="headline">Why the LLM-consumer framing <span class="it">changes everything</span></h2>
+    </div>
+    <div class="body-area">
+        <ul class="points reveal">
+            <li class="point">A human client reads docs, tries a REPL, asks a co-worker. The model reads the tool <b>spec once, at inference time</b>, and decides on the spot whether and how to call it.</li>
+            <li class="point">So every design choice optimizes for <b>the model choosing and using the tool correctly on first read</b> &mdash; not for the author's ergonomics.</li>
+        </ul>
+        <div class="diagram-frame reveal" style="gap:44px; margin-top:26px; justify-content:flex-start;">
+            <div class="dg-box neutral" style="width:600px;">
+                <div class="dg-head" style="color:var(--ink-dim);">human consumer</div>
+                <span class="dg-pill">IDE</span><span class="dg-pill">autocomplete</span><span class="dg-pill">docs</span><span class="dg-pill">REPL</span><span class="dg-pill">a co-worker to ask</span>
+            </div>
+            <div style="color:var(--cyan); font-size:24px; text-align:center; width:280px; line-height:1.4;">the model has<br>only this &rarr;</div>
+            <div class="dg-box" style="width:600px;">
+                <div class="dg-head" style="color:var(--cyan);">LLM consumer</div>
+                <span class="dg-pill" style="border-color:var(--cyan); color:var(--ink);">name</span><span class="dg-pill" style="border-color:var(--cyan); color:var(--ink);">description</span><span class="dg-pill" style="border-color:var(--cyan); color:var(--ink);">schema</span><span class="dg-pill" style="border-color:var(--cyan); color:var(--ink);">return shape</span>
+                <div class="dg-sub">read once, at inference time</div>
+            </div>
+        </div>
+    </div>
+    <div class="chrome-page">04 / 37</div>
+    <div class="chrome-nav">&larr; &rarr; navigate</div>
+</section>
+
+<!-- 05 — slide 1.3 -->
+<section class="slide">
+    <div class="chrome-tag">L08 &middot; <b>TOOL DESIGN</b></div>
+    <div class="topbar reveal">
+        <div class="eyebrow">Slide 1.3</div>
+        <h2 class="headline">The four judgment calls, <span class="it">in one breath</span></h2>
+    </div>
+    <div class="body-area reveal">
+        <table class="ledger">
+            <thead><tr><th>Decision</th><th>The mental model</th><th>Demo / lab</th></tr></thead>
+            <tbody>
+                <tr><td class="tag">Tool, or no tool?</td><td>adding a tool is <b>architecture</b>, not convenience</td><td>L0803 / L0804</td></tr>
+                <tr><td class="tag">The description is the tool</td><td>same name + schema, <b>different description &rarr; different behavior</b></td><td>L0805 / L0806</td></tr>
+                <tr><td class="tag">Schemas are a contract</td><td>a tight schema converts ambiguity into <b>recoverable errors</b></td><td>L0807 / L0808</td></tr>
+                <tr><td class="tag">Errors are the interface</td><td>an error is a <b>prompt for the model's next turn</b></td><td>L0809 / L0810</td></tr>
+            </tbody>
+        </table>
+    </div>
+    <div class="chrome-page">05 / 37</div>
+    <div class="chrome-nav">&larr; &rarr; navigate</div>
+</section>
+
+<!-- ============================================================ -->
+<!-- 06 — SECTION 2 DIVIDER                                       -->
+<!-- ============================================================ -->
+<section class="slide slide-chapter">
+    <div class="chrome-tag reveal">L08 &middot; <b>TOOL DESIGN</b></div>
+    <div class="chapter-ghost reveal">02</div>
+    <div class="chapter-eyebrow reveal">Section 2</div>
+    <div class="chapter-title reveal">Tool, or <span style="color:var(--cyan); font-style:normal;">no tool?</span></div>
+    <div class="chapter-sub reveal">Adding a tool is an architectural decision about the agent's affordances &mdash; and there is a worked test.</div>
+    <div class="chrome-page">06 / 37</div>
+</section>
+
+<!-- 07 — slide 2.1 -->
+<section class="slide">
+    <div class="chrome-tag">L08 &middot; <b>TOOL DESIGN</b></div>
+    <div class="topbar reveal">
+        <div class="eyebrow">Slide 2.1</div>
+        <h2 class="headline">Adding a tool is an <span class="it">architectural decision</span></h2>
+    </div>
+    <div class="body-area">
+        <ul class="points reveal">
+            <li class="point">The set of tools the model has <b>is</b> the set of actions it can take in the world. A tool is a decision about the agent's <b>affordances</b>, not a convenience.</li>
+            <li class="point">And it has a cost shadow (L01): every tool eats <b>system-prompt tokens</b>, adds a <b>per-turn decision</b>, and adds another <span class="warn">wrong-tool failure mode</span>.</li>
+        </ul>
+        <div class="callout reveal"><p>More tools &ne; more capable agent &mdash; a 5-tool agent the model can navigate beats a 20-tool agent it gets lost in.</p></div>
+    </div>
+    <div class="chrome-page">07 / 37</div>
+    <div class="chrome-nav">&larr; &rarr; navigate</div>
+</section>
+
+<!-- 08 — slide 2.2 -->
+<section class="slide">
+    <div class="chrome-tag">L08 &middot; <b>TOOL DESIGN</b></div>
+    <div class="topbar reveal">
+        <div class="eyebrow">Slide 2.2</div>
+        <h2 class="headline">Four signals a tool <span class="it">is warranted</span></h2>
+    </div>
+    <div class="body-area">
+        <table class="ledger reveal">
+            <thead><tr><th>Signal</th><th>The tell</th></tr></thead>
+            <tbody>
+                <tr><td class="tag">Data the model can't have memorized</td><td>current time, user-specific state, recent events</td></tr>
+                <tr><td class="tag">Precise computation the model is bad at</td><td>large arithmetic, exact date math, hashing</td></tr>
+                <tr><td class="tag">A side effect outside the conversation</td><td>sending email, writing to a DB, calling an external API</td></tr>
+                <tr><td class="tag">Verification against ground truth</td><td>database lookup, fact retrieval</td></tr>
+            </tbody>
+        </table>
+        <ul class="points reveal" style="margin-top:34px;">
+            <li class="point">The subtle one is <b>computation the model is bad at</b>: it <span class="warn">will attempt it, confidently, and be wrong</span>. The tool fills a gap the <b>designer</b> knows about, not the model.</li>
+        </ul>
+    </div>
+    <div class="chrome-page">08 / 37</div>
+    <div class="chrome-nav">&larr; &rarr; navigate</div>
+</section>
+
+<!-- 09 — slide 2.3 -->
+<section class="slide">
+    <div class="chrome-tag">L08 &middot; <b>TOOL DESIGN</b></div>
+    <div class="topbar reveal">
+        <div class="eyebrow">Slide 2.3</div>
+        <h2 class="headline">Two signals <span class="it">no tool</span> is needed</h2>
+    </div>
+    <div class="body-area">
+        <ul class="points reveal">
+            <li class="point"><b>The model already knows it, reliably.</b> "What is the capital of France?" &mdash; a tool here is pure overhead, and one more <span class="warn">wrong-tool option to pick by mistake</span>.</li>
+            <li class="point"><b>The round-trip costs more than the marginal accuracy.</b> A tiny accuracy gain at the price of a full extra call + latency &mdash; skip it.</li>
+            <li class="point">The discipline: <b>run the task model-alone first</b>, see where it actually fails, and add a tool only where the failure is real. Demo <code>L0803</code> does this across three tasks; lab <code>L0804</code> has you classify tasks and defend each call.</li>
+        </ul>
+    </div>
+    <div class="chrome-page">09 / 37</div>
+    <div class="chrome-nav">&larr; &rarr; navigate</div>
+</section>
+
+<!-- 10 — slide 2.4 -->
+<section class="slide">
+    <div class="chrome-tag">L08 &middot; <b>TOOL DESIGN</b></div>
+    <div class="topbar reveal">
+        <div class="eyebrow">Slide 2.4</div>
+        <h2 class="headline">The <span class="it">worked test</span></h2>
+    </div>
+    <div class="body-area">
+        <div class="diagram-frame reveal" style="width:1660px; height:480px;">
+            <svg viewBox="0 0 1660 500" width="100%" height="100%">
+                <defs>
+                    <marker id="ma" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="var(--ink-faint)"/></marker>
+                    <marker id="mb" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="var(--cyan)"/></marker>
+                </defs>
+                <rect x="30" y="185" width="170" height="90" rx="10" fill="#12181a" stroke="var(--ink-faint)" stroke-width="2"/>
+                <text x="115" y="239" text-anchor="middle" class="node-label">task</text>
+                <path d="M 200 230 L 300 230" stroke="var(--ink-faint)" stroke-width="3" marker-end="url(#ma)"/>
+                <rect x="310" y="110" width="350" height="240" rx="10" fill="#12181a" stroke="var(--cyan)" stroke-width="2.5"/>
+                <text x="485" y="155" text-anchor="middle" class="node-label">needs a tool?</text>
+                <text x="345" y="197" class="edge-label" fill="var(--ink-dim)">&middot; unmemorizable data</text>
+                <text x="345" y="232" class="edge-label" fill="var(--ink-dim)">&middot; precise computation</text>
+                <text x="345" y="267" class="edge-label" fill="var(--ink-dim)">&middot; side effect</text>
+                <text x="345" y="302" class="edge-label" fill="var(--ink-dim)">&middot; verification</text>
+                <path d="M 660 170 L 800 170" stroke="var(--cyan)" stroke-width="3.5" marker-end="url(#mb)"/>
+                <text x="730" y="152" text-anchor="middle" class="edge-label" fill="var(--cyan)">yes</text>
+                <rect x="810" y="125" width="170" height="90" rx="10" fill="#12181a" stroke="var(--cyan)" stroke-width="2.5"/>
+                <text x="895" y="179" text-anchor="middle" class="node-label">tool</text>
+                <path d="M 660 300 L 798 344" stroke="var(--ink-faint)" stroke-width="3" marker-end="url(#ma)"/>
+                <text x="722" y="305" text-anchor="middle" class="edge-label" fill="var(--ink-dim)">no</text>
+                <rect x="810" y="300" width="370" height="110" rx="10" fill="#12181a" stroke="var(--ink-faint)" stroke-width="2"/>
+                <text x="995" y="345" text-anchor="middle" class="edge-label" fill="var(--ink-dim)">model nails it cold &amp;</text>
+                <text x="995" y="380" text-anchor="middle" class="edge-label" fill="var(--ink-dim)">round-trip not worth it?</text>
+                <path d="M 1180 355 L 1300 355" stroke="var(--ink-faint)" stroke-width="3" marker-end="url(#ma)"/>
+                <text x="1240" y="338" text-anchor="middle" class="edge-label" fill="var(--ink-dim)">yes</text>
+                <rect x="1310" y="310" width="210" height="90" rx="10" fill="#12181a" stroke="var(--ink-faint)" stroke-width="2"/>
+                <text x="1415" y="364" text-anchor="middle" class="node-label">no tool</text>
+                <text x="830" y="478" text-anchor="middle" class="edge-label" fill="var(--ink-dim)" font-style="italic">either way, defend the call in one sentence.</text>
+            </svg>
+        </div>
+        <ul class="points reveal" style="margin-top:12px;">
+            <li class="point"><b>Defend the call in one sentence.</b> "Tool: needs the live clock." / "No tool: general knowledge the model has cold." That sentence is the deliverable &mdash; naming <b>why</b> is the skill.</li>
+        </ul>
+    </div>
+    <div class="chrome-page">10 / 37</div>
+    <div class="chrome-nav">&larr; &rarr; navigate</div>
+</section>
+
+<!-- ============================================================ -->
+<!-- 11 — SECTION 3 DIVIDER                                       -->
+<!-- ============================================================ -->
+<section class="slide slide-chapter">
+    <div class="chrome-tag reveal">L08 &middot; <b>TOOL DESIGN</b></div>
+    <div class="chapter-ghost reveal">03</div>
+    <div class="chapter-eyebrow reveal">Section 3</div>
+    <div class="chapter-title reveal">Name and <span style="color:var(--cyan); font-style:normal;">description</span></div>
+    <div class="chapter-sub reveal">The model's only training signal for tool selection &mdash; read once, at inference time.</div>
+    <div class="chrome-page">11 / 37</div>
+</section>
+
+<!-- 12 — slide 3.1 -->
+<section class="slide">
+    <div class="chrome-tag">L08 &middot; <b>TOOL DESIGN</b></div>
+    <div class="topbar reveal">
+        <div class="eyebrow">Slide 3.1</div>
+        <h2 class="headline">The name is read <span class="it">in isolation</span></h2>
+    </div>
+    <div class="body-area">
+        <ul class="points reveal">
+            <li class="point">The model sees the tool <b>name without surrounding context</b> &mdash; it must be descriptive, action-oriented, and unambiguous on its own.</li>
+            <li class="point">Anti-patterns: cryptic abbreviations (<code>lu</code>, <code>gx2</code>), overlapping names in one registry (<code>get_user</code> and <code>fetch_user</code>), and &mdash; worst &mdash; <span class="warn">names that hide a side effect</span> (<code>get_user</code> that also <i>creates</i> one).</li>
+            <li class="point">A name that lies about what the tool does is a tool that <span class="warn">will be misused</span>.</li>
+        </ul>
+    </div>
+    <div class="chrome-page">12 / 37</div>
+    <div class="chrome-nav">&larr; &rarr; navigate</div>
+</section>
+
+<!-- 13 — slide 3.2 -->
+<section class="slide">
+    <div class="chrome-tag">L08 &middot; <b>TOOL DESIGN</b></div>
+    <div class="topbar reveal">
+        <div class="eyebrow">Slide 3.2</div>
+        <h2 class="headline">The description is the <span class="it">most important field</span></h2>
+    </div>
+    <div class="body-area">
+        <ul class="points reveal">
+            <li class="point">Names are constrained by length and convention; schemas by types. The <b>description is freeform prose</b> &mdash; the only place to teach the model <b>when</b> to reach for the tool and <b>when not to</b>.</li>
+            <li class="point">It is the model's <b>only training signal at inference time</b> for tool selection. Treat it like the system prompt of a tiny sub-policy: it must land its point in a few sentences.</li>
+            <li class="point">A weak description is the <span class="warn">single most common cause</span> of an unused or misused tool. Demo <code>L0805</code>: same name, same schema, three descriptions &rarr; three very different behaviors.</li>
+        </ul>
+    </div>
+    <div class="chrome-page">13 / 37</div>
+    <div class="chrome-nav">&larr; &rarr; navigate</div>
+</section>
+
+<!-- 14 — slide 3.3 -->
+<section class="slide">
+    <div class="chrome-tag">L08 &middot; <b>TOOL DESIGN</b></div>
+    <div class="topbar reveal">
+        <div class="eyebrow">Slide 3.3</div>
+        <h2 class="headline">What a good description <span class="it">must answer</span></h2>
+    </div>
+    <div class="body-area">
+        <ul class="points reveal">
+            <li class="point">A description is two things at once: a <b>recruitment ad</b> (when to reach for the tool) and a <b>contract</b> (what it returns).</li>
+        </ul>
+        <div class="diagram-frame reveal" style="margin-top:26px;">
+            <div style="display:grid; grid-template-columns: 1000px 360px; gap:16px 36px; align-items:center;">
+                <div style="border-left:3px solid var(--cyan-rule); background:#12181a; padding:14px 24px; font-size:23px; line-height:1.45; color:var(--ink);">Looks up one user record by exact email address.</div>
+                <div style="font-size:19px; letter-spacing:0.1em; text-transform:uppercase; color:var(--cyan);">&larr; what it does</div>
+                <div style="border-left:3px solid var(--cyan-rule); background:#12181a; padding:14px 24px; font-size:23px; line-height:1.45; color:var(--ink);">Use when the user names a specific person to act on.</div>
+                <div style="font-size:19px; letter-spacing:0.1em; text-transform:uppercase; color:var(--cyan);">&larr; when to use</div>
+                <div style="border-left:3px solid var(--cyan-rule); background:#12181a; padding:14px 24px; font-size:23px; line-height:1.45; color:var(--ink);">Do not use to search or list many users.</div>
+                <div style="font-size:19px; letter-spacing:0.1em; text-transform:uppercase; color:var(--cyan);">&larr; when NOT to use</div>
+                <div style="border-left:3px solid var(--cyan-rule); background:#12181a; padding:14px 24px; font-size:23px; line-height:1.45; color:var(--ink);">Returns <span style="color:var(--cyan);">{name, email, plan}</span>, or <span style="color:var(--cyan);">{found: false}</span> when no user matches.</div>
+                <div style="font-size:19px; letter-spacing:0.1em; text-transform:uppercase; color:var(--cyan);">&larr; what it returns</div>
+            </div>
+        </div>
+        <div class="diagram-caption reveal">one block of prose, four jobs &mdash; the return shape lets the model plan its next turn.</div>
+    </div>
+    <div class="chrome-page">14 / 37</div>
+    <div class="chrome-nav">&larr; &rarr; navigate</div>
+</section>
+
+<!-- 15 — slide 3.4 -->
+<section class="slide">
+    <div class="chrome-tag">L08 &middot; <b>TOOL DESIGN</b></div>
+    <div class="topbar reveal">
+        <div class="eyebrow">Slide 3.4</div>
+        <h2 class="headline">Write for the <span class="it">model</span>, not the human reader</h2>
+    </div>
+    <div class="body-area">
+        <ul class="points reveal">
+            <li class="point">The audience is the model's <b>selection step at inference time</b> &mdash; not the human reading the source. Code comments are for humans; tool descriptions are for the model.</li>
+            <li class="point">Common confusion: <i>"the description is for whoever reads the code."</i> No &mdash; it's the <b>prompt the model reads to decide</b>. Write it short, concrete, examples included.</li>
+            <li class="point"><span class="warn">Overstating is as harmful as understating</span>: promise billing + history when the tool returns only a name, and the model calls it expecting rich data and is confused by the thin response. Match the description to the implementation <b>exactly</b>.</li>
+        </ul>
+    </div>
+    <div class="chrome-page">15 / 37</div>
+    <div class="chrome-nav">&larr; &rarr; navigate</div>
+</section>
+
+<!-- ============================================================ -->
+<!-- 16 — SECTION 4 DIVIDER                                       -->
+<!-- ============================================================ -->
+<section class="slide slide-chapter">
+    <div class="chrome-tag reveal">L08 &middot; <b>TOOL DESIGN</b></div>
+    <div class="chapter-ghost reveal">04</div>
+    <div class="chapter-eyebrow reveal">Section 4</div>
+    <div class="chapter-title reveal">The parameter schema is a <span style="color:var(--cyan); font-style:normal;">contract</span></div>
+    <div class="chapter-sub reveal">A tight schema turns the model's fuzziness into validation errors it can fix on the next turn.</div>
+    <div class="chrome-page">16 / 37</div>
+</section>
+
+<!-- 17 — slide 4.1 -->
+<section class="slide">
+    <div class="chrome-tag">L08 &middot; <b>TOOL DESIGN</b></div>
+    <div class="topbar reveal">
+        <div class="eyebrow">Slide 4.1</div>
+        <h2 class="headline">A fuzzy producer of <span class="it">structured output</span></h2>
+    </div>
+    <div class="body-area">
+        <ul class="points reveal">
+            <li class="point">Back-reference L02: the model produces structured output <b>best-effort, not guaranteed</b>. A schema is how you turn that fuzziness into something correctable.</li>
+            <li class="point">A <b>tight schema</b> &mdash; required fields, narrow types, enums where the value space is small, per-field descriptions &mdash; converts ambiguity into <b>validation errors the model can fix on the next turn</b>.</li>
+            <li class="point">A <span class="warn">loose schema</span> (one free-form <code>details: str</code>, everything optional) pushes the ambiguity into the implementation &mdash; ad-hoc rejections the model can't anticipate, or worse, a <span class="warn">silent "success" on a malformed call</span>.</li>
+        </ul>
+    </div>
+    <div class="chrome-page">17 / 37</div>
+    <div class="chrome-nav">&larr; &rarr; navigate</div>
+</section>
+
+<!-- 18 — slide 4.2 -->
+<section class="slide">
+    <div class="chrome-tag">L08 &middot; <b>TOOL DESIGN</b></div>
+    <div class="topbar reveal">
+        <div class="eyebrow">Slide 4.2</div>
+        <h2 class="headline">The pieces of a <span class="it">good schema</span></h2>
+    </div>
+    <div class="body-area">
+        <table class="ledger reveal">
+            <thead><tr><th>Lever</th><th>What it buys</th></tr></thead>
+            <tbody>
+                <tr><td class="tag">Typed parameters</td><td>the model knows <code>int</code> vs <code>str</code> vs <code>bool</code> up front</td></tr>
+                <tr><td class="tag">Required vs optional</td><td>required fields force the missing detail into the open</td></tr>
+                <tr><td class="tag">Enum constraints</td><td>a small value space the model can't misfill (<code>"low" | "med" | "high"</code>)</td></tr>
+                <tr><td class="tag">Per-parameter descriptions</td><td>the model's only source of truth for what a param <b>means</b></td></tr>
+            </tbody>
+        </table>
+        <ul class="points reveal" style="margin-top:34px;">
+            <li class="point"><b>Rule of thumb:</b> every parameter description includes an <b>example or a constraint</b> (<code>"RFC 5322 email, e.g. 'tim@example.com'"</code>, <code>"integer between 15 and 240"</code>). The model has no other source of truth.</li>
+        </ul>
+    </div>
+    <div class="chrome-page">18 / 37</div>
+    <div class="chrome-nav">&larr; &rarr; navigate</div>
+</section>
+
+<!-- 19 — slide 4.3 -->
+<section class="slide">
+    <div class="chrome-tag">L08 &middot; <b>TOOL DESIGN</b></div>
+    <div class="topbar reveal">
+        <div class="eyebrow">Slide 4.3</div>
+        <h2 class="headline">Schemas validate <span class="it">shape, not truth</span></h2>
+    </div>
+    <div class="body-area">
+        <ul class="points reveal">
+            <li class="point">A tight schema catches <b>malformed</b> arguments (<code>duration_minutes: 500</code> when the max is 240). It does <b>not</b> catch <span class="warn">false</span> ones &mdash; a well-formed but fabricated <code>priya@example.com</code> passes email-format validation even if no such user exists.</li>
+            <li class="point">Exactly why errors (section 6) are the second line of defense: <b>the schema rejects bad shape; the tool's runtime errors reject bad truth</b>.</li>
+            <li class="point">Demo <code>L0807</code> shows the model guessing a well-formed-but-fake value that passes validation and only fails at lookup.</li>
+        </ul>
+    </div>
+    <div class="chrome-page">19 / 37</div>
+    <div class="chrome-nav">&larr; &rarr; navigate</div>
+</section>
+
+<!-- 20 — slide 4.4 -->
+<section class="slide">
+    <div class="chrome-tag">L08 &middot; <b>TOOL DESIGN</b></div>
+    <div class="topbar reveal">
+        <div class="eyebrow">Slide 4.4</div>
+        <h2 class="headline">The two <span class="it">extremes</span> to avoid</h2>
+    </div>
+    <div class="body-area">
+        <ul class="points reveal">
+            <li class="point"><span class="warn">Too-specific</span> &rarr; <b>tool soup</b>: twenty near-identical options, the model picks wrong. <span class="warn">Too-generic</span> &rarr; <b>the kitchen sink</b>: one tool, twenty parameters, misconfigured.</li>
+        </ul>
+        <div class="reveal" style="margin-top:28px; max-width:1660px;">
+            <div style="display:flex; justify-content:space-between; gap:40px;">
+                <div class="dg-box fail" style="width:520px; text-align:center;">
+                    <div class="dg-title">20 narrow tools</div>
+                    <div class="dg-sub" style="color:var(--coral);">tool soup &mdash; the model picks wrong</div>
+                </div>
+                <div class="dg-box" style="width:520px; text-align:center;">
+                    <div class="dg-title">a focused 5-tool set</div>
+                    <div class="dg-sub" style="color:var(--cyan);">navigable</div>
+                </div>
+                <div class="dg-box fail" style="width:520px; text-align:center;">
+                    <div class="dg-title">1 tool, 20 params</div>
+                    <div class="dg-sub" style="color:var(--coral);">kitchen sink &mdash; misconfigured</div>
+                </div>
+            </div>
+            <div style="height:6px; margin-top:22px; border-radius:3px; background:linear-gradient(90deg, var(--coral) 0%, var(--cyan) 50%, var(--coral) 100%); opacity:0.55;"></div>
+            <div style="text-align:center; color:var(--cyan); font-size:22px; margin-top:6px;">&#9650;</div>
+        </div>
+        <ul class="points reveal" style="margin-top:20px;">
+            <li class="point"><b>LLM tools &ne; REST endpoints.</b> <code>GET /users/{id}</code> and <code>POST /users</code> may collapse into one tool with an <code>action</code> param &mdash; the right grouping is the one <b>a model can navigate without confusion</b>, not HTTP semantics.</li>
+        </ul>
+    </div>
+    <div class="chrome-page">20 / 37</div>
+    <div class="chrome-nav">&larr; &rarr; navigate</div>
+</section>
+
+<!-- ============================================================ -->
+<!-- 21 — SECTION 5 DIVIDER                                       -->
+<!-- ============================================================ -->
+<section class="slide slide-chapter">
+    <div class="chrome-tag reveal">L08 &middot; <b>TOOL DESIGN</b></div>
+    <div class="chapter-ghost reveal">05</div>
+    <div class="chapter-eyebrow reveal">Section 5</div>
+    <div class="chapter-title reveal">The return <span style="color:var(--cyan); font-style:normal;">shape</span></div>
+    <div class="chapter-sub reveal">The model branches its next turn on what came back &mdash; the shape has to keep three outcomes apart.</div>
+    <div class="chrome-page">21 / 37</div>
+</section>
+
+<!-- 22 — slide 5.1 -->
+<section class="slide">
+    <div class="chrome-tag">L08 &middot; <b>TOOL DESIGN</b></div>
+    <div class="topbar reveal">
+        <div class="eyebrow">Slide 5.1</div>
+        <h2 class="headline">Distinguish three outcomes <span class="it">cleanly</span></h2>
+    </div>
+    <div class="body-area">
+        <ul class="points reveal">
+            <li class="point">A <b>successful result</b>, a <b>successful call with no data</b> (a lookup with no match &mdash; <b>not</b> an error), and an <b>error</b> &mdash; each must be tellable apart on sight.</li>
+        </ul>
+        <div class="diagram-frame reveal" style="width:1660px; height:470px; margin-top:10px;">
+            <svg viewBox="0 0 1660 470" width="100%" height="100%">
+                <defs>
+                    <marker id="na" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="var(--ink-faint)"/></marker>
+                    <marker id="nb" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="var(--cyan)"/></marker>
+                    <marker id="nc" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="var(--coral)"/></marker>
+                </defs>
+                <rect x="30" y="185" width="230" height="100" rx="10" fill="#12181a" stroke="var(--cyan)" stroke-width="2.5"/>
+                <text x="145" y="244" text-anchor="middle" class="node-label">tool call</text>
+                <path d="M 260 215 C 420 120, 480 90, 600 87" fill="none" stroke="var(--cyan)" stroke-width="3" marker-end="url(#nb)"/>
+                <path d="M 260 235 L 600 235" stroke="var(--ink-faint)" stroke-width="3" marker-end="url(#na)"/>
+                <path d="M 260 255 C 420 350, 480 380, 600 385" fill="none" stroke="var(--coral)" stroke-width="3" marker-end="url(#nc)"/>
+                <circle r="8" fill="var(--cyan)">
+                    <animateMotion dur="3s" repeatCount="indefinite" path="M 260 215 C 420 120, 480 90, 600 87"/>
+                </circle>
+                <rect x="610" y="45" width="380" height="80" rx="10" fill="#12181a" stroke="var(--cyan)" stroke-width="2.5"/>
+                <text x="800" y="93" text-anchor="middle" class="node-label">{"results": [...]}</text>
+                <rect x="610" y="195" width="380" height="80" rx="10" fill="#12181a" stroke="var(--ink-faint)" stroke-width="2"/>
+                <text x="800" y="243" text-anchor="middle" class="node-label">{"found": false}</text>
+                <rect x="610" y="345" width="380" height="80" rx="10" fill="#12181a" stroke="var(--coral)" stroke-width="2.5"/>
+                <text x="800" y="393" text-anchor="middle" class="node-label">{"error": ...}</text>
+                <text x="1030" y="93" class="edge-label" fill="var(--cyan)">next turn: use the data</text>
+                <text x="1030" y="243" class="edge-label" fill="var(--ink-dim)">next turn: report &mdash; don't retry</text>
+                <text x="1030" y="393" class="edge-label" fill="var(--coral)">next turn: correct the call or retry</text>
+            </svg>
+        </div>
+    </div>
+    <div class="chrome-page">22 / 37</div>
+    <div class="chrome-nav">&larr; &rarr; navigate</div>
+</section>
+
+<!-- 23 — slide 5.2 -->
+<section class="slide">
+    <div class="chrome-tag">L08 &middot; <b>TOOL DESIGN</b></div>
+    <div class="topbar reveal">
+        <div class="eyebrow">Slide 5.2</div>
+        <h2 class="headline">Why "no data" must not <span class="it">look like an error</span></h2>
+    </div>
+    <div class="body-area">
+        <ul class="points reveal">
+            <li class="point">If "no user found" returns the same shape as "lookup crashed", the model can't tell whether to <b>retry</b> (it might be transient) or to <b>report</b> (it's final). Conflating them produces <span class="warn">undefined behavior</span>.</li>
+            <li class="point">A clean <code>{"found": false}</code> is a <b>final, unrecoverable</b> signal &mdash; the model reports back or asks for a better key, and does <b>not</b> retry. Demo <code>L0809</code> shows this path explicitly.</li>
+        </ul>
+    </div>
+    <div class="chrome-page">23 / 37</div>
+    <div class="chrome-nav">&larr; &rarr; navigate</div>
+</section>
+
+<!-- ============================================================ -->
+<!-- 24 — SECTION 6 DIVIDER                                       -->
+<!-- ============================================================ -->
+<section class="slide slide-chapter">
+    <div class="chrome-tag reveal">L08 &middot; <b>TOOL DESIGN</b></div>
+    <div class="chapter-ghost reveal">06</div>
+    <div class="chapter-eyebrow reveal">Section 6</div>
+    <div class="chapter-title reveal">Errors are part of the <span style="color:var(--cyan); font-style:normal;">interface</span></div>
+    <div class="chapter-sub reveal">An error is a prompt for the model's next turn &mdash; write it for the model, not the debugger.</div>
+    <div class="chrome-page">24 / 37</div>
+</section>
+
+<!-- 25 — slide 6.1 -->
+<section class="slide">
+    <div class="chrome-tag">L08 &middot; <b>TOOL DESIGN</b></div>
+    <div class="topbar reveal">
+        <div class="eyebrow">Slide 6.1</div>
+        <h2 class="headline">An error is <span class="it">new context</span>, not an exception</h2>
+    </div>
+    <div class="body-area">
+        <ul class="points reveal">
+            <li class="point">When a tool returns an error, the model's next turn is <b>conditioned on that error text</b> &mdash; exactly like any other context.</li>
+            <li class="point">A well-shaped error <b>teaches the model to fix its call</b>; a bare exception teaches it nothing, so it <span class="warn">guesses &mdash; often wrongly</span>. A stack trace dumped into the tool result tells the model nothing actionable.</li>
+        </ul>
+        <div class="callout reveal"><p>Errors should be informative for the model, not just for a human debugger.</p></div>
+    </div>
+    <div class="chrome-page">25 / 37</div>
+    <div class="chrome-nav">&larr; &rarr; navigate</div>
+</section>
+
+<!-- 26 — slide 6.2 -->
+<section class="slide">
+    <div class="chrome-tag">L08 &middot; <b>TOOL DESIGN</b></div>
+    <div class="topbar reveal">
+        <div class="eyebrow">Slide 6.2</div>
+        <h2 class="headline">Three error classes and <span class="it">their handling</span></h2>
+    </div>
+    <div class="body-area">
+        <table class="ledger reveal">
+            <thead><tr><th>Class</th><th>Example</th><th>The error should&hellip;</th><th>Model behavior</th></tr></thead>
+            <tbody>
+                <tr><td class="tag">Validation</td><td>bad arguments</td><td>name the field + the constraint</td><td>correct the field and retry</td></tr>
+                <tr><td class="tag">Recoverable runtime</td><td>rate limit, timeout, transient API failure</td><td>signal "try again" without burning budget</td><td>retry (or the runtime retries silently)</td></tr>
+                <tr><td class="tag">Unrecoverable</td><td>entity doesn't exist, no permission</td><td>be clear and <b>final</b></td><td class="warn-cell">stop retrying; report or route around</td></tr>
+            </tbody>
+        </table>
+        <ul class="points reveal" style="margin-top:34px;">
+            <li class="point">The shape of the error <b>is</b> the interface &mdash; an undocumented error class produces <span class="warn">undefined model behavior</span>. Add expected error shapes to the tool description.</li>
+        </ul>
+    </div>
+    <div class="chrome-page">26 / 37</div>
+    <div class="chrome-nav">&larr; &rarr; navigate</div>
+</section>
+
+<!-- 27 — slide 6.3 -->
+<section class="slide">
+    <div class="chrome-tag">L08 &middot; <b>TOOL DESIGN</b></div>
+    <div class="topbar reveal">
+        <div class="eyebrow">Slide 6.3</div>
+        <h2 class="headline">Write the error like a <span class="it">system message</span></h2>
+    </div>
+    <div class="body-area">
+        <div class="diagram-frame reveal" style="gap:40px; justify-content:flex-start;">
+            <div class="dg-box fail" style="width:790px;">
+                <div class="dg-head" style="color:var(--coral);">the same failing call &mdash; raw exception</div>
+                <div class="dg-code" style="color:var(--ink-faint);">Traceback (most recent call last):<br>&nbsp;&nbsp;File "tools.py", line 42, in lookup_user<br>KeyError: 'user_id'</div>
+                <div class="dg-sub" style="color:var(--coral); margin-top:16px;">model: &macr;\_(&#12484;)_/&macr; &mdash; retries the same wrong call</div>
+            </div>
+            <div class="dg-box" style="width:790px;">
+                <div class="dg-head" style="color:var(--cyan);">the same failing call &mdash; structured error</div>
+                <div class="dg-code" style="color:var(--ink);">{"error": "validation",<br>&nbsp;"field": "user_id",<br>&nbsp;"message": "must be a UUID, got 'tim@example.com'"}</div>
+                <div class="dg-sub" style="color:var(--cyan); margin-top:16px;">model: oh &mdash; I'll pass a UUID</div>
+            </div>
+        </div>
+        <div class="diagram-caption reveal">which field, why it was rejected, how to fix it &mdash; the error text is the model's next prompt.</div>
+        <ul class="points reveal" style="margin-top:22px;">
+            <li class="point">Lab <code>L0808</code>: take raw stack traces and rewrite each into an informative <code>{error, field, message}</code> payload &mdash; pure Python, no model needed.</li>
+        </ul>
+    </div>
+    <div class="chrome-page">27 / 37</div>
+    <div class="chrome-nav">&larr; &rarr; navigate</div>
+</section>
+
+<!-- ============================================================ -->
+<!-- 28 — SECTION 7 DIVIDER                                       -->
+<!-- ============================================================ -->
+<section class="slide slide-chapter">
+    <div class="chrome-tag reveal">L08 &middot; <b>TOOL DESIGN</b></div>
+    <div class="chapter-ghost reveal">07</div>
+    <div class="chapter-eyebrow reveal">Section 7</div>
+    <div class="chapter-title reveal">Idempotency and <span style="color:var(--cyan); font-style:normal;">side effects</span></div>
+    <div class="chapter-sub reveal">The model retries on its own &mdash; a side effect it can't see is a side effect it can't avoid.</div>
+    <div class="chrome-page">28 / 37</div>
+</section>
+
+<!-- 29 — slide 7.1 -->
+<section class="slide">
+    <div class="chrome-tag">L08 &middot; <b>TOOL DESIGN</b></div>
+    <div class="topbar reveal">
+        <div class="eyebrow">Slide 7.1</div>
+        <h2 class="headline">The model will retry <span class="it">on its own</span></h2>
+    </div>
+    <div class="body-area">
+        <ul class="points reveal">
+            <li class="point">When a result looks ambiguous, the model <span class="warn">retries &mdash; regardless of whether retry is safe</span>. You cannot rely on the model to know a call is dangerous to repeat.</li>
+            <li class="point">So idempotency is a <b>system</b> concern, not just a tool-author concern. Even a perfectly described tool can be called twice by a confused model.</li>
+        </ul>
+    </div>
+    <div class="chrome-page">29 / 37</div>
+    <div class="chrome-nav">&larr; &rarr; navigate</div>
+</section>
+
+<!-- 30 — slide 7.2 -->
+<section class="slide">
+    <div class="chrome-tag">L08 &middot; <b>TOOL DESIGN</b></div>
+    <div class="topbar reveal">
+        <div class="eyebrow">Slide 7.2</div>
+        <h2 class="headline">Safe to retry <span class="it">vs. not</span></h2>
+    </div>
+    <div class="body-area">
+        <table class="ledger reveal">
+            <thead><tr><th>Safe to retry</th><th>Not safe to retry</th></tr></thead>
+            <tbody>
+                <tr><td>read-only lookups</td><td class="warn-cell">sending a message</td></tr>
+                <tr><td>pure computations</td><td class="warn-cell">charging a card</td></tr>
+                <tr><td>idempotent upserts (with a key)</td><td class="warn-cell">creating a record (without a key)</td></tr>
+            </tbody>
+        </table>
+        <ul class="points reveal" style="margin-top:34px;">
+            <li class="point">For non-idempotent tools, apply at least one mitigation: <b>idempotency keys</b> passed by the runtime, an <b>explicit confirmation step</b>, or a <b>description that warns</b> the model not to retry on a success-with-no-result response.</li>
+        </ul>
+    </div>
+    <div class="chrome-page">30 / 37</div>
+    <div class="chrome-nav">&larr; &rarr; navigate</div>
+</section>
+
+<!-- 31 — slide 7.3 -->
+<section class="slide">
+    <div class="chrome-tag">L08 &middot; <b>TOOL DESIGN</b></div>
+    <div class="topbar reveal">
+        <div class="eyebrow">Slide 7.3</div>
+        <h2 class="headline">Name every side effect <span class="it">in the description</span></h2>
+    </div>
+    <div class="body-area">
+        <ul class="points reveal">
+            <li class="point">A side effect that isn't named is one the model <span class="warn">can't reason about &mdash; and therefore can't avoid</span>. Naming it is part of the contract. (Demo <code>L0809</code> runs the hidden create live; <b>L11 approval gates</b> build the structure this plants.)</li>
+        </ul>
+        <div class="diagram-frame reveal" style="gap:40px; margin-top:22px; justify-content:flex-start;">
+            <div style="width:790px;">
+                <div class="dg-head" style="color:var(--coral);">side effect omitted</div>
+                <div class="dg-box neutral" style="padding:16px 22px; font-size:21px; color:var(--ink); line-height:1.5;">"Looks up a user record by email."</div>
+                <div style="text-align:center; color:var(--coral); font-size:26px; margin:8px 0;">&darr; model calls it</div>
+                <div class="dg-box fail" style="padding:16px 22px; font-size:22px; color:var(--coral);">user record created &mdash; unintended</div>
+            </div>
+            <div style="width:790px;">
+                <div class="dg-head" style="color:var(--cyan);">side effect named</div>
+                <div class="dg-box neutral" style="padding:16px 22px; font-size:21px; color:var(--ink); line-height:1.5;">"Looks up a user record by email. <span style="color:var(--cyan);">If the user does not exist, this tool creates one.</span>"</div>
+                <div style="text-align:center; color:var(--cyan); font-size:26px; margin:8px 0;">&darr; model pauses</div>
+                <div class="dg-box" style="padding:16px 22px; font-size:22px; color:var(--cyan);">asks the user first &mdash; no record yet</div>
+            </div>
+        </div>
+        <div class="diagram-caption reveal">an unnamed side effect is one the model can't reason about; one sentence in the description changes the behavior.</div>
+    </div>
+    <div class="chrome-page">31 / 37</div>
+    <div class="chrome-nav">&larr; &rarr; navigate</div>
+</section>
+
+<!-- ============================================================ -->
+<!-- 32 — SECTION 8 DIVIDER                                       -->
+<!-- ============================================================ -->
+<section class="slide slide-chapter">
+    <div class="chrome-tag reveal">L08 &middot; <b>TOOL DESIGN</b></div>
+    <div class="chapter-ghost reveal">08</div>
+    <div class="chapter-eyebrow reveal">Section 8</div>
+    <div class="chapter-title reveal">Common confusions to <span style="color:var(--cyan); font-style:normal;">leave behind</span></div>
+    <div class="chapter-sub reveal">Five traps students walk into &mdash; and the correction for each.</div>
+    <div class="chrome-page">32 / 37</div>
+</section>
+
+<!-- 33 — slide 8.1 -->
+<section class="slide">
+    <div class="chrome-tag">L08 &middot; <b>TOOL DESIGN</b></div>
+    <div class="topbar reveal">
+        <div class="eyebrow">Slide 8.1</div>
+        <h2 class="headline">The <span class="it">five traps</span></h2>
+    </div>
+    <div class="body-area">
+        <table class="ledger reveal">
+            <thead><tr><th>Confusion</th><th>The correction</th></tr></thead>
+            <tbody>
+                <tr><td class="warn-cell">"More tools = more capable agent"</td><td>usually the opposite &mdash; each tool dilutes attention and adds a failure mode</td></tr>
+                <tr><td class="warn-cell">"The description is for the human reading the code"</td><td>it's for the model's <b>selection step</b> at inference time</td></tr>
+                <tr><td class="warn-cell">"Errors should be hidden from the model"</td><td>errors are how the model <b>learns to recover</b> within the conversation</td></tr>
+                <tr><td class="warn-cell">"A schema is just for type-checking"</td><td>it's also a teaching tool &mdash; shape + per-field descriptions guide the model</td></tr>
+                <tr><td class="warn-cell">"My tool worked once, so the design is fine"</td><td>one clean round-trip barely tests it; design pays off <b>under pressure</b></td></tr>
+            </tbody>
+        </table>
+        <ul class="points reveal" style="margin-top:28px;">
+            <li class="point">Design-side mirror: the capstone's <b>four anti-patterns</b> (<code>L0811</code>) &mdash; <span class="warn">tool soup</span>, vague description, opaque errors, the god-tool. L0811 recaps three from Demos 2&ndash;4 and runs <b>tool soup</b> live.</li>
+        </ul>
+    </div>
+    <div class="chrome-page">33 / 37</div>
+    <div class="chrome-nav">&larr; &rarr; navigate</div>
+</section>
+
+<!-- ============================================================ -->
+<!-- 34 — SECTION 9 DIVIDER                                       -->
+<!-- ============================================================ -->
+<section class="slide slide-chapter">
+    <div class="chrome-tag reveal">L08 &middot; <b>TOOL DESIGN</b></div>
+    <div class="chapter-ghost reveal">09</div>
+    <div class="chapter-eyebrow reveal">Section 9</div>
+    <div class="chapter-title reveal">Bridge to <span style="color:var(--cyan); font-style:normal;">L09</span></div>
+    <div class="chapter-sub reveal">MCP changes the packaging, not the design pressures.</div>
+    <div class="chrome-page">34 / 37</div>
+</section>
+
+<!-- 35 — slide 9.1 -->
+<section class="slide">
+    <div class="chrome-tag">L08 &middot; <b>TOOL DESIGN</b></div>
+    <div class="topbar reveal">
+        <div class="eyebrow">Slide 9.1</div>
+        <h2 class="headline">The design survives the <span class="it">packaging change</span></h2>
+    </div>
+    <div class="body-area">
+        <ul class="points reveal">
+            <li class="point">L09 introduces <b>MCP (Model Context Protocol)</b> &mdash; a portable packaging format that lets the <b>same</b> tool be exposed to many clients without rewiring.</li>
+            <li class="point">Everything L08 teaches &mdash; naming, descriptions, schemas, error shapes, idempotency &mdash; applies <b>unchanged</b>. MCP standardizes only the <b>transport</b> and the <b>discovery</b> layer, not the design pressures.</li>
+            <li class="point">A poorly designed tool exposed via MCP is <span class="warn">still a poorly designed tool</span> &mdash; just available to more clients. L09 leans on the L08 vocabulary throughout.</li>
+        </ul>
+    </div>
+    <div class="chrome-page">35 / 37</div>
+    <div class="chrome-nav">&larr; &rarr; navigate</div>
+</section>
+
+<!-- 36 — slide 9.2 -->
+<section class="slide">
+    <div class="chrome-tag">L08 &middot; <b>TOOL DESIGN</b></div>
+    <div class="topbar reveal">
+        <div class="eyebrow">Slide 9.2</div>
+        <h2 class="headline">What to <span class="it">carry forward</span></h2>
+    </div>
+    <div class="body-area">
+        <ul class="points reveal">
+            <li class="point"><b>Name + description + schema + error shape</b> &mdash; these <b>are</b> an MCP tool spec. The packaging changes; the design work does not.</li>
+            <li class="point"><b>Idempotency and side effects</b> &mdash; still a runtime concern in an MCP world, and still named in the description.</li>
+            <li class="point">One sentence to L09: <i>you can now design a tool a model uses well; next you'll package that same design so any client can use it.</i></li>
+        </ul>
+    </div>
+    <div class="chrome-page">36 / 37</div>
+    <div class="chrome-nav">&larr; &rarr; navigate</div>
+</section>
+
+<!-- ============================================================ -->
+<!-- 37 — CLOSING                                                 -->
+<!-- ============================================================ -->
+<section class="slide slide-closing">
+    <div class="chrome-tag reveal">L08 &middot; <b>TOOL DESIGN</b></div>
+    <div class="closing-statement reveal">The protocol makes a tool <span class="k">work</span>; the name, the description, the schema, and the errors make it <span class="k">good</span> &mdash; because its consumer is a model.</div>
+    <div class="closing-grid reveal">
+        <div class="col">
+            <div class="label">Next</div>
+            <div class="val"><b>L09 &mdash; MCP</b><br>package the same design so any client can use it</div>
+        </div>
+        <div class="col">
+            <div class="label">Practice</div>
+            <div class="val"><b>L0804</b> tool-or-no-tool &middot; <b>L0806</b> descriptions<br><b>L0808</b> error rewrites &middot; <b>L0810</b> side effects</div>
+        </div>
+        <div class="col">
+            <div class="label">Companions</div>
+            <div class="val">Demos <b>L0803 / L0805 / L0807 / L0809</b><br>anti-pattern capstone <b>L0811</b></div>
+        </div>
+    </div>
+    <div class="chrome-page">37 / 37</div>
+</section>
+
+</main>
+</div>
+
+<!-- Outside-stage UI: progress bar + arrow nav + editing controls -->
+<div class="deck-progress"><div class="deck-progress-bar" id="progressBar"></div></div>
+<button class="deck-arrow prev" id="prevBtn" aria-label="Previous slide">&#8592;</button>
+<button class="deck-arrow next" id="nextBtn" aria-label="Next slide">&#8594;</button>
+<div class="edit-hotzone" id="editHotzone"></div>
+<button class="edit-toggle" id="editToggle" title="Edit mode (E)">&#9998;</button>
+<div class="save-toast" id="saveToast">Saved</div>
+
+<script>
+/* ===========================================
+   SLIDE PRESENTATION CONTROLLER
+   =========================================== */
+class SlidePresentation {
+    constructor() {
+        this.slides = Array.from(document.querySelectorAll('.slide'));
+        this.currentSlide = 0;
+        this.stage = document.getElementById('deckStage');
+        this.progressBar = document.getElementById('progressBar');
+        this.setupStageScale();
+        this.setupKeyboardNav();
+        this.setupTouchNav();
+        this.setupWheelNav();
+        this.setupArrowButtons();
+        this.showSlide(0);
+    }
+
+    setupStageScale() {
+        const scale = () => {
+            const factor = Math.min(window.innerWidth / 1920, window.innerHeight / 1080);
+            const x = (window.innerWidth - 1920 * factor) / 2;
+            const y = (window.innerHeight - 1080 * factor) / 2;
+            this.stage.style.transform = `translate(${x}px, ${y}px) scale(${factor})`;
+        };
+        scale();
+        window.addEventListener('resize', scale);
+    }
+
+    setupKeyboardNav() {
+        document.addEventListener('keydown', (e) => {
+            if (e.target.getAttribute('contenteditable') === 'true') return;
+            if (['ArrowRight', 'ArrowDown', ' ', 'PageDown'].includes(e.key)) {
+                e.preventDefault();
+                this.next();
+            } else if (['ArrowLeft', 'ArrowUp', 'PageUp'].includes(e.key)) {
+                e.preventDefault();
+                this.prev();
+            } else if (e.key === 'Home') {
+                this.showSlide(0);
+            } else if (e.key === 'End') {
+                this.showSlide(this.slides.length - 1);
+            }
+        });
+    }
+
+    setupTouchNav() {
+        let startX = 0;
+        this.stage.addEventListener('touchstart', (e) => { startX = e.touches[0].clientX; }, { passive: true });
+        this.stage.addEventListener('touchend', (e) => {
+            const dx = e.changedTouches[0].clientX - startX;
+            if (Math.abs(dx) > 60) { dx < 0 ? this.next() : this.prev(); }
+        }, { passive: true });
+    }
+
+    setupWheelNav() {
+        let locked = false;
+        window.addEventListener('wheel', (e) => {
+            if (locked) return;
+            if (Math.abs(e.deltaY) < 24) return;
+            locked = true;
+            e.deltaY > 0 ? this.next() : this.prev();
+            setTimeout(() => { locked = false; }, 500);
+        }, { passive: true });
+    }
+
+    setupArrowButtons() {
+        document.getElementById('nextBtn').addEventListener('click', () => this.next());
+        document.getElementById('prevBtn').addEventListener('click', () => this.prev());
+    }
+
+    next() { this.showSlide(this.currentSlide + 1); }
+    prev() { this.showSlide(this.currentSlide - 1); }
+
+    showSlide(index) {
+        this.currentSlide = Math.max(0, Math.min(index, this.slides.length - 1));
+        this.slides.forEach((slide, i) => {
+            slide.classList.toggle('active', i === this.currentSlide);
+            slide.classList.toggle('visible', i === this.currentSlide);
+        });
+        this.progressBar.style.width = `${((this.currentSlide + 1) / this.slides.length) * 100}%`;
+    }
+}
+
+/* ===========================================
+   INLINE EDITING — hover hotzone + E key
+   =========================================== */
+class InlineEditor {
+    constructor() {
+        this.isActive = false;
+        this.toggle = document.getElementById('editToggle');
+        this.hotzone = document.getElementById('editHotzone');
+        this.toast = document.getElementById('saveToast');
+        this.editableSelector = 'h1, h2, h3, p, li, span, td, th, div.claim, div.lede, div.chapter-sub, div.diagram-caption';
+        this.hideTimeout = null;
+        this.bindEvents();
+        this.restore();
+    }
+
+    bindEvents() {
+        this.toggle.addEventListener('click', () => this.toggleEditMode());
+        this.hotzone.addEventListener('click', () => this.toggleEditMode());
+        this.hotzone.addEventListener('mouseenter', () => { clearTimeout(this.hideTimeout); this.toggle.classList.add('show'); });
+        this.hotzone.addEventListener('mouseleave', () => this.scheduleHide());
+        this.toggle.addEventListener('mouseenter', () => clearTimeout(this.hideTimeout));
+        this.toggle.addEventListener('mouseleave', () => this.scheduleHide());
+        document.addEventListener('keydown', (e) => {
+            if ((e.key === 'e' || e.key === 'E') && e.target.getAttribute('contenteditable') !== 'true') {
+                this.toggleEditMode();
+            }
+            if (e.key === 's' && (e.metaKey || e.ctrlKey) && this.isActive) {
+                e.preventDefault();
+                this.save();
+            }
+        });
+    }
+
+    scheduleHide() {
+        this.hideTimeout = setTimeout(() => {
+            if (!this.isActive) this.toggle.classList.remove('show');
+        }, 400);
+    }
+
+    toggleEditMode() {
+        this.isActive = !this.isActive;
+        this.toggle.classList.toggle('active', this.isActive);
+        const stage = document.getElementById('deckStage');
+        const editableEls = stage.querySelectorAll(this.editableSelector);
+        editableEls.forEach((el) => {
+            if (el.closest('svg')) return;
+            el.setAttribute('contenteditable', this.isActive ? 'true' : 'false');
+        });
+        if (!this.isActive) this.save();
+    }
+
+    save() {
+        try {
+            const html = document.getElementById('deckStage').innerHTML;
+            localStorage.setItem('l0802-deck-content', html);
+            this.showToast();
+        } catch (err) {
+            console.warn('Could not save deck content', err);
+        }
+    }
+
+    restore() {
+        try {
+            const saved = localStorage.getItem('l0802-deck-content');
+            if (saved) document.getElementById('deckStage').innerHTML = saved;
+        } catch (err) {
+            console.warn('Could not restore deck content', err);
+        }
+    }
+
+    showToast() {
+        this.toast.classList.add('show');
+        setTimeout(() => this.toast.classList.remove('show'), 1400);
+    }
+}
+
+new SlidePresentation();
+new InlineEditor();
+</script>
+</body>
+</html>
