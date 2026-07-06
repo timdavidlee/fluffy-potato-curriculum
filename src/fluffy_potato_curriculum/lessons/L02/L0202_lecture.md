@@ -26,7 +26,7 @@ estimated duration: 110
   **catalog** of the single-step task shapes they unlock (extract, classify, rank,
   generate-to-a-constraint, summarize). The levers are the minimum toolkit L06 (reasoning) and L07
   (tools) assume you already have; the catalog (section 5) is what one call can *do* with them.
-- diagram: a zoom-in / nesting block — an outer box "L01: the container (tokens · context window · temperature · cost)" with an inner box "L02: the contents = the prompt (roles · structured output · few-shot)", and a magnifier arrow from outer to inner captioned "same call — now we fill what goes inside."
+- diagram: a zoom-in / nesting block — an outer box "L01: the container (tokens · context window · temperature · cost)" with an inner box "L02: the contents = the prompt (roles · structured output · few-shot)", and a magnifier arrow from outer to inner captioned "same call — now we fill what goes inside." Colour: the inner L02 box and the magnifier arrow are cyan (this lesson's point); the L01 container is ink-faint (already learned — now just the plumbing around it).
 
 ### slide 1.2 The three levers at a glance
 
@@ -67,7 +67,9 @@ estimated duration: 110
   **user** (inputs from the caller), **assistant** (the model's prior replies — or planted
   in-context examples, see section 4).
 - diagram: a growing `messages=[...]` list — `[system, user, assistant, user, assistant, …]` —
-  with a label "the caller builds and re-sends this whole list every turn."
+  with a label "the caller builds and re-sends this whole list every turn." Colour: the re-send
+  arrow and its label are cyan (owning the list is the point); the message pills themselves stay
+  neutral ink — no coral, nothing is failing here.
 
 ### slide 2.2 system = always-true, user = per-call
 
@@ -80,6 +82,9 @@ estimated duration: 110
   fight).
 - diagram: two boxes — `system: "You are a triage assistant. Answer in two short paragraphs…"`
   (stamped "always true") and `user: "My head has hurt for three days."` (stamped "this call only").
+  Colour: both boxes cyan — this is a contrast of durable vs per-call, not right vs wrong, so the
+  stamps carry the distinction and no coral appears anywhere. (This two-box pair is a motif: slides
+  2.4 and 5.6 re-show it with one thing changed.)
 
 ### slide 2.3 Persona: the durable "who you are"
 
@@ -112,6 +117,11 @@ estimated duration: 110
 - **Per-call data crammed into the system message** *poisons reuse*: the system message stops being
   always-true, so the next user request inherits stale data — the model may end up answering about
   the *last* caller's problem instead of this one.
+- diagram: a two-up contrast reusing the same system/user boxes from slide 2.2, with one change:
+  the placement. Left panel (coral): the policy buried in the `user` message and per-call data
+  pinned in `system` — annotate the stale-data poison ("next caller inherits this"); right panel
+  (cyan): the slide-2.2 arrangement, durable persona in `system`, this call's question in `user`.
+  Caption: "same content, wrong homes — the two footguns side by side."
 - table: where each kind of content belongs.
 
 | Content | Belongs in | Why |
@@ -162,7 +172,10 @@ estimated duration: 110
 - Here you get structure **by instruction alone**: you *tell* the model the exact shape in the
   prompt ("Return a single JSON object with exactly these keys, no prose") and then parse the
   reply.
-- diagram: prompt with an explicit schema spec → model reply (hopefully JSON) → `parse()` → dict.
+- diagram: a flow — prompt with an explicit schema spec → model reply "(hopefully JSON)" →
+  `parse()` → dict. Colour: the prompt, `parse()`, and dict nodes cyan (the path you control); the
+  "(hopefully JSON)" reply node coral with a dashed border — it's a hope, not a guarantee — which
+  is exactly the gap the defensive parser in slide 3.4 exists to close.
 - A quick look ahead — you won't need it yet: *in production you'd reach for Anthropic's
   **tool-use-as-schema** to force schema-conformant output — that's L07. The parsing discipline
   below still applies there, because tool-call arguments can also be malformed.*
@@ -218,7 +231,10 @@ estimated duration: 110
 - Keep input and output *shapes consistent*: a labeled, structured request yields cleaner
   structured output than the same request phrased in flowing English. Consistency reduces the
   model's degrees of freedom — and therefore your parse failures.
-- diagram: two small gauges side by side — a temperature dial pinned near 0 for extraction / classification (the single repeatable answer), beside a token-size comparison "tight schema, no prose → fewer output tokens" vs. a chatty answer. Caption: "structured output is often a cost win too — output is the pricey direction."
+- diagram: two panels side by side. Left: a temperature dial pinned near 0 for extraction /
+  classification ("the single repeatable answer"). Right: a two-bar output-token comparison — a
+  short cyan bar "tight schema, no prose" beside a tall coral bar "chatty prose answer". Caption:
+  "structured output is often a cost win too — output is the pricey direction."
 
 ### slide 3.6 The thinking/answer channel split (mini-essential)
 
@@ -260,7 +276,11 @@ estimated duration: 110
   teaching**.
 - A misconception worth dropping: *"few-shot teaches the model new things."* It doesn't — it
   conditions this one call's behavior; nothing about the model itself is updated.
-- diagram: a stack feeding one call — example pairs `[in₁→out₁] [in₂→out₂] [in₃→out₃]` placed before the real input, all flowing into a single model call; a side note "model weights unchanged — this conditions *this call's* behavior (showing), it does not train (teaching)."
+- diagram: a stack feeding one call — example pairs `[in₁→out₁] [in₂→out₂] [in₃→out₃]` placed
+  before the real input, all flowing into a single model call; a side note "model weights
+  unchanged — this conditions *this call's* behavior (showing), it does not train (teaching)."
+  Colour: the example stack and the call arrow cyan (the lever at work); the model-weights box
+  dashed ink-faint with no arrow touching it (untouched, untrained).
 
 ### slide 4.2 Two placements, one trade-off
 
@@ -273,6 +293,8 @@ estimated duration: 110
   downstream parser or cache strategy prefers.
 - diagram: the two layouts side by side — left: `[user(ex1_in), assistant(ex1_out), user(ex2_in),
   assistant(ex2_out), user(real_in)]`; right: `[user("Examples:\n…\n\nNow classify: real_in")]`.
+  Colour: both panels cyan — this is a two-up of equals, not right-vs-wrong; no coral anywhere
+  (the trade-off is preference, not failure).
 
 ### slide 4.3 Diversity beats volume
 
@@ -292,6 +314,10 @@ estimated duration: 110
 - It's also **editable**: every time you find a failing input, you can add an example that
   resembles it. That's its power *and* its trap — the list grows, the per-call cost grows, and at
   some point you should reach for a different tool.
+- diagram: a bar chart of per-call input tokens — a short cyan 0-shot bar, then climbing coral
+  bars at 2-shot / 4-shot / 8-shot as the example list grows (the same `prefix_tokens` numbers
+  you'll measure live in L0207). Caption: "every example is re-billed on every call — a
+  cost-vs-quality dial, not a free improvement."
 - table: when few-shot is the right tool, and when it isn't.
 
 | Situation | Reach for… |
@@ -313,6 +339,10 @@ estimated duration: 110
 - The catalog is five shapes: **extraction**, **classification**, **ranking / recommendation**,
   **constrained generation**, **summarization / transformation**. Nothing here is a new
   technique — each is the three levers aimed at a different **output contract**.
+- diagram: a light fan-out — one "single LLM call" box branching to five output-contract chips:
+  extraction (JSON fields) · classification (label from a set) · ranking (ids reordered) ·
+  constrained generation (exactly N) · summarization (transformed text). Colour: the call box and
+  chips cyan; no coral — this is the menu, not a failure map.
 - table: the five shapes, the lever each leans on, the output contract, and the failure a validator
   must catch.
 
@@ -348,7 +378,8 @@ estimated duration: 110
   outside the set, so validate `label in ALLOWED` — and for a taxonomy, validate the subcategory
   belongs to the chosen category.
 - diagram: an input ticket flowing into a flat label, then into a two-level `category → subcategory`
-  pair, with the validator rejecting an out-of-set label.
+  pair, with a cyan validator gate rejecting an out-of-set label — the invented label and its
+  rejection mark are coral (the failure the `label in ALLOWED` check catches).
 
 ### slide 5.4 Ranking / recommendation — order a candidate list
 
@@ -359,6 +390,11 @@ estimated duration: 110
   fine until you notice one item vanished.
 - Optionally ask for a one-line justification per rank — useful, but it costs output tokens and
   isn't the thing you validate.
+- diagram: the same validator-gate shape as slides 5.2 / 5.3 / 5.5, pointed at ranking — candidate
+  pills `[1] [2] [3]` reordered to `[3] [1] [2]` passing through a cyan gate labeled "each id
+  exactly once"; below, a coral failure lane where the output reads `[3, 1]` and a dashed ghost
+  pill marks where id 2 silently vanished. Caption: "the classic silent failure — the ranking
+  looks fine until you notice an item is gone."
 - table: candidate list in, ordered id list out, validator preserving the set.
 
 | Prompt gives | Model returns | Validator checks |
@@ -384,8 +420,10 @@ estimated duration: 110
 - **Summarization, rewriting, normalization, translation** are one family: text in, *transformed*
   text out, **meaning preserved**. The **system message (section 2)** carries the durable policy —
   audience, length, register — because it's true on *every* call of this transformer.
-- diagram: `system: "Summarize for a non-technical exec in one sentence."` + `user: <the document>`
-  → a one-sentence summary; swap the system policy to restyle without touching the user text.
+- diagram: the same two system/user boxes from slide 2.2, reused with one change — the content:
+  `system: "Summarize for a non-technical exec in one sentence."` (cyan — the durable policy doing
+  the work) + `user: <the document>` → a one-sentence summary; swap the system policy to restyle
+  without touching the user text.
 - The contract here is softer (there's no single right answer), so validation is about
   **guardrails, not equality**: length within bound, no invented facts, required elements present.
   Failure modes to name: **hallucinated additions** and **length drift**.
@@ -431,7 +469,11 @@ estimated duration: 110
   instruction alone won't cut it.
 - The sentence to leave with: *you now know how to ask the model for what you want, in the shape
   you want.*
-- diagram: a bipartite map — three levers on the left (roles · structured output · few-shot) with edges to the five task shapes on the right (extraction · classification · ranking · constrained generation · summarization), each edge showing which lever a shape leans on.
+- diagram: a bipartite map — three levers on the left (roles · structured output · few-shot) with
+  edges to the five task shapes on the right (extraction · classification · ranking · constrained
+  generation · summarization), each edge showing which lever a shape leans on. Colour: the three
+  lever nodes cyan (the toolkit is the point); edges and shape chips neutral ink-faint; no coral —
+  nothing fails on this slide.
 
 ```text
   levers                     task shapes
@@ -448,6 +490,10 @@ estimated duration: 110
   your *own* prompts. All four share one root: **treating a strong nudge as a hard guarantee.** A
   role's weighting, a JSON contract, an example's pull, a system prompt's authority — each is
   *best-effort*, and building the validate-don't-assume reflex is L02's whole job.
+- diagram: one coral root box — "a strong nudge treated as a hard guarantee" — fanning out to four
+  anti-pattern chips (instructions in the wrong role · structured output trusted blind · leaky
+  under-diverse few-shot · bloated always-on system prompt), each chip paired with its cure in
+  cyan. Coral = the shared root and the anti-patterns; cyan = the cures.
 - table: the four anti-patterns, the one-line cure, and where you saw it.
 
 | Anti-pattern | Cure | Where you saw it |
@@ -470,7 +516,10 @@ estimated duration: 110
   framework-managed function. L03–L05 then chain several single-step shapes into a graph.
 - **Later: L06 (reasoning).** The three levers are also what L06 builds chain-of-thought on —
   that hand-off is the next slide.
-- diagram: a forward roadmap arrow — L02 (single-step toolkit) → L03 (wrap extraction as a reusable node) → L04–L05 (chain nodes into a graph) → L06 (reasoning on the same three levers); mark L03 "immediate next."
+- diagram: a forward roadmap arrow — L02 (single-step toolkit) → L03 (wrap extraction as a
+  reusable node) → L04–L05 (chain nodes into a graph) → L06 (reasoning on the same three levers);
+  mark L03 "immediate next." Colour: the L02 and L03 nodes cyan (where you are, and the immediate
+  next step); the L04–L06 stops dashed ink-faint (deferred, not yet); no coral.
 
 ### slide 6.4 What L06 does with this
 
@@ -485,6 +534,11 @@ estimated duration: 110
   L06 shows you one application of it.
 - The hand-off sentence: *L06 is about making the model think harder before it answers — built
   entirely on the three levers you now own.*
-- diagram: a hand-off map — the three L02 levers each feeding one L06 use: roles → a `system` message that licenses reasoning; structured output → the `<thinking>`/`<answer>` split; few-shot → worked-example chains-of-thought. Caption: "L06 = make the model think harder, built entirely on the three levers you now own."
+- diagram: a hand-off map — the three L02 levers each feeding one L06 use: roles → a `system`
+  message that licenses reasoning; structured output → the `<thinking>`/`<answer>` split;
+  few-shot → worked-example chains-of-thought. Caption: "L06 = make the model think harder, built
+  entirely on the three levers you now own." Colour: the three L02 lever nodes and the hand-off
+  edges cyan (what you now own doing the feeding); the L06 use-boxes dashed ink-faint (next
+  lesson's territory); no coral.
 
 [↑ Back to top](#prompting-fundamentals-roles-structured-output-few-shot)

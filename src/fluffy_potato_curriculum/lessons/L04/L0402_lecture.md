@@ -26,9 +26,11 @@ estimated duration: 55
   out. The model lives *inside* the nodes; it never decides what runs next.
 - [L05](../L05/objectives.md) adds a **conditional** edge on the same primitives; L11 later reuses
   everything here and adds exactly one more thing — a back-edge — to make an agent.
-- diagram: L03's single `node` box on the left growing into L04's fixed chain on the right — one box
-  `node`, an arrow, then three wired boxes `parse → draft → policy_check → END`, captioned "one node
-  (L03) → several wired in order (L04)."
+- diagram: L03's single `node` box on the left growing into L04's fixed chain on the right — one
+  **ink-faint** box `node` (where you were), an arrow, then three **cyan** wired boxes
+  `parse → draft → policy_check` into an ink-faint `END`, captioned "one node (L03) → several wired
+  in order (L04)." This chain is the lesson's motif — every diagram from here re-draws it with one
+  thing changed.
 
 ### slide 1.2 Workflow vs. agent — the headline distinction (first pass)
 
@@ -44,16 +46,20 @@ estimated duration: 55
 
 - The model is involved in **both**. Agency is about who controls the *path*, not whether a model
   is called somewhere. Here you're building the **simplest** workflow shape — no branches at all yet.
+- diagram: two-up contrast of the same `parse → draft → policy_check → END` chain — left panel all
+  **cyan** forward edges, acyclic, captioned "developer owns the path (workflow)"; right panel the
+  identical nodes plus one **coral** back-edge curling last → first into a cycle, captioned "model
+  owns the path (agent — L11)." Same motif, one edge changed — that one edge is the whole table.
 
 ### slide 1.3 The sentence to carry through the lesson
 
 - **In a workflow, the model lives inside the nodes; you own the edges.**
 - Every edge you write in L04 is **fixed** — `A → B`, always. There's nothing to branch on yet;
   that arrives in L05.
-- diagram: a fixed acyclic chain `parse → draft → policy_check → END`, each node showing a small
-  "model" chip *inside* it and the forward edges labeled "you own these (fixed)"; a faint dashed
-  back-edge from the last node curving to the first is crossed out and labeled "no back-edge yet — a
-  loop here would make it L11's agent."
+- diagram: the fixed acyclic chain `parse → draft → policy_check → END` again, each **cyan** node
+  showing a small "model" chip *inside* it and the cyan forward edges labeled "you own these
+  (fixed)"; a dashed **coral** back-edge from the last node curving to the first is crossed out and
+  labeled "no back-edge yet — a loop here would make it L11's agent."
 
 ## section 2. The StateGraph primitives (vocabulary, continued from L03)
 
@@ -61,7 +67,9 @@ estimated duration: 55
 
 - Every graph in this lesson is built with the same `StateGraph` recipe. Get this shape into
   muscle memory:
-- diagram: a flow `StateGraph(State) → add_node ×N → set_entry_point → add_edge → compile() → invoke(input)`.
+- diagram: a flow `StateGraph(State) → add_node ×N → set_entry_point → add_edge → compile() → invoke(input)`
+  — **cyan** step boxes joined by ink-faint arrows, with `add_edge` the emphasized cyan step (edges
+  *between* nodes are the one new piece of wiring vs. L03).
 
 ```python
 from langgraph.graph import StateGraph, END
@@ -94,6 +102,11 @@ def parse(state: TicketState) -> dict[str, object]:
     return {"parsed": reply.content}        # only the field this node changed
 ```
 
+- diagram: a small round-trip flow — the `TicketState` box feeds the `parse` node (the motif's
+  first link), which returns a single **cyan** `{"parsed": …}` pill riding a merge arrow back into
+  the state box; the untouched fields `ticket` / `draft` / `steps` stay **ink-faint**. Cyan marks
+  the one field the node changed — a partial update, never the whole state.
+
 ### slide 2.3 State and reducer — the data that flows between nodes
 
 - **State** is a typed object (a `TypedDict`) threaded through every node. In L03 your state had
@@ -102,8 +115,11 @@ def parse(state: TicketState) -> dict[str, object]:
 - A **reducer** is the rule that merges a node's returned update into state, *per field*. The
   default reducer **overwrites**; an `Annotated[list, add]` field **appends** instead. This is your
   first genuinely new primitive in L04 — you never needed one in L03 (one node, nothing to merge).
-- diagram: a `TicketState` box with fields `ticket: str`, `parsed: str`, `draft: str`,
-  `steps: Annotated[list[str], add]` — the last one tagged "append reducer".
+- diagram: the `TicketState` box drawn three times, once after each node of the
+  `parse → draft → policy_check` chain — the `ticket` / `parsed` / `draft` fields shown **ink-faint**,
+  each holding one value that gets *overwritten* in place (default reducer), while the **cyan**
+  `steps: Annotated[list[str], add]` row visibly grows by one entry per node, tagged "append
+  reducer". Cyan is on the appending field — the genuinely new behavior.
 - This is the **same** state/reducer machinery you'll reuse in L11 for an agent's *message
   history* — you're meeting it here first, on a simpler acyclic graph.
 
@@ -122,6 +138,10 @@ def parse(state: TicketState) -> dict[str, object]:
 - **END** — the sentinel where execution stops; every path in a workflow reaches it.
 - **DAG (directed acyclic graph)** — a graph with **no back-edges**: every edge moves forward to
   `END`. The absence of a back-edge is exactly what makes this a *workflow*, not an agent.
+- diagram: the `parse → draft → policy_check → END` chain once more, now with **cyan** callout
+  labels pinning the vocabulary onto it — "entry point" on `parse`, "edge" on a forward arrow,
+  "END" on the sentinel — plus a dashed **coral** back-edge from `policy_check` to `parse` labeled
+  "this one edge would un-DAG it." Same motif, this time annotated.
 
 ## section 3. The pattern — prompt chaining
 
@@ -129,7 +149,9 @@ def parse(state: TicketState) -> dict[str, object]:
 
 - **Prompt chaining**: a fixed chain of nodes where each step's output feeds the next. Your running
   example is a support-ticket pipeline: **parse → draft → policy-check**.
-- diagram: three boxes `parse → draft → policy_check → END`, two forward arrows, no back-edge.
+- diagram: the lesson's chain at its cleanest — three **cyan** boxes `parse → draft → policy_check`
+  joined by cyan forward arrows into an **ink-faint** `END`, no back-edge anywhere; the motif,
+  finally named: prompt chaining.
 - Each node is a **separate model call with a focused prompt**, not one mega-prompt doing
   everything.
 
@@ -150,6 +172,10 @@ def parse(state: TicketState) -> dict[str, object]:
 - Here's the honest trade-off: for a *strictly linear* three-step task the graph is near
   break-even. Its real payoff shows up once you add **branching** ([L05](../L05/objectives.md),
   next), shared state, and tracing ([L12](../L12/objectives.md), later).
+- diagram: two-up contrast — left, one oversized **coral** box labeled "parse + draft + police, one
+  mega-prompt" (unreliable, untestable as a lump); right, the same work as the motif's three small
+  **cyan** focused nodes `parse → draft → policy_check`. Coral is the monolith; cyan the
+  decomposition.
 
 ## section 4. Each node can bind its own model
 
@@ -159,8 +185,10 @@ def parse(state: TicketState) -> dict[str, object]:
   `ChatAnthropic(model=...)` for each one. That lets you **mix models per node**.
 - Use a **cheap, fast model** (Claude **Haiku 4.5**) for light steps — extract a field, summarize —
   and a **capable model** (Claude **Sonnet 4.6**) for heavy reasoning — draft, analyze.
-- diagram: the chaining graph with each node tagged by model — `parse` = Haiku, `draft` /
-  `policy_check` = Sonnet.
+- diagram: the chaining graph again, each node now tagged with a model chip — `parse` wears a
+  dim/neutral **ink-faint** Haiku 4.5 chip (cheap is a choice, not a failure — never coral), while
+  `draft` and `policy_check` wear **cyan** Sonnet 4.6 chips (the capable calls, where the spend
+  goes). Same motif; only the chips change.
 
 ### slide 4.2 Mechanism here; the decision framework is L14's
 
@@ -179,8 +207,9 @@ def parse(state: TicketState) -> dict[str, object]:
 - You can **list, draw, and reason about** nodes and edges — unlike `if`/`while` buried in Python.
 - LangGraph renders the compiled graph for you: `app.get_graph().draw_mermaid()` (text) or
   `draw_mermaid_png()` (image). The picture *is* the control flow, and needs no API key.
-- diagram: side by side — a block of imperative sequential Python vs. the rendered graph diagram —
-  captioned "same logic; the graph is data you can inspect."
+- diagram: side by side — a block of imperative sequential Python rendered **ink-faint** (control
+  flow buried in code) vs. the motif chain rendered as a **cyan** graph diagram (control flow as
+  inspectable data) — captioned "same logic; the graph is data you can inspect."
 
 ### slide 5.2 Watch it run — `graph.stream`, the same tool from L03
 
@@ -201,6 +230,10 @@ def parse(state: TicketState) -> dict[str, object]:
   [L13](../L13/objectives.md) discipline, same input → same path) is cheap and honest.
 - Notice the model *inside* a node is still non-deterministic — a draft's wording varies. The
   **path** is what's stable, and that's the whole lesson.
+- diagram: the motif chain drawn twice, stacked as "run 1" / "run 2" of the same input — the
+  `parse → draft → policy_check → END` path identical **cyan** in both, with only small **ink-dim**
+  wording chips beside `draft` differing ("Happy to help…" vs. "Glad to assist…"). The same picture
+  twice is the point: the path is stable, the words inside a node are not.
 
 ## section 6. Two DAG gotchas, named
 
@@ -226,6 +259,11 @@ def parse(state: TicketState) -> dict[str, object]:
   the path" (a workflow) with "the model owns the path" (an agent).** A model *inside* a node isn't
   agency; agency is the model choosing the *path*, which is exactly the back-edge L11 adds. Keep
   that line sharp and you've got the whole lesson.
+- diagram: two-up, one panel per gotcha, each the motif chain with exactly one thing gone **coral** —
+  left, an uninvited coral back-edge from `policy_check` to `parse` ("you slid into an agent without
+  deciding to"); right, the model chips swapped: a coral Sonnet chip on `parse` (overpaying) and a
+  coral Haiku chip on `draft` (underpowering). The healthy cyan versions of both live in 1.3 and 4.1
+  — these are the same pictures broken.
 
 ## section 7. Bridge to L05
 
@@ -238,3 +276,7 @@ def parse(state: TicketState) -> dict[str, object]:
 - L05 is also where the full **workflow vs. agent** contrast closes out, once you've seen both a
   fixed chain (this lesson) and a routed branch (L05) — the two things that make "developer wires
   every path" concrete before L11 hands the model that control.
+- diagram: the motif chain one last time, solid and **cyan**, unchanged — with a dashed **ink-faint**
+  routing diamond ghosted in after `parse`, its two dashed outgoing edges fading out, labeled
+  "conditional edge — lands in L05." Everything solid carries forward; the one dashed shape is all
+  L05 adds.

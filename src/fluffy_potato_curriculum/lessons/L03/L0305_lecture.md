@@ -21,9 +21,11 @@ estimated duration: 9
   one-line summary from them, in the same body with intermediate variables.
 - No state schema, no typed return, no graph — just sequential Python. It *works*. So why did we go
   to the trouble of a `StateGraph` for a single node?
-- diagram: two panels side by side — left, a single clean `extract_node` box labeled `typed state in
-  → state update out`; right, one wide `extract_and_summarize_inline` box with two fused calls
-  (`extract` + `summarize`) crammed inside it, no seam between them.
+- diagram: two panels side by side — left, a single clean **cyan** `extract_node` box labeled
+  `typed state in → state update out` (the cyan border *is* the seam); right, one wide **coral**
+  `extract_and_summarize_inline` box with two fused calls (`extract` + `summarize`) crammed inside
+  it, no seam between them. This node box is the deck's motif — slides 1.2, 2.1, 2.2, and 4.1
+  re-draw the *same* box with exactly one thing changed each time.
 
 ### slide 1.2 The tell: try to test extraction alone
 
@@ -32,9 +34,10 @@ estimated duration: 9
   calls it* moves.
 - The inline version takes the same edit too — but now **test extraction alone.** You can't run just
   that half without also running (and paying for) the summarize half. The two jobs are **fused**.
-- diagram: the inline function as one block with `extract` welded to `summarize` and a coral ✂ /
-  ✗ trying (and failing) to cut between them — "no seam to test one half"; beside it the node with a
-  clean dashed testable boundary around a single step.
+- diagram: the slide-1.1 two-up again, one change — a coral ✂ / ✗ trying (and failing) to cut
+  between the fused `extract` + `summarize` calls in the coral inline block ("no seam to test one
+  half"); beside it the same cyan `extract_node` box, now wearing a dashed testable boundary around
+  its single step.
 
 ## section 2. What the node buys you
 
@@ -51,10 +54,17 @@ estimated duration: 9
 | Swapped | model / prompt changes without touching neighbors | internals and callers are tangled |
 | Seen at a glance | inspectable data (`draw_mermaid()`, nodes + edges) | you must read the body to know its shape |
 
+- diagram: the slide-1.1 two-up again, one change — the four affordances pinned on: left, the same
+  cyan `extract_node` box with four labeled seams (`invoke alone` · `compose` · `swap` · `draw`);
+  right, the coral fused box with the same four labels struck through — "no seam, no affordance."
+
 ### slide 2.2 The through-line
 
 - An explicit, **narrow** step is the unit worth orchestrating.
 - The ceremony exists to make one LLM call **reusable and inspectable** instead of a one-off.
+- diagram: the same cyan `extract_node` box, alone — the one change this time: a dashed ink-faint
+  ghost row of future nodes trailing off to its right, labeled "lands in L04," pre-echoing the
+  slide-4.1 chain.
 
 ## section 3. Be honest about the break-even
 
@@ -68,8 +78,9 @@ estimated duration: 9
   not merely by a convention you have to keep up.
 - The value shows up the moment there is a **second step** — which is exactly the next lesson.
 - diagram: a break-even chart — x-axis "number of steps," two cost/complexity curves: `plain function`
-  (low at 1 step, rising steeply as steps grow) and `graph of nodes` (higher fixed start, near-flat),
-  crossing just after step 1, with the crossover point labeled "payoff starts at step 2."
+  in **coral** (low at 1 step, rising steeply as steps grow — the cost you pay later) and
+  `graph of nodes` in **cyan** (higher fixed start, near-flat), crossing just after step 1, with the
+  crossover point labeled "payoff starts at step 2."
 
 ## section 4. The bridge to L04
 
@@ -80,7 +91,8 @@ estimated duration: 9
   sequence.
 - If you understood today's one node, you already understand most of what L04 needs: it is mostly
   **wiring**, not new node design.
-- diagram: one `node` box on the left, an arrow to three chained node boxes
-  (`extract → summarize → format`) joined by fixed edges — "one step now → several wired next."
+- diagram: reuse the slide-1.1 node box — the same cyan `extract_node` box on the left, an arrow to
+  three chained copies of it (`extract → summarize → format`) joined by fixed cyan edges: the
+  slide-2.2 ghost row drawn solid — "one step now → several wired next."
 
 > **You just wired one step — next lesson, you wire several of them together.**

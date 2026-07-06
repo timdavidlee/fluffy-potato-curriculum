@@ -726,13 +726,13 @@ table.ledger td.warn-cell { color: var(--coral); }
                 <!-- forward edges (same shape) -->
                 <path d="M 1102 240 L 1218 240" stroke="var(--cyan)" stroke-width="3" marker-end="url(#mArrowC2)"/>
                 <path d="M 1362 240 L 1478 240" stroke="var(--cyan)" stroke-width="3" marker-end="url(#mArrowC2)"/>
-                <!-- THE dashed coral back-edge: tools -> back to model -->
+                <!-- THE dashed cyan back-edge: tools -> back to model (cyan = the point, not a failure) -->
                 <path d="M 1290 178 C 1290 90, 1120 78, 1040 150 C 1010 178, 1012 200, 1030 218"
-                      fill="none" stroke="var(--coral)" stroke-width="4" stroke-dasharray="10 8" marker-end="url(#mArrowR)"/>
-                <circle r="9" fill="var(--coral)">
+                      fill="none" stroke="var(--cyan)" stroke-width="4" stroke-dasharray="10 8" marker-end="url(#mArrowC2)"/>
+                <circle r="9" fill="var(--cyan)">
                     <animateMotion dur="3.2s" repeatCount="indefinite" path="M 1290 178 C 1290 90, 1120 78, 1040 150 C 1010 178, 1012 200, 1030 218"/>
                 </circle>
-                <text x="1165" y="92" text-anchor="middle" class="edge-label" fill="var(--coral)" font-size="22" font-weight="600">the only thing L11 adds</text>
+                <text x="1165" y="92" text-anchor="middle" class="edge-label" fill="var(--cyan)" font-size="22" font-weight="600">the only thing L11 adds</text>
                 <!-- nodes -->
                 <circle cx="1040" cy="240" r="62" fill="#12181a" stroke="var(--cyan)" stroke-width="2.5"/>
                 <text x="1040" y="249" text-anchor="middle" class="node-label" font-size="24">model</text>
@@ -749,7 +749,7 @@ table.ledger td.warn-cell { color: var(--coral); }
                 </defs>
             </svg>
         </div>
-        <div class="diagram-caption reveal" style="text-align:center; max-width:100%; margin-top:6px;">Same nodes, same edges &mdash; one <span style="color:var(--coral); font-style:normal;">dashed back-edge</span> curves from the model out to <code>tools</code> and back. That single edge hands the <b style="color:var(--ink);">model</b> control of the path: the acyclic workflow becomes a cyclic, model-driven agent.</div>
+        <div class="diagram-caption reveal" style="text-align:center; max-width:100%; margin-top:6px;">Same nodes, same edges &mdash; one <span style="color:var(--cyan); font-style:normal;">dashed back-edge</span> curves from the model out to <code>tools</code> and back. That single edge hands the <b style="color:var(--ink);">model</b> control of the path: the acyclic workflow becomes a cyclic, model-driven agent.</div>
     </div>
     <div class="chrome-page">06 / 15</div>
     <div class="chrome-nav">&larr; &rarr; navigate</div>
