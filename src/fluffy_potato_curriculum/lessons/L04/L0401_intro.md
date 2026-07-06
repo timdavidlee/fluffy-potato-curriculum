@@ -23,7 +23,7 @@ the path and the model never decides what runs next. [L05](../L05/objectives.md)
 turns a workflow into an agent: a cycle.
 
 Up to here you've written control flow as plain Python: a single call (L01–L02), one wrapped node
-(L03). Continuing from L03, the model still lives *inside* the nodes — classify, draft, summarize —
+(L03). Continuing from L03, the model still lives *inside* the nodes — parse, draft, summarize —
 but now you're wiring *several* nodes together, and *what runs next* is decided by the edges you lay
 out, not by the model.
 
@@ -65,10 +65,11 @@ Since [L03](../L03/objectives.md), you've been calling the native LangChain **`C
 client from your nodes, not the hand-rolled `potato_llm` seam from L01–L02 — no new departure here,
 just more of it.
 
-L04's demo also gives you a first, optional **taste** of watching a workflow run in Langfuse — but
-the full tracing skill (reading a structured trace, comparing runs, diagnosing failures) is
-**L12's** job, still several lessons away. If Langfuse isn't configured on your machine, the demo
-runs exactly the same; you just won't see the spans.
+L04's demo also shows you how to **watch a workflow run**: `graph.stream(stream_mode="updates")` —
+the same built-in call you used in L03 — prints one update per node, in the order they fire, which
+confirms the path was developer-determined. Routing that same run to **Langfuse** for a structured,
+comparable trace (reading a trace, comparing runs, diagnosing failures) is **L12's** job, still
+several lessons away — nothing in L04 depends on tracing being set up.
 
 The single sentence to leave L04 with: **"You just wired several steps together — next lesson, one
 of those edges gets to choose."**

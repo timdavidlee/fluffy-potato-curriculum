@@ -2,7 +2,7 @@
 
 ```yaml
 title: "Directed graphs: sequential chaining — wire several nodes into a fixed pipeline"
-keywords: langgraph, StateGraph, workflow, dag, node, edge, state, reducer, prompt chaining, per-node model, mixed models, control flow as data, determinism, ChatAnthropic
+keywords: langgraph, StateGraph, workflow, dag, node, edge, state, reducer, prompt chaining, per-node model, mixed models, control flow as data, determinism, ChatAnthropic, graph.stream
 estimated duration: 55
 ```
 
@@ -182,14 +182,16 @@ def parse(state: TicketState) -> dict[str, object]:
 - diagram: side by side — a block of imperative sequential Python vs. the rendered graph diagram —
   captioned "same logic; the graph is data you can inspect."
 
-### slide 5.2 A first taste of tracing (not a prerequisite)
+### slide 5.2 Watch it run — `graph.stream`, the same tool from L03
 
-- The demo gives you an **optional** taste of routing spans to Langfuse, the same self-hosted
-  instance **[L12](../L12/objectives.md)** will teach in full — reading a structured trace,
-  comparing runs, diagnosing failures from a trace alone is entirely L12's job, several lessons
-  away.
-- If Langfuse isn't configured on your machine, the workflow runs exactly the same; you simply
-  won't see the spans. Nothing in L04 depends on tracing being set up.
+- Run the workflow with `app.stream({...}, stream_mode="updates")` instead of `invoke`: you get
+  **one chunk per node, in the order they fire** — `{"parse": {...}}` → `{"draft": {...}}` →
+  `{"policy_check": {...}}`.
+- That output is the **path made visible**: it confirms the route was developer-determined. It's
+  the same built-in call you used in [L03](../L03/objectives.md) — nothing new to set up.
+- Routing this same run to **Langfuse** for a structured, comparable trace is
+  **[L12](../L12/objectives.md)'s** job, several lessons away. Nothing in L04 depends on tracing
+  being set up.
 
 ### slide 5.3 Determinism is a feature, not a limitation
 
@@ -218,7 +220,7 @@ def parse(state: TicketState) -> dict[str, object]:
 | Gotcha | Cure | Where you saw it |
 | --- | --- | --- |
 | **"My DAG is deterministic"** — trusting the *whole* workflow to reproduce, or quietly adding a back-edge without deciding to | the **path** is fixed; the model's output *inside* each node still varies. Keep the graph acyclic **on purpose** — the moment you loop on the model's own output you've built an agent ([L10](../L10/objectives.md)/[L11](../L11/objectives.md)), so name the crossing instead of sliding into it | §5.3 (determinism is the *path*, not the wording) + §2.5 (a DAG is exactly "no back-edge") + slide 1.2 (acyclic workflow vs. cyclic agent) |
-| **Wrong model per node** — Sonnet on the label step (overpaying), or Haiku on the hard reasoning step (underpowering) | cheap model for classify / extract, capable model for reasoning. The *mechanism* is per-node `ChatAnthropic(model=...)` (§4); the *which-model decision framework* is [L14](../L14/objectives.md) — hold onto the link, you'll get the full framework there | §4 (each node binds its own model) + the `parse`=Haiku / `draft`=Sonnet chain in the [L0403](L0403_lecture.ipynb) demo |
+| **Wrong model per node** — Sonnet on the light `parse`/extract step (overpaying), or Haiku on the hard reasoning (`draft`) step (underpowering) | cheap model for parse / extract, capable model for reasoning. The *mechanism* is per-node `ChatAnthropic(model=...)` (§4); the *which-model decision framework* is [L14](../L14/objectives.md) — hold onto the link, you'll get the full framework there | §4 (each node binds its own model) + the `parse`=Haiku / `draft`=Sonnet chain in the [L0403](L0403_lecture.ipynb) demo |
 
 - text: the first gotcha is where this lesson's spine can blur — **confusing "the developer owns
   the path" (a workflow) with "the model owns the path" (an agent).** A model *inside* a node isn't

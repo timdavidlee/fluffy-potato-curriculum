@@ -1134,14 +1134,24 @@ ok = policy(draft)
     <div class="chrome-tag">L04 &middot; <b>WORKFLOWS</b></div>
     <div class="topbar reveal">
         <div class="eyebrow">Slide 5.2</div>
-        <h2 class="headline">A first taste of tracing <span class="it">(not a prerequisite)</span></h2>
+        <h2 class="headline">Watch it run &mdash; <span class="it">graph.stream</span>, the same tool from L03</h2>
     </div>
-    <div class="body-area">
-        <ul class="points reveal">
-            <li class="point">The demo gives an <b>optional</b> taste of routing spans to <b>Langfuse</b> &mdash; the same self-hosted instance <b>L12</b> teaches in full.</li>
-            <li class="point">Reading a structured trace, comparing runs, diagnosing failures from a trace alone is entirely <b>L12's</b> job, several lessons away.</li>
-            <li class="point">If Langfuse isn't configured, the workflow runs <b>exactly the same</b>; you just won't see the spans. Nothing in L04 depends on tracing.</li>
-        </ul>
+    <div class="body-area" style="display:flex; align-items:center; gap:56px;">
+        <div style="flex:1; min-width:0;">
+            <ul class="points reveal" style="max-width:none;">
+                <li class="point">Run with <code>stream_mode="updates"</code> instead of <code>invoke</code>: <b>one chunk per node, in the order they fire</b>.</li>
+                <li class="point">That output is the <b>path made visible</b> &mdash; it confirms the route was developer-determined. Same built-in call you used in <b>L03</b>; nothing new to set up.</li>
+                <li class="point">Routing this same run to <b>Langfuse</b> for a structured, comparable trace is <b>L12's</b> job, several lessons away. Nothing in L04 depends on tracing.</li>
+            </ul>
+        </div>
+        <div class="diagram-frame reveal" style="width:620px; flex-shrink:0;">
+            <pre class="code" style="margin:0; flex:1; padding:16px 20px;"><code style="font-size:17px;"><span class="kw">for</span> chunk <span class="kw">in</span> app.stream(inp, stream_mode=<span class="p">"updates"</span>):
+    print(chunk)
+
+{<span class="p">'parse'</span>: {...}}
+{<span class="p">'draft'</span>: {...}}
+{<span class="p">'policy_check'</span>: {...}}</code></pre>
+        </div>
     </div>
     <div class="chrome-page">20 / 26</div>
     <div class="chrome-nav">&larr; &rarr; navigate</div>
@@ -1199,7 +1209,7 @@ ok = policy(draft)
                 </tr>
                 <tr>
                     <td class="tag warn-cell">Wrong model per node</td>
-                    <td>cheap model for classify / extract, capable for reasoning. The <i>mechanism</i> is per-node <code>ChatAnthropic(model=...)</code> (&sect;4); the <i>which-model</i> framework is L14.</td>
+                    <td>cheap model for parse / extract, capable for reasoning. The <i>mechanism</i> is per-node <code>ChatAnthropic(model=...)</code> (&sect;4); the <i>which-model</i> framework is L14.</td>
                     <td>&sect;4 + the <code>parse</code>=Haiku / <code>draft</code>=Sonnet chain in the L0403 demo</td>
                 </tr>
             </tbody>

@@ -62,7 +62,7 @@ The teacher should have, before the first demo starts:
 
 - **Control flow is now data.** Nodes and edges can be listed, drawn, and streamed step by step — unlike `if`/`while` buried in Python. Show the diagram and the `stream` output as proof.
 - **The model lives *inside* the nodes; the developer owns the edges.** The model does the smart per-step work (parse, draft); *what runs next* is decided by the edges *you* wired. This is the contrast you'll repeat all lesson.
-- **First framework, native client.** Say the departure out loud: from L04 on, nodes call LangChain's `ChatAnthropic` directly, not the `potato_llm` seam from L01–L13 — "frameworks bring their own client abstraction."
+- **First framework, native client.** Say the departure out loud: from L03 on, nodes call LangChain's `ChatAnthropic` directly, not the `potato_llm` seam from L01–L02 — "frameworks bring their own client abstraction."
 - **Each node can bind its own model.** A node is an independent call, so a graph mixes models: **Haiku** on the light `parse` step, **Sonnet** on the heavy `draft` step. The `stream` output makes it tangible — each node's update shows which model produced it. This is the **mechanism** of mixed-model design; the *which-model decision framework* (capability/latency/cost, budgets) is **[L14](../L14/objectives.md)'s** job, not L04's — name the link, don't re-teach it.
 - **Why decompose into three prompts instead of one mega-prompt?** Smaller focused prompts are more reliable and individually testable; the cost is more calls (the L01 cost trade). Name it honestly: for a strictly linear chain the graph is near break-even — its payoff shows with branching ([L05](../L05/objectives.md), next), visualization, shared state, and tracing.
 
