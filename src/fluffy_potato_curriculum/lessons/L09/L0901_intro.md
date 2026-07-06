@@ -17,8 +17,8 @@ estimated duration: 10
 
 ## Where this lesson sits
 
-[L07](../L07/objectives.md) taught the **mechanics** of a tool call — the `tool_use` / `tool_result`
-round-trip, who runs what, and why the application validates. [L08](../L08/objectives.md) taught the
+[L07](../L07/objectives.md) taught the **mechanics** of a tool call — the `AIMessage.tool_calls` /
+`ToolMessage` round-trip, who runs what, and why the application validates. [L08](../L08/objectives.md) taught the
 **design** of a good tool — naming, descriptions written for the model's eyes, tight schemas,
 informative errors, named side effects. In both lessons the tool was a Python function living inside
 **one process**: your code registered it, your code ran it when the model asked.
@@ -36,8 +36,8 @@ extra process to run, a transport to keep healthy, failures that can now happen 
 ## The one idea, said five ways
 
 If you remember nothing else from L09, remember this: **MCP changes where the tool lives and how it is
-reached — not how it should be designed.** Said five ways, because students keep expecting MCP to do
-more (or less) than it does:
+reached — not how it should be designed.** Here it is said five ways, because it's easy to expect MCP
+to do more (or less) than it does:
 
 1. MCP is a **protocol, not a framework**. It specifies how a client and server *talk* about tools.
    It does not prescribe an SDK, a language, or a hosting model. Any process that speaks the protocol
@@ -49,8 +49,8 @@ more (or less) than it does:
    at code-write time. With MCP, the client *asks* the server at connect time: "what tools do you
    expose?" The server's published tool list becomes an external API the server author owns.
 4. **The model can't tell the difference.** From the model's seat, an MCP tool call is the same
-   `tool_use` / `tool_result` round-trip as [L07](../L07/objectives.md). MCP is invisible to the
-   model — it shows up only in the *client's* implementation and the *operator's* config.
+   `AIMessage.tool_calls` / `ToolMessage` round-trip as [L07](../L07/objectives.md). MCP is invisible
+   to the model — it shows up only in the *client's* implementation and the *operator's* config.
 5. **MCP earns its overhead when a second consumer appears.** One agent, one tool, one place — inline
    wins. The moment a different agent, team, or app wants the same tool, MCP's portability starts
    paying for its tax.
@@ -74,8 +74,8 @@ These terms recur whenever tools are packaged for reuse:
 
 ## A note on the code you'll see (read this carefully)
 
-The official Python **`mcp` package is not installed in this course environment**, and we do not add
-it. That has a deliberate consequence for how L09 is built:
+The official Python **`mcp` package is not installed in this course environment**, and it isn't going
+to be. That has a deliberate consequence for how L09 is built:
 
 - The **offline** material — the spec-translation demo ([L0903](L0903_lecture.ipynb)) and all three
   labs ([L0904](L0904_lab_empty.ipynb), [L0907](L0907_lab_empty.ipynb), and the validator lab) — uses

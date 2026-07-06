@@ -1,8 +1,8 @@
-# L12 lecture: Seeing your trace in Langfuse
+# Seeing your trace in Langfuse
 
 ```yaml
-title: "L12 lecture: Seeing your trace in Langfuse"
-keywords: langfuse, observability, trace, span, generation, observation, OpenTelemetry, export
+title: "Seeing your trace in Langfuse"
+keywords: Langfuse, observability, trace, span, generation, observation, OpenTelemetry, export
 estimated duration: 20
 ```
 
@@ -21,12 +21,12 @@ estimated duration: 20
 
 ### slide 1.2 The tool for this course: self-hosted Langfuse
 
-- text: **Langfuse** is an open-source (MIT) LLM observability platform. The cohort runs **one shared instructor instance** — you get a base URL + project keys, no per-student signup, no seat cost.
+- text: **Langfuse** is an open-source (MIT) LLM observability platform. The cohort runs **one shared instructor instance** — you get a base URL + project keys, no signup, no seat cost.
 - text: it ingests **OpenTelemetry** spans. That is *why* `TraceEvent` was shaped the way it was in `common/tracing.py` — an approximate OTel/Langfuse shape — so exporting is a natural step, not a rewrite.
 - text: keys load through `common/config.py` (the pydantic-settings seam), **never hard-coded** — the same stance as every other live call in the course.
 - diagram: a box "your instrumented `agent_graph.run(...)`" with an arrow labeled "export (langfuse SDK / OTLP)" pointing to a box "shared Langfuse dashboard"; a second arrow from "L11 LangGraph agent" pointing at the *same* dashboard, to foreshadow that later traces land here too.
 
-[↑ Back to top](#l12-lecture-seeing-your-trace-in-langfuse)
+[↑ Back to top](#seeing-your-trace-in-langfuse)
 
 ## section 2. The vocabulary mapping (the whole lecture in one table)
 
@@ -51,7 +51,7 @@ estimated duration: 20
 - text: OpenTelemetry says "span," Langfuse says "observation," LangSmith says "run" — three names, one structure. You learned the structure; the names are just vocabulary.
 - text: exact field-name fidelity to one vendor is **not** the goal — approximate OTel-ish structure is. If a field doesn't map perfectly, that mismatch is a useful aside, not a bug.
 
-[↑ Back to top](#l12-lecture-seeing-your-trace-in-langfuse)
+[↑ Back to top](#seeing-your-trace-in-langfuse)
 
 ## section 3. Exporting a run
 
@@ -67,7 +67,7 @@ estimated duration: 20
 - text: **OTLP export** — emit the OTel-shaped spans over the OpenTelemetry protocol; Langfuse ingests them. More moving parts, but reinforces "this was OTel-shaped all along."
 - text: either way the `langfuse` dependency is already in the project (`uv add` was run when the course infra was set up) — there is no install step in class.
 
-[↑ Back to top](#l12-lecture-seeing-your-trace-in-langfuse)
+[↑ Back to top](#seeing-your-trace-in-langfuse)
 
 ## section 4. Re-doing L12's reading skills in the dashboard
 
@@ -75,20 +75,20 @@ estimated duration: 20
 
 - text: filter the project to the failing run, expand the offending observation, read its `inputs` and `error`.
 - text: it's the *same reading* you did on the `.jsonl` in `L1203_lab` — wrong arguments, a runaway's repeated calls, a tool error — only faster to find at scale.
-- text: the dashboard does not replace the skill; it accelerates a skill you already have. A student who never read a raw trace would treat the dashboard as a mystery.
+- text: the dashboard does not replace the skill; it accelerates a skill you already have. Without that reading practice, the dashboard would just look like a mystery — you've already put in the work that makes it legible.
 
 ### slide 4.2 Compare two runs (objective 4), now visual
 
 - text: open two runs of the same task side by side; compare token usage, latency, and the span timeline.
 - text: same comparison as `L1205_lab`'s diff helper — signal (a real behavior change) vs. noise (a few tokens, a few milliseconds) — now read off a waterfall instead of two printed lists.
 
-[↑ Back to top](#l12-lecture-seeing-your-trace-in-langfuse)
+[↑ Back to top](#seeing-your-trace-in-langfuse)
 
 ## section 5. Graceful degradation and what's next
 
 ### slide 5.1 It's additive, never a gate
 
-- text: a student without the Langfuse instance configured **already finished** objectives 1–4 on the in-memory / `.to_jsonl()` trace. This step is the payoff, not a prerequisite.
+- text: without the Langfuse instance configured, you've **already finished** objectives 1–4 on the in-memory / `.to_jsonl()` trace. This step is the payoff, not a prerequisite.
 - text: if the instance is unreachable on the day, a screenshot walk-through of the timeline, a GENERATION, and a two-run comparison teaches the same mapping. The live click-through is a bonus.
 
 ### slide 5.2 This is the cohort's one observability home
@@ -97,7 +97,7 @@ estimated duration: 20
 - text: it also has a datasets/experiments feature that **L13** name-drops for evaluation — the platform version of the eval harness you'll hand-build next lesson.
 - text: closing line: *"you built the minimal version by hand, so the real tool is just your trace, rendered."*
 
-[↑ Back to top](#l12-lecture-seeing-your-trace-in-langfuse)
+[↑ Back to top](#seeing-your-trace-in-langfuse)
 
 ## section 6. What does *not* go in here: extracts (the data plane)
 
@@ -105,7 +105,7 @@ estimated duration: 20
 
 - text: you just sent your trace to Langfuse. That is the **observability plane** — sampled, TTL'd, keyed by `trace_id`, read by you and the eval harness to answer *"what did the run do?"*
 - text: it is **not** where the data your agent *produces* should live. If a run extracts an invoice, scrapes a table, or generates a record, that hard data is a **deliverable** — the **data plane** — and it answers a different question: *"what did the run make?"*
-- text: this is the last artifact from the intro's map — **extracts / new records** — and the one place students most often get the architecture wrong.
+- text: this is the last artifact from the intro's map — **extracts / new records** — and the one place it's easiest to get the architecture wrong.
 - diagram: one tool call fanning out to two destinations — an arrow "observe" to a box "trace → Langfuse (TTL'd, for debugging)", and a *separate* arrow "persist" to a box "database or S3 (durable, for downstream)". Same result, two homes.
 
 ### slide 6.2 Two calls at the boundary, two homes
@@ -129,4 +129,4 @@ estimated duration: 20
 - text: treat the trace store **as** your database → you can't serve, join, back up, or access-control the data.
 - text: neither tool is wrong; each is being used for the other's job. The rule, one line to carry out of L12: **observe the run in the trace; persist the product to the datastore.**
 
-[↑ Back to top](#l12-lecture-seeing-your-trace-in-langfuse)
+[↑ Back to top](#seeing-your-trace-in-langfuse)

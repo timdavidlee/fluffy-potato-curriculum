@@ -1,0 +1,886 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Slide Theme — Sample Deck</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500;1,9..144,600&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+/* ===========================================
+   THEME — Graph Canvas system
+   Fraunces (display serif) + IBM Plex Mono (everything else)
+   =========================================== */
+:root {
+    --stage-bg: #05070a;
+    --slide-bg: #0a0e13;
+    --cyan: #52e8c8;
+    --cyan-dim: #1f6f60;
+    --cyan-faint: rgba(82, 232, 200, 0.16);
+    --cyan-rule: rgba(82, 232, 200, 0.22);
+    --coral: #ff6b57;
+    --coral-dim: #7a3229;
+    --ink: #eef2f0;
+    --ink-dim: #8a9490;
+    --ink-faint: #4c5652;
+
+    --font-display: 'Fraunces', Georgia, serif;
+    --font-body: 'IBM Plex Mono', ui-monospace, monospace;
+
+    --edge-x: 130px;
+    --edge-top: 96px;
+    --edge-bottom: 64px;
+
+    --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+    --duration-normal: 0.7s;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body { font-family: var(--font-body); }
+
+/* ===========================================
+   FIXED 16:9 STAGE: MANDATORY BASE STYLES
+   (viewport-base.css, included in full)
+   =========================================== */
+html, body { width: 100%; height: 100%; margin: 0; overflow: hidden; background: var(--stage-bg, #000); }
+.deck-viewport { position: fixed; inset: 0; overflow: hidden; background: var(--stage-bg, #000); }
+.deck-stage { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; overflow: hidden; transform-origin: 0 0; background: var(--slide-bg, #fff); }
+.slide { position: absolute; inset: 0; width: 1920px; height: 1080px; overflow: hidden; display: block; visibility: hidden; opacity: 0; pointer-events: none; background: var(--slide-bg, #fff); }
+.slide.active, .slide.visible { visibility: visible; opacity: 1; pointer-events: auto; z-index: 1; }
+img, video, canvas, svg { max-width: 100%; max-height: 100%; }
+.deck-controls { position: fixed; left: 50%; bottom: 22px; transform: translateX(-50%); z-index: 1000; }
+@media print {
+    html, body { width: 1920px; height: auto; overflow: visible; background: #fff; }
+    .deck-viewport { position: static; overflow: visible; background: #fff; }
+    .deck-stage { position: static; width: auto; height: auto; transform: none !important; background: none; }
+    .slide { position: relative; display: block !important; visibility: visible !important; opacity: 1 !important; pointer-events: auto !important; width: 1920px; height: 1080px; break-after: page; page-break-after: always; }
+    .slide:last-child { break-after: auto; page-break-after: auto; }
+    .deck-controls { display: none !important; }
+}
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.2s !important; }
+}
+
+/* ===========================================
+   PERMANENT CANVAS TREATMENT
+   Dot-grid + corner glows live on the stage itself so every
+   slide (transparent bg) shows the same atmosphere underneath.
+   =========================================== */
+.deck-stage {
+    background:
+        radial-gradient(ellipse 900px 700px at 82% 12%, rgba(82,232,200,0.10) 0%, transparent 60%),
+        radial-gradient(ellipse 900px 700px at 10% 92%, rgba(255,107,87,0.07) 0%, transparent 60%),
+        var(--slide-bg);
+}
+.deck-stage::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(rgba(82,232,200,0.14) 1.4px, transparent 1.4px);
+    background-size: 64px 64px;
+    z-index: 0;
+}
+.slide { background: transparent; z-index: 1; }
+.slide.active, .slide.visible { z-index: 2; }
+
+/* ===========================================
+   REVEAL ANIMATION — staggered fade + rise
+   =========================================== */
+.reveal {
+    opacity: 0;
+    transform: translateY(22px);
+    transition: opacity var(--duration-normal) var(--ease-out-expo),
+                transform var(--duration-normal) var(--ease-out-expo);
+}
+.slide.visible .reveal { opacity: 1; transform: translateY(0); }
+.slide.visible .reveal:nth-child(1) { transition-delay: 0.05s; }
+.slide.visible .reveal:nth-child(2) { transition-delay: 0.15s; }
+.slide.visible .reveal:nth-child(3) { transition-delay: 0.25s; }
+.slide.visible .reveal:nth-child(4) { transition-delay: 0.35s; }
+.slide.visible .points.reveal .point:nth-child(1) { transition-delay: 0.30s; }
+.slide.visible .points.reveal .point:nth-child(2) { transition-delay: 0.38s; }
+.slide.visible .points.reveal .point:nth-child(3) { transition-delay: 0.46s; }
+.slide.visible .points.reveal .point:nth-child(4) { transition-delay: 0.54s; }
+.slide.visible .points.reveal .point:nth-child(5) { transition-delay: 0.62s; }
+.slide.visible .points .point {
+    opacity: 0;
+    transform: translateY(14px);
+    transition: opacity 0.5s var(--ease-out-expo), transform 0.5s var(--ease-out-expo);
+}
+.slide.visible .points.reveal .point { opacity: 1; transform: translateY(0); }
+
+/* ===========================================
+   CHROME — applies inside every slide
+   =========================================== */
+.chrome-tag {
+    position: absolute;
+    top: 52px;
+    left: var(--edge-x);
+    font-size: 16px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--cyan-dim);
+}
+.chrome-tag b { color: var(--cyan); font-weight: 500; }
+.chrome-page {
+    position: absolute;
+    bottom: 48px;
+    right: var(--edge-x);
+    font-size: 16px;
+    color: var(--ink-faint);
+    letter-spacing: 0.05em;
+}
+.chrome-nav {
+    position: absolute;
+    bottom: 48px;
+    left: var(--edge-x);
+    font-size: 15px;
+    color: var(--ink-faint);
+    letter-spacing: 0.06em;
+    opacity: 0.55;
+}
+
+/* ===========================================
+   TYPOGRAPHY PRIMITIVES
+   =========================================== */
+.eyebrow {
+    font-size: 22px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--cyan);
+    font-weight: 500;
+}
+.eyebrow::before { content: "◆ "; }
+
+.slide-index {
+    position: absolute;
+    top: var(--edge-top);
+    right: var(--edge-x);
+    font-size: 18px;
+    color: var(--ink-faint);
+    letter-spacing: 0.05em;
+}
+
+.topbar {
+    position: absolute;
+    top: var(--edge-top);
+    left: var(--edge-x);
+    right: var(--edge-x);
+    padding-bottom: 26px;
+    border-bottom: 1px solid var(--cyan-rule);
+}
+
+h2.headline {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 62px;
+    line-height: 1.1;
+    color: var(--ink);
+    letter-spacing: -0.005em;
+    margin-top: 18px;
+}
+h2.headline .it { font-style: italic; font-weight: 500; color: var(--cyan); }
+
+.lede {
+    font-size: 29px;
+    line-height: 1.5;
+    color: var(--ink-dim);
+    max-width: 1200px;
+    margin-top: 22px;
+}
+.lede b { color: var(--ink); font-weight: 500; }
+
+.body-area {
+    position: absolute;
+    top: 312px;
+    left: var(--edge-x);
+    right: var(--edge-x);
+    bottom: var(--edge-bottom);
+}
+
+.points { list-style: none; max-width: 1420px; }
+.points .point {
+    position: relative;
+    padding-left: 40px;
+    font-size: 29px;
+    line-height: 1.5;
+    color: var(--ink-dim);
+    margin-bottom: 15px;
+}
+.points .point::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 9px;
+    width: 12px;
+    height: 12px;
+    border: 2px solid var(--cyan);
+    border-radius: 50%;
+}
+.points .point b, .points .point .k { color: var(--ink); font-weight: 600; }
+.points .point code {
+    font-family: var(--font-body);
+    color: var(--cyan);
+    background: rgba(82,232,200,0.08);
+    padding: 1px 8px;
+    border-radius: 3px;
+    font-size: 0.9em;
+}
+.points .point .warn { color: var(--coral); font-weight: 600; }
+
+/* callout — emphasis statement */
+.callout {
+    margin-top: 28px;
+    padding: 28px 36px;
+    border-left: 3px solid var(--cyan);
+    background: rgba(82,232,200,0.05);
+    max-width: 1200px;
+}
+.callout p {
+    font-family: var(--font-display);
+    font-style: italic;
+    font-size: 38px;
+    line-height: 1.32;
+    color: var(--ink);
+}
+
+/* ===========================================
+   TABLE — ledger style
+   =========================================== */
+table.ledger { width: 100%; border-collapse: collapse; max-width: 1660px; }
+table.ledger th {
+    font-size: 19px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--cyan);
+    text-align: left;
+    padding: 0 22px 16px 0;
+    border-bottom: 1.5px solid var(--cyan-rule);
+    font-weight: 600;
+}
+table.ledger td {
+    font-size: 24px;
+    line-height: 1.38;
+    color: var(--ink-dim);
+    padding: 11px 20px 11px 0;
+    border-bottom: 1px solid rgba(82,232,200,0.10);
+    vertical-align: top;
+}
+table.ledger tr:last-child td { border-bottom: none; }
+table.ledger td.tag {
+    font-size: 23px;
+    color: var(--cyan);
+    font-weight: 500;
+    white-space: nowrap;
+}
+table.ledger td b { color: var(--ink); font-weight: 600; }
+table.ledger td code {
+    color: var(--cyan);
+    background: rgba(82,232,200,0.08);
+    padding: 1px 7px;
+    border-radius: 3px;
+    font-size: 0.92em;
+}
+table.ledger td.warn-cell { color: var(--coral); }
+
+/* ===========================================
+   DIAGRAM CONTAINERS
+   =========================================== */
+.diagram-frame {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.diagram-caption {
+    font-size: 25px;
+    line-height: 1.6;
+    color: var(--ink-dim);
+    font-style: italic;
+    max-width: 1300px;
+    margin-top: 18px;
+}
+.node-label { font-family: var(--font-body); font-weight: 600; font-size: 27px; fill: var(--ink); }
+.edge-label { font-family: var(--font-body); font-size: 20px; }
+
+/* ===========================================
+   CHAPTER (section divider) SLIDES — sparse
+   =========================================== */
+.slide-chapter { display: flex; flex-direction: column; justify-content: center; }
+.chapter-ghost {
+    position: absolute;
+    top: -40px;
+    right: 90px;
+    font-family: var(--font-display);
+    font-size: 480px;
+    font-weight: 600;
+    color: var(--cyan);
+    opacity: 0.07;
+    line-height: 1;
+    user-select: none;
+}
+.chapter-eyebrow {
+    position: absolute;
+    left: var(--edge-x);
+    top: 420px;
+    font-size: 20px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--cyan);
+}
+.chapter-eyebrow::before { content: "◆ "; }
+.chapter-title {
+    position: absolute;
+    left: var(--edge-x);
+    top: 468px;
+    right: 260px;
+    font-family: var(--font-display);
+    font-style: italic;
+    font-weight: 500;
+    font-size: 96px;
+    line-height: 1.08;
+    color: var(--ink);
+}
+.chapter-sub {
+    position: absolute;
+    left: var(--edge-x);
+    top: 690px;
+    font-size: 29px;
+    color: var(--ink-dim);
+    max-width: 1100px;
+    line-height: 1.6;
+    border-left: 2px solid var(--cyan-dim);
+    padding-left: 28px;
+}
+
+/* ===========================================
+   COVER SLIDE
+   =========================================== */
+.slide-cover .eyebrow { position: absolute; top: 108px; left: var(--edge-x); }
+.slide-cover h1 {
+    position: absolute;
+    top: 190px;
+    left: var(--edge-x);
+    width: 980px;
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 116px;
+    line-height: 1.05;
+    color: var(--ink);
+}
+.slide-cover h1 .it { font-style: italic; font-weight: 500; color: var(--cyan); }
+.slide-cover .claim {
+    position: absolute;
+    top: 636px;
+    left: var(--edge-x);
+    width: 920px;
+    font-size: 29px;
+    line-height: 1.6;
+    color: var(--ink-dim);
+}
+.slide-cover .claim b { color: var(--ink); font-weight: 600; }
+.slide-cover .meta-row {
+    position: absolute;
+    bottom: 100px;
+    left: var(--edge-x);
+    display: flex;
+    gap: 44px;
+    font-size: 21px;
+    color: var(--ink-dim);
+}
+.slide-cover .meta-row span b { color: var(--cyan); }
+.cover-diagram { position: absolute; right: 90px; top: 280px; width: 740px; height: 540px; }
+
+/* ===========================================
+   CLOSING SLIDE
+   =========================================== */
+.slide-closing { display: flex; flex-direction: column; justify-content: center; }
+.closing-statement {
+    position: absolute;
+    left: var(--edge-x);
+    top: 300px;
+    right: 260px;
+    font-family: var(--font-display);
+    font-style: italic;
+    font-weight: 500;
+    font-size: 56px;
+    line-height: 1.35;
+    color: var(--ink);
+}
+.closing-statement .k { color: var(--cyan); font-style: normal; font-weight: 600; }
+.closing-grid {
+    position: absolute;
+    left: var(--edge-x);
+    right: var(--edge-x);
+    bottom: 190px;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 40px;
+    border-top: 1px solid var(--cyan-rule);
+    padding-top: 30px;
+}
+.closing-grid .col .label {
+    font-size: 18px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--cyan);
+    margin-bottom: 10px;
+}
+.closing-grid .col .val {
+    font-size: 24px;
+    color: var(--ink-dim);
+    line-height: 1.5;
+}
+.closing-grid .col .val b { color: var(--ink); }
+
+/* ===========================================
+   OUTSIDE-STAGE UI: progress + nav buttons
+   (kept outside .deck-stage per skill rules)
+   =========================================== */
+.deck-progress {
+    position: fixed;
+    left: 0; right: 0; bottom: 0;
+    height: 3px;
+    background: rgba(82,232,200,0.08);
+    z-index: 500;
+}
+.deck-progress-bar {
+    height: 100%;
+    background: var(--cyan);
+    width: 0%;
+    transition: width 0.35s var(--ease-out-expo);
+}
+.deck-arrow {
+    position: fixed;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 52px; height: 52px;
+    border-radius: 50%;
+    border: 1px solid var(--cyan-rule);
+    background: rgba(10,14,19,0.6);
+    color: var(--cyan);
+    font-size: 20px;
+    cursor: pointer;
+    z-index: 500;
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.2s, border-color 0.2s;
+}
+.deck-arrow:hover { background: rgba(82,232,200,0.12); border-color: var(--cyan); }
+.deck-arrow.prev { left: 22px; }
+.deck-arrow.next { right: 22px; }
+
+/* Mobile/portrait: arrows can collide with the letterboxed stage; swipe covers nav there. */
+@media (max-width: 600px), (orientation: portrait) {
+    .deck-arrow { display: none; }
+}
+
+/* ===========================================
+   INLINE EDITING
+   =========================================== */
+.edit-hotzone { position: fixed; top: 0; left: 0; width: 80px; height: 80px; z-index: 10000; cursor: pointer; }
+.edit-toggle {
+    position: fixed; top: 14px; left: 14px;
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    border: 1px solid var(--cyan-rule);
+    background: rgba(10,14,19,0.85);
+    font-size: 17px;
+    cursor: pointer;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+    z-index: 10001;
+}
+.edit-toggle.show, .edit-toggle.active { opacity: 1; pointer-events: auto; }
+.edit-toggle.active { background: var(--cyan); }
+[contenteditable="true"] {
+    outline: 1px dashed var(--cyan-rule);
+    outline-offset: 4px;
+    cursor: text;
+}
+.save-toast {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--cyan);
+    color: #05070a;
+    font-family: var(--font-body);
+    font-size: 14px;
+    font-weight: 600;
+    padding: 10px 20px;
+    border-radius: 4px;
+    opacity: 0;
+    transition: opacity 0.3s, transform 0.3s;
+    z-index: 10002;
+    pointer-events: none;
+}
+.save-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+
+<div class="deck-viewport">
+<main class="deck-stage" id="deckStage">
+
+<!-- ============================================================ -->
+<!-- 0 — COVER                                                    -->
+<!-- ============================================================ -->
+<section class="slide slide-cover active">
+    <div class="eyebrow reveal">Deck subtitle &middot; context line</div>
+    <h1 class="reveal">A deck <span class="it">title</span><br>goes here</h1>
+    <div class="claim reveal"><b>One load-bearing sentence that states the deck's single claim.</b> Everything after it is a closer look at that one idea.</div>
+    <div class="meta-row reveal">
+        <span>anchor &mdash; <b>a value</b></span>
+        <span>keyword &middot; keyword &middot; keyword</span>
+    </div>
+    <div class="cover-diagram reveal">
+        <svg viewBox="0 0 760 560" width="100%" height="100%">
+            <path d="M 180 170 C 380 60, 500 60, 610 170" fill="none" stroke="#3a4a46" stroke-width="3"/>
+            <path d="M 610 390 C 500 500, 260 500, 150 390" fill="none" stroke="var(--cyan-dim)" stroke-width="3"/>
+            <circle cx="180" cy="170" r="86" fill="#12181a" stroke="var(--cyan)" stroke-width="2.5"/>
+            <text x="180" y="179" text-anchor="middle" class="node-label">node A</text>
+            <circle cx="610" cy="390" r="86" fill="#12181a" stroke="var(--coral)" stroke-width="2.5"/>
+            <text x="610" y="399" text-anchor="middle" class="node-label">node B</text>
+            <circle r="9" fill="var(--cyan)">
+                <animateMotion dur="3.4s" repeatCount="indefinite" path="M 610 390 C 500 500, 260 500, 150 390"/>
+            </circle>
+            <text x="380" y="475" text-anchor="middle" class="edge-label" fill="var(--cyan)">a labelled edge</text>
+            <text x="470" y="100" text-anchor="middle" class="edge-label" fill="#5b6b66">condition?</text>
+        </svg>
+    </div>
+    <div class="chrome-page">01 / 07</div>
+    <div class="chrome-nav">slide_theme &middot; sample deck</div>
+</section>
+
+<!-- ============================================================ -->
+<!-- 1 — SECTION DIVIDER                                          -->
+<!-- ============================================================ -->
+<section class="slide slide-chapter">
+    <div class="chrome-tag reveal">SLIDE THEME &middot; <b>SAMPLE</b></div>
+    <div class="chapter-ghost reveal">01</div>
+    <div class="chapter-eyebrow reveal">Section 1</div>
+    <div class="chapter-title reveal">A section <span style="color:var(--cyan); font-style:normal;">divider</span></div>
+    <div class="chapter-sub reveal">One sparse line framing what this section covers &mdash; giant ghost numeral behind, cyan accent on the second half of the title.</div>
+    <div class="chrome-page">02 / 07</div>
+</section>
+
+<!-- ============================================================ -->
+<!-- 2 — CONTENT: points + callout                               -->
+<!-- ============================================================ -->
+<section class="slide">
+    <div class="chrome-tag">SLIDE THEME &middot; <b>SAMPLE</b></div>
+    <div class="topbar reveal">
+        <div class="eyebrow">Slide 1.1</div>
+        <h2 class="headline">A bulleted <span class="it">content</span> slide</h2>
+    </div>
+    <div class="body-area">
+        <ul class="points reveal">
+            <li class="point">The default body is a <code>ul.points</code> list &mdash; cyan ring bullets, one idea per line, kept <b>tight</b> so nothing overflows the stage.</li>
+            <li class="point">Inline emphasis: <b>bold ink</b> for the key term, <code>code</code> for identifiers, and a <span class="warn">coral warn span</span> for the failure to avoid.</li>
+            <li class="point">Aim for around four points; reading-first density means self-contained lines, not a wall of text.</li>
+            <li class="point">Reveal animation staggers each point in as the slide becomes <code>.visible</code>.</li>
+        </ul>
+        <div class="callout reveal"><p>Use a callout for the one load-bearing sentence a slide is built around.</p></div>
+    </div>
+    <div class="chrome-page">03 / 07</div>
+    <div class="chrome-nav">&larr; &rarr; navigate</div>
+</section>
+
+<!-- ============================================================ -->
+<!-- 3 — CONTENT: ledger table                                   -->
+<!-- ============================================================ -->
+<section class="slide">
+    <div class="chrome-tag">SLIDE THEME &middot; <b>SAMPLE</b></div>
+    <div class="topbar reveal">
+        <div class="eyebrow">Slide 1.2</div>
+        <h2 class="headline">A <span class="it">ledger</span> table</h2>
+    </div>
+    <div class="body-area reveal">
+        <table class="ledger">
+            <thead><tr><th>Tag</th><th>What it is</th><th>When to reach for it</th></tr></thead>
+            <tbody>
+                <tr><td class="tag">points</td><td>a <code>ul.points</code> list of tight bullets</td><td>the default &mdash; prose that breaks into a few ideas</td></tr>
+                <tr><td class="tag">ledger</td><td>this table style: uppercase-cyan header, tag column</td><td>any markdown table or <code>table:</code> directive</td></tr>
+                <tr><td class="tag">callout</td><td>a cyan-bordered emphasis line</td><td>a slide's single load-bearing claim</td></tr>
+                <tr><td class="tag">diagram</td><td>a <code>diagram-frame</code> with SVG or CSS blocks</td><td>any <code>diagram:</code> directive &mdash; <span class="warn">never print ASCII raw</span></td></tr>
+            </tbody>
+        </table>
+    </div>
+    <div class="chrome-page">04 / 07</div>
+    <div class="chrome-nav">&larr; &rarr; navigate</div>
+</section>
+
+<!-- ============================================================ -->
+<!-- 4 — CONTENT: CSS block diagram                              -->
+<!-- ============================================================ -->
+<section class="slide">
+    <div class="chrome-tag">SLIDE THEME &middot; <b>SAMPLE</b></div>
+    <div class="topbar reveal">
+        <div class="eyebrow">Slide 1.3</div>
+        <h2 class="headline">A <span class="it">block</span> diagram</h2>
+    </div>
+    <div class="body-area">
+        <div class="diagram-frame reveal" style="gap:34px; margin-top:40px;">
+            <div style="border:2px solid var(--cyan); border-radius:10px; background:#12181a; padding:24px 30px; text-align:center;">
+                <div style="font-family:var(--font-display); font-size:26px; color:var(--ink);">normal node</div>
+                <div style="font-size:17px; color:var(--ink-dim); margin-top:6px;">cyan = the happy path</div>
+            </div>
+            <div style="color:var(--ink-faint); font-size:34px;">&rarr;</div>
+            <div style="border:2px solid var(--coral); border-radius:10px; background:#12181a; padding:24px 30px; text-align:center;">
+                <div style="font-family:var(--font-display); font-size:26px; color:var(--ink);">failure node</div>
+                <div style="font-size:17px; color:var(--ink-dim); margin-top:6px;">coral = the error branch</div>
+            </div>
+            <div style="color:var(--ink-faint); font-size:34px;">&rarr;</div>
+            <div style="border:2px dashed var(--ink-faint); border-radius:10px; background:transparent; padding:24px 30px; text-align:center;">
+                <div style="font-family:var(--font-display); font-size:26px; color:var(--ink-dim);">deferred</div>
+                <div style="font-size:17px; color:var(--ink-faint); margin-top:6px;">dashed = out of scope</div>
+            </div>
+        </div>
+        <div class="diagram-caption reveal">Plain <code>&lt;div&gt;</code> boxes with the theme's box vocabulary &mdash; robust for stacks, grids, and contrasts. Colour <i>carries meaning</i>: cyan normal, coral failure, dashed deferred.</div>
+    </div>
+    <div class="chrome-page">05 / 07</div>
+    <div class="chrome-nav">&larr; &rarr; navigate</div>
+</section>
+
+<!-- ============================================================ -->
+<!-- 5 — CONTENT: SVG flow diagram                               -->
+<!-- ============================================================ -->
+<section class="slide">
+    <div class="chrome-tag">SLIDE THEME &middot; <b>SAMPLE</b></div>
+    <div class="topbar reveal">
+        <div class="eyebrow">Slide 1.4</div>
+        <h2 class="headline">An <span class="it">SVG</span> flow</h2>
+    </div>
+    <div class="body-area" style="display:flex; align-items:center; gap:60px;">
+        <div class="diagram-frame reveal" style="width:760px; height:520px; flex-shrink:0;">
+            <svg viewBox="0 0 760 520" width="100%" height="100%">
+                <path d="M 60 150 L 210 150" stroke="var(--ink-faint)" stroke-width="3" marker-end="url(#a)"/>
+                <text x="20" y="140" class="edge-label" fill="var(--ink-dim)">start</text>
+                <path d="M 350 120 C 460 40, 560 40, 650 120" fill="none" stroke="var(--ink-faint)" stroke-width="3" marker-end="url(#a)"/>
+                <text x="500" y="70" text-anchor="middle" class="edge-label" fill="var(--ink-dim)">condition?</text>
+                <path d="M 650 220 C 560 320, 460 320, 350 240" fill="none" stroke="var(--coral)" stroke-width="3.5" marker-end="url(#c)"/>
+                <circle r="8" fill="var(--coral)">
+                    <animateMotion dur="3s" repeatCount="indefinite" path="M 650 220 C 560 320, 460 320, 350 240"/>
+                </circle>
+                <text x="500" y="340" text-anchor="middle" class="edge-label" fill="var(--coral)">a looping / failure edge</text>
+                <path d="M 285 260 L 285 350" stroke="var(--ink-faint)" stroke-width="3" marker-end="url(#a)"/>
+                <text x="315" y="315" class="edge-label" fill="var(--ink-dim)">else</text>
+                <text x="230" y="410" class="edge-label" fill="var(--ink)" font-size="22" font-weight="600">exit</text>
+                <circle cx="285" cy="180" r="80" fill="#12181a" stroke="var(--cyan)" stroke-width="2.5"/>
+                <text x="285" y="188" text-anchor="middle" class="node-label">node</text>
+                <circle cx="730" cy="180" r="80" fill="#12181a" stroke="var(--coral)" stroke-width="2.5"/>
+                <text x="730" y="188" text-anchor="middle" class="node-label">node</text>
+                <defs>
+                    <marker id="a" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="var(--ink-faint)"/></marker>
+                    <marker id="c" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="var(--coral)"/></marker>
+                </defs>
+            </svg>
+        </div>
+        <div class="diagram-caption reveal" style="max-width:560px;">Use SVG for anything with arrows, curves, or a cycle: <code>circle</code> nodes, <code>path</code> edges with <code>marker-end</code> arrowheads, an animated <code>circle</code> to show flow. Cyan node = normal, coral = failure.</div>
+    </div>
+    <div class="chrome-page">06 / 07</div>
+    <div class="chrome-nav">&larr; &rarr; navigate</div>
+</section>
+
+<!-- ============================================================ -->
+<!-- 6 — CLOSING                                                  -->
+<!-- ============================================================ -->
+<section class="slide slide-closing">
+    <div class="chrome-tag reveal">SLIDE THEME &middot; <b>SAMPLE</b></div>
+    <div class="closing-statement reveal">A closing statement, in Fraunces italic, that lands the deck's <span class="k">one idea</span>.</div>
+    <div class="closing-grid reveal">
+        <div class="col">
+            <div class="label">Next</div>
+            <div class="val"><b>Where this goes</b><br>the follow-on lesson or topic</div>
+        </div>
+        <div class="col">
+            <div class="label">Practice</div>
+            <div class="val"><b>Item</b> one line<br><b>Item</b> one line</div>
+        </div>
+        <div class="col">
+            <div class="label">Companions</div>
+            <div class="val">Related demo <b>ref</b><br>Related demo <b>ref</b></div>
+        </div>
+    </div>
+    <div class="chrome-page">07 / 07</div>
+</section>
+
+</main>
+</div>
+
+<!-- Outside-stage UI: progress bar + arrow nav + editing controls -->
+<div class="deck-progress"><div class="deck-progress-bar" id="progressBar"></div></div>
+<button class="deck-arrow prev" id="prevBtn" aria-label="Previous slide">&#8592;</button>
+<button class="deck-arrow next" id="nextBtn" aria-label="Next slide">&#8594;</button>
+<div class="edit-hotzone" id="editHotzone"></div>
+<button class="edit-toggle" id="editToggle" title="Edit mode (E)">&#9998;</button>
+<div class="save-toast" id="saveToast">Saved</div>
+
+<script>
+/* ===========================================
+   SLIDE PRESENTATION CONTROLLER
+   =========================================== */
+class SlidePresentation {
+    constructor() {
+        this.slides = Array.from(document.querySelectorAll('.slide'));
+        this.currentSlide = 0;
+        this.stage = document.getElementById('deckStage');
+        this.progressBar = document.getElementById('progressBar');
+        this.setupStageScale();
+        this.setupKeyboardNav();
+        this.setupTouchNav();
+        this.setupWheelNav();
+        this.setupArrowButtons();
+        this.showSlide(0);
+    }
+
+    setupStageScale() {
+        const scale = () => {
+            const factor = Math.min(window.innerWidth / 1920, window.innerHeight / 1080);
+            const x = (window.innerWidth - 1920 * factor) / 2;
+            const y = (window.innerHeight - 1080 * factor) / 2;
+            this.stage.style.transform = `translate(${x}px, ${y}px) scale(${factor})`;
+        };
+        scale();
+        window.addEventListener('resize', scale);
+    }
+
+    setupKeyboardNav() {
+        document.addEventListener('keydown', (e) => {
+            if (e.target.getAttribute('contenteditable') === 'true') return;
+            if (['ArrowRight', 'ArrowDown', ' ', 'PageDown'].includes(e.key)) {
+                e.preventDefault();
+                this.next();
+            } else if (['ArrowLeft', 'ArrowUp', 'PageUp'].includes(e.key)) {
+                e.preventDefault();
+                this.prev();
+            } else if (e.key === 'Home') {
+                this.showSlide(0);
+            } else if (e.key === 'End') {
+                this.showSlide(this.slides.length - 1);
+            }
+        });
+    }
+
+    setupTouchNav() {
+        let startX = 0;
+        this.stage.addEventListener('touchstart', (e) => { startX = e.touches[0].clientX; }, { passive: true });
+        this.stage.addEventListener('touchend', (e) => {
+            const dx = e.changedTouches[0].clientX - startX;
+            if (Math.abs(dx) > 60) { dx < 0 ? this.next() : this.prev(); }
+        }, { passive: true });
+    }
+
+    setupWheelNav() {
+        let locked = false;
+        window.addEventListener('wheel', (e) => {
+            if (locked) return;
+            if (Math.abs(e.deltaY) < 24) return;
+            locked = true;
+            e.deltaY > 0 ? this.next() : this.prev();
+            setTimeout(() => { locked = false; }, 500);
+        }, { passive: true });
+    }
+
+    setupArrowButtons() {
+        document.getElementById('nextBtn').addEventListener('click', () => this.next());
+        document.getElementById('prevBtn').addEventListener('click', () => this.prev());
+    }
+
+    next() { this.showSlide(this.currentSlide + 1); }
+    prev() { this.showSlide(this.currentSlide - 1); }
+
+    showSlide(index) {
+        this.currentSlide = Math.max(0, Math.min(index, this.slides.length - 1));
+        this.slides.forEach((slide, i) => {
+            slide.classList.toggle('active', i === this.currentSlide);
+            slide.classList.toggle('visible', i === this.currentSlide);
+        });
+        this.progressBar.style.width = `${((this.currentSlide + 1) / this.slides.length) * 100}%`;
+    }
+}
+
+/* ===========================================
+   INLINE EDITING — hover hotzone + E key
+   =========================================== */
+class InlineEditor {
+    constructor() {
+        this.isActive = false;
+        this.toggle = document.getElementById('editToggle');
+        this.hotzone = document.getElementById('editHotzone');
+        this.toast = document.getElementById('saveToast');
+        this.editableSelector = 'h1, h2, h3, p, li, span, td, th, div.claim, div.lede, div.chapter-sub, div.diagram-caption';
+        this.hideTimeout = null;
+        this.bindEvents();
+        this.restore();
+    }
+
+    bindEvents() {
+        this.toggle.addEventListener('click', () => this.toggleEditMode());
+        this.hotzone.addEventListener('click', () => this.toggleEditMode());
+        this.hotzone.addEventListener('mouseenter', () => { clearTimeout(this.hideTimeout); this.toggle.classList.add('show'); });
+        this.hotzone.addEventListener('mouseleave', () => this.scheduleHide());
+        this.toggle.addEventListener('mouseenter', () => clearTimeout(this.hideTimeout));
+        this.toggle.addEventListener('mouseleave', () => this.scheduleHide());
+        document.addEventListener('keydown', (e) => {
+            if ((e.key === 'e' || e.key === 'E') && e.target.getAttribute('contenteditable') !== 'true') {
+                this.toggleEditMode();
+            }
+            if (e.key === 's' && (e.metaKey || e.ctrlKey) && this.isActive) {
+                e.preventDefault();
+                this.save();
+            }
+        });
+    }
+
+    scheduleHide() {
+        this.hideTimeout = setTimeout(() => {
+            if (!this.isActive) this.toggle.classList.remove('show');
+        }, 400);
+    }
+
+    toggleEditMode() {
+        this.isActive = !this.isActive;
+        this.toggle.classList.toggle('active', this.isActive);
+        const stage = document.getElementById('deckStage');
+        const editableEls = stage.querySelectorAll(this.editableSelector);
+        editableEls.forEach((el) => {
+            if (el.closest('svg')) return;
+            el.setAttribute('contenteditable', this.isActive ? 'true' : 'false');
+        });
+        if (!this.isActive) this.save();
+    }
+
+    save() {
+        try {
+            const html = document.getElementById('deckStage').innerHTML;
+            localStorage.setItem('slide-theme-sample', html);
+            this.showToast();
+        } catch (err) {
+            console.warn('Could not save deck content', err);
+        }
+    }
+
+    restore() {
+        try {
+            const saved = localStorage.getItem('slide-theme-sample');
+            if (saved) document.getElementById('deckStage').innerHTML = saved;
+        } catch (err) {
+            console.warn('Could not restore deck content', err);
+        }
+    }
+
+    showToast() {
+        this.toast.classList.add('show');
+        setTimeout(() => this.toast.classList.remove('show'), 1400);
+    }
+}
+
+new SlidePresentation();
+new InlineEditor();
+</script>
+</body>
+</html>

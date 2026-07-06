@@ -7,8 +7,8 @@ estimated duration: 80
 ```
 
 > **Lesson:** L09. **Roadmap:** [objectives.md](../../../../docs/origin/lesson_roadmaps/L09/objectives.md).
-> This is the written reference lecture — thorough on purpose, so a student who missed the verbal
-> delivery can rebuild the lesson from the page. The offline spec-translation demo is
+> This is your written reference lecture — thorough on purpose, so if you missed the live session
+> you can rebuild the whole lesson from it. The offline spec-translation demo is
 > [L0903](L0903_lecture.ipynb); connecting to an existing server is the slide outline
 > [L0905](L0905_lecture.md); building your own server is the code walkthrough
 > [L0906](L0906_lecture.ipynb). Hands-on practice is in the L09 labs (L0904 / L0907, plus the validator
@@ -66,7 +66,7 @@ estimated duration: 80
 - diagram: a vertical stack — `model` at top, then `client (agent/app)`, then a labeled wire
   `← MCP →`, then `server (tool implementation)`. The model and the server never touch directly; the
   client brokers everything.
-- Common confusion to retire now: *"MCP is a Claude thing."* It is an open protocol with many clients
+- Let go of one confusion now: *"MCP is a Claude thing."* It is an open protocol with many clients
   and many servers, written in many languages, used by many models. This course uses Python and Claude
   because the rest of the course does — not because MCP is tied to either.
 
@@ -75,10 +75,10 @@ estimated duration: 80
 - MCP changes the **packaging and the transport**. It does **not** change the [L08](../L08/objectives.md)
   design pressures. A bad name is still bad; a loose schema is still loose; a bare-stack-trace error is
   still useless — now over a wire instead of in-process.
-- A common student mistake is to think MCP makes design *easier* or *harder*. It does **neither**. The
-  design work from L08 is identical; MCP just decides where the bytes go afterward.
-- This is the single most repeated point in the lesson. If a student leaves thinking "MCP replaces tool
-  design," the lesson failed.
+- It's tempting to think MCP makes design *easier* or *harder*. It does **neither**. The design work
+  from L08 is identical; MCP just decides where the bytes go afterward.
+- This is the single most repeated point in the lesson, worth holding onto: **MCP doesn't replace tool
+  design** — it's the L08 design, unchanged, now reachable over a wire.
 
 [↑ Back to top](#mcp-the-portable-tool-contract-the-boundary-and-when-it-pays)
 
@@ -159,18 +159,19 @@ estimated duration: 80
 
 ### slide 3.3 The model can't tell it's MCP
 
-- Once the specs are registered, the model emits a `tool_use` block exactly as in
+- Once the specs are registered, the model emits an `AIMessage` with a tool call exactly as in
   [L07](../L07/objectives.md). The client notices the tool belongs to an MCP server and routes the call
-  over the transport; the server runs the tool; the result comes back as a `tool_result` block.
+  over the transport; the server runs the tool and returns a structured result; the client feeds that
+  back to the model as a `ToolMessage`.
 - table: the round-trip phases, now with the MCP hop made explicit.
 
 | # | Who | What happens |
 | --- | --- | --- |
-| 1 | model | emits a `tool_use` block (name + args + id) — same as L07 |
+| 1 | model | emits an `AIMessage` with a tool call (name + args + id) — same as L07 |
 | 2 | **client** | recognizes the tool is MCP-served; sends the call over the transport |
 | 3 | **server** | runs the tool function; returns a structured result |
-| 4 | **client** | wraps the result as a `tool_result` block and continues the conversation |
-| 5 | model | reads the `tool_result` and produces its final answer — same as L07 |
+| 4 | **client** | wraps the result as a `ToolMessage` (paired by `tool_call_id`) and continues the conversation |
+| 5 | model | reads the `ToolMessage` and produces its final answer — same as L07 |
 
 - The model's view is **identical to L07**. MCP is invisible to it — it lives entirely in steps 2–4,
   which are the *client's* job and the *operator's* config. The slide-outline lecture
@@ -178,8 +179,8 @@ estimated duration: 80
 
 ### slide 3.4 New failure modes live on the wire
 
-- The cross-process boundary adds failure modes inline tools simply can't have. Naming them now means
-  you recognize them in a trace later.
+- The cross-process boundary adds failure modes inline tools simply can't have. Learn to name them now
+  and you'll recognize them in a trace later.
 - table: the boundary-specific failures and what they look like.
 
 | Failure | Cause | What you see |
@@ -202,7 +203,7 @@ estimated duration: 80
 
 - A minimal MCP server is a script: define the tool function (your L08 design, unchanged), register it
   with a server object, pick a transport, and run. Tens of lines, not a deployment.
-- Common confusion to retire: *"an MCP server is a microservice."* It *can* be deployed like one over
+- Let go of one more confusion: *"an MCP server is a microservice."* It *can* be deployed like one over
   HTTP/SSE, but it can equally be a 50-line Python script launched as a stdio child process. Don't let
   the protocol's shape inflate the implementation in your head — **start small.**
 - The build walkthrough [L0906](L0906_lecture.ipynb) shows the full skeleton for `book_meeting`
@@ -257,11 +258,11 @@ estimated duration: 80
   run with different permissions, and be replaced or upgraded independently.
 - The boundary is a **tax**: every call crosses a wire, errors can happen on either side, and you have
   one more thing to deploy and keep healthy.
-- Subgoal 4 is fundamentally one question: **is the feature worth the tax for *this* tool?**
+- This whole section is fundamentally one question: **is the feature worth the tax for *this* tool?**
 
 ### slide 5.2 The costs and benefits, named
 
-- table: the ledger from [objectives.md](../../../../docs/origin/lesson_roadmaps/L09/objectives.md).
+- table: the ledger you'll keep coming back to.
 
 | Costs MCP adds | Benefits MCP adds |
 | --- | --- |
@@ -276,7 +277,7 @@ estimated duration: 80
 
 ### slide 5.3 Three scenarios, three answers
 
-- table: apply the ledger to the three roadmap scenarios.
+- table: apply the ledger to three scenarios.
 
 | Scenario | Verdict | Why |
 | --- | --- | --- |
@@ -291,7 +292,7 @@ estimated duration: 80
 
 - Many tools **start inline and graduate to MCP** once a second consumer appears. The decision is *not
   permanent*, and it depends on the **number of consumers** more than any other factor.
-- A common temptation is to reach for MCP early because it sounds more "professional." Push back:
+- It's tempting to reach for MCP early because it sounds more "professional." Resist that:
   **inline is the right default until reuse appears.** Complexity that buys nothing is just complexity.
 - Think about *near-future* consumers when you decide — but don't pay the tax now for hypothetical
   reuse that never arrives. The break-even is "one" for a tool you *know* will be reused and "many" for
@@ -303,8 +304,8 @@ estimated duration: 80
 - One genuine reason the boundary is valuable: the server process can hold credentials the client never
   sees. The tool runs with *its own* permissions, so a compromised or buggy agent can't directly reach
   the tool's secrets.
-- We **name** this as a real benefit but **defer** the deep dive (auth flows, secret storage) to later
-  in the course. For L09, it's one item on the benefit side of the ledger, not a full topic.
+- Hold onto this as a real benefit, but the deep dive (auth flows, secret storage) is coming later
+  in the course. Here, it's one item on the benefit side of the ledger, not a full topic yet.
 
 [↑ Back to top](#mcp-the-portable-tool-contract-the-boundary-and-when-it-pays)
 

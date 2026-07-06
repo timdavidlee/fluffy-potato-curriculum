@@ -7,36 +7,37 @@ estimated duration: 80
 ```
 
 > **Lesson:** L06. **Roadmap:** [objectives.md](../../../../docs/origin/lesson_roadmaps/L06/objectives.md).
-> This is the written reference lecture — thorough on purpose, so a student who missed the verbal
-> delivery can rebuild the lesson from the page. The live demos are split one per technique
+> This page is your written reference — thorough on purpose, so if you missed the live session you
+> can rebuild the whole lesson from it. The live demos are split one per technique
 > ([L0603](L0603_lecture.ipynb) CoT, [L0605](L0605_lecture.ipynb) scratchpad,
-> [L0607](L0607_lecture.ipynb) self-critique, [L0609](L0609_lecture.ipynb) when-it-hurts); hands-on
-> practice is in the L06 labs (L0604 / L0606 / L0608 / L0610).
+> [L0607](L0607_lecture.ipynb) self-critique, [L0609](L0609_lecture.ipynb) when-it-hurts); you get
+> hands-on in the L06 labs (L0604 / L0606 / L0608 / L0610).
 > **Anchor model throughout: Claude Sonnet 4.6.**
 
 ## section 1. The lesson in one claim
 
 ### slide 1.1 From the shape of the prompt to the content of the answer
 
-- L02 taught the *shape* of a prompt — roles, structured output, few-shot. L06 teaches a technique
-  that lives in the *content*: getting the model to surface intermediate reasoning before it commits.
+- In L02 you learned the *shape* of a prompt — roles, structured output, few-shot. Here you pick up
+  a technique that lives in the *content*: getting the model to surface intermediate reasoning
+  before it commits.
 - The whole lesson rests on one claim: **reasoning is a tokens-on-the-page phenomenon, not a
-  separate model mode.** The model is not "thinking harder"; it is generating intermediate tokens
-  that condition its later tokens.
-- This claim is load-bearing. It explains why chain-of-thought *helps* and why it sometimes *hurts*,
-  and it makes every later technique in the lesson predictable instead of magical.
+  separate model mode.** The model isn't "thinking harder"; it's generating intermediate tokens that
+  condition its later tokens.
+- Hold onto this claim — it explains why chain-of-thought *helps* and why it sometimes *hurts*, and
+  it turns every later technique in this lesson from magic into something predictable.
 
 ### slide 1.2 Why more tokens change the answer
 
 - An LLM predicts the next token from everything on the page so far. Predicting *"the answer is 0.32"*
   right after *"step 1 … step 2 … step 3 …"* draws from a **different distribution** than predicting
   it cold, with no working shown.
-- So the reasoning text is not a window into a hidden thought process — it *is* the process. The
+- So the reasoning text isn't a window into a hidden thought process — it *is* the process. The
   tokens are the computation.
 - diagram: two prompts side by side — "Q → A" (cold) vs "Q → step1 → step2 → step3 → A" (CoT) — with
   an arrow noting that the second conditions A on the intermediate tokens.
 
-### slide 1.3 The four techniques L06 hands you
+### slide 1.3 The four techniques you'll pick up
 
 - table: the four techniques, the one sentence each lands, and the cost shadow each carries.
 
@@ -55,10 +56,10 @@ estimated duration: 80
 
 - **Chain-of-thought (CoT)** is any prompt that asks the model to produce step-by-step reasoning
   *before* its final answer, instead of jumping straight to the answer.
-- It helps most on a recognizable problem class: **multi-step arithmetic, logical deduction,
+- It helps you most on a recognizable problem class: **multi-step arithmetic, logical deduction,
   ambiguous classification, and multi-constraint generation** — anything where a single forward pass
   to the answer is error-prone.
-- It is the most reliable single lever in this lesson, and the cheapest to try first.
+- It's the most reliable single lever in this lesson, and the cheapest for you to try first.
 
 ### slide 2.2 Three CoT triggers, cheapest to most controlled
 
@@ -67,9 +68,9 @@ estimated duration: 80
 - **Numbered scaffold.** You name the steps: *"(1) count the total ways, (2) count the favorable
   outcomes, (3) divide."* More tokens to write, far more consistent structure, more brittle if the
   input drifts off the template.
-- **Worked-example few-shot.** Reuse L02's few-shot lever: show one or two fully-worked
-  problem→reasoning→answer examples, then the real problem. The model imitates the *reasoning style*,
-  not just the answer format.
+- **Worked-example few-shot.** Reuse L02's few-shot lever: show the model one or two fully-worked
+  problem→reasoning→answer examples, then the real problem. It imitates the *reasoning style*, not
+  just the answer format.
 - diagram: a dial from "free-form (cheap, loose)" → "numbered (structured)" → "worked-example
   (most guided, most tokens)".
 
@@ -77,17 +78,17 @@ estimated duration: 80
 
 - A free-form *"think step by step"* is cheapest but least predictable; numbered scaffolds and
   worked examples buy you **consistent structure** at the cost of tokens and brittleness.
-- Match the trigger to the need: exploratory one-off → free-form; a production prompt that must
+- Match the trigger to your need: exploratory one-off → free-form; a production prompt that must
   return the same shape every time → scaffold or worked example.
 - Newer models often reason *without* an explicit trigger — the trigger is one tool, not the only
   one. Don't assume CoT is absent just because you didn't say the magic words.
 
 ### slide 2.4 Always compare with and against
 
-- The discipline: run the **same input** with and without the CoT scaffold, and read off what
-  changed — accuracy, structure, latency, token count. The contrast is the evidence.
+- Build the discipline: run the **same input** with and without the CoT scaffold, and read off what
+  changed — accuracy, structure, latency, token count. The contrast is your evidence.
 - This with/against comparison is exactly what the L0604 lab has you build, and what
-  [Demo 1](L0603_lecture.ipynb) shows live.
+  [Demo 1](L0603_lecture.ipynb) shows you live.
 
 [↑ Back to top](#teaching-an-llm-to-think-chain-of-thought-scratchpads-and-self-critique)
 
@@ -104,7 +105,7 @@ estimated duration: 80
 ### slide 3.2 Tags are a contract, not a capability
 
 - The model could already reason inline — wrapping it in tags adds **zero capability**. The tags are
-  purely a boundary for downstream code to ignore (the thinking) or surface (the answer).
+  purely a boundary you can use to ignore (the thinking) or surface (the answer).
 - This is the **same move as JSON-mode output in L02**: a contract about *shape*, not *substance*.
   Treat it identically — ask for the shape, then enforce it in code.
 - diagram: a model response split into a greyed-out `<thinking>` block (logged, ignored by callers)
@@ -117,8 +118,12 @@ estimated duration: 80
 - So you parse defensively, exactly like L02's JSON parser: try the happy path (`re.search` for the
   `<answer>` block), have a fallback, and **fail loudly** when you truly can't extract an answer —
   never silently return an empty string.
-- A single tag-violation in front of the class teaches more than ten clean runs: it proves the
-  contract is best-effort, which is why the parser exists.
+- One tag-violation teaches you more than ten clean runs: it proves the contract is best-effort,
+  which is exactly why your parser exists.
+- diagram: a defensive parse flow — a model response that broke the contract (a missing
+  `</answer>`, the answer outside the tag, or two `<answer>` blocks) feeding a parser: try the
+  `<answer>` regex (happy path, cyan) → a fallback → and a **coral** "fail loud" terminal, captioned
+  "never silently return an empty string."
 
 ### slide 3.4 Why the separation matters downstream
 
@@ -134,19 +139,24 @@ estimated duration: 80
 ### slide 4.1 What self-critique is
 
 - **Self-critique** takes the model's first answer as input and asks for a *critique plus a revised
-  answer*. It is a second sampling pass, not a verification oracle.
+  answer*. It's a second sampling pass, not a verification oracle.
 - Two shapes:
   - **Single-prompt** — one round-trip; the model answers, critiques, and revises inline.
-  - **Two-step** — two round-trips; the first answer is fed into a second call (possibly a different
-    prompt or a different model). More expensive, more controllable.
+  - **Two-step** — two round-trips; you feed the first answer into a second call (possibly a
+    different prompt or a different model). More expensive, more controllable.
+- diagram: the two self-critique shapes side by side — **single-prompt** (one round-trip: a single
+  call where the model answers → critiques → revises inline) vs **two-step** (two round-trips: call 1
+  produces the answer, then call 2 — possibly a different prompt or model — critiques and revises
+  it), the two-step tagged "a whole extra round-trip: costlier, more controllable."
 
 ### slide 4.2 The sycophancy failure mode
 
 - The dominant failure: the critic **agrees with the original answer regardless of correctness** —
-  "yes, that looks right" — especially when it is the *same model, same prompt, seeing its own
+  "yes, that looks right" — especially when it's the *same model, same prompt, seeing its own
   answer*.
 - A critic with **no new information** is a weak critic. It has nothing to disagree *with*.
-- Name it out loud — sycophancy is the thing to watch for every time you reach for self-critique.
+- Watch for this every time you reach for self-critique — that's sycophancy, and it's the failure
+  mode to keep in mind.
 
 ### slide 4.3 Mitigations — inject new information
 
@@ -159,7 +169,7 @@ estimated duration: 80
 | **Adversarial role** | force the critic to argue the answer is wrong before deciding |
 | **Ground-truth check** | compare against a known answer, a tool result, or retrieved evidence |
 
-- The common thread: a critique is only as good as the *new information* it brings. Re-asking the
+- The common thread: your critique is only as good as the *new information* it brings. Re-asking the
   same model the same way is theatre.
 
 ### slide 4.4 Single-prompt vs two-step — the trade-off
@@ -168,7 +178,7 @@ estimated duration: 80
   context that produced the error — weaker.
 - **Two-step:** a full extra round-trip (cost + latency), but lets you change the model, the framing,
   or inject evidence between passes — stronger.
-- Choose deliberately, the same way you choose a CoT trigger: by what the task can afford.
+- Choose deliberately, the same way you chose a CoT trigger: by what the task can afford.
 
 [↑ Back to top](#teaching-an-llm-to-think-chain-of-thought-scratchpads-and-self-critique)
 
@@ -177,8 +187,9 @@ estimated duration: 80
 ### slide 5.1 Reasoning is not free
 
 - Every CoT, scratchpad, or critique token is **paid for** (L01's per-token cost), **adds latency**,
-  and **competes for the context window**. None of that is hypothetical — the demos print the numbers.
-- L06 is the first lesson where you must consciously weigh reasoning *quality* against *cost*. That
+  and **competes for the context window**. None of that is hypothetical — the demos print the numbers
+  for you.
+- This is the first lesson where you must consciously weigh reasoning *quality* against *cost*. That
   trade-off returns in L13 (model power) and L16 (context management).
 
 ### slide 5.2 Three cases where it backfires
@@ -188,12 +199,18 @@ estimated duration: 80
 - **"Talks itself into the wrong answer."** On some problems, free-form reasoning constructs a
   plausible-but-wrong justification and the model follows it off a cliff — CoT *lowers* accuracy.
 - **Tight-latency, user-facing flows.** A chat UI or real-time agent often can't afford CoT on every
-  call even when it would help accuracy — the latency budget says no.
+  call even when it would help accuracy — your latency budget says no.
+- diagram: three compact panels of reasoning backfiring — (1) an **easy** task (a 2-token answer
+  weighed down by a 200-token CoT preamble: cost + latency, no accuracy gain); (2) a **trap** task
+  (free-form reasoning building a plausible-but-wrong path the model then follows off a cliff —
+  accuracy *drops*, mark it coral); (3) a **latency-bound** flow (a real-time chat/agent whose budget
+  says no even when CoT would help).
 
 ### slide 5.3 Make the trade-off on purpose
 
 - Given a task, an accuracy requirement, and a latency/cost budget, **decide and defend**: reason, or
-  answer cold? That decision *is* the L06 skill — the L0610 lab has you make it on a table of tasks.
+  answer cold? That decision is the skill you're building here — the L0610 lab has you make it on a
+  table of tasks.
 - Heuristic: reach for reasoning when the task is in the help-class from section 2 *and* the budget
   allows; skip it when the task is easy, latency-bound, or prone to talked-into-it errors.
 
@@ -205,9 +222,9 @@ estimated duration: 80
 
 - L07 introduces **tool calling**, which adds an outer loop: the model decides whether to answer
   directly or call a tool. *That decision is itself a reasoning step.*
-- Everything from L06 applies inside that loop — eliciting reasoning about *which* tool to call,
-  separating that reasoning from the tool-call output, and recognizing when reasoning about the tool
-  is wasted.
+- Everything you learned in L06 applies inside that loop — eliciting reasoning about *which* tool to
+  call, separating that reasoning from the tool-call output, and recognizing when reasoning about the
+  tool is wasted.
 
 ### slide 6.2 What to carry forward
 
@@ -215,7 +232,7 @@ estimated duration: 80
   (L07's central framing — the parallel is deliberate).
 - **Parse defensively** → tool-call arguments can be malformed exactly like a broken `<answer>` tag;
   the same discipline applies.
-- One sentence to L07: *you can make the model think before it answers; next you'll let that thinking
-  decide to reach for a tool.*
+- One sentence to carry into L07: *you can now make the model think before it answers; next you'll
+  let that thinking decide to reach for a tool.*
 
 [↑ Back to top](#teaching-an-llm-to-think-chain-of-thought-scratchpads-and-self-critique)

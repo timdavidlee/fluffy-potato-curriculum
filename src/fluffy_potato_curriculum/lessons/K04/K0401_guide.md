@@ -1,5 +1,11 @@
 # K04 — Python you'll read: types & pydantic
 
+```yaml
+title: K04 — Python you'll read: types & pydantic
+keywords: type hints, annotations, return type, list, dict, X | None, optional, pydantic, BaseModel, Settings, validation, ValidationError, reading signatures, prework
+estimated duration: 30
+```
+
 This is a self-paced prework unit. You work through it **alone** as a runbook — read each
 step, do the small thing it asks, and check your understanding against what's written.
 

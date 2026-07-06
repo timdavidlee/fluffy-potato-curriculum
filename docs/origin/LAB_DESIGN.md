@@ -1,10 +1,33 @@
-<!-- llm-status: draft, do not consume for now -->
-
 # Lab Design Guidelines
 
 A **lab** is a self-driven exercise where a student practices a concept
 introduced in a lecture or experiments with a library hands-on. Labs are the primary
 way students convert passive lecture material into working knowledge.
+
+## Voice
+
+Labs are written **to the student, in the second person** — see the course-wide rule in
+[CURRICULUM_PRD.md](CURRICULUM_PRD.md#voice--point-of-view). The lab-specific register is **Punchy**:
+terse, energetic, high-signal. A lab is a list of things to *do*, so the prose keeps momentum and
+gets out of the way.
+
+**Punchy in practice**
+
+- Lead with the action; cut hedging and throat-clearing. Short sentences, strong verbs.
+- Trim *words*, never *substance* — every function name, argument, step, and acceptance check a
+  student needs stays exactly as precise as before.
+
+| ✗ Flat / wordy | ✓ Punchy |
+| --- | --- |
+| "Script a stub that never stops — many distinct `lookup` turns. Invoke with `{"recursion_limit": 6}` and confirm a `GraphRecursionError` fires." | "**Now break it on purpose.** Script a stub that never stops… Invoke with `{"recursion_limit": 6}` and **watch `GraphRecursionError` fire.**" |
+| "After this lab you can: wire a ReAct agent as a cyclic `StateGraph`…" | "**You'll walk out able to** build a ReAct agent as a cyclic `StateGraph`…" |
+| "If it's an `AIMessage` whose `.tool_calls` is non-empty, return `\"tools\"`; otherwise return `END`." | "Tool calls waiting? Return `\"tools\"`. Anything else? Return `END`." |
+
+- **Table-related text stays terse** (course-wide rule) — fragments in the cells, not sentences.
+- **Preserve the scaffolding.** Revoice prose only: leave code cells, `# TODO` markers, and section
+  **headings** untouched — headings feed the Contents/TOC anchors, so changing them breaks the links.
+- **Keep `_empty` and `_solutions` in lockstep.** Their prose and ordering must match exactly, so when
+  you revoice one, mirror it into the other in the same pass.
 
 ## File layout
 

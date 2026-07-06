@@ -1,3 +1,87 @@
+## v0.22.0 (2026-07-06)
+
+### Feat
+
+- **L07**: build lecture HTML deck + add tool-calling diagrams
+
+## v0.21.0 (2026-07-06)
+
+### Feat
+
+- **L06**: build lecture HTML deck + add reasoning diagrams
+
+## v0.20.0 (2026-07-06)
+
+### Feat
+
+- **L05**: build L0502 & L0505 lecture HTML decks + routing diagrams
+
+## v0.19.0 (2026-07-06)
+
+### Feat
+
+- **L04**: build lecture HTML deck + add section-1 diagrams
+
+## v0.18.0 (2026-07-06)
+
+### Feat
+
+- **L03**: add LangChain/LangGraph primer (L0302) + build L0305 deck
+
+## v0.17.0 (2026-07-05)
+
+### Feat
+
+- **L01**: build L0102 lecture HTML deck (Graph Canvas)
+
+## v0.16.0 (2026-07-05)
+
+### Feat
+
+- **L01**: add missing diagram directives to lecture outline
+
+## v0.15.0 (2026-07-05)
+
+### Feat
+
+- **L02**: add persona slide to lecture deck
+
+## v0.14.0 (2026-07-05)
+
+### Feat
+
+- **curriculum**: standardize HTML lecture decks; define L02 channel term
+
+## v0.13.0 (2026-07-05)
+
+### Feat
+
+- **curriculum**: add L02 HTML lecture deck and reusable slide theme
+
+## v0.12.0 (2026-07-05)
+
+### Feat
+
+- **skills**: add build-lecture-deck skill for markdown-to-pptx
+
+## v0.11.0 (2026-07-05)
+
+### Feat
+
+- **local-ui**: color-code sidebar items by kind
+
+## v0.10.1 (2026-07-05)
+
+### Refactor
+
+- **L02**: convert live notebook cells to async client.achat
+
+## v0.10.0 (2026-07-04)
+
+### Feat
+
+- **L08**: add Demo 5 anti-pattern capstone notebook (tool soup) (#94)
+
 ## v0.9.1 (2026-07-04)
 
 ### Refactor

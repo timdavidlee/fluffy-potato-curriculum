@@ -15,12 +15,12 @@ estimated duration: 10
 
 ## Why this lesson exists
 
-This is the first lesson of the course. Before we can build agents, prompt well, or wire up tools,
-we need a working mental model of what an LLM *is at the API level* — not the math inside it, but
-the contract you interact with when your code talks to a model.
+This is the first lesson of the course. Before you can build agents, prompt well, or wire up tools,
+you need a working mental model of what an LLM *is at the API level* — not the math inside it, but
+the contract you're working with every time your code talks to a model.
 
-L01 tells **one connected story**, not a list of four facts. Each idea is the reason the next one
-exists:
+L01 tells you **one connected story**, not a list of four facts. Each idea is the reason the next
+one exists:
 
 > An LLM **predicts the next token** → the pieces are **sub-word tokens** → real strings (names,
 > code, JSON) **fragment** into more tokens than you'd guess → a bigger **model** and better
@@ -52,9 +52,9 @@ your code  ──HTTP request──▶  the provider  ──▶  the model
    `max_tokens` limit.
 4. **You get back** the reply text *and* an accounting of how many tokens went in and came out.
 
-In this course we make that call through a tiny wrapper,
-[`PotatoLLMClient`](../../potato_llm/__init__.py), so the code reads the same whether we talk to
-Claude or to an OpenAI model:
+In this course you'll make that call through a tiny wrapper,
+[`PotatoLLMClient`](../../potato_llm/__init__.py), so your code reads the same whether you're
+talking to Claude or to an OpenAI model:
 
 ```python
 from fluffy_potato_curriculum.potato_llm import AnthropicClient, Message
@@ -65,7 +65,7 @@ print(reply.text)            # the assistant's answer
 print(reply.usage)           # input_tokens / output_tokens — the bill
 ```
 
-We `await client.achat(...)` — the **async** call. Every client also has a blocking
+You `await client.achat(...)` — the **async** call. Every client also has a blocking
 `client.chat(...)`, but the course defaults to the async one, so you `await` model calls from the
 start (a notebook cell lets you `await` at the top level). *Why* async is the default — overlapping
 many model calls instead of waiting on each in turn — is covered in the **K05** prework.

@@ -41,15 +41,16 @@ async-first with the existing sync names kept working, so nothing downstream bro
       `TraceEvent` stay sync — pure/in-memory, no I/O to await.
 - [x] **Test tooling** — `pytest-asyncio` (dev dep) with `asyncio_mode = "auto"`; async sibling
       tests for every new entry point (marker-free `async def test_*`).
-- [~] **Lessons** — **started with L01** (2026-07-04). The `potato_llm` intro lessons (L01–L02) are
-      *outside* the LangChain migration, so they convert safely now without collision: L01's live
-      cells (`L0107`, `L0108` lab pair, `L0109`) + the `L0101` intro snippet + `PROCTOR_NOTES` now
-      `await client.achat(...)`. Verified: ruff format/lint clean, every cell compiles as
-      top-level-await (a keyed live restart-run-all is the remaining human check). **Next: L02**
-      (same `potato_llm` pattern). L03+ stay deferred to the LangChain migration — converted as
-      those notebooks regenerate, so they're touched once.
-- [~] **`invoke` / `ainvoke` note** — added for L01: the `chat`/`achat` → K05 pointer at the first
-      call sites (`L0101` intro, `L0107` §2). Same one-liner to add per lesson as it's converted.
+- [~] **Lessons** — **L01 and L02 converted** (2026-07-04). The `potato_llm` intro lessons (L01–L02)
+      are *outside* the LangChain migration, so they convert safely now without collision: L01's live
+      cells (`L0107`, `L0108` lab pair, `L0109`) + the `L0101` intro snippet + `PROCTOR_NOTES`, and
+      all of L02's live cells (`L0203`/`L0205`/`L0207`/`L0209` lectures + the `L0206`/`L0210`
+      `_empty`/`_solutions` lab pairs) now `await client.achat(...)`. Verified per lesson: ruff
+      format/lint clean, every cell compiles as top-level-await (a keyed live restart-run-all is the
+      remaining human check). **Next: L03+**, deferred to the LangChain migration — converted as those
+      notebooks regenerate, so they're touched once.
+- [~] **`invoke` / `ainvoke` note** — added for L01 (`chat`/`achat` → K05 pointer at `L0101` intro,
+      `L0107` §2) and L02 (`L0203` Setup). Same one-liner to add per lesson as it's converted.
 
 ## Scope / where it lands
 

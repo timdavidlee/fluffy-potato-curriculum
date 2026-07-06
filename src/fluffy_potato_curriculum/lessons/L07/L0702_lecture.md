@@ -7,8 +7,8 @@ estimated duration: 75
 ```
 
 > **Lesson:** L07. **Roadmap:** [objectives.md](../../../../docs/origin/lesson_roadmaps/L07/objectives.md).
-> This is the written reference lecture — thorough on purpose, so a student who missed the verbal
-> delivery can rebuild the lesson from the page. The live demos are split one per beat
+> This is your written reference lecture — thorough on purpose, so if you missed the live session
+> you can rebuild the whole lesson from the page. The live demos are split one per beat
 > ([L0703](L0703_lecture.ipynb) a tool call is tokens, [L0704](L0704_lecture.ipynb) one wired
 > round-trip, [L0706](L0706_lecture.ipynb) trace the round-trip, [L0708](L0708_lecture.ipynb)
 > three outcomes); hands-on practice is in the L07 labs (L0705 / L0707 / L0709).
@@ -26,6 +26,11 @@ estimated duration: 75
   function and feed the result back. This is the foundation of every agent later in the course.
 - But it is not magic, and it is not a new model capability. It is a **protocol** the model was
   trained to participate in.
+- diagram: two stacked lanes contrasting the eras — top lane "L01–L06" shows
+  `model → text → your code reads it` with a note "nothing the model said ever *ran*" (all neutral
+  ink-faint); bottom lane "L07" shows `model → tool call → your code runs the function → result →
+  model` as a closed loop (the run + result legs in cyan) — caption: "the model gains the ability to
+  *act* by asking your code to run something; the loop, not the model, does the work."
 
 ### slide 1.2 A tool call is just more tokens
 
@@ -70,6 +75,11 @@ estimated duration: 75
   function *is* the schema.
 - The model never sees your Python function. It sees only that inferred *definition* — the name, the
   prose, and the argument schema. That is the entire contract.
+- diagram: a typed Python `calculator(expression: str) -> str` function box on the left, an arrow
+  through `bind_tools` in the middle, producing a tool *definition* card on the right (name ·
+  description · argument JSON-Schema); a dashed boundary separates "your code" from "what the model
+  sees" so that only the definition crosses it — caption: "the model never sees your function, only
+  the inferred definition; the typed function *is* the schema."
 
 ### slide 2.2 The five mechanical steps
 
@@ -95,19 +105,19 @@ estimated duration: 75
   - force the model to call the tool (it may answer directly instead),
   - validate the arguments at generation time (the model can pass nonsense),
   - stop the model from inventing a tool name that doesn't exist.
-- **The application validates; the model proposes.** This is the single sentence to repeat whenever
-  a student expects the schema to *enforce* anything.
+- **The application validates; the model proposes.** Come back to this sentence any time you catch
+  yourself expecting the schema to *enforce* something.
 
 ### slide 2.4 The model decides whether to call — that's a reasoning step
 
 - Handing the model a tool is an *offer*, never a *command*. Whether the model reaches for the tool
   is a sampling decision conditioned on the prompt, the conversation, and the tool's description.
 - That decision is itself a **reasoning step** — exactly the kind [L06](../L06/objectives.md) was
-  about. A vague tool the model can't tell when to use is a tool it will skip. (Reinforce L06; we do
-  not re-teach chain-of-thought here.)
-- *Foreshadow [L08](../L08/objectives.md):* "what makes a tool worth adding, well-named, and
-  well-described?" is L08's whole job. L07 only needs you to see that the description visibly moves
-  behavior.
+  about. A vague tool the model can't tell when to use is a tool it will skip. You've already built
+  the chain-of-thought instincts in L06; this is that same skill, aimed at a new kind of choice.
+- A quick look ahead — you won't need it yet: "what makes a tool worth adding, well-named, and
+  well-described?" is [L08](../L08/objectives.md)'s whole job. For now, just notice that the
+  description visibly moves behavior.
 
 [↑ Back to top](#tool-calling-the-protocol-the-round-trip-and-who-runs-what)
 
@@ -170,6 +180,10 @@ estimated duration: 75
   - the tool **result** lives in the message history for *every* subsequent turn.
 - This is L01's per-token cost shadow, now attached to tools. Nothing here is hypothetical — the
   demos print the token counts.
+- diagram: a three-turn conversation timeline with two cost sites called out in coral — the tool
+  *definition* re-sent in the prompt of *every* request (site 1, paid once per turn) and the tool
+  *result* carried forward in the history of *every* later turn (site 2, accumulating); caption:
+  "stateless means you pay for the definition on every turn and the result forever after."
 
 ### slide 4.2 A worked cost example
 
@@ -209,12 +223,17 @@ estimated duration: 75
 | **Answers without it** | text in `.content`, an empty `.tool_calls` | the model judged the tool unnecessary — a registered tool is an *option*, never an obligation |
 | **Calls it with bad arguments** | a tool call with malformed / missing / invented arguments | the model hallucinated; **your application must catch this** |
 
+- diagram: one prompt-plus-tool at the left fanning into three branches — "calls the tool" (valid
+  args, cyan happy path), "answers without it" (empty `.tool_calls`, neutral ink-faint), and "calls
+  it with bad arguments" (malformed / invented, coral); caption: "one offer, three possible replies —
+  your code must tell which happened and validate the third."
+
 ### slide 5.2 The model can hallucinate a tool call
 
 - The schema did not stop any of this at generation time: wrong argument *types*, a *missing*
   required argument, an *extra* invented argument, even a tool *name that doesn't exist*.
-- This is the L07 analogue of [L06](../L06/objectives.md)'s tag-violation moment: **showing one
-  hallucination teaches more than ten clean runs**, because it proves the contract is best-effort.
+- This is the L07 analogue of [L06](../L06/objectives.md)'s tag-violation moment: **one hallucinated
+  call will teach you more than ten clean runs**, because it proves the contract is best-effort.
 - The remedy is not a better schema (that's an L08 conversation) — it is that **the application
   validates; the model proposes.** Validation is not optional.
 
@@ -232,8 +251,8 @@ estimated duration: 75
 - But even *forcing* a call does not guarantee **well-formed arguments** — it only guarantees that
   *some* tool call is attempted. Forcing changes whether the model calls, not whether it calls
   *correctly*.
-- We mention it and move on: the deeper `tool_choice` design conversation belongs to
-  [L08](../L08/objectives.md).
+- Worth knowing it exists, but the deeper `tool_choice` design conversation belongs to
+  [L08](../L08/objectives.md) — you'll get there.
 
 [↑ Back to top](#tool-calling-the-protocol-the-round-trip-and-who-runs-what)
 

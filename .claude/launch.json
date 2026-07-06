@@ -5,7 +5,64 @@
       "name": "lesson-ui",
       "runtimeExecutable": "uv",
       "runtimeArgs": ["run", "python", "-m", "fluffy_potato_curriculum.local_ui"],
-      "port": 8000
+      "port": 8000,
+      "autoPort": true
+    },
+    {
+      "name": "static-preview",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": ["-m", "http.server", "8123", "--directory", "src/fluffy_potato_curriculum/lessons/L10"],
+      "port": 8123,
+      "autoPort": true
+    },
+    {
+      "name": "static-preview-l02",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": ["-m", "http.server", "8124", "--directory", "src/fluffy_potato_curriculum/lessons/L02"],
+      "port": 8124,
+      "autoPort": true
+    },
+    {
+      "name": "static-preview-l01",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": ["-m", "http.server", "8125", "--directory", "src/fluffy_potato_curriculum/lessons/L01"],
+      "port": 8125,
+      "autoPort": true
+    },
+    {
+      "name": "static-preview-l03",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": ["-m", "http.server", "8126", "--directory", "src/fluffy_potato_curriculum/lessons/L03"],
+      "port": 8126,
+      "autoPort": true
+    },
+    {
+      "name": "static-preview-l04",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": ["-m", "http.server", "8127", "--directory", "src/fluffy_potato_curriculum/lessons/L04"],
+      "port": 8127,
+      "autoPort": true
+    },
+    {
+      "name": "static-preview-l05",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": ["-m", "http.server", "8128", "--directory", "src/fluffy_potato_curriculum/lessons/L05"],
+      "port": 8128,
+      "autoPort": true
+    },
+    {
+      "name": "static-preview-l06",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": ["-m", "http.server", "8129", "--directory", "src/fluffy_potato_curriculum/lessons/L06"],
+      "port": 8129,
+      "autoPort": true
+    },
+    {
+      "name": "static-preview-l07",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": ["-m", "http.server", "8130", "--directory", "src/fluffy_potato_curriculum/lessons/L07"],
+      "port": 8130,
+      "autoPort": true
     }
   ]
 }

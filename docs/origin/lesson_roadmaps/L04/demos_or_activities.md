@@ -4,7 +4,7 @@
 >
 > **Audience for this file:** the teacher running L04. Every demo below is *teacher-driven, no student participation*. Student-driven exercises live in the L04 labs (separate file, stage 2).
 >
-> **Anchor model: Claude Sonnet 4.6** for the heavy reasoning nodes (draft, policy-check), **Claude Haiku 4.5** for the light nodes (parse / extract / summarize). **L04 deliberately mixes models per node** — that mixing is the point of objective 1's per-node binding, *not* an accident. **This is the course's first framework lesson:** nodes call the **native LangChain `ChatAnthropic`** client directly, *not* the hand-rolled `potato_llm` seam used in L01–L13. Call that departure out loud.
+> **Anchor model: Claude Sonnet 4.6** for the heavy reasoning nodes (draft, policy-check), **Claude Haiku 4.5** for the light nodes (parse / extract / summarize). **L04 deliberately mixes models per node** — that mixing is the point of objective 1's per-node binding, *not* an accident. **This is the course's first framework lesson:** nodes call the **native LangChain `ChatAnthropic`** client directly, *not* the hand-rolled `potato_llm` seam used in L01–L02. Call that departure out loud — it's the single switch-over point: the seam carries the prompt-only lessons, the framework client takes over from L03 onward.
 >
 > **Scope (post-split):** L04 is **sequential prompt-chaining only** — a fixed, acyclic chain. **Routing, conditional edges, and user-input branching are not L04's** — they moved to **[L05](../L05/demos_or_activities.md)** in the [L04/L05 split](objectives.md). This file builds the chain and *names* (does not build) the workflow-vs-agent line.
 

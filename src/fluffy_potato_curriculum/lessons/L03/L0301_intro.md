@@ -2,15 +2,16 @@
 
 ```yaml
 title: "A node is one LLM call you wire: state goes in, state comes out"
-keywords: langgraph, stategraph, node, state, typed state, typeddict, compile, invoke, pure function, chatanthropic, single node, extract, first framework
+keywords: langgraph, StateGraph, node, state, typed state, typeddict, compile, invoke, pure function, ChatAnthropic, single node, extract, first framework
 estimated duration: 8
 ```
 
 > **Lesson:** L03 — Single-node operations (the first LangGraph lesson).
 > **Roadmap:** see this lesson's [objectives.md](../../../../docs/origin/lesson_roadmaps/L03/objectives.md).
-> This is a short framing piece. Read it before the build demo
-> ([L0302_lecture.ipynb](L0302_lecture.ipynb)) and the "why wire a node at all?" wrap-up
-> ([L0304_lecture.md](L0304_lecture.md)). Hands-on practice is in the L03 lab (L0303).
+> This is a short framing piece. Read it first, then the LangChain & LangGraph primer
+> ([L0302_lecture.ipynb](L0302_lecture.ipynb)), the build demo
+> ([L0303_lecture.ipynb](L0303_lecture.ipynb)), and the "why wire a node at all?" wrap-up
+> ([L0305_lecture.md](L0305_lecture.md)). Hands-on practice is in the L03 lab (L0304).
 > **Anchor model: Claude Sonnet 4.6 — and only Sonnet.** L03 keeps the model constant so the
 > *node* is the only new thing to track.
 
@@ -85,8 +86,8 @@ L01–L02 talked to the model through the hand-rolled `potato_llm` seam. From L0
 **reaches for a framework**, and frameworks bring their own client. So inside a graph node we call
 LangChain's **`ChatAnthropic`** directly, not `potato_llm`. The API key still loads through the same
 [`common/config.py`](../../common/config.py) seam (`ChatAnthropic` reads `ANTHROPIC_API_KEY` from the
-same environment the config seam populates) — only the *client* is the framework's now. Watch for
-that departure called out in the build demo.
+same environment the config seam populates) — only the *client* is the framework's now. You meet
+`ChatAnthropic` hands-on in the L0302 primer, then use it inside a node in the build demo.
 
 The single sentence to leave L03 with: **"You just wired one step — next lesson, you wire several of
 them together."**

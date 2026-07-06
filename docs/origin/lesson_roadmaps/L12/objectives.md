@@ -89,7 +89,7 @@ By the end of L12, a student should be able to:
 
 2. **Locate where a failure occurred from the trace alone — without re-running the agent.** Concretely:
    - Given a trace of a *failed or wrong* run, point to the exact event where things went off the rails, and classify the failure by its trace signature:
-     - **Tool error** — a `tool_result` with `is_error: true` (the L10 exception-to-`tool_result` conversion, or a structured error the tool returned). The trace shows the model's *next* move: did it recover, retry, or give up?
+     - **Tool error** — a `ToolMessage` with `status="error"` (the L10 exception-to-`ToolMessage` conversion, or a structured error the tool returned). The trace shows the model's *next* move: did it recover, retry, or give up?
      - **Wrong tool arguments** — the call succeeded but the model passed bad args (wrong key, malformed expression). The tool result looks "fine" but is answering the wrong question. This is the hardest to spot and the best argument for tracing *arguments*, not just call names.
      - **Runaway loop** — the same `(tool_name, args)` pair repeating across iterations, ending in `max_steps`. The trace makes the repetition visible at a glance.
      - **Premature termination** — `natural` termination with a final answer that's wrong or incomplete, because the model thought it was done when it wasn't.

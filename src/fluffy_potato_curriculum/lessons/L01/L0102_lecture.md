@@ -7,14 +7,14 @@ estimated duration: 85
 ```
 
 > **Lesson:** L01. **Roadmap:** [objectives.md](../../../../docs/origin/lesson_roadmaps/L01/objectives.md).
-> This is the written reference lecture — thorough on purpose, so a student who missed the verbal
-> delivery can rebuild the lesson from the page. It follows one connected chain, not a list of
+> This is your written reference lecture — thorough on purpose, so if you missed the live delivery
+> you can rebuild the lesson from the page. It follows one connected chain, not a list of
 > topics: **an LLM predicts the next token → the pieces are sub-word tokens → tokenization
 > fragments real strings → a bigger model and better context sharpen the prediction → temperature
 > reshapes it → you reuse a preamble → and now you pay to carry all that overhead every call.**
-> The teacher demos in this lesson's
+> The live demos in this lesson's
 > [demos_or_activities.md](../../../../docs/origin/lesson_roadmaps/L01/demos_or_activities.md)
-> run in that same order; hands-on practice is in the L01 labs.
+> run in that same order; you get hands-on practice in the L01 labs.
 > **Anchor model for the live/API parts: Claude Sonnet 4.6 (200k-token context window).**
 > **The prediction/scale demos use a local GPT-2 ladder (offline, deterministic) so the raw
 > next-token probabilities are visible.**
@@ -51,6 +51,9 @@ estimated duration: 85
 - This one fact is the thread tying the whole lesson together: it is *why* front-loading context
   works, *why* a reusable preamble is overhead, *why* the context window fills, and *why* a
   conversation's cost climbs. Write it down now.
+- diagram: two sequential API calls to the same model with a "🚫 no server-side memory" gap between
+  them — call 2's request box visibly *re-contains* all of call 1's text plus the new turn, an arrow
+  from the client labeled "re-sends the entire history every call."
 
 ## section 2. Why the pieces are sub-word tokens
 
@@ -59,7 +62,10 @@ estimated duration: 85
 - The unit the model predicts is a **token** — often a whole common word, often a fragment.
   `running` may be one token; a rare or invented word splits into several (`fli|bber|ti|gib|beting`).
 - So "predict the next word" is really "predict the next *token*." Everything downstream — window,
-  cost — is counted in tokens, so we have to know what one is.
+  cost — is counted in tokens, so you need to know what one is.
+- diagram: two words as token blocks — `running` as one solid block (1 token) beside
+  `flibbertigibbeting` broken into five differently-colored pieces `fli|bber|ti|gib|beting` (5
+  tokens) — a common word costs one token, a rare word fragments into many.
 
 ### slide 2.2 Why sub-word — not whole words, not characters
 
@@ -75,9 +81,11 @@ estimated duration: 85
 ### slide 2.3 A token is really an integer
 
 - The model never sees characters. It sees **integer IDs** (e.g. `running` → `[16, 5143]`). The
-  readable "pieces" we show are a decoding of those IDs for *human* benefit.
-- Takeaway to say out loud: the tokenizer is a *chosen* encoding, not a natural fact about language.
+  readable "pieces" shown here are a decoding of those IDs for *your* benefit.
+- The takeaway to hold onto: the tokenizer is a *chosen* encoding, not a natural fact about language.
   That choice is exactly why the next section's strings fragment the way they do.
+- diagram: a left-to-right pipeline `running` → pieces `run|ning` → integer IDs `[16, 5143]`, with a
+  caption "the readable pieces are for you; the model only ever sees the integers."
 
 ## section 3. What tokenization does to real strings
 
@@ -135,7 +143,7 @@ estimated duration: 85
 - It is **not** a model-selection lesson. *Which* model or provider you'd actually pick for a job —
   a vision model for OCR, a strong reasoner for planning, a small fast model for cheap execution,
   trading capability against cost, latency, and context length — is **L14 (choosing models &
-  providers)**. Here we only establish *that* capability sharpens prediction.
+  providers)**. Here you only need *that* capability sharpens prediction.
 
 ## section 5. Temperature: the knob on the distribution
 
@@ -161,7 +169,7 @@ estimated duration: 85
 
 - **top-p (nucleus):** sample only from the smallest set of tokens whose probabilities sum to `p`.
   **top-k:** sample only from the `k` most likely tokens. Both *restrict the candidate set*;
-  temperature *reshapes the distribution*. Different levers — we won't tune top-p/top-k here, but
+  temperature *reshapes the distribution*. Different levers — you won't tune top-p/top-k here, but
   you'll see them in API docs and shouldn't be surprised.
 - table: pick a temperature by task type.
 
@@ -182,6 +190,9 @@ estimated duration: 85
 - Same model, same task, two prompts — a bare `Summarize this.` versus a front-loaded version with a
   role, an audience, a format, and one worked example — produce visibly different quality. The
   front-loaded context did the work.
+- diagram: two prompt cards feeding the same model — a bare `Summarize this.` yielding a short,
+  flat-quality output bar, and a front-loaded card (role + audience + format + one example) yielding
+  a taller "on-target" output bar — same model, the context did the work.
 
 ### slide 6.2 Reusable preambles — and the sting in the tail
 
@@ -261,16 +272,16 @@ estimated duration: 85
 | 5    | ~200                 | ~1000                    | the bill grows even though each message is small |
 
 - This staircase is exactly what **prompt caching** and context management (L19) and retrieval (L21)
-  exist to fight. We only name it here.
+  exist to fight. Just the name for now — the fix comes later.
 
 ### slide 8.4 Order-of-magnitude: from "free" to "a real budget"
 
 - One call costs ~nothing. The number that matters is what happens when you *multiply*:
   one call → a 10-step agent run (L10) → 100 dev iterations → a small production deployment.
 - diagram: a ladder — `1 call ≈ $0.000X` → `×10 (agent run)` → `×100 (dev iteration)` →
-  `×1000 (small deployment)` — the final rung landing on a number students can *feel*.
+  `×1000 (small deployment)` — the final rung landing on a number you can *feel*.
 - ⚠️ **Pricing note:** per-token rates change. Always pull current Claude Sonnet pricing from
-  Anthropic's pricing page on the day you teach or estimate; never trust a hard-coded number.
+  Anthropic's pricing page on the day you're estimating; never trust a hard-coded number.
 
 ## section 9. Wrap-up and the bridge to L02
 
@@ -288,10 +299,10 @@ estimated duration: 85
 ### slide 9.2 What L02 does with this
 
 - L02 (prompting fundamentals) turns the informal **preamble** into explicit system/user/assistant
-  **roles** — and every one of those turns is billed against the window L01 just taught.
+  **roles** — and every one of those turns is billed against the window L01 just taught you.
 - **Structured output** is partly a don't-pay-for-tokens-you-don't-need move; **few-shot examples**
-  are front-loading made deliberate — a context-window-vs-quality trade-off. Students who felt L01's
-  "input tokens cost money and eat the window" treat few-shot as expensive-but-sometimes-worth-it,
-  which is the right intuition.
+  are front-loading made deliberate — a context-window-vs-quality trade-off. If L01's "input tokens
+  cost money and eat the window" landed, you'll treat few-shot as expensive-but-sometimes-worth-it —
+  which is the right instinct to carry forward.
 - See the bridge in this lesson's roadmap:
   [objectives.md § Bridge to L02](../../../../docs/origin/lesson_roadmaps/L01/objectives.md).

@@ -1,8 +1,9 @@
 # L22 Proctor Notes — Skills
 
 Teaching notes for whoever runs L22's labs. One section per problem, keyed by the lab's
-`L<LL><NN>` identifier and problem number. The mini cut's final lesson is a **capstone**: keep the
-energy on *judgment* ("where does this capability live?") more than on code volume.
+`L<LL><NN>` identifier and problem number. L22 is a **capstone** of the *"where does a capability
+live?"* question (the mini cut continues to L23, then L50): keep the energy on *judgment* ("where does
+this capability live?") more than on code volume.
 
 Both labs run **fully offline** on the scripted `FakeModel` — no API key, no network. If a student's
 notebook asks for a key, they've drifted off the given scaffolding; send them back to the setup cell.

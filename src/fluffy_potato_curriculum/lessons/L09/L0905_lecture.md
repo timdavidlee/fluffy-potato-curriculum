@@ -7,7 +7,7 @@ estimated duration: 20
 ```
 
 > **Lesson:** L09. **Roadmap:** Demo 2 in the [demos_or_activities.md](../../../../docs/origin/lesson_roadmaps/L09/demos_or_activities.md).
-> A slide outline (teacher-presented) covering **connecting a client to an already-published MCP
+> A slide outline walking you through **connecting a client to an already-published MCP
 > server** and reading the discovery handshake.
 >
 > **⚠️ NOT RUNNABLE in this environment.** The Python `mcp` package is **not installed** in the course
@@ -83,8 +83,8 @@ async with connect_stdio(server_config) as session:
 | `description` | `"Book a meeting on the user's calendar. Use when the user asks to schedule…"` | the L08 description, written for the model |
 | `inputSchema` | `{"type": "object", "properties": {…}, "required": ["attendee", "start"]}` | the L08 parameter schema (JSON Schema) |
 
-- The teacher-narration point: the client now "knows about tools it did not ship with." Ownership of the
-  tool list has moved to the **server author** (reinforce [L0902 lecture](L0902_lecture.md) slide 2.3).
+- The point worth sitting with: the client now "knows about tools it did not ship with." Ownership of
+  the tool list has moved to the **server author** ([L0902 lecture](L0902_lecture.md) slide 2.3).
 
 [↑ Back to top](#connecting-to-an-existing-mcp-server-wire-shape-walkthrough)
 
@@ -92,28 +92,28 @@ async with connect_stdio(server_config) as session:
 
 ### slide 3.1 The round-trip, with the MCP hop made explicit
 
-- Once the specs are registered, the model emits a `tool_use` block exactly as in
-  [L07](../L07/objectives.md). The client routes it over the transport; the server runs the tool; the
-  result returns as a `tool_result`.
-- diagram: `model (tool_use)` → `client routes over transport` → `server runs book_meeting` →
-  `client wraps as tool_result` → `model (final answer)`. Steps 2–4 are the MCP hop; the model never
+- Once the specs are registered, the model emits an `AIMessage` with a tool call exactly as in
+  [L07](../L07/objectives.md). The client routes it over the transport; the server runs the tool and
+  returns a structured result; the client feeds it back as a `ToolMessage`.
+- diagram: `model (AIMessage.tool_calls)` → `client routes over transport` → `server runs book_meeting`
+  → `client wraps as ToolMessage` → `model (final answer)`. Steps 2–4 are the MCP hop; the model never
   sees them.
 - text: the call shape (pseudocode).
 
 ```python
 # NOT-RUNNABLE here (no `mcp` package). Shown for wire shape only.
-# The client, having seen the model emit a tool_use for "book_meeting",
+# The client, having seen the model emit a tool call for "book_meeting" (AIMessage.tool_calls),
 # forwards the call to the server and gets a structured result back.
 result = await session.call_tool(
     name="book_meeting",
     arguments={"attendee": "priya@example.com", "start": "2026-06-16T14:00", "duration_minutes": 90},
 )
-print(result.content)  # the server's structured tool result, sent back as a tool_result block
+print(result.content)  # the server's structured tool result, fed back to the model as a ToolMessage
 ```
 
 ### slide 3.2 The model can't tell it's MCP
 
-- From the model's seat, this is the **same** `tool_use` / `tool_result` exchange as
+- From the model's seat, this is the **same** `AIMessage.tool_calls` / `ToolMessage` exchange as
   [L07](../L07/objectives.md). MCP is invisible to it — it lives entirely in the client's routing and
   the operator's config.
 - That invisibility is the proof of the abstraction: the model designed-for in L08 and the loop coming
@@ -125,8 +125,8 @@ print(result.content)  # the server's structured tool result, sent back as a too
 
 ### slide 4.1 Stop the server, watch the boundary fail
 
-- The teacher-demo move: stop the server process mid-conversation and re-issue the prompt. The client
-  surfaces a **transport error** to the model — a failure mode an inline tool *cannot* have.
+- Watch what happens if the server process stops mid-conversation and the prompt gets re-issued: the
+  client surfaces a **transport error** to the model — a failure mode an inline tool *cannot* have.
 - table: the boundary-specific failures (mirrors [L0902 lecture](L0902_lecture.md) slide 3.4) and how
   the model reacts.
 
@@ -155,8 +155,8 @@ print(result.content)  # the server's structured tool result, sent back as a too
 ### slide 5.1 You read a discovery response; you traced a cross-process call
 
 - After this walkthrough you can read a server's published tool list and predict what the model will
-  see, and you can trace a `tool_use` → transport → server → `tool_result` round-trip and name where it
-  can fail.
+  see, and you can trace an `AIMessage.tool_calls` → transport → server → `ToolMessage` round-trip and
+  name where it can fail.
 - Next: [L0906](L0906_lecture.ipynb) shows the *other* side of the wire — **building** the server whose
   tools you just discovered (also shown, not run here). The offline [L0904 lab](L0904_lab_empty.ipynb)
   has you validate and translate the spec these handshakes exchange.

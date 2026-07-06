@@ -21,7 +21,7 @@ estimated duration: 10
 
 L07 covered the *mechanics* of tool calling: how a single tool is wired to a model call, what the
 tool-call round-trip looks like on the wire, and the protocol the model and runtime use to negotiate
-a call. By the end of L07 a student can make a tool *work*.
+a call. By the end of L07 you can make a tool *work*.
 
 L08 takes the next step: making a tool *good*. The protocol is settled — the open question now is
 *what to expose, how to name and shape it, and how to fail gracefully* when the world disagrees with
@@ -88,8 +88,8 @@ Each demo lands one sentence. If you remember nothing else, remember these:
   *truth*, and you still parse and validate defensively.
 - **L06 (reasoning is tokens).** Choosing *whether* to call a tool is itself a reasoning step. A good
   description and a clean error are the tokens the model conditions that decision on.
-- **L07 (the protocol).** L08 assumes the wiring works. We do **not** re-teach the round-trip — if you
-  are shaky on the mechanics, redirect to the L07 lab before continuing. L08 is about *design
+- **L07 (the protocol).** L08 assumes the wiring works — this lecture doesn't re-teach the round-trip.
+  If you're shaky on the mechanics, head back to the L07 lab before continuing. L08 is about *design
   judgment* on top of a protocol you already understand.
 
 ## A note on the code

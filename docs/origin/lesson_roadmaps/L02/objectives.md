@@ -31,6 +31,7 @@ By the end of L02, a student should be able to:
    - Explain what each role *is* in the API protocol: the system message as out-of-band steering, user messages as inputs from the caller, assistant messages as the model's prior responses (or as in-context examples — see Subgoal 3).
    - Construct a multi-turn conversation by appending alternating user/assistant messages and resending the full history (recall from L01: there is no server-side memory).
    - Decide what content belongs in the system message vs. the user message: durable, identity-and-policy content goes in `system`; per-call task content goes in `user`. Articulate why this matters for both reusability and (foreshadowing prompt caching) cost.
+   - **Name the *persona* as the durable slice of the system message** — the model's role, tone/register, and standing format/policy that fronts every call unchanged. Frame it honestly: a persona is a *behavior-and-voice* nudge (it steers *how* the model answers — register, format, adherence), **not** an accuracy unlock — "you are an expert X" does not make the underlying facts more correct (accuracy comes from context, reasoning in L06, or model choice in L14). Forward-point that this is the seed of a bigger idea: from L11 on, **an agent's persona *is* its system prompt** — its role and guardrails (L11 shallow agent; L19 static system prompt vs. context management).
    - Recognize the consequences of mis-attributing content: instructions buried in user messages get re-sent every turn (cost and confusion); per-call data crammed into the system message poisons reuse.
    - Identify when to start a *new* conversation vs. continue an existing one — and reason about the cost-vs-context trade-off (recall L01: every continued turn re-bills history).
 
@@ -74,6 +75,7 @@ By the end of L02, a student should be able to:
 ## Common student confusions to watch for
 
 - *"The system message is enforced; the user can't override it."* No. The system message is *strongly weighted* but not inviolable. Anything close to a security or policy guarantee belongs outside the model, not inside the system prompt.
+- *"Giving the model an expert persona makes its answers more accurate."* No. A persona shapes voice, tone, format, and adherence — not correctness. "You are an expert oncologist" changes the register, not the medical facts; accuracy comes from better context, reasoning (L06), or model choice (L14), not a flattering job title.
 - *"Once I say 'output JSON', the model will always output valid JSON."* No. Even with JSON mode, the model can produce malformed output, especially under unusual inputs or low capacity. Always parse defensively.
 - *"More examples is always better."* No — examples cost tokens every call (recall L01), and the model often overfits to surface features of a uniform example set.
 - *"Few-shot teaches the model new things."* No — it conditions in-context behavior. The model's underlying capabilities don't change. Frame few-shot as "showing", not "teaching."

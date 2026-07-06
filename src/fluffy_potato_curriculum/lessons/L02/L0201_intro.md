@@ -17,19 +17,19 @@ estimated duration: 12
 
 ## Where this lesson sits
 
-L01 answered *what an API call costs and how the model produces its output* — tokens, the context
-window, temperature, cost. Those four primitives describe the **container**. L02 is the first
-lesson about what you **put in the container**: the *prompt*.
+In L01 you learned *what an API call costs and how the model produces its output* — tokens, the
+context window, temperature, cost. Those four primitives describe the **container**. Now, in L02,
+you get to what you **put in the container**: the *prompt*.
 
-The whole lesson rests on one claim, which the demos make concrete:
+The whole lesson rests on one claim, and the demos will make it concrete for you:
 
 > *The same content, arranged differently, produces a different answer. Prompt structure is not
 > decoration — it is a lever.*
 
 ## The three levers, in one breath
 
-L02 hands you three tools — plus a catalog of what they let a single call *do*. The three levers
-are the minimum prompting toolkit every later lesson assumes you already own.
+Here you'll pick up three tools — plus a catalog of what they let a single call *do*. These three
+levers are the minimum prompting toolkit every later lesson assumes you already have in hand.
 
 - **Roles** — who said what. A prompt is not one blob of text; it is a list of `{role, content}`
   messages with three roles: `system` (the always-true steering), `user` (the per-call request),
@@ -44,11 +44,11 @@ are the minimum prompting toolkit every later lesson assumes you already own.
 
 ## Three mental models to carry out of L02
 
-Each demo lands one sentence. If you remember nothing else, remember these:
+Each demo lands one sentence for you. If you remember nothing else, hold onto these:
 
-1. **The system message is *always-true context*, not an *inviolable rule*.** It is strongly
-   weighted, but it is still just text the model reads. Durable identity-and-policy content goes
-   in `system`; per-call data goes in `user`. Putting per-call data in `system` poisons reuse.
+1. **The system message is *always-true context*, not an *inviolable rule*.** It's strongly
+   weighted, but it's still just text the model reads. Durable identity-and-policy content goes
+   in `system`; per-call data goes in `user`. Put per-call data in `system` and you poison reuse.
 2. **Structured output is a *negotiation*, not a *guarantee*.** Ask for structure, parse
    defensively, fail loudly when the parse fails. "The model agreed to a contract" is not "the
    model honored the contract."
@@ -60,7 +60,7 @@ Each demo lands one sentence. If you remember nothing else, remember these:
 
 The three levers are *mechanics* — where content goes, how to get a parseable answer, how to nudge
 behavior. Point them at a goal and you get the everyday jobs a **single LLM call** does. Learn to
-name the shape, because naming it tells you which lever to reach for and what to validate:
+name the shape — naming it tells you which lever to reach for and what to validate:
 
 - **Extraction** — pull structured fields out of text (one fixed schema, or a mixed bag of items).
 - **Classification** — sort an input into a fixed label set (flat, a category→subcategory taxonomy,
@@ -78,7 +78,7 @@ and L03–L05 chain several into a pipeline.
 
 ## How L01 carries forward
 
-Every L02 lever has an L01 cost shadow, and we keep printing the numbers:
+Every L02 lever has an L01 cost shadow, and you'll keep seeing the numbers:
 
 - The **system message is re-sent on every turn** — keep it lean, or the L01 cost staircase steepens.
 - **Structured output is often a cost win** — a tight schema usually means fewer output tokens than
@@ -87,28 +87,29 @@ Every L02 lever has an L01 cost shadow, and we keep printing the numbers:
 
 ## What L02 deliberately does *not* teach
 
-This lesson is narrow on purpose. It does **not** cover:
+This lesson stays narrow on purpose. You won't cover:
 
-- **Chain-of-thought / scratchpad reasoning** — that is L06. L02 teaches the *structured-answer*
-  half of `<thinking>…</thinking><answer>{…}</answer>` and *shows* the channel split (the demo parses
-  the answer straight past a thinking block); L06 teaches the thinking half — what to reason about and
-  when it helps. (Mini-track note: the mini skips L06, so that small beat is your only look at the
-  thinking channel.)
-- **Tool calling / forcing schema-conformant output via tool-use** — that is L07. Here we ask for
-  JSON *by instruction only* and parse defensively. In production you would use Anthropic's
-  tool-use mechanism for stricter structure — you will see it in L07, and the parsing discipline
-  you learn here still applies.
-- **Orchestration — chaining several single steps into a pipeline** — that is L03–L05. The task
+- **Chain-of-thought / scratchpad reasoning** — that's L06. Here you get the *structured-answer*
+  half of `<thinking>…</thinking><answer>{…}</answer>`, and you'll see the channel split (the demo
+  parses the answer straight past a thinking block); L06 is where you pick up the thinking half —
+  what to reason about and when it helps. (Mini-track note: the mini skips L06, so that small beat
+  is your only look at the thinking channel.)
+- **Tool calling / forcing schema-conformant output via tool-use** — that's L07. Here you ask for
+  JSON *by instruction only* and parse defensively. In production you'd reach for Anthropic's
+  tool-use mechanism for stricter structure — you'll get there in L07, and the parsing discipline
+  you build here still applies.
+- **Orchestration — chaining several single steps into a pipeline** — that's L03–L05. The task
   catalog above is the menu of what *one* call (one node) can do; wiring several together into a
-  graph is the next three lessons.
+  graph is the next three lessons for you.
 
 The one sentence to leave L02 with:
 
 > *You now know how to ask the model for what you want, in the shape you want — L06 is about making
 > it think harder before it answers.*
 
-Next up is [L03](../../../../docs/origin/lesson_roadmaps/L03/objectives.md) (single-node operations),
-which takes one task shape from the catalog — extraction — and wraps it as a reusable graph node.
+Next up for you is [L03](../../../../docs/origin/lesson_roadmaps/L03/objectives.md) (single-node
+operations), which takes one task shape from the catalog — extraction — and wraps it as a reusable
+graph node.
 
 Read next: the written reference lecture in [L0202_lecture.md](L0202_lecture.md), then the live demos
 (roles [L0203](L0203_lecture.ipynb), structured output [L0205](L0205_lecture.ipynb), few-shot
