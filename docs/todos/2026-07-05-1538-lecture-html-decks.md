@@ -15,7 +15,7 @@ recurring drift risk below.
 
 ## Status (19 lecture outlines)
 
-**Progress: 13 built (L0102, L0202, L0305, L0402, L0502, L0505, L0602, L0702, L0802, L0902, L0905, L1102, L1105) · 1 needs rescale (L1002) · 5 pending.**
+**Progress: 14 built (L0102, L0202, L0305, L0402, L0502, L0505, L0602, L0702, L0802, L0902, L0905, L1002, L1102, L1105) · 5 pending.**
 
 | Lesson item | Deck? | Scale | Note |
 | --- | --- | --- | --- |
@@ -30,26 +30,25 @@ recurring drift risk below.
 | L0802 | ✅ | classroom | done (tool design; 7 diagrams — 2 added: worked-test flow + hidden-side-effect panels; 6 ledger tables, 37 slides) |
 | L0902 | ✅ | classroom | done (MCP contract + boundary; 6 diagrams — 1 added: §5.2 break-even chart; 9 ledger tables, 32 slides) |
 | L0905 | ✅ | classroom | done (MCP wire-shape walkthrough; 3 diagrams — 1 added: §4.1 boundary-failure timeline; 2 ledger tables, 16 slides) |
-| L1002 | ⚠️ | **OLD** | **known off** — built pre-classroom-scale; needs the rescale below |
+| L1002 | ✅ | classroom | done 2026-07-06 — rescaled to classroom type-scale (hand-scaled, art preserved) + rebuilt to the densified outline (+9 visuals incl. the cyan back-edge fixes; 30 slides) |
 | L1102 | ✅ | classroom | done (loop→graph; 6 diagrams — 4 added: L10 loop recap, back-edge-on-the-DAG, numbered run trace, step-cap-at-25; 1 mapping table, 16 slides) |
 | L1105 | ✅ | classroom | done (config surface + ceiling; 5 diagrams — 3 added: managed-by-create_agent bracket, outgrow break-out arrows, L10→L15 ladder; 3 tables, 14 slides) |
 | L1206, L1307, L2202, L2205, L2302 | ❌ | — | no deck yet (5 outlines) |
 
 ## Open items
 
-- **[drift] The 2026-07-06 diagram-coverage reviews densified all built outlines** — the L01–L07
-  decks lag their outlines per
-  [2026-07-06-1408-diagram-review-l01-l07.md](2026-07-06-1408-diagram-review-l01-l07.md), and the
-  L08–L11 decks per [2026-07-06-1439-diagram-review-l08-l11.md](2026-07-06-1439-diagram-review-l08-l11.md)
-  (which also lists the deck colour fixes already applied and a rebuild order). Every ✅ row above
-  predates that densify — rebuild before presenting.
-- **[known off] Rescale L1002 deck to the classroom type-scale.** It sits at the old sizes
-  (`--edge-bottom: 90px`, bullets 25px, cells 21px, SVG labels 18–24px). Apply the same transform
-  used on L02: shared-CSS type bump + reclaim vertical space (`--edge-bottom` 90→64, `body-area`
-  top 322→312, `.point` margin 22→15, `td` padding 18→11), bump `.node-label`/`.edge-label` and any
-  L10-specific diagram-helper classes + inline SVG `font-size="N"` attributes, then **verify no slide
-  overflows** the stage (L10 has a 7-row arc table + several SVG diagrams — the dense ones to watch).
-  L10's diagrams are hand-crafted and good; **hand-scale, don't regenerate** (preserves the art).
+- ~~**[drift] The 2026-07-06 diagram-coverage reviews densified all built outlines**~~ —
+  **resolved 2026-07-06, both rebuild passes landed.** The eight L01–L07 decks were rebuilt to
+  their densified outlines (merged in `c6571ad`; see
+  [2026-07-06-1408-diagram-review-l01-l07.md](2026-07-06-1408-diagram-review-l01-l07.md)), and the
+  six L08–L11 decks (L0802 +8 visuals, L0902 +9, L0905 +6, L1002 +9, L1102 +4, L1105 +3) were
+  rebuilt and browser-verified in this pass (stage-overflow + chrome-collision sweeps, slide counts
+  vs outlines, classroom type-scale; see
+  [2026-07-06-1439-diagram-review-l08-l11.md](2026-07-06-1439-diagram-review-l08-l11.md)). Every
+  ✅ row above now matches its densified outline, though row diagram-counts predate the rebuilds.
+- ~~**[known off] Rescale L1002 deck to the classroom type-scale.**~~ **Done 2026-07-06** in the
+  L08–L11 rebuild: same transform as L02 (`--edge-bottom` 90→64, type bump, spacing reclaim),
+  diagrams hand-scaled (art preserved), no slide overflows the stage.
 - **Build decks for the 5 remaining outlines.** Each via the `build-lecture-deck` skill (copy the
   sample, map the outline, build diagrams, verify). Rough priority: the rest of the core arc first
   (L12–L13), then the mini/standalone items (L22, L23). No hard dependency between

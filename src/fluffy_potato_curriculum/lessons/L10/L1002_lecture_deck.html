@@ -31,7 +31,7 @@
 
     --edge-x: 130px;
     --edge-top: 96px;
-    --edge-bottom: 90px;
+    --edge-bottom: 64px;
 
     --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
     --duration-normal: 0.7s;
@@ -147,7 +147,7 @@ img, video, canvas, svg { max-width: 100%; max-height: 100%; }
    TYPOGRAPHY PRIMITIVES
    =========================================== */
 .eyebrow {
-    font-size: 19px;
+    font-size: 22px;
     letter-spacing: 0.16em;
     text-transform: uppercase;
     color: var(--cyan);
@@ -176,8 +176,8 @@ img, video, canvas, svg { max-width: 100%; max-height: 100%; }
 h2.headline {
     font-family: var(--font-display);
     font-weight: 600;
-    font-size: 58px;
-    line-height: 1.12;
+    font-size: 62px;
+    line-height: 1.1;
     color: var(--ink);
     letter-spacing: -0.005em;
     margin-top: 18px;
@@ -185,8 +185,8 @@ h2.headline {
 h2.headline .it { font-style: italic; font-weight: 500; color: var(--cyan); }
 
 .lede {
-    font-size: 24px;
-    line-height: 1.6;
+    font-size: 29px;
+    line-height: 1.5;
     color: var(--ink-dim);
     max-width: 1200px;
     margin-top: 22px;
@@ -195,7 +195,7 @@ h2.headline .it { font-style: italic; font-weight: 500; color: var(--cyan); }
 
 .body-area {
     position: absolute;
-    top: 322px;
+    top: 312px;
     left: var(--edge-x);
     right: var(--edge-x);
     bottom: var(--edge-bottom);
@@ -204,11 +204,11 @@ h2.headline .it { font-style: italic; font-weight: 500; color: var(--cyan); }
 .points { list-style: none; max-width: 1420px; }
 .points .point {
     position: relative;
-    padding-left: 38px;
-    font-size: 25px;
-    line-height: 1.55;
+    padding-left: 40px;
+    font-size: 29px;
+    line-height: 1.5;
     color: var(--ink-dim);
-    margin-bottom: 22px;
+    margin-bottom: 15px;
 }
 .points .point::before {
     content: "";
@@ -233,7 +233,7 @@ h2.headline .it { font-style: italic; font-weight: 500; color: var(--cyan); }
 
 /* callout — emphasis statement */
 .callout {
-    margin-top: 40px;
+    margin-top: 28px;
     padding: 28px 36px;
     border-left: 3px solid var(--cyan);
     background: rgba(82,232,200,0.05);
@@ -242,8 +242,8 @@ h2.headline .it { font-style: italic; font-weight: 500; color: var(--cyan); }
 .callout p {
     font-family: var(--font-display);
     font-style: italic;
-    font-size: 32px;
-    line-height: 1.4;
+    font-size: 38px;
+    line-height: 1.32;
     color: var(--ink);
 }
 
@@ -252,7 +252,7 @@ h2.headline .it { font-style: italic; font-weight: 500; color: var(--cyan); }
    =========================================== */
 table.ledger { width: 100%; border-collapse: collapse; max-width: 1660px; }
 table.ledger th {
-    font-size: 16px;
+    font-size: 19px;
     letter-spacing: 0.1em;
     text-transform: uppercase;
     color: var(--cyan);
@@ -262,16 +262,16 @@ table.ledger th {
     font-weight: 600;
 }
 table.ledger td {
-    font-size: 21px;
-    line-height: 1.45;
+    font-size: 24px;
+    line-height: 1.38;
     color: var(--ink-dim);
-    padding: 18px 22px 18px 0;
+    padding: 11px 20px 11px 0;
     border-bottom: 1px solid rgba(82,232,200,0.10);
     vertical-align: top;
 }
 table.ledger tr:last-child td { border-bottom: none; }
 table.ledger td.tag {
-    font-size: 20px;
+    font-size: 23px;
     color: var(--cyan);
     font-weight: 500;
     white-space: nowrap;
@@ -295,15 +295,15 @@ table.ledger td.warn-cell { color: var(--coral); }
     justify-content: center;
 }
 .diagram-caption {
-    font-size: 21px;
+    font-size: 25px;
     line-height: 1.6;
     color: var(--ink-dim);
     font-style: italic;
     max-width: 1300px;
     margin-top: 18px;
 }
-.node-label { font-family: var(--font-body); font-weight: 600; font-size: 24px; fill: var(--ink); }
-.edge-label { font-family: var(--font-body); font-size: 18px; }
+.node-label { font-family: var(--font-body); font-weight: 600; font-size: 27px; fill: var(--ink); }
+.edge-label { font-family: var(--font-body); font-size: 20px; }
 
 /* ===========================================
    CHAPTER (section divider) SLIDES — sparse
@@ -346,8 +346,8 @@ table.ledger td.warn-cell { color: var(--coral); }
 .chapter-sub {
     position: absolute;
     left: var(--edge-x);
-    top: 700px;
-    font-size: 25px;
+    top: 690px;
+    font-size: 29px;
     color: var(--ink-dim);
     max-width: 1100px;
     line-height: 1.6;
@@ -375,8 +375,8 @@ table.ledger td.warn-cell { color: var(--coral); }
     position: absolute;
     top: 636px;
     left: var(--edge-x);
-    width: 880px;
-    font-size: 25px;
+    width: 920px;
+    font-size: 29px;
     line-height: 1.6;
     color: var(--ink-dim);
 }
@@ -387,7 +387,7 @@ table.ledger td.warn-cell { color: var(--coral); }
     left: var(--edge-x);
     display: flex;
     gap: 44px;
-    font-size: 18px;
+    font-size: 21px;
     color: var(--ink-dim);
 }
 .slide-cover .meta-row span b { color: var(--cyan); }
@@ -405,7 +405,7 @@ table.ledger td.warn-cell { color: var(--coral); }
     font-family: var(--font-display);
     font-style: italic;
     font-weight: 500;
-    font-size: 52px;
+    font-size: 56px;
     line-height: 1.35;
     color: var(--ink);
 }
@@ -422,14 +422,14 @@ table.ledger td.warn-cell { color: var(--coral); }
     padding-top: 30px;
 }
 .closing-grid .col .label {
-    font-size: 15px;
+    font-size: 18px;
     letter-spacing: 0.12em;
     text-transform: uppercase;
     color: var(--cyan);
     margin-bottom: 10px;
 }
 .closing-grid .col .val {
-    font-size: 20px;
+    font-size: 24px;
     color: var(--ink-dim);
     line-height: 1.5;
 }
@@ -518,6 +518,85 @@ table.ledger td.warn-cell { color: var(--coral); }
     pointer-events: none;
 }
 .save-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* ===========================================
+   L10 DIAGRAM HELPERS (appended — deck-local)
+   =========================================== */
+/* generic two-up diagram row + panel labels */
+.dg-label {
+    font-size: 18px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink-dim);
+    font-weight: 600;
+    margin-bottom: 12px;
+}
+.dg-label.good { color: var(--cyan); }
+.dg-label.bad  { color: var(--coral); }
+
+/* message pill stack (2.2 append-vs-overwrite) */
+.msg-pill {
+    font-family: var(--font-body);
+    font-size: 20px;
+    line-height: 1.3;
+    padding: 9px 18px;
+    border: 2px solid var(--ink-faint);
+    border-radius: 9px;
+    color: var(--ink-dim);
+    background: #12181a;
+    width: max-content;
+}
+.msg-pill.new  { border-color: var(--cyan); color: var(--cyan); background: rgba(82,232,200,0.07); }
+.msg-pill.dead { border-color: var(--coral-dim); color: var(--ink-faint); text-decoration: line-through; text-decoration-color: var(--coral); }
+
+/* runaway-trace strip (3.3) */
+.cycle-box {
+    border: 2px dashed var(--ink-faint);
+    border-radius: 12px;
+    padding: 16px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+.cycle-box .cycle-name {
+    font-size: 16px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+}
+.step-chip {
+    font-family: var(--font-body);
+    font-size: 20px;
+    padding: 8px 16px;
+    border: 2px solid var(--ink-faint);
+    border-radius: 8px;
+    color: var(--ink-dim);
+    background: #12181a;
+    width: max-content;
+}
+.step-chip.bad {
+    border-color: var(--coral);
+    color: var(--coral);
+    background: rgba(255,107,87,0.06);
+}
+.crash-box {
+    border: 2.5px solid var(--coral);
+    border-radius: 12px;
+    padding: 18px 24px;
+    color: var(--coral);
+    font-size: 20px;
+    line-height: 1.5;
+    background: rgba(255,107,87,0.06);
+    align-self: center;
+}
+
+/* cumulative-token staircase (5.4) */
+.stair-chart { display: flex; align-items: flex-end; gap: 26px; height: 230px; }
+.stair-chart .col { width: 110px; display: flex; flex-direction: column; justify-content: flex-end; height: 100%; }
+.stair-chart .col .new    { background: var(--cyan); border-radius: 6px 6px 0 0; }
+.stair-chart .col .resend { background: var(--coral); opacity: 0.85; }
+.stair-legend { display: flex; flex-direction: column; gap: 16px; font-size: 21px; line-height: 1.5; color: var(--ink-dim); max-width: 640px; }
+.stair-legend .sw { display: inline-block; width: 22px; height: 22px; border-radius: 5px; vertical-align: -3px; margin-right: 12px; }
 </style>
 </head>
 <body>
@@ -576,13 +655,56 @@ table.ledger td.warn-cell { color: var(--coral); }
         <div class="eyebrow">Slide 1.1</div>
         <h2 class="headline">An agent is a graph <span class="it">with a cycle</span></h2>
     </div>
-    <div class="body-area">
-        <ul class="points reveal">
-            <li class="point">The graphs you built in <code>L04</code>/<code>L05</code> flowed <b>forward and stopped</b> &mdash; a DAG, where no node ever ran twice and <b>you</b> owned every edge.</li>
-            <li class="point">An <b>agent</b> takes those same primitives &mdash; typed state, nodes, a conditional edge &mdash; and adds exactly <b>one</b> new thing: a <b>back-edge</b> from the tool node to the model node.</li>
-            <li class="point">That single edge hands the <b>model</b> the decision of what runs next.</li>
-        </ul>
-        <div class="callout reveal"><p>The back-edge is the cycle, and the cycle is the agent.</p></div>
+    <div class="body-area" style="display:flex; gap:60px; align-items:center;">
+        <div style="flex:1; min-width:0;">
+            <ul class="points reveal">
+                <li class="point">The <code>L04</code>/<code>L05</code> graphs flowed <b>forward and stopped</b> &mdash; a DAG, no node ever ran twice, and <b>you</b> owned every edge.</li>
+                <li class="point">An <b>agent</b> takes the same primitives and adds exactly <b>one</b> new thing: a <b>back-edge</b> from the tool node to the model node.</li>
+                <li class="point">That single edge hands the <b>model</b> the decision of what runs next.</li>
+            </ul>
+            <div class="callout reveal"><p>The back-edge is the cycle, and the cycle is the agent.</p></div>
+        </div>
+        <div class="diagram-frame reveal" style="width:780px; height:640px; flex-shrink:0;">
+            <svg viewBox="0 0 780 640" width="100%" height="100%">
+                <defs>
+                    <marker id="s11-f" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="var(--ink-faint)"/></marker>
+                    <marker id="s11-c" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="var(--cyan)"/></marker>
+                </defs>
+                <!-- top: the L04/L05 forward chain, all ink-faint -->
+                <text x="10" y="40" class="edge-label" fill="var(--ink-dim)">L04 / L05 &mdash; you own every edge</text>
+                <g>
+                    <rect x="10" y="76" width="170" height="76" rx="12" fill="#12181a" stroke="var(--ink-faint)" stroke-width="2.5"/>
+                    <text x="95" y="122" text-anchor="middle" class="node-label" font-size="24" fill="var(--ink-dim)">parse</text>
+                    <rect x="230" y="76" width="170" height="76" rx="12" fill="#12181a" stroke="var(--ink-faint)" stroke-width="2.5"/>
+                    <text x="315" y="122" text-anchor="middle" class="node-label" font-size="24" fill="var(--ink-dim)">draft</text>
+                    <rect x="450" y="76" width="190" height="76" rx="12" fill="#12181a" stroke="var(--ink-faint)" stroke-width="2.5"/>
+                    <text x="545" y="122" text-anchor="middle" class="node-label" font-size="19" fill="var(--ink-dim)">policy_check</text>
+                    <path d="M 180 114 L 224 114" stroke="var(--ink-faint)" stroke-width="3" marker-end="url(#s11-f)"/>
+                    <path d="M 400 114 L 444 114" stroke="var(--ink-faint)" stroke-width="3" marker-end="url(#s11-f)"/>
+                    <path d="M 640 114 L 690 114" stroke="var(--ink-faint)" stroke-width="3" marker-end="url(#s11-f)"/>
+                    <text x="735" y="121" text-anchor="middle" class="node-label" font-size="21" fill="var(--ink-faint)">END</text>
+                </g>
+                <!-- bottom: the same graph + the ONE cyan back-edge -->
+                <text x="10" y="330" class="edge-label" fill="var(--ink)">L10 &mdash; the same graph, one added arc</text>
+                <g>
+                    <rect x="10" y="366" width="170" height="76" rx="12" fill="#12181a" stroke="var(--ink-faint)" stroke-width="2.5"/>
+                    <text x="95" y="412" text-anchor="middle" class="node-label" font-size="24" fill="var(--ink-dim)">parse</text>
+                    <rect x="230" y="366" width="170" height="76" rx="12" fill="#12181a" stroke="var(--ink-faint)" stroke-width="2.5"/>
+                    <text x="315" y="412" text-anchor="middle" class="node-label" font-size="24" fill="var(--ink-dim)">draft</text>
+                    <rect x="450" y="366" width="190" height="76" rx="12" fill="#12181a" stroke="var(--ink-faint)" stroke-width="2.5"/>
+                    <text x="545" y="412" text-anchor="middle" class="node-label" font-size="19" fill="var(--ink-dim)">policy_check</text>
+                    <path d="M 180 404 L 224 404" stroke="var(--ink-faint)" stroke-width="3" marker-end="url(#s11-f)"/>
+                    <path d="M 400 404 L 444 404" stroke="var(--ink-faint)" stroke-width="3" marker-end="url(#s11-f)"/>
+                    <path d="M 640 404 L 690 404" stroke="var(--ink-faint)" stroke-width="3" marker-end="url(#s11-f)"/>
+                    <text x="735" y="411" text-anchor="middle" class="node-label" font-size="21" fill="var(--ink-faint)">END</text>
+                    <path d="M 545 448 C 460 560, 180 560, 98 450" fill="none" stroke="var(--cyan)" stroke-width="3.5" marker-end="url(#s11-c)"/>
+                    <circle r="8" fill="var(--cyan)">
+                        <animateMotion dur="3.2s" repeatCount="indefinite" path="M 545 448 C 460 560, 180 560, 98 450"/>
+                    </circle>
+                    <text x="330" y="600" text-anchor="middle" class="edge-label" fill="var(--cyan)">the back-edge &mdash; the one new thing</text>
+                </g>
+            </svg>
+        </div>
     </div>
     <div class="chrome-page">03 / 30</div>
     <div class="chrome-nav">← → navigate</div>
@@ -601,14 +723,14 @@ table.ledger td.warn-cell { color: var(--coral); }
         <table class="ledger">
             <thead><tr><th>Lesson</th><th>What it built</th><th>What L10 reuses</th></tr></thead>
             <tbody>
-                <tr><td class="tag">L04</td><td>directed <code>StateGraph</code>: typed state, <code>add_node</code>, <code>add_edge</code>, <code>compile</code></td><td>the same primitives &mdash; now with a cycle</td></tr>
-                <tr><td class="tag">L05</td><td>the <b>conditional edge</b>: <code>add_conditional_edges</code> + a routing function</td><td><code>route</code> <b>is</b> an L05 conditional edge</td></tr>
-                <tr><td class="tag">L07</td><td>one tool-call round-trip: <code>.bind_tools()</code> + <code>.tool_calls</code> + <code>ToolMessage</code></td><td>the exact interface, now repeated inside the cycle</td></tr>
-                <tr><td class="tag">L08</td><td>tool design; what a tool <b>returns</b> on failure</td><td>the error-as-data idea, now carried back by the graph</td></tr>
-                <tr><td class="tag">L09</td><td>tools packaged over MCP</td><td>the graph runs MCP tools and inline tools identically</td></tr>
-                <tr><td class="tag" style="color:var(--ink);">L10</td><td><b>the ReAct cyclic graph</b>: back-edge, termination, failure handling</td><td>&mdash;</td></tr>
+                <tr><td class="tag">L04</td><td>directed <code>StateGraph</code>: <code>add_node</code>, <code>add_edge</code>, <code>compile</code></td><td>the same primitives &mdash; now with a cycle</td></tr>
+                <tr><td class="tag">L05</td><td>the <b>conditional edge</b> + a routing function</td><td><code>route</code> <b>is</b> an L05 conditional edge</td></tr>
+                <tr><td class="tag">L07</td><td>one tool round-trip: <code>.bind_tools()</code>, <code>.tool_calls</code>, <code>ToolMessage</code></td><td>the same interface, repeated inside the cycle</td></tr>
+                <tr><td class="tag">L08</td><td>tool design; what a tool <b>returns</b> on failure</td><td>error-as-data, now carried back by the graph</td></tr>
+                <tr><td class="tag">L09</td><td>tools packaged over MCP</td><td>MCP and inline tools run identically</td></tr>
+                <tr><td class="tag" style="color:var(--ink);">L10</td><td><b>the ReAct cyclic graph</b>: back-edge, termination, failures</td><td>&mdash;</td></tr>
                 <tr><td class="tag">L11</td><td><code>create_agent</code> builds this exact graph in one line</td><td>the by-hand graph makes the one-liner legible</td></tr>
-                <tr><td class="tag">L12</td><td>tracing what the graph did &mdash; each node a span</td><td>the graph becomes the thing you instrument</td></tr>
+                <tr><td class="tag">L12</td><td>tracing &mdash; each node becomes a span</td><td>the graph becomes the thing you instrument</td></tr>
             </tbody>
         </table>
     </div>
@@ -671,7 +793,7 @@ table.ledger td.warn-cell { color: var(--coral); }
                 <text x="500" y="320" text-anchor="middle" class="edge-label" fill="var(--cyan)">back-edge (the cycle)</text>
                 <path d="M 300 250 L 300 340" stroke="var(--ink-faint)" stroke-width="3" marker-end="url(#arrow)"/>
                 <text x="330" y="300" class="edge-label" fill="var(--ink-dim)">no tool call</text>
-                <text x="230" y="400" class="edge-label" fill="var(--ink)" font-size="22" font-weight="600">__end__</text>
+                <text x="230" y="400" class="edge-label" fill="var(--ink)" font-size="25" font-weight="600">__end__</text>
                 <circle cx="300" cy="160" r="80" fill="#12181a" stroke="var(--cyan)" stroke-width="2.5"/>
                 <text x="300" y="168" text-anchor="middle" class="node-label">agent</text>
                 <circle cx="720" cy="160" r="80" fill="#12181a" stroke="var(--cyan)" stroke-width="2.5"/>
@@ -697,13 +819,34 @@ table.ledger td.warn-cell { color: var(--coral); }
         <div class="eyebrow">Slide 2.2</div>
         <h2 class="headline">The state: the <span class="it">add_messages</span> reducer</h2>
     </div>
-    <div class="body-area">
-        <ul class="points reveal">
+    <div class="body-area" style="display:flex; gap:60px; align-items:center;">
+        <ul class="points reveal" style="flex:1; min-width:0;">
             <li class="point">The agent's state is a <code>TypedDict</code> with one field: <code>messages: Annotated[list, add_messages]</code>.</li>
-            <li class="point">Back in L04, returning a state key <b>overwrote</b> it. The <code>add_messages</code> <b>reducer</b> flips that: each node's returned <code>messages</code> get <b>appended</b> instead of substituted.</li>
-            <li class="point">That's <i>why</i> the conversation grows every turn &mdash; the <code>agent</code> node adds one <code>AIMessage</code>, and the <code>tools</code> node adds one <code>ToolMessage</code> per call.</li>
-            <li class="point"><code>add_messages</code> also pairs messages by id, so history stays well-formed as it accumulates &mdash; <span class="k">half of Rule 1</span>, with no bookkeeping from you.</li>
+            <li class="point">In L04, returning a state key <b>overwrote</b> it. The <code>add_messages</code> <b>reducer</b> flips that: returned <code>messages</code> get <b>appended</b>, not substituted.</li>
+            <li class="point">That's <i>why</i> the conversation grows every turn &mdash; <code>agent</code> adds one <code>AIMessage</code>, <code>tools</code> one <code>ToolMessage</code> per call.</li>
+            <li class="point">It also pairs messages by id, so history stays well-formed &mdash; <span class="k">half of Rule 1</span>, with no bookkeeping from you.</li>
         </ul>
+        <div class="reveal" style="display:flex; gap:44px; flex-shrink:0; align-items:flex-start;">
+            <div>
+                <div class="dg-label">L04 default &mdash; overwrite</div>
+                <div style="display:flex; flex-direction:column; gap:14px;">
+                    <div class="msg-pill" style="color:var(--ink-faint);">draft: &nbsp;&ldquo;v1 &hellip;&rdquo;</div>
+                    <div class="msg-pill dead">draft: &nbsp;&ldquo;v1 &hellip;&rdquo;</div>
+                    <div class="msg-pill">draft: &nbsp;&ldquo;v2 &hellip;&rdquo;</div>
+                    <div style="font-size:19px; color:var(--coral); margin-top:2px;">old value overwritten &mdash; lost</div>
+                </div>
+            </div>
+            <div>
+                <div class="dg-label good">L10 &mdash; append</div>
+                <div style="display:flex; flex-direction:column; gap:14px;">
+                    <div class="msg-pill">HumanMessage</div>
+                    <div class="msg-pill">AIMessage &middot; tool_calls</div>
+                    <div class="msg-pill">ToolMessage</div>
+                    <div class="msg-pill new">AIMessage &nbsp;&larr; appended</div>
+                    <div style="font-size:19px; color:var(--ink-dim); margin-top:2px;">the conversation only grows</div>
+                </div>
+            </div>
+        </div>
     </div>
     <div class="chrome-page">08 / 30</div>
     <div class="chrome-nav">← → navigate</div>
@@ -747,16 +890,16 @@ table.ledger td.warn-cell { color: var(--coral); }
         </ul>
         <div class="diagram-frame reveal" style="flex:1; flex-direction:column; align-items:stretch; gap:26px;">
             <div>
-                <div style="font-size:16px; letter-spacing:0.12em; text-transform:uppercase; color:var(--cyan); margin-bottom:14px;">correct</div>
-                <div style="font-size:22px; color:var(--ink-dim); line-height:2;">
+                <div style="font-size:19px; letter-spacing:0.12em; text-transform:uppercase; color:var(--cyan); margin-bottom:14px;">correct &mdash; what ToolNode always does</div>
+                <div style="font-size:24px; color:var(--ink-dim); line-height:2;">
                     <code>AIMessage[tool_calls #a, #b]</code><br>
                     &rarr; <code>ToolMessage #a</code><br>
                     &rarr; <code>ToolMessage #b</code>
                 </div>
             </div>
             <div style="border-top:1px solid var(--cyan-rule); padding-top:24px;">
-                <div style="font-size:16px; letter-spacing:0.12em; text-transform:uppercase; color:var(--coral); margin-bottom:14px;">broken</div>
-                <div style="font-size:22px; color:var(--ink-dim); line-height:2;">
+                <div style="font-size:19px; letter-spacing:0.12em; text-transform:uppercase; color:var(--coral); margin-bottom:14px;">broken</div>
+                <div style="font-size:24px; color:var(--ink-dim); line-height:2;">
                     <code>AIMessage[tool_calls #a, #b]</code><br>
                     &rarr; <code>ToolMessage #a</code> <span class="warn">&#10008;</span><br>
                     <span style="color:var(--coral);">missing #b &rarr; API error</span>
@@ -779,11 +922,45 @@ table.ledger td.warn-cell { color: var(--coral); }
     </div>
     <div class="body-area">
         <ul class="points reveal">
-            <li class="point">Two edges finish the graph. <code>route</code> is the L05 conditional edge; the back-edge is a plain <code>add_edge</code>.</li>
-            <li class="point"><code>route(state)</code> returns <code>"tools"</code> when the last message has <code>.tool_calls</code>, and <code>END</code> otherwise. Wire with <code>add_conditional_edges("agent", route, {"tools": "tools", END: END})</code>, then <code>add_edge("tools", "agent")</code> &mdash; the <b>back-edge</b>.</li>
-            <li class="point">You write <code>route</code> by hand here. In L11 you'll meet LangGraph's prebuilt <code>tools_condition</code> &mdash; the <i>same</i> function, packaged.</li>
-            <li class="point">Watch the cycle turn with <code>graph.stream(task, stream_mode="updates")</code>: <code>{"agent": …}</code> &rarr; <code>{"tools": …}</code> &rarr; <code>{"agent": …}</code> &hellip;</li>
+            <li class="point">Two edges finish the graph. <code>route</code> is the L05 conditional edge; the back-edge is a plain <code>add_edge("tools", "agent")</code>.</li>
+            <li class="point"><code>route(state)</code> returns <code>"tools"</code> when the last message has <code>.tool_calls</code>, and <code>END</code> otherwise &mdash; wire it with <code>add_conditional_edges</code>, set the entry point, <code>compile()</code>.</li>
+            <li class="point">You write <code>route</code> by hand here; L11's prebuilt <code>tools_condition</code> is the <i>same</i> function, packaged.</li>
+            <li class="point">Watch the cycle turn with <code>graph.stream(task, stream_mode="updates")</code> &mdash; one chunk per node; try naming each moment control crosses the back-edge:</li>
         </ul>
+        <div class="diagram-frame reveal" style="width:1660px; height:230px; margin-top:10px;">
+            <svg viewBox="0 0 1660 230" width="100%" height="100%">
+                <defs>
+                    <marker id="s25-f" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="var(--ink-faint)"/></marker>
+                    <marker id="s25-c" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="var(--cyan)"/></marker>
+                </defs>
+                <!-- cyan arcs over each back-edge crossing -->
+                <path d="M 390 132 C 450 40, 610 40, 670 132" fill="none" stroke="var(--cyan)" stroke-width="3" marker-end="url(#s25-c)"/>
+                <circle r="7" fill="var(--cyan)">
+                    <animateMotion dur="2.6s" repeatCount="indefinite" path="M 390 132 C 450 40, 610 40, 670 132"/>
+                </circle>
+                <path d="M 950 132 C 1010 40, 1170 40, 1230 132" fill="none" stroke="var(--cyan)" stroke-width="3" marker-end="url(#s25-c)"/>
+                <text x="810" y="34" text-anchor="middle" class="edge-label" fill="var(--cyan)">each arc = control crossing the back-edge</text>
+                <!-- the chunk pills -->
+                <rect x="10" y="140" width="200" height="56" rx="28" fill="#12181a" stroke="var(--cyan)" stroke-width="2"/>
+                <text x="110" y="175" text-anchor="middle" class="edge-label" fill="var(--ink)">{"agent": &hellip;}</text>
+                <rect x="290" y="140" width="200" height="56" rx="28" fill="#12181a" stroke="var(--cyan)" stroke-width="2"/>
+                <text x="390" y="175" text-anchor="middle" class="edge-label" fill="var(--ink)">{"tools": &hellip;}</text>
+                <rect x="570" y="140" width="200" height="56" rx="28" fill="#12181a" stroke="var(--cyan)" stroke-width="2"/>
+                <text x="670" y="175" text-anchor="middle" class="edge-label" fill="var(--ink)">{"agent": &hellip;}</text>
+                <rect x="850" y="140" width="200" height="56" rx="28" fill="#12181a" stroke="var(--cyan)" stroke-width="2"/>
+                <text x="950" y="175" text-anchor="middle" class="edge-label" fill="var(--ink)">{"tools": &hellip;}</text>
+                <rect x="1130" y="140" width="200" height="56" rx="28" fill="#12181a" stroke="var(--cyan)" stroke-width="2"/>
+                <text x="1230" y="175" text-anchor="middle" class="edge-label" fill="var(--ink)">{"agent": &hellip;}</text>
+                <path d="M 215 168 L 284 168" stroke="var(--ink-faint)" stroke-width="3" marker-end="url(#s25-f)"/>
+                <path d="M 495 168 L 564 168" stroke="var(--ink-faint)" stroke-width="3" marker-end="url(#s25-f)"/>
+                <path d="M 775 168 L 844 168" stroke="var(--ink-faint)" stroke-width="3" marker-end="url(#s25-f)"/>
+                <path d="M 1055 168 L 1124 168" stroke="var(--ink-faint)" stroke-width="3" marker-end="url(#s25-f)"/>
+                <path d="M 1335 168 L 1404 168" stroke="var(--ink-faint)" stroke-width="3" stroke-dasharray="8 7" marker-end="url(#s25-f)"/>
+                <!-- dashed deferred tail: same stream, structured later -->
+                <rect x="1410" y="140" width="240" height="56" rx="28" fill="none" stroke="var(--ink-faint)" stroke-width="2" stroke-dasharray="9 7"/>
+                <text x="1530" y="175" text-anchor="middle" class="edge-label" fill="var(--ink-dim)">&rarr; L12 tracer</text>
+            </svg>
+        </div>
     </div>
     <div class="chrome-page">11 / 30</div>
     <div class="chrome-nav">← → navigate</div>
@@ -830,17 +1007,58 @@ table.ledger td.warn-cell { color: var(--coral); }
         <div class="eyebrow">Slide 3.2</div>
         <h2 class="headline">Four <span class="it">termination conditions</span></h2>
     </div>
-    <div class="body-area reveal">
-        <table class="ledger">
+    <div class="body-area">
+        <table class="ledger reveal">
             <thead><tr><th>Condition</th><th>Fires when</th><th>In L10</th></tr></thead>
             <tbody>
-                <tr><td class="tag" style="color:var(--ink);">Natural termination</td><td>the <code>agent</code> node returns an <code>AIMessage</code> with <b>no</b> <code>.tool_calls</code>, so <code>route</code> returns <code>END</code>. The only condition meaning &ldquo;the model thinks it's done.&rdquo;</td><td>rely on <code>route</code></td></tr>
-                <tr><td class="tag" style="color:var(--ink);">Recursion limit</td><td>the graph took more steps than <code>recursion_limit</code> allows and raises <code>GraphRecursionError</code>.</td><td>rely on the built-in</td></tr>
-                <tr><td class="tag" style="color:var(--ink);">Token budget</td><td>cumulative input+output tokens (or cost) cross a threshold.</td><td>sketch as custom routing</td></tr>
-                <tr><td class="tag" style="color:var(--ink);">Loop detection</td><td>the model calls the <i>same tool with the same arguments</i> repeatedly without progress.</td><td>sketch as custom routing</td></tr>
+                <tr><td class="tag" style="color:var(--ink);">Natural termination</td><td>the <code>agent</code> node returns <b>no</b> <code>.tool_calls</code> &rarr; <code>route</code> returns <code>END</code></td><td>rely on <code>route</code></td></tr>
+                <tr><td class="tag" style="color:var(--ink);">Recursion limit</td><td>steps exceed <code>recursion_limit</code> &rarr; raises <code>GraphRecursionError</code></td><td>rely on the built-in</td></tr>
+                <tr><td class="tag" style="color:var(--ink);">Token budget</td><td>cumulative input+output tokens (or cost) cross a threshold</td><td>sketch as custom routing</td></tr>
+                <tr><td class="tag" style="color:var(--ink);">Loop detection</td><td>the <i>same tool, same arguments</i>, repeatedly &mdash; without progress</td><td>sketch as custom routing</td></tr>
             </tbody>
         </table>
-        <div class="callout reveal" style="margin-top:32px;"><p style="font-size:26px;">Natural termination is the only one that means &ldquo;the answer is ready.&rdquo; Every other condition means &ldquo;we stopped it.&rdquo;</p></div>
+        <div class="diagram-frame reveal" style="width:1660px; height:390px; margin-top:14px;">
+            <svg viewBox="0 0 1660 390" width="100%" height="100%">
+                <defs>
+                    <marker id="s32-f" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="var(--ink-faint)"/></marker>
+                    <marker id="s32-c" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="var(--cyan)"/></marker>
+                    <marker id="s32-r" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="var(--coral)"/></marker>
+                </defs>
+                <!-- the 2.1 graph, small -->
+                <path d="M 275 66 C 350 8, 470 8, 545 66" fill="none" stroke="var(--ink-faint)" stroke-width="3" marker-end="url(#s32-f)"/>
+                <text x="410" y="22" text-anchor="middle" class="edge-label" fill="var(--ink-dim)">tool call?</text>
+                <path d="M 545 134 C 470 200, 350 200, 275 134" fill="none" stroke="var(--cyan)" stroke-width="3.5" marker-end="url(#s32-c)"/>
+                <circle r="7" fill="var(--cyan)">
+                    <animateMotion dur="3s" repeatCount="indefinite" path="M 545 134 C 470 200, 350 200, 275 134"/>
+                </circle>
+                <text x="410" y="170" text-anchor="middle" class="edge-label" fill="var(--cyan)">back-edge (the cycle)</text>
+                <circle cx="230" cy="100" r="52" fill="#12181a" stroke="var(--cyan)" stroke-width="2.5"/>
+                <text x="230" y="108" text-anchor="middle" class="node-label" font-size="24">agent</text>
+                <circle cx="590" cy="100" r="52" fill="#12181a" stroke="var(--cyan)" stroke-width="2.5"/>
+                <text x="590" y="108" text-anchor="middle" class="node-label" font-size="24">tools</text>
+                <!-- the load-bearing claim, folded in -->
+                <text x="800" y="82" class="edge-label" font-size="23" fill="var(--ink)">natural &rarr; <tspan fill="var(--cyan)">END</tspan> is the only exit that means &ldquo;the answer is ready&rdquo;;</text>
+                <text x="800" y="120" class="edge-label" font-size="23" fill="var(--ink-dim)">every other condition means &ldquo;we stopped it&rdquo; &mdash; a halt, not a completion.</text>
+                <!-- route's exit, fanned four ways -->
+                <path d="M 205 150 C 190 220, 190 245, 200 296" fill="none" stroke="var(--cyan)" stroke-width="3" marker-end="url(#s32-c)"/>
+                <path d="M 230 152 C 230 262, 400 278, 608 296" fill="none" stroke="var(--coral)" stroke-width="3" marker-end="url(#s32-r)"/>
+                <path d="M 230 152 C 400 228, 780 248, 1015 292" fill="none" stroke="var(--ink-faint)" stroke-width="3" stroke-dasharray="9 7" marker-end="url(#s32-f)"/>
+                <path d="M 230 152 C 500 236, 1120 244, 1426 292" fill="none" stroke="var(--ink-faint)" stroke-width="3" stroke-dasharray="9 7" marker-end="url(#s32-f)"/>
+                <!-- the four branch chips -->
+                <rect x="30" y="300" width="350" height="80" rx="12" fill="#12181a" stroke="var(--cyan)" stroke-width="2.5"/>
+                <text x="205" y="334" text-anchor="middle" class="edge-label" fill="var(--cyan)" font-weight="600">END</text>
+                <text x="205" y="362" text-anchor="middle" class="edge-label" font-size="16" fill="var(--ink-dim)">the answer is ready</text>
+                <rect x="440" y="300" width="350" height="80" rx="12" fill="rgba(255,107,87,0.05)" stroke="var(--coral)" stroke-width="2.5"/>
+                <text x="615" y="334" text-anchor="middle" class="edge-label" fill="var(--coral)" font-weight="600">GraphRecursionError</text>
+                <text x="615" y="362" text-anchor="middle" class="edge-label" font-size="16" fill="var(--ink-dim)">recursion_limit exceeded</text>
+                <rect x="850" y="300" width="350" height="80" rx="12" fill="none" stroke="var(--ink-faint)" stroke-width="2" stroke-dasharray="9 7"/>
+                <text x="1025" y="334" text-anchor="middle" class="edge-label" fill="var(--ink-dim)" font-weight="600">token budget</text>
+                <text x="1025" y="362" text-anchor="middle" class="edge-label" font-size="16" fill="var(--ink-faint)">custom routing &mdash; see 3.5</text>
+                <rect x="1260" y="300" width="350" height="80" rx="12" fill="none" stroke="var(--ink-faint)" stroke-width="2" stroke-dasharray="9 7"/>
+                <text x="1435" y="334" text-anchor="middle" class="edge-label" fill="var(--ink-dim)" font-weight="600">loop detection</text>
+                <text x="1435" y="362" text-anchor="middle" class="edge-label" font-size="16" fill="var(--ink-faint)">custom routing &mdash; see 3.5</text>
+            </svg>
+        </div>
     </div>
     <div class="chrome-page">14 / 30</div>
     <div class="chrome-nav">← → navigate</div>
@@ -857,10 +1075,28 @@ table.ledger td.warn-cell { color: var(--coral); }
     </div>
     <div class="body-area">
         <ul class="points reveal">
-            <li class="point">The cap bounds the damage when something goes wrong &mdash; a runaway model, a tool that always looks unfinished, a prompt that never converges. What it does <b>not</b> do is make answers correct.</li>
-            <li class="point"><b>Hitting the cap is always a signal worth investigating.</b> Either the task genuinely needs a higher cap, or the agent is misbehaving &mdash; treat <code>GraphRecursionError</code> as an alert, not noise.</li>
-            <li class="point"><code>recursion_limit</code> lives on <code>invoke</code>, not the graph shape. It counts <b>super-steps</b> (node visits) &mdash; one tool per turn burns roughly two steps per cycle.</li>
+            <li class="point">The cap bounds the damage when something goes wrong &mdash; a runaway model, a tool that always looks unfinished. It does <b>not</b> make answers correct.</li>
+            <li class="point"><b>Hitting the cap is always a signal worth investigating</b> &mdash; a genuinely hard task, or a misbehaving agent. Treat <code>GraphRecursionError</code> as an alert, not noise.</li>
+            <li class="point"><code>recursion_limit</code> lives on <code>invoke</code>, not the graph shape. It counts <b>super-steps</b> (node visits) &mdash; one tool per turn &asymp; two steps per cycle:</li>
         </ul>
+        <div class="reveal" style="display:flex; gap:26px; align-items:stretch; margin-top:22px;">
+            <div class="cycle-box">
+                <div class="cycle-name">cycle 1 &middot; steps 1&ndash;2</div>
+                <div class="step-chip">1 &middot; agent</div>
+                <div class="step-chip bad">2 &middot; lookup(city="paris")</div>
+            </div>
+            <div class="cycle-box">
+                <div class="cycle-name">cycle 2 &middot; steps 3&ndash;4</div>
+                <div class="step-chip">3 &middot; agent</div>
+                <div class="step-chip bad">4 &middot; lookup(city="paris")</div>
+            </div>
+            <div class="cycle-box">
+                <div class="cycle-name">cycle 3 &middot; steps 5&ndash;6</div>
+                <div class="step-chip">5 &middot; agent</div>
+                <div class="step-chip bad">6 &middot; lookup(city="paris")</div>
+            </div>
+            <div class="crash-box" style="max-width:420px;"><b>step 7</b> &mdash; recursion_limit=6 exceeded<br>&rarr; <b>GraphRecursionError</b><br><span style="color:var(--ink-dim); font-size:18px;">same call, same args, no progress</span></div>
+        </div>
     </div>
     <div class="chrome-page">15 / 30</div>
     <div class="chrome-nav">← → navigate</div>
@@ -898,11 +1134,51 @@ table.ledger td.warn-cell { color: var(--coral); }
     </div>
     <div class="body-area">
         <ul class="points reveal">
-            <li class="point">Here's the payoff of building <code>route</code> by hand: extra termination conditions are just <b>more branches of the conditional edge.</b> No new mechanism &mdash; you extend <code>route</code>.</li>
-            <li class="point"><span class="k">Token budget</span> &mdash; carry a running token sum in state (from <code>reply.usage_metadata</code>); have <code>route</code> return <code>END</code> once it crosses a threshold.</li>
-            <li class="point"><span class="k">Loop detection</span> &mdash; carry a short history of <code>(tool_name, json.dumps(args))</code> tuples; return <code>END</code> if the last <i>k</i> are identical. Needs <b>arguments and progress</b>, not just call counts.</li>
-            <li class="point">In a graph, termination is just another routing decision &mdash; the L05 skill, now pointed at <code>END</code>.</li>
+            <li class="point">The payoff of building <code>route</code> by hand: extra termination conditions are just <b>more branches of the conditional edge.</b> No new mechanism &mdash; you extend <code>route</code>.</li>
+            <li class="point"><span class="k">Token budget</span> &mdash; carry a running token sum in state (from <code>reply.usage_metadata</code>); return <code>END</code> past a threshold.</li>
+            <li class="point"><span class="k">Loop detection</span> &mdash; keep a short history of <code>(tool_name, json.dumps(args))</code>; return <code>END</code> if the last <i>k</i> are identical. Needs <b>args + progress</b>, not just counts.</li>
         </ul>
+        <div class="diagram-frame reveal" style="width:1660px; height:390px; margin-top:6px;">
+            <svg viewBox="0 0 1660 390" width="100%" height="100%">
+                <defs>
+                    <marker id="s35-f" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="var(--ink-faint)"/></marker>
+                    <marker id="s35-c" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="var(--cyan)"/></marker>
+                    <marker id="s35-r" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="var(--coral)"/></marker>
+                </defs>
+                <!-- the same 3.2 fan, two branches promoted -->
+                <path d="M 275 66 C 350 8, 470 8, 545 66" fill="none" stroke="var(--ink-faint)" stroke-width="3" marker-end="url(#s35-f)"/>
+                <text x="410" y="22" text-anchor="middle" class="edge-label" fill="var(--ink-dim)">tool call?</text>
+                <path d="M 545 134 C 470 200, 350 200, 275 134" fill="none" stroke="var(--cyan)" stroke-width="3.5" marker-end="url(#s35-c)"/>
+                <circle r="7" fill="var(--cyan)">
+                    <animateMotion dur="3s" repeatCount="indefinite" path="M 545 134 C 470 200, 350 200, 275 134"/>
+                </circle>
+                <text x="410" y="170" text-anchor="middle" class="edge-label" fill="var(--cyan)">back-edge (the cycle)</text>
+                <circle cx="230" cy="100" r="52" fill="#12181a" stroke="var(--cyan)" stroke-width="2.5"/>
+                <text x="230" y="108" text-anchor="middle" class="node-label" font-size="24">agent</text>
+                <circle cx="590" cy="100" r="52" fill="#12181a" stroke="var(--cyan)" stroke-width="2.5"/>
+                <text x="590" y="108" text-anchor="middle" class="node-label" font-size="24">tools</text>
+                <text x="800" y="76" class="edge-label" font-size="23" fill="var(--ink)">same picture as 3.2 &mdash; <tspan fill="var(--cyan)">two branches promoted</tspan> to solid:</text>
+                <text x="800" y="114" class="edge-label" font-size="23" fill="var(--ink-dim)">termination is just another routing decision</text>
+                <text x="800" y="152" class="edge-label" font-size="23" fill="var(--ink-dim)">(the L05 skill, now pointed at END).</text>
+                <!-- route's exit, fanned — token budget + loop detection now solid cyan -->
+                <path d="M 205 150 C 190 220, 190 245, 200 296" fill="none" stroke="var(--cyan)" stroke-width="3" marker-end="url(#s35-c)"/>
+                <path d="M 230 152 C 230 262, 400 278, 608 296" fill="none" stroke="var(--coral)" stroke-width="3" marker-end="url(#s35-r)"/>
+                <path d="M 230 152 C 400 228, 780 248, 1015 292" fill="none" stroke="var(--cyan)" stroke-width="3" marker-end="url(#s35-c)"/>
+                <path d="M 230 152 C 500 236, 1120 244, 1426 292" fill="none" stroke="var(--cyan)" stroke-width="3" marker-end="url(#s35-c)"/>
+                <rect x="30" y="300" width="350" height="80" rx="12" fill="#12181a" stroke="var(--cyan)" stroke-width="2.5"/>
+                <text x="205" y="334" text-anchor="middle" class="edge-label" fill="var(--cyan)" font-weight="600">END</text>
+                <text x="205" y="362" text-anchor="middle" class="edge-label" font-size="16" fill="var(--ink-dim)">the answer is ready</text>
+                <rect x="440" y="300" width="350" height="80" rx="12" fill="rgba(255,107,87,0.05)" stroke="var(--coral)" stroke-width="2.5"/>
+                <text x="615" y="334" text-anchor="middle" class="edge-label" fill="var(--coral)" font-weight="600">GraphRecursionError</text>
+                <text x="615" y="362" text-anchor="middle" class="edge-label" font-size="16" fill="var(--ink-dim)">recursion_limit exceeded</text>
+                <rect x="850" y="300" width="350" height="80" rx="12" fill="#12181a" stroke="var(--cyan)" stroke-width="2.5"/>
+                <text x="1025" y="334" text-anchor="middle" class="edge-label" fill="var(--cyan)" font-weight="600">token budget</text>
+                <text x="1025" y="362" text-anchor="middle" class="edge-label" font-size="16" fill="var(--ink-dim)">token sum &gt; budget &rarr; END</text>
+                <rect x="1260" y="300" width="350" height="80" rx="12" fill="#12181a" stroke="var(--cyan)" stroke-width="2.5"/>
+                <text x="1435" y="334" text-anchor="middle" class="edge-label" fill="var(--cyan)" font-weight="600">loop detection</text>
+                <text x="1435" y="362" text-anchor="middle" class="edge-label" font-size="16" fill="var(--ink-dim)">last k identical &rarr; END</text>
+            </svg>
+        </div>
     </div>
     <div class="chrome-page">17 / 30</div>
     <div class="chrome-nav">← → navigate</div>
@@ -936,17 +1212,24 @@ table.ledger td.warn-cell { color: var(--coral); }
             <li class="point">Those are <b>different layers</b>, and the graph owns the second one.</li>
         </ul>
         <div class="reveal" style="flex:1; display:flex; flex-direction:column; gap:20px;">
-            <div style="border:1.5px solid var(--cyan-rule); padding:26px 30px; background:rgba(82,232,200,0.04);">
-                <div style="font-size:15px; letter-spacing:0.1em; text-transform:uppercase; color:var(--cyan); margin-bottom:10px;">model</div>
-                <div style="font-size:20px; color:var(--ink-dim);">sits above both layers</div>
+            <div style="border:1.5px solid var(--cyan-rule); padding:24px 30px; background:rgba(82,232,200,0.04);">
+                <div style="font-size:18px; letter-spacing:0.1em; text-transform:uppercase; color:var(--cyan); margin-bottom:10px;">model</div>
+                <div style="font-size:23px; color:var(--ink-dim);">sits above both layers</div>
             </div>
-            <div style="border:1.5px solid var(--cyan-rule); padding:26px 30px;">
-                <div style="font-size:15px; letter-spacing:0.1em; text-transform:uppercase; color:var(--cyan); margin-bottom:10px;">tool author (L08)</div>
-                <div style="font-size:20px; color:var(--ink-dim);">return errors as data</div>
+            <div style="border:1.5px solid var(--cyan-rule); padding:24px 30px;">
+                <div style="font-size:18px; letter-spacing:0.1em; text-transform:uppercase; color:var(--cyan); margin-bottom:10px;">tool author (L08)</div>
+                <div style="font-size:23px; color:var(--ink-dim);">return errors as data</div>
             </div>
-            <div style="border:1.5px solid var(--cyan); padding:26px 30px; background:rgba(82,232,200,0.05);">
-                <div style="font-size:15px; letter-spacing:0.1em; text-transform:uppercase; color:var(--cyan); margin-bottom:10px;">graph (L10)</div>
-                <div style="font-size:20px; color:var(--ink-dim);"><code>ToolNode</code> catches raises, sets <code>status='error'</code></div>
+            <div style="border:1.5px solid var(--cyan); padding:24px 30px; background:rgba(82,232,200,0.05);">
+                <div style="font-size:18px; letter-spacing:0.1em; text-transform:uppercase; color:var(--cyan); margin-bottom:10px;">graph (L10)</div>
+                <div style="font-size:23px; color:var(--ink-dim);"><code>ToolNode</code> catches raises, sets <code>status='error'</code></div>
+            </div>
+            <div style="display:flex; align-items:center; gap:16px; padding-left:34px;">
+                <svg width="40" height="62" viewBox="0 0 40 62" style="overflow:visible;">
+                    <defs><marker id="s41-r" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="var(--coral)"/></marker></defs>
+                    <path d="M 20 58 L 20 10" stroke="var(--coral)" stroke-width="3.5" marker-end="url(#s41-r)"/>
+                </svg>
+                <div style="font-size:19px; line-height:1.45; color:var(--coral);">a tool <b>raises</b> &mdash; the failure enters here.<br><span style="color:var(--ink-dim);">the layers themselves are cures, not failures.</span></div>
             </div>
         </div>
     </div>
@@ -972,7 +1255,7 @@ table.ledger td.warn-cell { color: var(--coral); }
                 <tr><td class="tag" style="color:var(--ink);">Malformed output</td><td>wrong type, unparseable, missing a field the model expected</td><td>flows back too; decide where a minimum shape-check belongs</td></tr>
             </tbody>
         </table>
-        <div class="callout reveal" style="margin-top:32px;"><p style="font-size:26px;">The unifying move: the failure becomes a <code style="font-style:normal;">ToolMessage</code>, and the back-edge hands it to the model.</p></div>
+        <div class="callout reveal" style="margin-top:28px;"><p style="font-size:30px;">The unifying move: the failure becomes a <code style="font-style:normal;">ToolMessage</code>, and the back-edge hands it to the model.</p></div>
     </div>
     <div class="chrome-page">20 / 30</div>
     <div class="chrome-nav">← → navigate</div>
@@ -989,11 +1272,58 @@ table.ledger td.warn-cell { color: var(--coral); }
     </div>
     <div class="body-area">
         <ul class="points reveal">
-            <li class="point">The whole exception-to-message behavior is a single constructor argument: <code>ToolNode(tools, handle_tool_errors=True)</code>.</li>
-            <li class="point">Compare to <code>handle_tool_errors=False</code>: the exception <b>escapes the node and kills the whole <code>invoke</code>.</b> <span class="warn">One buggy tool crashes the agent.</span></li>
-            <li class="point">Flipping that single argument is the beat to watch: <b>one word, and it's crash vs. recover.</b></li>
-            <li class="point">With it on, a buggy tool <b>degrades into a message</b> instead of crashing &mdash; the model can retry, reach for a different tool, or apologize. Its call, not the graph's.</li>
+            <li class="point">The whole exception-to-message behavior is one constructor argument: <code>ToolNode(tools, handle_tool_errors=True)</code>. A raise becomes a <code>ToolMessage(status="error")</code> the back-edge hands back.</li>
+            <li class="point">With <code>handle_tool_errors=False</code>, the exception <b>escapes the node and kills the whole <code>invoke</code></b> &mdash; <span class="warn">one buggy tool crashes the agent.</span></li>
+            <li class="point"><b>One word, and it's crash vs. recover</b> &mdash; a buggy tool degrades into a message; the model can retry, switch tools, or apologize. Its call, not the graph's.</li>
         </ul>
+        <div class="reveal" style="display:flex; gap:40px; margin-top:18px;">
+            <div style="flex:1;">
+                <div class="dg-label bad">handle_tool_errors=False &mdash; crash</div>
+                <svg viewBox="0 -26 780 336" width="780" height="336">
+                    <defs>
+                        <marker id="s43-f" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="var(--ink-faint)"/></marker>
+                        <marker id="s43-r" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="var(--coral)"/></marker>
+                    </defs>
+                    <path d="M 225 58 C 300 4, 420 4, 495 58" fill="none" stroke="var(--ink-faint)" stroke-width="3" marker-end="url(#s43-f)"/>
+                    <text x="360" y="18" text-anchor="middle" class="edge-label" fill="var(--ink-dim)">tool call?</text>
+                    <path d="M 495 122 C 420 184, 300 184, 225 122" fill="none" stroke="var(--ink-faint)" stroke-width="3" marker-end="url(#s43-f)"/>
+                    <text x="360" y="196" text-anchor="middle" class="edge-label" font-size="16" fill="var(--ink-faint)">the cycle never gets the message</text>
+                    <circle cx="180" cy="90" r="50" fill="#12181a" stroke="var(--cyan)" stroke-width="2.5"/>
+                    <text x="180" y="98" text-anchor="middle" class="node-label" font-size="23">agent</text>
+                    <circle cx="540" cy="90" r="50" fill="#12181a" stroke="var(--cyan)" stroke-width="2.5"/>
+                    <text x="540" y="98" text-anchor="middle" class="node-label" font-size="23">tools</text>
+                    <path d="M 565 135 C 620 190, 660 215, 700 240" fill="none" stroke="var(--coral)" stroke-width="4" marker-end="url(#s43-r)"/>
+                    <text x="580" y="268" text-anchor="middle" class="edge-label" fill="var(--coral)">raise escapes the node</text>
+                    <line x1="120" y1="26" x2="600" y2="230" stroke="var(--coral)" stroke-width="5" opacity="0.6"/>
+                    <line x1="600" y1="26" x2="120" y2="230" stroke="var(--coral)" stroke-width="5" opacity="0.6"/>
+                    <text x="360" y="292" text-anchor="middle" class="edge-label" fill="var(--coral)" font-weight="600">the whole invoke crashes</text>
+                </svg>
+            </div>
+            <div style="flex:1;">
+                <div class="dg-label good">handle_tool_errors=True &mdash; recover</div>
+                <svg viewBox="0 -26 780 336" width="780" height="336">
+                    <defs>
+                        <marker id="s43b-f" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="var(--ink-faint)"/></marker>
+                        <marker id="s43b-c" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="var(--cyan)"/></marker>
+                    </defs>
+                    <path d="M 225 58 C 300 4, 420 4, 495 58" fill="none" stroke="var(--ink-faint)" stroke-width="3" marker-end="url(#s43b-f)"/>
+                    <text x="360" y="18" text-anchor="middle" class="edge-label" fill="var(--ink-dim)">tool call?</text>
+                    <path d="M 495 122 C 420 184, 300 184, 225 122" fill="none" stroke="var(--cyan)" stroke-width="3.5" marker-end="url(#s43b-c)"/>
+                    <circle r="7" fill="var(--cyan)">
+                        <animateMotion dur="3s" repeatCount="indefinite" path="M 495 122 C 420 184, 300 184, 225 122"/>
+                    </circle>
+                    <circle cx="180" cy="90" r="50" fill="#12181a" stroke="var(--cyan)" stroke-width="2.5"/>
+                    <text x="180" y="98" text-anchor="middle" class="node-label" font-size="23">agent</text>
+                    <circle cx="540" cy="90" r="50" fill="#12181a" stroke="var(--cyan)" stroke-width="2.5"/>
+                    <text x="540" y="98" text-anchor="middle" class="node-label" font-size="23">tools</text>
+                    <!-- the error pill riding the back-edge (cyan = recovery is the happy path) -->
+                    <rect x="190" y="170" width="340" height="52" rx="26" fill="#12181a" stroke="var(--cyan)" stroke-width="2.5"/>
+                    <rect x="204" y="180" width="8" height="32" rx="4" fill="var(--coral)"/>
+                    <text x="372" y="203" text-anchor="middle" class="edge-label" font-size="18" fill="var(--ink)">ToolMessage(status="error")</text>
+                    <text x="360" y="292" text-anchor="middle" class="edge-label" fill="var(--cyan)" font-weight="600">the raise rides the back-edge &mdash; the model decides next</text>
+                </svg>
+            </div>
+        </div>
     </div>
     <div class="chrome-page">21 / 30</div>
     <div class="chrome-nav">← → navigate</div>
@@ -1063,10 +1393,46 @@ table.ledger td.warn-cell { color: var(--coral); }
     </div>
     <div class="body-area">
         <ul class="points reveal">
-            <li class="point">Put the hand-wired graph next to a bare <code>while</code> loop doing the same model&rarr;tool&rarr;model round, and they're the <b>same skeleton</b>.</li>
-            <li class="point"><code>agent</code> = &ldquo;call the model,&rdquo; <code>tools</code> = &ldquo;run the tools,&rdquo; the conditional back-edge = &ldquo;got tool calls? go again : stop.&rdquo;</li>
-            <li class="point">So the graph form didn't change <i>what</i> happens &mdash; it drew the control flow as <b>data</b> (nodes and edges). That's exactly what makes it packageable (L11) and inspectable (L12).</li>
+            <li class="point">Put the hand-wired graph next to a bare <code>while</code> loop doing the same model&rarr;tool&rarr;model round, and they're the <b>same skeleton</b> &mdash; neither side is the wrong one.</li>
+            <li class="point">The graph form didn't change <i>what</i> happens &mdash; it drew the control flow as <b>data</b> (nodes and edges). That's exactly what makes it packageable (L11) and inspectable (L12).</li>
         </ul>
+        <div class="diagram-frame reveal" style="width:1560px; height:430px; margin-top:8px;">
+            <svg viewBox="0 0 1560 430" width="100%" height="100%">
+                <defs>
+                    <marker id="s51-f" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="var(--ink-faint)"/></marker>
+                    <marker id="s51-c" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="var(--cyan)"/></marker>
+                </defs>
+                <!-- left: the 2.1 graph -->
+                <path d="M 255 112 C 320 40, 440 40, 505 112" fill="none" stroke="var(--ink-faint)" stroke-width="3" marker-end="url(#s51-f)"/>
+                <text x="380" y="52" text-anchor="middle" class="edge-label" fill="var(--ink-dim)">tool call?</text>
+                <path d="M 505 190 C 440 262, 320 262, 255 190" fill="none" stroke="var(--cyan)" stroke-width="3.5" marker-end="url(#s51-c)"/>
+                <circle r="7" fill="var(--cyan)">
+                    <animateMotion dur="3s" repeatCount="indefinite" path="M 505 190 C 440 262, 320 262, 255 190"/>
+                </circle>
+                <text x="380" y="296" text-anchor="middle" class="edge-label" fill="var(--cyan)">back-edge</text>
+                <path d="M 200 212 L 200 310" stroke="var(--ink-faint)" stroke-width="3" marker-end="url(#s51-f)"/>
+                <text x="200" y="346" text-anchor="middle" class="edge-label" fill="var(--ink-dim)">__end__</text>
+                <circle cx="200" cy="150" r="60" fill="#12181a" stroke="var(--cyan)" stroke-width="2.5"/>
+                <text x="200" y="158" text-anchor="middle" class="node-label" font-size="25">agent</text>
+                <circle cx="560" cy="150" r="60" fill="#12181a" stroke="var(--cyan)" stroke-width="2.5"/>
+                <text x="560" y="158" text-anchor="middle" class="node-label" font-size="25">tools</text>
+                <!-- right: the bare while loop -->
+                <rect x="860" y="40" width="660" height="300" rx="14" fill="#12181a" stroke="var(--ink-faint)" stroke-width="2"/>
+                <text x="900" y="112" class="edge-label" font-size="22" fill="var(--ink)">while True:</text>
+                <text x="900" y="172" class="edge-label" font-size="22" fill="var(--ink)">&#160;&#160;&#160;&#160;reply = call_model(msgs)</text>
+                <text x="900" y="232" class="edge-label" font-size="22" fill="var(--ink)">&#160;&#160;&#160;&#160;if not reply.tool_calls: break</text>
+                <text x="900" y="292" class="edge-label" font-size="22" fill="var(--ink)">&#160;&#160;&#160;&#160;msgs += run_tools(reply)</text>
+                <!-- cyan tie-lines: same skeleton, piece by piece -->
+                <path d="M 245 96 C 430 6, 650 40, 890 160" fill="none" stroke="var(--cyan)" stroke-width="2.5" opacity="0.75"/>
+                <circle cx="245" cy="96" r="5" fill="var(--cyan)"/><circle cx="890" cy="164" r="5" fill="var(--cyan)"/>
+                <line x1="470" y1="242" x2="890" y2="224" stroke="var(--cyan)" stroke-width="2.5" opacity="0.75"/>
+                <circle cx="470" cy="242" r="5" fill="var(--cyan)"/><circle cx="890" cy="224" r="5" fill="var(--cyan)"/>
+                <line x1="624" y1="150" x2="890" y2="284" stroke="var(--cyan)" stroke-width="2.5" opacity="0.75"/>
+                <circle cx="624" cy="150" r="5" fill="var(--cyan)"/><circle cx="890" cy="284" r="5" fill="var(--cyan)"/>
+                <text x="380" y="410" text-anchor="middle" class="edge-label" fill="var(--ink-dim)">control flow as data</text>
+                <text x="1190" y="410" text-anchor="middle" class="edge-label" fill="var(--ink-dim)">the same round, spelled out</text>
+            </svg>
+        </div>
     </div>
     <div class="chrome-page">25 / 30</div>
     <div class="chrome-nav">← → navigate</div>
@@ -1131,15 +1497,38 @@ table.ledger td.warn-cell { color: var(--coral); }
         <div class="eyebrow">Slide 5.4</div>
         <h2 class="headline">Three agent-loop gotchas, <span class="it">named</span></h2>
     </div>
-    <div class="body-area reveal">
-        <table class="ledger">
-            <thead><tr><th>Gotcha</th><th>Cure</th><th>Where you saw it</th></tr></thead>
+    <div class="body-area">
+        <table class="ledger reveal">
+            <thead><tr><th>Gotcha</th><th>Cure</th><th>Where</th></tr></thead>
             <tbody>
-                <tr><td class="warn-cell"><b>No termination guard</b> &mdash; a cycle with no cap runs forever on one confused turn</td><td>every agent gets an iteration cap; hitting it is a signal to investigate, <b>never noise to swallow</b></td><td class="tag">section 3</td></tr>
-                <tr><td class="warn-cell"><b>Not handling tool failures</b> &mdash; a raise escapes <code>ToolNode</code> and crashes the whole <code>invoke</code></td><td><code>ToolNode(handle_tool_errors=True)</code> turns the raise into a message</td><td class="tag">section 4</td></tr>
-                <tr><td class="warn-cell"><b>Unbounded context growth</b> &mdash; <code>add_messages</code> appends every turn, cost drifts toward the window limit</td><td>watch cumulative tokens; trimming/summarizing is <b>L19</b> &mdash; name it, don't build it here</td><td class="tag">slide 2.2</td></tr>
+                <tr><td class="warn-cell"><b>No termination guard</b> &mdash; a cycle with no cap runs forever on one confused turn</td><td>an iteration cap on every <code>invoke</code>; hitting it is a signal to investigate, <b>never noise to swallow</b></td><td class="tag">section 3</td></tr>
+                <tr><td class="warn-cell"><b>Not handling tool failures</b> &mdash; a raise escapes <code>ToolNode</code>, crashes the <code>invoke</code></td><td><code>handle_tool_errors=True</code> turns the raise into a message &mdash; and no tracebacks at the model</td><td class="tag">section 4</td></tr>
+                <tr><td class="warn-cell"><b>Unbounded context growth</b> &mdash; <b>the silent one</b>: nothing errors, the bill just climbs</td><td>watch cumulative tokens; trimming/summarizing is <b>L19</b> &mdash; name it, don't build it here</td><td class="tag">slide 2.2</td></tr>
             </tbody>
         </table>
+        <div class="reveal" style="display:flex; gap:70px; align-items:flex-end; margin-top:26px;">
+            <div>
+                <div class="stair-chart">
+                    <div class="col"><div class="new" style="height:44px;"></div><div class="resend" style="height:22px;"></div></div>
+                    <div class="col"><div class="new" style="height:44px;"></div><div class="resend" style="height:56px;"></div></div>
+                    <div class="col"><div class="new" style="height:44px;"></div><div class="resend" style="height:90px;"></div></div>
+                    <div class="col"><div class="new" style="height:44px;"></div><div class="resend" style="height:124px;"></div></div>
+                    <div class="col"><div class="new" style="height:44px;"></div><div class="resend" style="height:158px;"></div></div>
+                </div>
+                <div style="display:flex; gap:26px; margin-top:10px;">
+                    <div style="width:110px; text-align:center; font-size:18px; color:var(--ink-faint);">turn 1</div>
+                    <div style="width:110px; text-align:center; font-size:18px; color:var(--ink-faint);">turn 2</div>
+                    <div style="width:110px; text-align:center; font-size:18px; color:var(--ink-faint);">turn 3</div>
+                    <div style="width:110px; text-align:center; font-size:18px; color:var(--ink-faint);">turn 4</div>
+                    <div style="width:110px; text-align:center; font-size:18px; color:var(--ink-faint);">turn 5</div>
+                </div>
+            </div>
+            <div class="stair-legend">
+                <div><span class="sw" style="background:var(--cyan);"></span>that turn's <b style="color:var(--ink);">new</b> tokens</div>
+                <div><span class="sw" style="background:var(--coral); opacity:0.85;"></span>the growing <b style="color:var(--ink);">re-sent block</b> &mdash; history + re-sent tool schemas, compounding once per loop (the L01 / L07 staircase, third beat)</div>
+                <div style="font-size:19px; color:var(--ink-faint);">the cap bounds the <i>number</i> of turns, not the <i>size</i> of each turn's history &mdash; different budgets.</div>
+            </div>
+        </div>
     </div>
     <div class="chrome-page">28 / 30</div>
     <div class="chrome-nav">← → navigate</div>
@@ -1154,13 +1543,51 @@ table.ledger td.warn-cell { color: var(--coral); }
         <div class="eyebrow">Slide 5.5</div>
         <h2 class="headline">The minimum-viable trace, <span class="it">and the bridge ahead</span></h2>
     </div>
-    <div class="body-area">
-        <ul class="points reveal">
-            <li class="point">By now you can read the returned <code>messages</code> and narrate the run turn by turn &mdash; <code>agent, tools, agent, tools, agent</code> &mdash; and say why it stopped. That narration is a <span class="k">minimum-viable trace.</span></li>
-            <li class="point"><span class="k">Bridge to L11</span> &mdash; <code>create_agent</code> builds this exact graph in one line: <code>MessagesState</code> is your <code>add_messages</code> state, its tool node is the same <code>ToolNode</code>, its routing is the prebuilt <code>tools_condition</code> you wrote as <code>route</code>.</li>
-            <li class="point"><span class="k">Bridge to L12</span> &mdash; that same stream, routed to a structured tracer: each node becomes a span.</li>
-        </ul>
-        <div class="callout reveal" style="margin-top:36px;"><p>An agent is a cyclic graph around a stateless model &mdash; until <code style="font-style:normal;">route</code> returns <code style="font-style:normal;">END</code> or <code style="font-style:normal;">recursion_limit</code> fires; and when a tool breaks, <code style="font-style:normal;">ToolNode</code> turns the break into a message, not a crash.</p></div>
+    <div class="body-area" style="display:flex; gap:56px; align-items:center;">
+        <div style="flex:1; min-width:0;">
+            <ul class="points reveal">
+                <li class="point">Narrate the returned <code>messages</code> turn by turn and say why it stopped: a <span class="k">minimum-viable trace.</span> <span class="k">L12</span> replaces it with structured spans &mdash; on <b>this exact graph</b>.</li>
+                <li class="point"><span class="k">Bridge to L11</span> &mdash; <code>create_agent</code> builds this graph in one line: <code>MessagesState</code> = your <code>add_messages</code> state, the same <code>ToolNode</code>, and <code>tools_condition</code> = your <code>route</code>.</li>
+                <li class="point">Because you wired it yourself, the one-liner lands as <b>&ldquo;the thing I already built, packaged&rdquo;</b> &mdash; not a black box.</li>
+            </ul>
+            <div class="callout reveal" style="margin-top:16px; padding:20px 30px;"><p style="font-size:29px;">An agent is a cyclic graph around a stateless model &mdash; looping until <code style="font-style:normal;">route</code> returns <code style="font-style:normal;">END</code> or the cap fires; a broken tool becomes a message, not a crash.</p></div>
+        </div>
+        <div class="diagram-frame reveal" style="width:720px; height:600px; flex-shrink:0;">
+            <svg viewBox="0 0 720 600" width="100%" height="100%">
+                <defs>
+                    <marker id="s55-f" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="var(--ink-faint)"/></marker>
+                    <marker id="s55-c" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="var(--cyan)"/></marker>
+                </defs>
+                <!-- dashed create_agent wrapper: lands next lesson -->
+                <text x="36" y="46" class="edge-label" font-size="22" fill="var(--ink-dim)">create_agent(...)</text>
+                <rect x="16" y="60" width="688" height="404" rx="16" fill="none" stroke="var(--ink-faint)" stroke-width="2.5" stroke-dasharray="10 8"/>
+                <!-- three chips, pinned to the parts they package -->
+                <rect x="40" y="84" width="180" height="44" rx="9" fill="none" stroke="var(--ink-faint)" stroke-width="2" stroke-dasharray="8 6"/>
+                <text x="130" y="112" text-anchor="middle" class="edge-label" font-size="18" fill="var(--ink-dim)">MessagesState</text>
+                <rect x="260" y="84" width="200" height="44" rx="9" fill="none" stroke="var(--ink-faint)" stroke-width="2" stroke-dasharray="8 6"/>
+                <text x="360" y="112" text-anchor="middle" class="edge-label" font-size="18" fill="var(--ink-dim)">tools_condition</text>
+                <rect x="550" y="84" width="130" height="44" rx="9" fill="none" stroke="var(--ink-faint)" stroke-width="2" stroke-dasharray="8 6"/>
+                <text x="615" y="112" text-anchor="middle" class="edge-label" font-size="18" fill="var(--ink-dim)">ToolNode</text>
+                <line x1="140" y1="128" x2="185" y2="180" stroke="var(--ink-faint)" stroke-width="2" stroke-dasharray="5 5"/>
+                <line x1="365" y1="128" x2="360" y2="146" stroke="var(--ink-faint)" stroke-width="2" stroke-dasharray="5 5"/>
+                <line x1="600" y1="128" x2="540" y2="180" stroke="var(--ink-faint)" stroke-width="2" stroke-dasharray="5 5"/>
+                <!-- the 2.1 graph, unchanged -->
+                <path d="M 265 196 C 320 130, 400 130, 455 196" fill="none" stroke="var(--ink-faint)" stroke-width="3" marker-end="url(#s55-f)"/>
+                <text x="360" y="188" text-anchor="middle" class="edge-label" font-size="17" fill="var(--ink-dim)">tool call?</text>
+                <path d="M 455 284 C 400 348, 320 348, 265 284" fill="none" stroke="var(--cyan)" stroke-width="3.5" marker-end="url(#s55-c)"/>
+                <circle r="7" fill="var(--cyan)">
+                    <animateMotion dur="3s" repeatCount="indefinite" path="M 455 284 C 400 348, 320 348, 265 284"/>
+                </circle>
+                <text x="360" y="384" text-anchor="middle" class="edge-label" fill="var(--cyan)">the back-edge &mdash; built in</text>
+                <circle cx="210" cy="240" r="62" fill="#12181a" stroke="var(--cyan)" stroke-width="2.5"/>
+                <text x="210" y="248" text-anchor="middle" class="node-label" font-size="25">agent</text>
+                <circle cx="510" cy="240" r="62" fill="#12181a" stroke="var(--cyan)" stroke-width="2.5"/>
+                <text x="510" y="248" text-anchor="middle" class="node-label" font-size="25">tools</text>
+                <path d="M 210 302 L 210 516" stroke="var(--ink-faint)" stroke-width="3" marker-end="url(#s55-f)"/>
+                <text x="210" y="550" text-anchor="middle" class="edge-label" fill="var(--ink-dim)">__end__</text>
+                <text x="470" y="550" text-anchor="middle" class="edge-label" font-size="18" fill="var(--ink-faint)">the picture L11 opens on</text>
+            </svg>
+        </div>
     </div>
     <div class="chrome-page">29 / 30</div>
     <div class="chrome-nav">← → navigate</div>

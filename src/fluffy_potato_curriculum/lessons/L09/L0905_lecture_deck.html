@@ -553,6 +553,38 @@ table.ledger td.warn-cell { color: var(--coral); }
     color: var(--ink);
 }
 .flow-arrow { color: var(--ink-faint); font-size: 30px; flex-shrink: 0; }
+/* --- L0905 wire-motif helpers (appended per FRONTEND-STYLE §5) --- */
+.flow-box.hop { border-color: var(--ink-faint); }      /* neutral plumbing hop, not the point */
+.hop-dim { opacity: 0.45; }                            /* 3.2: the hop hazed from the model's seat */
+.msg-pill {                                            /* L07 message-strip echo (cross-lesson motif) */
+    display: inline-block;
+    font-family: var(--font-body);
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--cyan);
+    background: rgba(82,232,200,0.10);
+    border: 1.5px solid var(--cyan-rule);
+    border-radius: 999px;
+    padding: 2px 12px;
+    margin-top: 8px;
+    white-space: nowrap;
+}
+.spawn-box {                                           /* 1.2: config→child-process block diagram */
+    border: 2px solid var(--cyan);
+    border-radius: 10px;
+    background: #12181a;
+    padding: 13px 20px;
+    font-family: var(--font-body);
+    font-size: 20px;
+    line-height: 1.45;
+    color: var(--ink);
+    text-align: center;
+}
+.spawn-box b { color: var(--cyan); font-weight: 600; }
+.spawn-box.ghost { border-style: dashed; border-color: var(--ink-faint); background: transparent; color: var(--ink-dim); }
+.spawn-box.ghost b { color: var(--ink-dim); }
+.spawn-arrow { text-align: center; color: var(--ink-faint); font-size: 26px; line-height: 1.2; }
+.spawn-arrow .lbl { display: block; font-size: 20px; color: var(--ink-dim); }
 </style>
 </head>
 <body>
@@ -585,8 +617,8 @@ table.ledger td.warn-cell { color: var(--coral); }
             <text x="130" y="294" text-anchor="middle" class="node-label">client</text>
             <rect x="520" y="240" width="210" height="90" rx="10" fill="#12181a" stroke="var(--cyan)" stroke-width="2.5"/>
             <text x="625" y="294" text-anchor="middle" class="node-label">MCP server</text>
-            <rect x="230" y="490" width="300" height="52" rx="8" fill="none" stroke="var(--coral)" stroke-width="2" stroke-dasharray="8 6"/>
-            <text x="380" y="522" text-anchor="middle" class="edge-label" fill="var(--coral)">&#9888; shown, not run</text>
+            <rect x="230" y="490" width="300" height="52" rx="8" fill="none" stroke="var(--ink-faint)" stroke-width="2" stroke-dasharray="8 6"/>
+            <text x="380" y="522" text-anchor="middle" class="edge-label"><tspan fill="var(--coral)">&#9888;</tspan> <tspan fill="var(--ink-dim)">shown, not run</tspan></text>
             <defs>
                 <marker id="cvCyan" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="var(--cyan)"/></marker>
             </defs>
@@ -654,15 +686,24 @@ table.ledger td.warn-cell { color: var(--coral); }
         <ul class="points reveal">
             <li class="point">For a local <b>stdio</b> server, the config names <b>the command that launches the server</b> as a child process &mdash; the lowest-friction transport for local development. Exact key names vary by client; the <b>shape</b> is what matters.</li>
         </ul>
-        <div class="code-block reveal"><span class="nr"># NOT-RUNNABLE here (no `mcp` package). Shown for wire shape only.</span>
+        <div class="diagram-frame reveal" style="gap:44px; align-items:flex-start; justify-content:flex-start;">
+            <div class="code-block" style="margin-top:12px; flex-shrink:0;"><span class="nr"># NOT-RUNNABLE here (no `mcp` package). Shown for wire shape only.</span>
 <span class="c"># A client config entry describing how to launch a local stdio MCP server.</span>
 server_config = {
     <span class="s">"command"</span>: <span class="s">"uv"</span>,
     <span class="s">"args"</span>: [<span class="s">"run"</span>, <span class="s">"python"</span>, <span class="s">"-m"</span>, <span class="s">"my_org.book_meeting_server"</span>],
     <span class="s">"transport"</span>: <span class="s">"stdio"</span>,
 }</div>
-        <ul class="points reveal" style="margin-top:26px;">
-            <li class="point">Note what is <b>absent</b>: any tool-specific code. The config says <b>how to start the server</b>, never <i>what tools it has</i> &mdash; the client learns those at connect time (section 2). An HTTP/SSE server would carry a <code>url</code> instead of a launch command.</li>
+            <div style="display:flex; flex-direction:column; gap:10px; width:560px; margin-top:12px;">
+                <div class="spawn-box"><b>config entry</b> &mdash; how to start it</div>
+                <div class="spawn-arrow">&darr;<span class="lbl">spawns &middot; stdio pipes (stdin/stdout)</span></div>
+                <div class="spawn-box"><b>book_meeting server</b> &mdash; child process</div>
+                <div class="spawn-box ghost">HTTP/SSE &mdash; <b>"url"</b> instead of a command</div>
+                <div class="spawn-box ghost"><span style="text-decoration:line-through;">"tools": [&hellip;]</span> &mdash; no tool list here; learned at connect time</div>
+            </div>
+        </div>
+        <ul class="points reveal" style="margin-top:22px;">
+            <li class="point">Note what is <b>absent</b>: any tool-specific code. The config says <b>how to start the server</b>, never <i>what tools it has</i> &mdash; the client learns those at connect time (section 2).</li>
         </ul>
     </div>
     <div class="chrome-page">04 / 16</div>
@@ -692,18 +733,39 @@ server_config = {
     </div>
     <div class="body-area">
         <ul class="points reveal">
-            <li class="point">The client connects and issues a <b>list-tools</b> request; the server replies with its <b>published tool specs</b>. This is the step inline tools don't have &mdash; the client <b>discovers</b> the tool list instead of shipping with it.</li>
+            <li class="point">Connect, then issue <b>list-tools</b>: the server replies with its <b>published tool specs</b> &mdash; the client <b>discovers</b> the tool list instead of shipping with it.</li>
         </ul>
-        <div class="code-block reveal"><span class="nr"># NOT-RUNNABLE here (no `mcp` package). Shown for wire shape only.</span>
+        <div class="diagram-frame reveal" style="margin-top:8px;">
+            <svg viewBox="0 0 1660 250" style="width:1660px; height:250px;">
+                <line x1="150" y1="74" x2="150" y2="242" stroke="var(--ink-faint)" stroke-width="2"/>
+                <line x1="1510" y1="74" x2="1510" y2="242" stroke="var(--ink-faint)" stroke-width="2"/>
+                <path d="M 160 104 L 1496 104" stroke="var(--ink-faint)" stroke-width="2.5" marker-end="url(#s21-nf)"/>
+                <text x="830" y="94" text-anchor="middle" class="edge-label" fill="var(--ink-faint)">initialize() &mdash; protocol handshake &middot; version negotiation</text>
+                <path d="M 1500 136 L 164 136" stroke="var(--ink-faint)" stroke-width="2.5" marker-end="url(#s21-nf)"/>
+                <path d="M 160 180 L 1496 180" stroke="var(--cyan-dim)" stroke-width="3" marker-end="url(#s21-cyd)"/>
+                <text x="830" y="170" text-anchor="middle" class="edge-label" fill="var(--ink-dim)">list_tools() &mdash; &ldquo;what tools do you expose?&rdquo;</text>
+                <path d="M 1500 224 L 164 224" stroke="var(--cyan)" stroke-width="3.5" marker-end="url(#s21-cy)"/>
+                <circle r="8" fill="var(--cyan)"><animateMotion dur="3s" repeatCount="indefinite" path="M 1500 224 L 172 224"/></circle>
+                <text x="830" y="214" text-anchor="middle" class="edge-label" fill="var(--cyan)">tool specs &mdash; name &middot; description &middot; inputSchema &mdash; tools the client didn't ship with</text>
+                <rect x="30" y="10" width="240" height="64" rx="10" fill="#12181a" stroke="var(--cyan)" stroke-width="2.5"/>
+                <text x="150" y="50" text-anchor="middle" class="node-label">client</text>
+                <rect x="1390" y="10" width="240" height="64" rx="10" fill="#12181a" stroke="var(--cyan)" stroke-width="2.5"/>
+                <text x="1510" y="50" text-anchor="middle" class="node-label">MCP server</text>
+                <defs>
+                    <marker id="s21-nf" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="var(--ink-faint)"/></marker>
+                    <marker id="s21-cyd" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="var(--cyan-dim)"/></marker>
+                    <marker id="s21-cy" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="var(--cyan)"/></marker>
+                </defs>
+            </svg>
+        </div>
+        <div class="code-block reveal" style="margin-top:12px;"><span class="nr"># NOT-RUNNABLE here (no `mcp` package). Shown for wire shape only.</span>
 <span class="s">async with</span> connect_stdio(server_config) <span class="s">as</span> session:
     <span class="s">await</span> session.initialize()           <span class="c"># protocol handshake (version negotiation)</span>
     listed = <span class="s">await</span> session.list_tools()  <span class="c"># discovery: "what tools do you expose?"</span>
     <span class="s">for</span> tool <span class="s">in</span> listed.tools:
         print(tool.name, <span class="s">"-&gt;"</span>, tool.description)
         print(<span class="s">"  schema:"</span>, tool.inputSchema)</div>
-        <ul class="points reveal" style="margin-top:26px;">
-            <li class="point">The <code>tool.name</code>, <code>tool.description</code>, <code>tool.inputSchema</code> you get back are <b>exactly the L08 design surface</b>, serialized &mdash; the same fields the L0903 demo translates offline.</li>
-        </ul>
+        <div class="mini-note reveal" style="margin-top:12px;"><code style="color:var(--cyan); background:rgba(82,232,200,0.08); padding:1px 7px; border-radius:3px;">name</code> &middot; <code style="color:var(--cyan); background:rgba(82,232,200,0.08); padding:1px 7px; border-radius:3px;">description</code> &middot; <code style="color:var(--cyan); background:rgba(82,232,200,0.08); padding:1px 7px; border-radius:3px;">inputSchema</code> = <b>the L08 design surface</b>, serialized &mdash; L0903 translates it offline.</div>
     </div>
     <div class="chrome-page">06 / 16</div>
     <div class="chrome-nav">&larr; &rarr; navigate</div>
@@ -719,7 +781,7 @@ server_config = {
         <h2 class="headline">The discovery response <span class="it">on the wire</span></h2>
     </div>
     <div class="body-area">
-        <div class="mini-note reveal" style="margin-bottom:26px;">The shape of one tool entry &mdash; what every connecting model sees registered into its system prompt.</div>
+        <div class="mini-note reveal" style="margin-bottom:16px;">The shape of one tool entry &mdash; what every connecting model sees registered into its system prompt.</div>
         <table class="ledger reveal">
             <thead><tr><th>Field</th><th>Example value</th><th>Comes from</th></tr></thead>
             <tbody>
@@ -728,8 +790,33 @@ server_config = {
                 <tr><td class="tag">inputSchema</td><td><code>{"type": "object", "properties": {&hellip;}, "required": ["attendee", "start"]}</code></td><td>the L08 parameter schema (JSON Schema)</td></tr>
             </tbody>
         </table>
-        <ul class="points reveal" style="margin-top:34px;">
-            <li class="point">The point worth sitting with: the client now <b>knows about tools it did not ship with</b>. Ownership of the tool list has moved to the <b>server author</b> (L0902 slide 2.3).</li>
+        <div class="diagram-frame reveal" style="margin-top:14px;">
+            <svg viewBox="0 0 1660 252" style="width:1660px; height:252px;">
+                <line x1="150" y1="74" x2="150" y2="228" stroke="var(--ink-faint)" stroke-width="2"/>
+                <line x1="1510" y1="74" x2="1510" y2="228" stroke="var(--ink-faint)" stroke-width="2"/>
+                <path d="M 1500 155 L 1064 155" stroke="var(--ink-faint)" stroke-width="2.5" marker-end="url(#s22-nf)"/>
+                <text x="1275" y="142" text-anchor="middle" class="edge-label" fill="var(--ink-faint)">transport</text>
+                <path d="M 606 155 L 454 155" stroke="var(--ink-faint)" stroke-width="2.5" marker-end="url(#s22-nf)"/>
+                <circle r="7" fill="var(--cyan)"><animateMotion dur="2.6s" repeatCount="indefinite" path="M 1500 155 L 460 155"/></circle>
+                <rect x="610" y="90" width="440" height="130" rx="10" fill="#12181a" stroke="var(--cyan)" stroke-width="2.5"/>
+                <text x="638" y="126" class="edge-label"><tspan fill="var(--cyan)">name:</tspan> <tspan fill="var(--ink)">"book_meeting"</tspan></text>
+                <text x="638" y="158" class="edge-label"><tspan fill="var(--cyan)">description:</tspan> <tspan fill="var(--ink)">"Book a meeting&hellip;"</tspan></text>
+                <text x="638" y="190" class="edge-label"><tspan fill="var(--cyan)">inputSchema:</tspan> <tspan fill="var(--ink)">{&hellip;, "required": [&hellip;]}</tspan></text>
+                <rect x="60" y="100" width="380" height="110" rx="10" fill="var(--cyan-faint)" stroke="var(--cyan-rule)" stroke-width="1.5"/>
+                <text x="250" y="148" text-anchor="middle" class="edge-label" fill="var(--ink)">model's tool registry</text>
+                <text x="250" y="180" text-anchor="middle" class="edge-label" fill="var(--ink-dim)">(the system prompt)</text>
+                <rect x="30" y="10" width="240" height="64" rx="10" fill="#12181a" stroke="var(--cyan)" stroke-width="2.5"/>
+                <text x="150" y="50" text-anchor="middle" class="node-label">client</text>
+                <rect x="1390" y="10" width="240" height="64" rx="10" fill="#12181a" stroke="var(--cyan)" stroke-width="2.5"/>
+                <text x="1510" y="50" text-anchor="middle" class="node-label">MCP server</text>
+                <text x="830" y="248" text-anchor="middle" class="edge-label" font-style="italic" fill="var(--ink-dim)">exactly the L08 design surface, serialized</text>
+                <defs>
+                    <marker id="s22-nf" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="var(--ink-faint)"/></marker>
+                </defs>
+            </svg>
+        </div>
+        <ul class="points reveal" style="margin-top:10px;">
+            <li class="point">Worth sitting with: the client now <b>knows about tools it did not ship with</b> &mdash; ownership moved to the <b>server author</b> (L0902 2.3).</li>
         </ul>
     </div>
     <div class="chrome-page">07 / 16</div>
@@ -761,21 +848,21 @@ server_config = {
         <ul class="points reveal">
             <li class="point">Once the specs are registered, the model emits <code>AIMessage.tool_calls</code> <b>exactly as in L07</b>; the result comes back to it as a <code>ToolMessage</code>. Steps 2&ndash;4 are the MCP hop &mdash; <b>the model never sees them</b>.</li>
         </ul>
-        <div class="diagram-frame reveal" style="gap:18px; margin-top:24px;">
-            <div class="flow-box" style="width:225px;"><b>1 &middot; model</b><br><span style="color:var(--ink-dim);">AIMessage<br>.tool_calls</span></div>
+        <div class="diagram-frame reveal" style="gap:16px; margin-top:24px;">
+            <div class="flow-box" style="width:312px;"><b>1 &middot; model</b><br><span class="msg-pill">AIMessage.tool_calls</span></div>
             <div class="flow-arrow">&rarr;</div>
             <div style="border:1.5px solid var(--cyan-rule); border-radius:14px; background:var(--cyan-faint); padding:14px 20px 16px;">
                 <div style="font-size:16px; letter-spacing:0.12em; text-transform:uppercase; color:var(--cyan); text-align:center; margin-bottom:10px;">the MCP hop &mdash; invisible to the model</div>
                 <div style="display:flex; gap:16px; align-items:center;">
-                    <div class="flow-box" style="width:225px;"><b>2 &middot; client</b><br><span style="color:var(--ink-dim);">routes over<br>the transport</span></div>
+                    <div class="flow-box hop" style="width:212px;"><b>2 &middot; client</b><br><span style="color:var(--ink-dim);">routes over<br>the transport</span></div>
                     <div class="flow-arrow">&rarr;</div>
-                    <div class="flow-box" style="width:225px;"><b>3 &middot; server</b><br><span style="color:var(--ink-dim);">runs<br>book_meeting</span></div>
+                    <div class="flow-box hop" style="width:212px;"><b>3 &middot; server</b><br><span style="color:var(--ink-dim);">runs<br>book_meeting</span></div>
                     <div class="flow-arrow">&rarr;</div>
-                    <div class="flow-box" style="width:225px;"><b>4 &middot; client</b><br><span style="color:var(--ink-dim);">wraps result as<br>ToolMessage</span></div>
+                    <div class="flow-box hop" style="width:212px;"><b>4 &middot; client</b><br><span style="color:var(--ink-dim);">wraps the<br>result</span></div>
                 </div>
             </div>
             <div class="flow-arrow">&rarr;</div>
-            <div class="flow-box" style="width:225px;"><b>5 &middot; model</b><br><span style="color:var(--ink-dim);">final<br>answer</span></div>
+            <div class="flow-box" style="width:312px;"><b>5 &middot; model</b><br><span class="msg-pill">ToolMessage</span><br><span style="color:var(--ink-dim);">&rarr; final answer</span></div>
         </div>
         <div class="code-block reveal" style="margin-top:28px;"><span class="nr"># NOT-RUNNABLE here (no `mcp` package). Shown for wire shape only.</span>
 <span class="c"># The client forwards the model's tool call to the server; a structured result comes back.</span>
@@ -803,7 +890,24 @@ print(result.content)  <span class="c"># fed back to the model as a ToolMessage<
             <li class="point">From the model's seat, this is the <b>same</b> <code>AIMessage.tool_calls</code> / <code>ToolMessage</code> exchange as L07. MCP is invisible to it &mdash; it lives entirely in the <b>client's routing</b> and the <b>operator's config</b>.</li>
             <li class="point">The model you designed for in <b>L08</b> and the loop coming in <b>L10</b> both work <b>unchanged</b> whether the tool is inline or MCP-served.</li>
         </ul>
-        <div class="callout reveal"><p>That invisibility is the proof of the abstraction.</p></div>
+        <div class="diagram-frame reveal" style="gap:16px; margin-top:22px;">
+            <div class="flow-box" style="width:312px;"><b>model</b><br><span class="msg-pill">AIMessage.tool_calls</span></div>
+            <div class="flow-arrow">&rarr;</div>
+            <div style="border:1.5px dashed var(--ink-faint); border-radius:14px; background:transparent; padding:14px 20px 16px;">
+                <div style="font-size:16px; letter-spacing:0.12em; text-transform:uppercase; color:var(--ink-faint); text-align:center; margin-bottom:10px;">invisible from the model's seat</div>
+                <div class="hop-dim" style="display:flex; gap:16px; align-items:center;">
+                    <div class="flow-box hop" style="width:212px;"><b>client</b><br><span style="color:var(--ink-dim);">routes over<br>the transport</span></div>
+                    <div class="flow-arrow">&rarr;</div>
+                    <div class="flow-box hop" style="width:212px;"><b>server</b><br><span style="color:var(--ink-dim);">runs<br>book_meeting</span></div>
+                    <div class="flow-arrow">&rarr;</div>
+                    <div class="flow-box hop" style="width:212px;"><b>client</b><br><span style="color:var(--ink-dim);">wraps the<br>result</span></div>
+                </div>
+            </div>
+            <div class="flow-arrow">&rarr;</div>
+            <div class="flow-box" style="width:312px;"><b>model</b><br><span class="msg-pill">ToolMessage</span></div>
+        </div>
+        <div class="diagram-caption reveal">The endpoints are the <b>inline-L07 shape, exactly</b> &mdash; dim the hop and nothing the model sees changes.</div>
+        <div class="callout reveal" style="margin-top:20px;"><p>That invisibility is the proof of the abstraction.</p></div>
     </div>
     <div class="chrome-page">10 / 16</div>
     <div class="chrome-nav">&larr; &rarr; navigate</div>
@@ -832,33 +936,36 @@ print(result.content)  <span class="c"># fed back to the model as a ToolMessage<
     </div>
     <div class="body-area">
         <div class="mini-note reveal">Server dies mid-conversation, prompt re-issued: the client surfaces a <span class="warn">transport error</span> &mdash; the tool didn't fail, the <b>boundary</b> did. Inline tools cannot fail this way.</div>
-        <div class="diagram-frame reveal" style="margin-top:16px;">
-            <svg viewBox="0 0 1660 300" style="width:1560px; height:282px;">
-                <path d="M 220 80 L 1338 80" stroke="var(--cyan)" stroke-width="3" marker-end="url(#f-cy)"/>
-                <text x="775" y="62" text-anchor="middle" class="edge-label" fill="var(--cyan)">call 1 &middot; book_meeting</text>
-                <circle r="8" fill="var(--cyan)"><animateMotion dur="3s" repeatCount="indefinite" path="M 220 80 L 1330 80"/></circle>
-                <path d="M 1350 118 L 222 118" stroke="var(--cyan)" stroke-width="3" marker-end="url(#f-cy)"/>
-                <text x="775" y="150" text-anchor="middle" class="edge-label" fill="var(--ink-dim)">structured result &#10003; &rarr; ToolMessage</text>
-                <text x="1490" y="170" text-anchor="middle" class="edge-label" fill="var(--coral)">server stops between calls</text>
-                <path d="M 220 220 L 1280 220" stroke="var(--ink-faint)" stroke-width="3"/>
-                <text x="700" y="202" text-anchor="middle" class="edge-label" fill="var(--ink-dim)">call 2 &middot; prompt re-issued</text>
-                <text x="1300" y="232" text-anchor="middle" fill="var(--coral)" font-family="var(--font-body)" font-size="36" font-weight="700">&#215;</text>
-                <path d="M 1280 252 L 232 252" stroke="var(--coral)" stroke-width="3.5" marker-end="url(#f-co)"/>
-                <circle r="8" fill="var(--coral)"><animateMotion dur="3s" repeatCount="indefinite" path="M 1280 252 L 240 252"/></circle>
-                <text x="760" y="286" text-anchor="middle" class="edge-label" fill="var(--coral)">transport error &mdash; connection refused</text>
-                <rect x="30" y="50" width="180" height="200" rx="10" fill="#12181a" stroke="var(--cyan)" stroke-width="2.5"/>
-                <text x="120" y="158" text-anchor="middle" class="node-label">client</text>
-                <rect x="1350" y="40" width="280" height="80" rx="10" fill="#12181a" stroke="var(--cyan)" stroke-width="2.5"/>
-                <text x="1490" y="88" text-anchor="middle" class="node-label">server &mdash; live</text>
-                <rect x="1330" y="185" width="320" height="80" rx="10" fill="none" stroke="var(--coral)" stroke-width="2.5" stroke-dasharray="9 7"/>
-                <text x="1490" y="233" text-anchor="middle" class="node-label" style="fill:var(--ink-faint);">server &mdash; stopped</text>
+        <div class="diagram-frame reveal" style="margin-top:12px;">
+            <svg viewBox="0 0 1660 310" style="width:1660px; height:310px;">
+                <line x1="150" y1="74" x2="150" y2="302" stroke="var(--ink-faint)" stroke-width="2"/>
+                <line x1="1510" y1="74" x2="1510" y2="176" stroke="var(--ink-faint)" stroke-width="2"/>
+                <line x1="1510" y1="224" x2="1510" y2="302" stroke="var(--coral-dim)" stroke-width="2" stroke-dasharray="7 6"/>
+                <path d="M 160 112 L 1496 112" stroke="var(--cyan)" stroke-width="3" marker-end="url(#s41-cy)"/>
+                <text x="830" y="100" text-anchor="middle" class="edge-label" fill="var(--cyan)">call 1 &middot; book_meeting &mdash; server live</text>
+                <circle r="8" fill="var(--cyan)"><animateMotion dur="3s" repeatCount="indefinite" path="M 160 112 L 1488 112"/></circle>
+                <path d="M 1500 156 L 164 156" stroke="var(--cyan)" stroke-width="3" marker-end="url(#s41-cy)"/>
+                <text x="830" y="144" text-anchor="middle" class="edge-label" fill="var(--ink-dim)">structured result &#10003; &rarr; ToolMessage</text>
+                <rect x="1390" y="176" width="240" height="48" rx="8" fill="none" stroke="var(--coral)" stroke-width="2.5" stroke-dasharray="9 7"/>
+                <text x="1510" y="207" text-anchor="middle" class="edge-label" fill="var(--coral)">server stopped</text>
+                <text x="1370" y="207" text-anchor="end" class="edge-label" fill="var(--ink-faint)">between calls, the process dies &rarr;</text>
+                <path d="M 160 252 L 1470 252" stroke="var(--ink-faint)" stroke-width="3"/>
+                <text x="830" y="240" text-anchor="middle" class="edge-label" fill="var(--ink-dim)">call 2 &middot; prompt re-issued</text>
+                <text x="1495" y="262" text-anchor="middle" fill="var(--coral)" font-family="var(--font-body)" font-size="34" font-weight="700">&#215;</text>
+                <path d="M 1470 288 L 164 288" stroke="var(--coral)" stroke-width="3.5" marker-end="url(#s41-co)"/>
+                <circle r="8" fill="var(--coral)"><animateMotion dur="3s" repeatCount="indefinite" path="M 1470 288 L 172 288"/></circle>
+                <text x="830" y="278" text-anchor="middle" class="edge-label" fill="var(--coral)">transport error &mdash; connection refused</text>
+                <rect x="30" y="10" width="240" height="64" rx="10" fill="#12181a" stroke="var(--cyan)" stroke-width="2.5"/>
+                <text x="150" y="50" text-anchor="middle" class="node-label">client</text>
+                <rect x="1390" y="10" width="240" height="64" rx="10" fill="#12181a" stroke="var(--cyan)" stroke-width="2.5"/>
+                <text x="1510" y="50" text-anchor="middle" class="node-label">MCP server</text>
                 <defs>
-                    <marker id="f-cy" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="var(--cyan)"/></marker>
-                    <marker id="f-co" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="var(--coral)"/></marker>
+                    <marker id="s41-cy" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="var(--cyan)"/></marker>
+                    <marker id="s41-co" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="var(--coral)"/></marker>
                 </defs>
             </svg>
         </div>
-        <table class="ledger reveal" style="margin-top:18px;">
+        <table class="ledger reveal" style="margin-top:14px;">
             <thead><tr><th>Failure</th><th>What the client surfaces</th><th>Model reaction (L08 error classes)</th></tr></thead>
             <tbody>
                 <tr><td class="tag">server not running</td><td>connection refused / no handshake</td><td>reports failure; needs the operator</td></tr>
@@ -884,10 +991,44 @@ print(result.content)  <span class="c"># fed back to the model as a ToolMessage<
     <div class="body-area">
         <ul class="points reveal">
             <li class="point">Restart the server, re-run the prompt &mdash; recovered. Cross-process tools add an <b>operational</b> dimension inline tools don't have.</li>
-            <li class="point">The model treats a well-shaped error as new context <b>exactly as in L08</b>; what's new is <i>where</i> the error can originate &mdash; now on <b>either side of the wire</b>.</li>
-            <li class="point">This makes the L0902 cost-ledger row <b>&ldquo;a transport to keep healthy&rdquo;</b> concrete: you just watched a stopped server break a conversation.</li>
+            <li class="point">A well-shaped error is new context <b>exactly as in L08</b>; what's new is <i>where</i> it can originate &mdash; <b>either side of the wire</b>.</li>
+            <li class="point">The L0902 cost-ledger row <b>&ldquo;a transport to keep healthy&rdquo;</b>, made concrete: a stopped server just broke a conversation.</li>
         </ul>
-        <div class="callout reveal"><p>Someone has to keep the server alive.</p></div>
+        <div class="diagram-frame reveal" style="margin-top:10px;">
+            <svg viewBox="0 0 1660 344" style="width:1660px; height:344px;">
+                <line x1="150" y1="74" x2="150" y2="336" stroke="var(--ink-faint)" stroke-width="2"/>
+                <line x1="1510" y1="74" x2="1510" y2="186" stroke="var(--coral-dim)" stroke-width="2" stroke-dasharray="7 6"/>
+                <line x1="1510" y1="234" x2="1510" y2="336" stroke="var(--ink-faint)" stroke-width="2"/>
+                <path d="M 160 112 L 1470 112" stroke="var(--ink-faint)" stroke-width="2.5"/>
+                <text x="830" y="100" text-anchor="middle" class="edge-label" fill="var(--ink-faint)">call 2 &middot; failed while the server was down (history)</text>
+                <text x="1495" y="121" text-anchor="middle" fill="var(--coral)" font-family="var(--font-body)" font-size="32" font-weight="700">&#215;</text>
+                <path d="M 1470 152 L 164 152" stroke="var(--coral)" stroke-width="3" marker-end="url(#s42-co)"/>
+                <text x="830" y="140" text-anchor="middle" class="edge-label" fill="var(--coral)">transport error &mdash; connection refused</text>
+                <rect x="900" y="186" width="230" height="48" rx="8" fill="#12181a" stroke="var(--cyan)" stroke-width="2.5"/>
+                <text x="1015" y="217" text-anchor="middle" class="edge-label" fill="var(--ink)">operator</text>
+                <path d="M 1134 210 L 1226 210" stroke="var(--cyan)" stroke-width="3" marker-end="url(#s42-cy)"/>
+                <text x="1180" y="178" text-anchor="middle" class="edge-label" fill="var(--cyan)">restart</text>
+                <rect x="1230" y="186" width="170" height="48" rx="8" fill="none" stroke="var(--coral)" stroke-width="2.5" stroke-dasharray="9 7"/>
+                <text x="1315" y="217" text-anchor="middle" class="edge-label" fill="var(--coral)">stopped</text>
+                <path d="M 1404 210 L 1444 210" stroke="var(--cyan)" stroke-width="3" marker-end="url(#s42-cy)"/>
+                <rect x="1448" y="186" width="182" height="48" rx="8" fill="#12181a" stroke="var(--cyan)" stroke-width="2.5"/>
+                <text x="1539" y="217" text-anchor="middle" class="edge-label" fill="var(--cyan)">live again</text>
+                <path d="M 160 284 L 1496 284" stroke="var(--cyan)" stroke-width="3" marker-end="url(#s42-cy)"/>
+                <text x="830" y="272" text-anchor="middle" class="edge-label" fill="var(--cyan)">call 3 &middot; book_meeting &mdash; succeeds</text>
+                <circle r="8" fill="var(--cyan)"><animateMotion dur="3s" repeatCount="indefinite" path="M 160 284 L 1488 284"/></circle>
+                <path d="M 1500 324 L 164 324" stroke="var(--cyan)" stroke-width="3" marker-end="url(#s42-cy)"/>
+                <text x="830" y="312" text-anchor="middle" class="edge-label" fill="var(--ink-dim)">structured result &#10003; &rarr; ToolMessage</text>
+                <rect x="30" y="10" width="240" height="64" rx="10" fill="#12181a" stroke="var(--cyan)" stroke-width="2.5"/>
+                <text x="150" y="50" text-anchor="middle" class="node-label">client</text>
+                <rect x="1390" y="10" width="240" height="64" rx="10" fill="#12181a" stroke="var(--cyan)" stroke-width="2.5"/>
+                <text x="1510" y="50" text-anchor="middle" class="node-label">MCP server</text>
+                <defs>
+                    <marker id="s42-cy" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="var(--cyan)"/></marker>
+                    <marker id="s42-co" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="var(--coral)"/></marker>
+                </defs>
+            </svg>
+        </div>
+        <div class="diagram-caption reveal" style="max-width:1660px; margin-top:8px;">Live &rarr; stopped &rarr; restarted: the fix never touches the model &mdash; <b>someone has to keep the server alive.</b></div>
     </div>
     <div class="chrome-page">13 / 16</div>
     <div class="chrome-nav">&larr; &rarr; navigate</div>
@@ -916,11 +1057,36 @@ print(result.content)  <span class="c"># fed back to the model as a ToolMessage<
     </div>
     <div class="body-area">
         <ul class="points reveal">
-            <li class="point">You can <b>read a server's published tool list</b> and predict what the model will see.</li>
-            <li class="point">You can trace an <code>AIMessage.tool_calls</code> &rarr; transport &rarr; server &rarr; <code>ToolMessage</code> round-trip and <b>name where it can fail</b>.</li>
-            <li class="point">Next: <b>L0906</b> shows the <i>other</i> side of the wire &mdash; <b>building</b> the server whose tools you just discovered (also shown, not run here).</li>
-            <li class="point">The offline <b>L0904 lab</b> has you validate and translate the spec these handshakes exchange.</li>
+            <li class="point">You can <b>read a published tool list</b> and predict what the model will see.</li>
+            <li class="point">You can trace <code>AIMessage.tool_calls</code> &rarr; transport &rarr; server &rarr; <code>ToolMessage</code> and <b>name where it can fail</b>.</li>
+            <li class="point">Next: <b>L0906</b> &mdash; the <i>other</i> side of the wire: <b>building</b> the server (also shown, not run). The offline <b>L0904 lab</b> has you validate &amp; translate the spec these handshakes exchange.</li>
         </ul>
+        <div class="diagram-frame reveal" style="margin-top:8px;">
+            <svg viewBox="0 0 1660 300" style="width:1660px; height:300px;">
+                <line x1="150" y1="74" x2="150" y2="292" stroke="var(--ink-faint)" stroke-width="2"/>
+                <line x1="1510" y1="74" x2="1510" y2="292" stroke="var(--cyan-dim)" stroke-width="2" stroke-dasharray="8 7"/>
+                <text x="1630" y="100" text-anchor="end" class="edge-label" fill="var(--cyan)">you build this side next &mdash; L0906</text>
+                <path d="M 160 134 L 1496 134" stroke="var(--ink-faint)" stroke-width="2.5" marker-end="url(#s51-nf)"/>
+                <text x="830" y="122" text-anchor="middle" class="edge-label" fill="var(--ink-dim)">1 &middot; config &mdash; name the command, spawn over stdio</text>
+                <path d="M 1500 182 L 164 182" stroke="var(--cyan)" stroke-width="3" marker-end="url(#s51-cy)"/>
+                <text x="830" y="170" text-anchor="middle" class="edge-label" fill="var(--cyan)">2 &middot; discovery &mdash; list_tools() &rarr; the published specs</text>
+                <path d="M 160 230 L 1496 230" stroke="var(--cyan)" stroke-width="3" marker-end="url(#s51-cy)"/>
+                <text x="830" y="218" text-anchor="middle" class="edge-label" fill="var(--cyan)">3 &middot; the call &mdash; AIMessage.tool_calls &rarr; server &rarr; ToolMessage</text>
+                <path d="M 1470 278 L 164 278" stroke="var(--coral)" stroke-width="3" marker-end="url(#s51-co)"/>
+                <text x="1495" y="287" text-anchor="middle" fill="var(--coral)" font-family="var(--font-body)" font-size="30" font-weight="700">&#215;</text>
+                <text x="830" y="266" text-anchor="middle" class="edge-label" fill="var(--coral)">4 &middot; failure &mdash; the boundary itself can refuse</text>
+                <rect x="30" y="10" width="240" height="64" rx="10" fill="#12181a" stroke="var(--cyan)" stroke-width="2.5"/>
+                <text x="150" y="50" text-anchor="middle" class="node-label">client</text>
+                <rect x="1390" y="10" width="240" height="64" rx="10" fill="transparent" stroke="var(--cyan)" stroke-width="2.5" stroke-dasharray="9 7"/>
+                <text x="1510" y="50" text-anchor="middle" class="node-label">MCP server</text>
+                <defs>
+                    <marker id="s51-nf" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="var(--ink-faint)"/></marker>
+                    <marker id="s51-cy" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="var(--cyan)"/></marker>
+                    <marker id="s51-co" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="var(--coral)"/></marker>
+                </defs>
+            </svg>
+        </div>
+        <div class="diagram-caption reveal" style="max-width:1660px; margin-top:10px;">The whole walkthrough on one wire &mdash; config &middot; discovery &middot; call &middot; failure; the dashed lane is deferred, not broken: yours to build in <b>L0906</b>.</div>
     </div>
     <div class="chrome-page">15 / 16</div>
     <div class="chrome-nav">&larr; &rarr; navigate</div>

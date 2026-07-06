@@ -549,6 +549,42 @@ table.ledger td.warn-cell { color: var(--coral); }
     margin-bottom: 14px;
 }
 .dg-code { font-family: var(--font-body); font-size: 21px; line-height: 1.6; }
+
+/* ===========================================
+   DENSIFY-PASS HELPERS (appended 2026-07-06;
+   new diagram flavors per FRONTEND-STYLE §5)
+   =========================================== */
+/* bar chart — height % encodes the value (slide 2.1) */
+.chart { display: flex; align-items: flex-end; justify-content: center; gap: 30px; height: 430px; }
+.chart .bar { width: 104px; background: var(--ink-faint); border-radius: 6px 6px 0 0; position: relative; }
+.chart .bar.hi  { background: var(--cyan); }
+.chart .bar.bad { background: var(--coral); }
+.chart .bar .val { position: absolute; top: -36px; left: 50%; transform: translateX(-50%); font-size: 20px; color: var(--ink-dim); white-space: nowrap; }
+.chart .bar .val.warn-val { top: -72px; color: var(--coral); }
+.chart .bar .cat { position: absolute; bottom: -42px; left: 50%; transform: translateX(-50%); font-size: 20px; color: var(--ink-dim); white-space: nowrap; }
+/* registry name pills (slide 3.1) */
+.name-pill { display: inline-block; font-family: var(--font-body); font-size: 24px; color: var(--ink); border: 2px solid var(--coral); border-radius: 999px; padding: 10px 24px; background: #12181a; }
+.name-pill.good { border-color: var(--cyan); }
+.pill-note { font-size: 20px; color: var(--coral); margin-top: 12px; text-align: center; line-height: 1.35; }
+.pill-note b { color: inherit; }
+/* the four-pill tool-spec card motif (slides 3.2 / 3.3 / 4.1 / 9.1) */
+.spec-card { border: 2px solid var(--ink-faint); border-radius: 10px; background: #12181a; padding: 18px 20px; }
+.spec-card.good { border-color: var(--cyan); }
+.spec-card.bad  { border-color: var(--coral); }
+.spec-row { font-family: var(--font-body); font-size: 20px; line-height: 1.4; color: var(--ink-dim); border: 1.5px solid var(--ink-faint); border-radius: 14px; padding: 8px 20px; margin-bottom: 10px; }
+.spec-row:last-child { margin-bottom: 0; }
+.spec-row.lit { border-color: var(--cyan); color: var(--ink); background: rgba(82,232,200,0.08); }
+.spec-row.lit-coral { border-color: var(--coral); color: var(--ink); background: rgba(255,107,87,0.07); }
+.spec-row b { color: inherit; font-weight: 600; }
+/* outcome chips + fan arrows (slide 3.2) */
+.outcome-chip { display: inline-block; font-family: var(--font-body); font-size: 22px; font-weight: 600; border: 2px solid var(--ink-faint); border-radius: 8px; padding: 10px 24px; color: var(--ink-dim); background: #12181a; }
+.outcome-chip.good { border-color: var(--cyan); color: var(--cyan); }
+.outcome-chip.bad  { border-color: var(--coral); color: var(--coral); }
+.fan-arrow { text-align: center; font-size: 32px; line-height: 1; margin: 6px 0; color: var(--ink-faint); }
+/* dashed MCP envelope + client chips (slide 9.1) */
+.mcp-envelope { border: 2px dashed var(--ink-faint); border-radius: 14px; background: transparent; padding: 26px 30px; }
+.mcp-envelope .env-label { font-size: 20px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-dim); margin-bottom: 18px; }
+.client-chip { display: inline-block; font-size: 22px; color: var(--ink-dim); border: 2px dashed var(--ink-faint); border-radius: 10px; padding: 12px 24px; background: transparent; }
 </style>
 </head>
 <body>
@@ -633,7 +669,7 @@ table.ledger td.warn-cell { color: var(--coral); }
         <div class="diagram-frame reveal" style="gap:44px; margin-top:26px; justify-content:flex-start;">
             <div class="dg-box neutral" style="width:600px;">
                 <div class="dg-head" style="color:var(--ink-dim);">human consumer</div>
-                <span class="dg-pill">IDE</span><span class="dg-pill">autocomplete</span><span class="dg-pill">docs</span><span class="dg-pill">REPL</span><span class="dg-pill">a co-worker to ask</span>
+                <span class="dg-pill" style="border-color:var(--ink-faint);">IDE</span><span class="dg-pill" style="border-color:var(--ink-faint);">autocomplete</span><span class="dg-pill" style="border-color:var(--ink-faint);">docs</span><span class="dg-pill" style="border-color:var(--ink-faint);">REPL</span><span class="dg-pill" style="border-color:var(--ink-faint);">a co-worker to ask</span>
             </div>
             <div style="color:var(--cyan); font-size:24px; text-align:center; width:280px; line-height:1.4;">the model has<br>only this &rarr;</div>
             <div class="dg-box" style="width:600px;">
@@ -642,6 +678,7 @@ table.ledger td.warn-cell { color: var(--coral); }
                 <div class="dg-sub">read once, at inference time</div>
             </div>
         </div>
+        <div class="diagram-caption reveal">the four-pill spec card is the lesson's reusable motif &mdash; later slides re-show it with one field lit.</div>
     </div>
     <div class="chrome-page">04 / 37</div>
     <div class="chrome-nav">&larr; &rarr; navigate</div>
@@ -689,11 +726,25 @@ table.ledger td.warn-cell { color: var(--coral); }
         <h2 class="headline">Adding a tool is an <span class="it">architectural decision</span></h2>
     </div>
     <div class="body-area">
-        <ul class="points reveal">
-            <li class="point">The set of tools the model has <b>is</b> the set of actions it can take in the world. A tool is a decision about the agent's <b>affordances</b>, not a convenience.</li>
-            <li class="point">And it has a cost shadow (L01): every tool eats <b>system-prompt tokens</b>, adds a <b>per-turn decision</b>, and adds another <span class="warn">wrong-tool failure mode</span>.</li>
-        </ul>
-        <div class="callout reveal"><p>More tools &ne; more capable agent &mdash; a 5-tool agent the model can navigate beats a 20-tool agent it gets lost in.</p></div>
+        <div style="display:flex; gap:60px;">
+            <div style="width:820px;">
+                <ul class="points reveal">
+                    <li class="point">The set of tools the model has <b>is</b> the set of actions it can take in the world. A tool is a decision about the agent's <b>affordances</b>, not a convenience.</li>
+                    <li class="point">And it has a cost shadow (L01): every tool eats <b>system-prompt tokens</b>, adds a <b>per-turn decision</b>, and adds another <span class="warn">wrong-tool failure mode</span>.</li>
+                </ul>
+                <div class="callout reveal"><p>More tools &ne; more capable agent.</p></div>
+            </div>
+            <div class="reveal" style="flex:1;">
+                <div class="chart" style="margin-top:76px;">
+                    <div class="bar" style="height:12%"><span class="val">~0.4k tok</span><span class="cat">1 tool</span></div>
+                    <div class="bar hi" style="height:26%"><span class="val">~2k tok</span><span class="cat">5 tools</span></div>
+                    <div class="bar" style="height:50%"><span class="val">~4k tok</span><span class="cat">10</span></div>
+                    <div class="bar" style="height:74%"><span class="val">~6k tok</span><span class="cat">15</span></div>
+                    <div class="bar bad" style="height:100%"><span class="val warn-val">wrong-tool picks &uarr;</span><span class="val" style="color:var(--coral);">~8k tok</span><span class="cat">20 tools</span></div>
+                </div>
+                <div class="diagram-caption" style="margin-top:58px;">the per-tool system-prompt token tax &mdash; a 5-tool agent the model can navigate beats a 20-tool agent it gets lost in.</div>
+            </div>
+        </div>
     </div>
     <div class="chrome-page">07 / 37</div>
     <div class="chrome-nav">&larr; &rarr; navigate</div>
@@ -811,9 +862,20 @@ table.ledger td.warn-cell { color: var(--coral); }
     <div class="body-area">
         <ul class="points reveal">
             <li class="point">The model sees the tool <b>name without surrounding context</b> &mdash; it must be descriptive, action-oriented, and unambiguous on its own.</li>
-            <li class="point">Anti-patterns: cryptic abbreviations (<code>lu</code>, <code>gx2</code>), overlapping names in one registry (<code>get_user</code> and <code>fetch_user</code>), and &mdash; worst &mdash; <span class="warn">names that hide a side effect</span> (<code>get_user</code> that also <i>creates</i> one).</li>
-            <li class="point">A name that lies about what the tool does is a tool that <span class="warn">will be misused</span>.</li>
+            <li class="point">Anti-patterns: <span class="warn">cryptic abbreviations</span>, <span class="warn">overlapping names</span> in one registry, and &mdash; worst &mdash; <span class="warn">names that hide a side effect</span>. A name that lies about what the tool does is a tool that will be misused.</li>
         </ul>
+        <div class="diagram-frame reveal" style="margin-top:34px; justify-content:flex-start;">
+            <div class="dg-box neutral" style="width:100%; padding:26px 34px;">
+                <div class="dg-head" style="color:var(--ink-dim);">the registry, as the model reads it &mdash; bare names, no context</div>
+                <div style="display:flex; gap:44px; align-items:flex-start; justify-content:space-between;">
+                    <div style="text-align:center;"><span class="name-pill good">get_current_time</span><div class="pill-note" style="color:var(--cyan);">says what it does</div></div>
+                    <div style="text-align:center;"><span class="name-pill">lu</span>&nbsp;<span class="name-pill">gx2</span><div class="pill-note">cryptic &mdash; opaque on their own</div></div>
+                    <div style="text-align:center;"><span class="name-pill">get_user</span>&nbsp;<span class="name-pill">fetch_user</span><div class="pill-note">overlap &mdash; which one?</div></div>
+                    <div style="text-align:center;"><span class="name-pill">get_user</span><div class="pill-note">&hellip;that also <b>creates</b> one<br>hidden side effect</div></div>
+                </div>
+            </div>
+        </div>
+        <div class="diagram-caption reveal">one strip of pills is the model's entire first impression &mdash; only the cyan name survives being read in isolation.</div>
     </div>
     <div class="chrome-page">12 / 37</div>
     <div class="chrome-nav">&larr; &rarr; navigate</div>
@@ -828,10 +890,38 @@ table.ledger td.warn-cell { color: var(--coral); }
     </div>
     <div class="body-area">
         <ul class="points reveal">
-            <li class="point">Names are constrained by length and convention; schemas by types. The <b>description is freeform prose</b> &mdash; the only place to teach the model <b>when</b> to reach for the tool and <b>when not to</b>.</li>
-            <li class="point">It is the model's <b>only training signal at inference time</b> for tool selection. Treat it like the system prompt of a tiny sub-policy: it must land its point in a few sentences.</li>
-            <li class="point">A weak description is the <span class="warn">single most common cause</span> of an unused or misused tool. Demo <code>L0805</code>: same name, same schema, three descriptions &rarr; three very different behaviors.</li>
+            <li class="point">Names are constrained by convention, schemas by types &mdash; the <b>description is freeform prose</b>: the only place to teach the model <b>when</b> (and when <b>not</b>) to use the tool, and its <b>only training signal at inference time</b> for selection.</li>
+            <li class="point">Treat it like the system prompt of a tiny sub-policy &mdash; a weak one is the <span class="warn">most common cause</span> of an unused or misused tool. Demo <code>L0805</code>: same name, same schema, three descriptions &rarr; three behaviors.</li>
         </ul>
+        <div class="diagram-frame reveal" style="margin-top:12px; gap:60px; align-items:flex-start;">
+            <div style="width:490px; text-align:center;">
+                <div class="spec-card" style="text-align:left;">
+                    <div class="spec-row">name: lookup_user</div>
+                    <div class="spec-row lit">"One user by exact email; not for search. Returns {name, plan} or {found: false}."</div>
+                    <div class="spec-row">schema: {email: str}</div>
+                </div>
+                <div class="fan-arrow" style="color:var(--cyan);">&darr;</div>
+                <span class="outcome-chip good">called correctly</span>
+            </div>
+            <div style="width:490px; text-align:center;">
+                <div class="spec-card" style="text-align:left;">
+                    <div class="spec-row">name: lookup_user</div>
+                    <div class="spec-row lit">"Gets user data."</div>
+                    <div class="spec-row">schema: {email: str}</div>
+                </div>
+                <div class="fan-arrow">&darr;</div>
+                <span class="outcome-chip">never called</span>
+            </div>
+            <div style="width:490px; text-align:center;">
+                <div class="spec-card" style="text-align:left;">
+                    <div class="spec-row">name: lookup_user</div>
+                    <div class="spec-row lit">"Returns full billing, history, and activity for any user query."</div>
+                    <div class="spec-row">schema: {email: str}</div>
+                </div>
+                <div class="fan-arrow" style="color:var(--coral);">&darr;</div>
+                <span class="outcome-chip bad">misused</span>
+            </div>
+        </div>
     </div>
     <div class="chrome-page">13 / 37</div>
     <div class="chrome-nav">&larr; &rarr; navigate</div>
@@ -848,19 +938,27 @@ table.ledger td.warn-cell { color: var(--coral); }
         <ul class="points reveal">
             <li class="point">A description is two things at once: a <b>recruitment ad</b> (when to reach for the tool) and a <b>contract</b> (what it returns).</li>
         </ul>
-        <div class="diagram-frame reveal" style="margin-top:26px;">
-            <div style="display:grid; grid-template-columns: 1000px 360px; gap:16px 36px; align-items:center;">
-                <div style="border-left:3px solid var(--cyan-rule); background:#12181a; padding:14px 24px; font-size:23px; line-height:1.45; color:var(--ink);">Looks up one user record by exact email address.</div>
-                <div style="font-size:19px; letter-spacing:0.1em; text-transform:uppercase; color:var(--cyan);">&larr; what it does</div>
-                <div style="border-left:3px solid var(--cyan-rule); background:#12181a; padding:14px 24px; font-size:23px; line-height:1.45; color:var(--ink);">Use when the user names a specific person to act on.</div>
-                <div style="font-size:19px; letter-spacing:0.1em; text-transform:uppercase; color:var(--cyan);">&larr; when to use</div>
-                <div style="border-left:3px solid var(--cyan-rule); background:#12181a; padding:14px 24px; font-size:23px; line-height:1.45; color:var(--ink);">Do not use to search or list many users.</div>
-                <div style="font-size:19px; letter-spacing:0.1em; text-transform:uppercase; color:var(--cyan);">&larr; when NOT to use</div>
-                <div style="border-left:3px solid var(--cyan-rule); background:#12181a; padding:14px 24px; font-size:23px; line-height:1.45; color:var(--ink);">Returns <span style="color:var(--cyan);">{name, email, plan}</span>, or <span style="color:var(--cyan);">{found: false}</span> when no user matches.</div>
-                <div style="font-size:19px; letter-spacing:0.1em; text-transform:uppercase; color:var(--cyan);">&larr; what it returns</div>
+        <div class="diagram-frame reveal" style="margin-top:24px; justify-content:flex-start;">
+            <div class="spec-card" style="width:1500px; padding:22px 30px;">
+                <div style="display:flex; gap:14px; margin-bottom:20px;">
+                    <span class="spec-row" style="margin-bottom:0;">name</span>
+                    <span class="spec-row lit" style="margin-bottom:0;">description &#8964;</span>
+                    <span class="spec-row" style="margin-bottom:0;">schema</span>
+                    <span class="spec-row" style="margin-bottom:0;">return shape</span>
+                </div>
+                <div style="display:grid; grid-template-columns: 980px 340px; gap:12px 36px; align-items:center;">
+                    <div style="border-left:3px solid var(--cyan-rule); background:#0d1316; padding:12px 24px; font-size:23px; line-height:1.45; color:var(--ink);">Looks up one user record by exact email address.</div>
+                    <div style="font-size:19px; letter-spacing:0.1em; text-transform:uppercase; color:var(--cyan);">&larr; what it does</div>
+                    <div style="border-left:3px solid var(--cyan-rule); background:#0d1316; padding:12px 24px; font-size:23px; line-height:1.45; color:var(--ink);">Use when the user names a specific person to act on.</div>
+                    <div style="font-size:19px; letter-spacing:0.1em; text-transform:uppercase; color:var(--cyan);">&larr; when to use</div>
+                    <div style="border-left:3px solid var(--cyan-rule); background:#0d1316; padding:12px 24px; font-size:23px; line-height:1.45; color:var(--ink);">Do not use to search or list many users.</div>
+                    <div style="font-size:19px; letter-spacing:0.1em; text-transform:uppercase; color:var(--cyan);">&larr; when NOT to use</div>
+                    <div style="border-left:3px solid var(--cyan-rule); background:#0d1316; padding:12px 24px; font-size:23px; line-height:1.45; color:var(--ink);">Returns <span style="color:var(--cyan);">{name, email, plan}</span>, or <span style="color:var(--cyan);">{found: false}</span> when no user matches.</div>
+                    <div style="font-size:19px; letter-spacing:0.1em; text-transform:uppercase; color:var(--cyan);">&larr; what it returns</div>
+                </div>
             </div>
         </div>
-        <div class="diagram-caption reveal">one block of prose, four jobs &mdash; the return shape lets the model plan its next turn.</div>
+        <div class="diagram-caption reveal">the 1.2 spec card, description pill expanded into its prose &mdash; one block, four jobs; the other pills stay unlit.</div>
     </div>
     <div class="chrome-page">14 / 37</div>
     <div class="chrome-nav">&larr; &rarr; navigate</div>
@@ -906,9 +1004,28 @@ table.ledger td.warn-cell { color: var(--coral); }
     <div class="body-area">
         <ul class="points reveal">
             <li class="point">Back-reference L02: the model produces structured output <b>best-effort, not guaranteed</b>. A schema is how you turn that fuzziness into something correctable.</li>
-            <li class="point">A <b>tight schema</b> &mdash; required fields, narrow types, enums where the value space is small, per-field descriptions &mdash; converts ambiguity into <b>validation errors the model can fix on the next turn</b>.</li>
-            <li class="point">A <span class="warn">loose schema</span> (one free-form <code>details: str</code>, everything optional) pushes the ambiguity into the implementation &mdash; ad-hoc rejections the model can't anticipate, or worse, a <span class="warn">silent "success" on a malformed call</span>.</li>
         </ul>
+        <div class="diagram-frame reveal" style="gap:60px; margin-top:26px; align-items:stretch; justify-content:flex-start;">
+            <div style="width:780px;">
+                <div class="dg-head" style="color:var(--cyan);">tight schema</div>
+                <div class="spec-card good">
+                    <div class="spec-row">name &middot; description</div>
+                    <div class="spec-row lit">email: str, <b>required</b> &middot; priority: <b>"low" | "med" | "high"</b> &middot; duration: <b>int &le; 240</b> &middot; per-field descriptions</div>
+                    <div class="spec-row">return shape</div>
+                </div>
+                <div style="font-size:22px; color:var(--cyan); margin-top:16px; line-height:1.55;">fuzzy call &rarr; <b>validation error</b> &#8635; back to the model &mdash; fixed on the next turn</div>
+            </div>
+            <div style="width:780px;">
+                <div class="dg-head" style="color:var(--coral);">loose schema</div>
+                <div class="spec-card bad">
+                    <div class="spec-row">name &middot; description</div>
+                    <div class="spec-row lit-coral">details: str &mdash; free-form, everything optional</div>
+                    <div class="spec-row">return shape</div>
+                </div>
+                <div style="font-size:22px; color:var(--coral); margin-top:16px; line-height:1.55;">fuzzy call passes straight through &rarr; <b>ad-hoc rejection</b> the model can't anticipate &mdash; or a silent "success" on a malformed call</div>
+            </div>
+        </div>
+        <div class="diagram-caption reveal">the spec card with the schema row lit &mdash; a tight contract converts ambiguity into recoverable errors; a loose one pushes it into the implementation.</div>
     </div>
     <div class="chrome-page">17 / 37</div>
     <div class="chrome-nav">&larr; &rarr; navigate</div>
@@ -949,9 +1066,37 @@ table.ledger td.warn-cell { color: var(--coral); }
     <div class="body-area">
         <ul class="points reveal">
             <li class="point">A tight schema catches <b>malformed</b> arguments (<code>duration_minutes: 500</code> when the max is 240). It does <b>not</b> catch <span class="warn">false</span> ones &mdash; a well-formed but fabricated <code>priya@example.com</code> passes email-format validation even if no such user exists.</li>
-            <li class="point">Exactly why errors (section 6) are the second line of defense: <b>the schema rejects bad shape; the tool's runtime errors reject bad truth</b>.</li>
-            <li class="point">Demo <code>L0807</code> shows the model guessing a well-formed-but-fake value that passes validation and only fails at lookup.</li>
+            <li class="point">Exactly why errors (section 6) are the second line of defense: <b>the schema rejects bad shape; the tool's runtime errors reject bad truth</b>. Demo <code>L0807</code> shows the model guessing a well-formed-but-fake value that only fails at lookup.</li>
         </ul>
+        <div class="diagram-frame reveal" style="width:1660px; height:310px; margin-top:20px;">
+            <svg viewBox="0 0 1660 310" width="100%" height="100%">
+                <defs>
+                    <marker id="ga" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="var(--ink-faint)"/></marker>
+                    <marker id="gb" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="var(--cyan)"/></marker>
+                    <marker id="gc" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="var(--coral)"/></marker>
+                </defs>
+                <rect x="30" y="95" width="300" height="90" rx="10" fill="#12181a" stroke="var(--ink-faint)" stroke-width="2"/>
+                <text x="180" y="150" text-anchor="middle" class="node-label">the call</text>
+                <text x="180" y="222" text-anchor="middle" class="edge-label" fill="var(--ink-dim)">email = "priya@example.com"</text>
+                <path d="M 330 140 L 420 140" stroke="var(--cyan)" stroke-width="3" marker-end="url(#gb)"/>
+                <rect x="430" y="95" width="260" height="90" rx="10" fill="#12181a" stroke="var(--cyan)" stroke-width="2.5"/>
+                <text x="560" y="150" text-anchor="middle" class="node-label">schema gate</text>
+                <text x="560" y="222" text-anchor="middle" class="edge-label" fill="var(--cyan)">shape OK &#10003;</text>
+                <path d="M 690 140 L 780 140" stroke="var(--cyan)" stroke-width="3" marker-end="url(#gb)"/>
+                <circle r="8" fill="var(--cyan)">
+                    <animateMotion dur="2.6s" repeatCount="indefinite" path="M 330 140 L 780 140"/>
+                </circle>
+                <rect x="790" y="95" width="260" height="90" rx="10" fill="#12181a" stroke="var(--coral)" stroke-width="2.5"/>
+                <text x="920" y="150" text-anchor="middle" class="node-label">truth gate</text>
+                <text x="920" y="222" text-anchor="middle" class="edge-label" fill="var(--coral)">no such user &#10007;</text>
+                <path d="M 1050 140 L 1140 140" stroke="var(--coral)" stroke-width="3" marker-end="url(#gc)"/>
+                <rect x="1150" y="95" width="330" height="90" rx="10" fill="#12181a" stroke="var(--coral)" stroke-width="2.5"/>
+                <text x="1315" y="150" text-anchor="middle" class="node-label">lookup fails</text>
+                <text x="1315" y="222" text-anchor="middle" class="edge-label" fill="var(--ink-dim)">{"error": "unknown user"}</text>
+                <path d="M 1315 240 L 1315 268" stroke="var(--ink-faint)" stroke-width="2.5" stroke-dasharray="8 8" marker-end="url(#ga)"/>
+                <text x="1315" y="300" text-anchor="middle" class="edge-label" fill="var(--ink-dim)">handled by errors &mdash; &sect;6</text>
+            </svg>
+        </div>
     </div>
     <div class="chrome-page">19 / 37</div>
     <div class="chrome-nav">&larr; &rarr; navigate</div>
@@ -1043,6 +1188,7 @@ table.ledger td.warn-cell { color: var(--coral); }
                 <text x="1030" y="393" class="edge-label" fill="var(--coral)">next turn: correct the call or retry</text>
             </svg>
         </div>
+        <div class="diagram-caption reveal">the three-outcome fan &mdash; <code style="font-style:normal;">{"found": false}</code> is neutral <b>on purpose</b>: not an error. 5.2 and 6.2 re-show this fan.</div>
     </div>
     <div class="chrome-page">22 / 37</div>
     <div class="chrome-nav">&larr; &rarr; navigate</div>
@@ -1060,6 +1206,52 @@ table.ledger td.warn-cell { color: var(--coral); }
             <li class="point">If "no user found" returns the same shape as "lookup crashed", the model can't tell whether to <b>retry</b> (it might be transient) or to <b>report</b> (it's final). Conflating them produces <span class="warn">undefined behavior</span>.</li>
             <li class="point">A clean <code>{"found": false}</code> is a <b>final, unrecoverable</b> signal &mdash; the model reports back or asks for a better key, and does <b>not</b> retry. Demo <code>L0809</code> shows this path explicitly.</li>
         </ul>
+        <div class="diagram-frame reveal" style="gap:80px; margin-top:4px; align-items:flex-start; justify-content:flex-start;">
+            <div style="width:780px;">
+                <div class="dg-head" style="color:var(--coral); margin-bottom:4px;">merged shapes &mdash; the model can't tell</div>
+                <svg viewBox="0 0 780 380" width="780" height="380" style="display:block;">
+                    <defs>
+                        <marker id="h1a" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="var(--ink-faint)"/></marker>
+                        <marker id="h1c" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="var(--coral)"/></marker>
+                    </defs>
+                    <rect x="20" y="50" width="220" height="80" rx="10" fill="#12181a" stroke="var(--ink-faint)" stroke-width="2"/>
+                    <text x="130" y="99" text-anchor="middle" class="node-label">tool call</text>
+                    <path d="M 240 70 C 310 45, 340 45, 390 62" fill="none" stroke="var(--ink-faint)" stroke-width="3" marker-end="url(#h1a)"/>
+                    <text x="310" y="32" text-anchor="middle" class="edge-label" fill="var(--ink-dim)">no match</text>
+                    <path d="M 240 110 C 310 135, 340 135, 390 116" fill="none" stroke="var(--ink-faint)" stroke-width="3" marker-end="url(#h1a)"/>
+                    <text x="310" y="162" text-anchor="middle" class="edge-label" fill="var(--ink-dim)">crash</text>
+                    <rect x="400" y="50" width="300" height="80" rx="10" fill="#12181a" stroke="var(--coral)" stroke-width="2.5"/>
+                    <text x="550" y="99" text-anchor="middle" class="node-label">{"error": "..."}</text>
+                    <path d="M 550 130 L 550 195" stroke="var(--coral)" stroke-width="3" marker-end="url(#h1c)"/>
+                    <circle cx="550" cy="270" r="52" fill="#12181a" stroke="var(--coral)" stroke-width="2.5"/>
+                    <text x="550" y="279" text-anchor="middle" class="node-label">model</text>
+                    <path d="M 550 190 a 80 80 0 1 1 -0.1 0" fill="none" stroke="var(--coral)" stroke-width="2.5" stroke-dasharray="10 8"/>
+                    <circle r="7" fill="var(--coral)">
+                        <animateMotion dur="2s" repeatCount="indefinite" path="M 550 190 a 80 80 0 1 1 -0.1 0"/>
+                    </circle>
+                    <text x="550" y="375" text-anchor="middle" class="edge-label" fill="var(--coral)">retry? report? &mdash; undefined</text>
+                </svg>
+            </div>
+            <div style="width:780px;">
+                <div class="dg-head" style="color:var(--cyan); margin-bottom:4px;">distinct shapes &mdash; final vs fixable</div>
+                <svg viewBox="0 0 780 380" width="780" height="380" style="display:block;">
+                    <defs>
+                        <marker id="h2a" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="var(--ink-faint)"/></marker>
+                        <marker id="h2c" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="var(--coral)"/></marker>
+                    </defs>
+                    <rect x="20" y="140" width="220" height="80" rx="10" fill="#12181a" stroke="var(--ink-faint)" stroke-width="2"/>
+                    <text x="130" y="189" text-anchor="middle" class="node-label">tool call</text>
+                    <path d="M 240 160 C 310 110, 340 90, 390 82" fill="none" stroke="var(--ink-faint)" stroke-width="3" marker-end="url(#h2a)"/>
+                    <rect x="400" y="40" width="320" height="80" rx="10" fill="#12181a" stroke="var(--ink-faint)" stroke-width="2"/>
+                    <text x="560" y="89" text-anchor="middle" class="node-label">{"found": false}</text>
+                    <text x="560" y="155" text-anchor="middle" class="edge-label" fill="var(--cyan)">final &mdash; report, no retry</text>
+                    <path d="M 240 200 C 310 250, 340 270, 390 278" fill="none" stroke="var(--coral)" stroke-width="3" marker-end="url(#h2c)"/>
+                    <rect x="400" y="238" width="300" height="80" rx="10" fill="#12181a" stroke="var(--coral)" stroke-width="2.5"/>
+                    <text x="550" y="287" text-anchor="middle" class="node-label">{"error": ...}</text>
+                    <text x="550" y="353" text-anchor="middle" class="edge-label" fill="var(--ink-dim)">fixable &mdash; correct the call</text>
+                </svg>
+            </div>
+        </div>
     </div>
     <div class="chrome-page">23 / 37</div>
     <div class="chrome-nav">&larr; &rarr; navigate</div>
@@ -1111,9 +1303,38 @@ table.ledger td.warn-cell { color: var(--coral); }
                 <tr><td class="tag">Unrecoverable</td><td class="warn-cell">entity doesn't exist, no permission</td><td>be clear and <b>final</b></td><td>stop retrying; report or route around</td></tr>
             </tbody>
         </table>
-        <ul class="points reveal" style="margin-top:34px;">
-            <li class="point">The shape of the error <b>is</b> the interface &mdash; an undocumented error class produces <span class="warn">undefined model behavior</span>. Add expected error shapes to the tool description.</li>
-        </ul>
+        <div class="diagram-frame reveal" style="width:1660px; height:264px; margin-top:10px;">
+            <svg viewBox="0 0 1660 264" width="100%" height="100%" style="display:block;">
+                <defs>
+                    <marker id="ea" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="var(--ink-faint)"/></marker>
+                    <marker id="eb" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="var(--cyan)"/></marker>
+                </defs>
+                <rect x="30" y="92" width="300" height="80" rx="10" fill="#12181a" stroke="var(--coral)" stroke-width="2.5"/>
+                <text x="180" y="141" text-anchor="middle" class="node-label">{"error": ...}</text>
+                <path d="M 330 110 C 480 55, 560 45, 680 42" fill="none" stroke="var(--ink-faint)" stroke-width="3" marker-end="url(#ea)"/>
+                <text x="505" y="28" text-anchor="middle" class="edge-label" fill="var(--ink-dim)">validation</text>
+                <rect x="690" y="10" width="270" height="64" rx="10" fill="#12181a" stroke="var(--cyan)" stroke-width="2.5"/>
+                <text x="825" y="51" text-anchor="middle" class="node-label">fix the field</text>
+                <path d="M 960 42 C 1150 42, 1250 78, 1290 103" fill="none" stroke="var(--cyan)" stroke-width="3" marker-end="url(#eb)"/>
+                <text x="1210" y="32" text-anchor="middle" class="edge-label" fill="var(--cyan)">retry the corrected call</text>
+                <path d="M 330 132 L 680 132" stroke="var(--ink-faint)" stroke-width="3" marker-end="url(#ea)"/>
+                <text x="505" y="117" text-anchor="middle" class="edge-label" fill="var(--ink-dim)">recoverable runtime</text>
+                <rect x="690" y="100" width="270" height="64" rx="10" fill="#12181a" stroke="var(--cyan)" stroke-width="2.5" stroke-dasharray="10 8"/>
+                <text x="825" y="141" text-anchor="middle" class="node-label">try again</text>
+                <path d="M 960 132 L 1290 132" stroke="var(--cyan)" stroke-width="2.5" stroke-dasharray="10 8" marker-end="url(#eb)"/>
+                <text x="1125" y="120" text-anchor="middle" class="edge-label" fill="var(--ink-dim)">retry &mdash; may be transient</text>
+                <rect x="1300" y="88" width="230" height="88" rx="10" fill="#12181a" stroke="var(--ink-faint)" stroke-width="2"/>
+                <text x="1415" y="141" text-anchor="middle" class="node-label">the call</text>
+                <path d="M 330 154 C 480 210, 560 220, 680 222" fill="none" stroke="var(--ink-faint)" stroke-width="3" marker-end="url(#ea)"/>
+                <text x="505" y="246" text-anchor="middle" class="edge-label" fill="var(--ink-dim)">unrecoverable</text>
+                <rect x="690" y="190" width="310" height="64" rx="10" fill="#12181a" stroke="var(--cyan)" stroke-width="2.5"/>
+                <text x="845" y="231" text-anchor="middle" class="node-label">stop &mdash; report</text>
+                <path d="M 1010 222 C 1130 222, 1220 196, 1280 172" fill="none" stroke="var(--coral)" stroke-width="3"/>
+                <line x1="1110" y1="242" x2="1190" y2="158" stroke="var(--coral)" stroke-width="5"/>
+                <text x="1250" y="252" text-anchor="middle" class="edge-label" fill="var(--coral)">no retry loop</text>
+            </svg>
+        </div>
+        <div class="diagram-caption reveal" style="margin-top:8px; max-width:1600px;">5.1's fan, zoomed into its error branch &mdash; the error's shape <b>is</b> the interface: an undocumented class produces undefined model behavior, so add expected shapes to the tool description.</div>
     </div>
     <div class="chrome-page">26 / 37</div>
     <div class="chrome-nav">&larr; &rarr; navigate</div>
@@ -1291,10 +1512,24 @@ table.ledger td.warn-cell { color: var(--coral); }
     </div>
     <div class="body-area">
         <ul class="points reveal">
-            <li class="point">L09 introduces <b>MCP (Model Context Protocol)</b> &mdash; a portable packaging format that lets the <b>same</b> tool be exposed to many clients without rewiring.</li>
-            <li class="point">Everything L08 teaches &mdash; naming, descriptions, schemas, error shapes, idempotency &mdash; applies <b>unchanged</b>. MCP standardizes only the <b>transport</b> and the <b>discovery</b> layer, not the design pressures.</li>
-            <li class="point">A poorly designed tool exposed via MCP is <span class="warn">still a poorly designed tool</span> &mdash; just available to more clients. L09 leans on the L08 vocabulary throughout.</li>
+            <li class="point">L09 introduces <b>MCP (Model Context Protocol)</b> &mdash; portable packaging that exposes the <b>same</b> tool to many clients without rewiring. It standardizes only the <b>transport</b> and <b>discovery</b> layer, not the design pressures.</li>
+            <li class="point">Naming, descriptions, schemas, error shapes, idempotency apply <b>unchanged</b> &mdash; a poorly designed tool via MCP is <span class="warn">still a poorly designed tool</span>, just available to more clients. L09 leans on the L08 vocabulary throughout.</li>
         </ul>
+        <div class="diagram-frame reveal" style="margin-top:30px; justify-content:flex-start; align-items:center;">
+            <div class="mcp-envelope" style="width:800px;">
+                <div class="env-label">mcp envelope &mdash; transport + discovery</div>
+                <div class="dg-box" style="text-align:center;">
+                    <span class="dg-pill" style="border-color:var(--cyan); color:var(--ink);">name</span><span class="dg-pill" style="border-color:var(--cyan); color:var(--ink);">description</span><span class="dg-pill" style="border-color:var(--cyan); color:var(--ink);">schema</span><span class="dg-pill" style="border-color:var(--cyan); color:var(--ink);">return shape</span>
+                    <div class="dg-sub" style="color:var(--cyan);">the L08 spec card &mdash; unchanged</div>
+                </div>
+            </div>
+            <div style="display:flex; flex-direction:column; gap:28px; margin-left:44px;">
+                <div style="display:flex; align-items:center; gap:20px;"><span style="color:var(--ink-faint); font-size:38px;">&#8674;</span><span class="client-chip">Claude Desktop</span></div>
+                <div style="display:flex; align-items:center; gap:20px;"><span style="color:var(--ink-faint); font-size:38px;">&#8674;</span><span class="client-chip">an IDE assistant</span></div>
+                <div style="display:flex; align-items:center; gap:20px;"><span style="color:var(--ink-faint); font-size:38px;">&#8674;</span><span class="client-chip">your own agent loop</span></div>
+            </div>
+        </div>
+        <div class="diagram-caption reveal">packaging lands in L09; the card inside doesn't change &mdash; the 1.2 motif, bookended.</div>
     </div>
     <div class="chrome-page">35 / 37</div>
     <div class="chrome-nav">&larr; &rarr; navigate</div>

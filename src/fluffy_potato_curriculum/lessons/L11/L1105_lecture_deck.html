@@ -576,6 +576,8 @@ table.ledger td.warn-cell { color: var(--coral); }
 .ladder .rung.here { border: 2px solid var(--cyan); background: rgba(82,232,200,0.10); }
 .ladder .rung.here .lnum { color: var(--cyan); }
 .ladder .rung.here .lsub { color: var(--ink-dim); }
+/* 3.5 gotcha table: tighter row padding so the motif triptych fits above it */
+table.ledger.gotcha td { padding-top: 6px; padding-bottom: 6px; }
 </style>
 </head>
 <body>
@@ -687,13 +689,13 @@ table.ledger td.warn-cell { color: var(--coral); }
     </div>
     <div class="body-area">
         <div class="duo reveal">
-            <div class="panel">
+            <div class="panel" style="border-color:var(--cyan);">
                 <div class="panel-head">run A &mdash; create_agent(model, tools, system_prompt=&hellip;)</div>
                 <div class="chip" style="font-size:21px;">"answer in one sentence"</div>
                 <div style="font-size:18px; color:var(--ink-faint); margin:16px 0 10px;">same tools &middot; same loop &middot; same task</div>
                 <div style="border:1px solid var(--cyan-rule); border-radius:8px; padding:14px 18px; font-size:20px; color:var(--ink-dim);">The answer, in exactly one sentence.</div>
             </div>
-            <div class="panel">
+            <div class="panel" style="border-color:var(--cyan);">
                 <div class="panel-head">run B &mdash; create_agent(model, tools, system_prompt=&hellip;)</div>
                 <div class="chip" style="font-size:21px;">"show your reasoning step by step"</div>
                 <div style="font-size:18px; color:var(--ink-faint); margin:16px 0 10px;">same tools &middot; same loop &middot; same task</div>
@@ -790,10 +792,48 @@ table.ledger td.warn-cell { color: var(--coral); }
     </div>
     <div class="body-area">
         <ul class="points reveal">
-            <li class="point">In L10 you set <code>recursion_limit</code> on <code>invoke</code> yourself; here you don't have to &mdash; the cap still exists as the framework's <b>recursion / step limit</b> (LangGraph's default is <b>25 steps</b>; set <code>recursion_limit</code> in the run config to change it).</li>
+            <li class="point">In L10 you set <code>recursion_limit</code> on <code>invoke</code> yourself; here it's the framework's <b>recursion / step limit</b> by default &mdash; <b>25 steps</b> (set <code>recursion_limit</code> in the run config to change it).</li>
             <li class="point">A runaway agent still trips it &mdash; and tripping it is <span class="warn">still a signal worth investigating</span>, not noise to raise the limit past.</li>
         </ul>
-        <div class="callout reveal"><p>The L10 lesson didn't go away &mdash; it moved inside the framework.</p></div>
+        <div class="diagram-frame reveal" style="margin-top:2px;">
+            <svg viewBox="0 0 1660 372" width="1660" height="372">
+                <defs>
+                    <marker id="cap-y" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="var(--cyan)"/></marker>
+                    <marker id="cap-r" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="var(--coral)"/></marker>
+                </defs>
+                <!-- 2.1's bracket, re-shown smaller: everything inside is the framework's -->
+                <rect x="430" y="10" width="1010" height="308" rx="14" fill="none" stroke="var(--ink-faint)" stroke-width="2.5" stroke-dasharray="12 9"/>
+                <text x="935" y="46" text-anchor="middle" class="edge-label" fill="var(--ink-dim)" font-weight="600">managed by create_agent</text>
+                <!-- the three plugs, echo of 2.1 -->
+                <rect x="60" y="70" width="230" height="48" rx="8" fill="rgba(82,232,200,0.08)" stroke="var(--cyan)" stroke-width="2"/>
+                <text x="175" y="101" text-anchor="middle" class="edge-label" fill="var(--cyan)" font-weight="600">model</text>
+                <rect x="60" y="150" width="230" height="48" rx="8" fill="rgba(82,232,200,0.08)" stroke="var(--cyan)" stroke-width="2"/>
+                <text x="175" y="181" text-anchor="middle" class="edge-label" fill="var(--cyan)" font-weight="600">tools</text>
+                <rect x="60" y="230" width="230" height="48" rx="8" fill="rgba(82,232,200,0.08)" stroke="var(--cyan)" stroke-width="2"/>
+                <text x="175" y="261" text-anchor="middle" class="edge-label" fill="var(--cyan)" font-weight="600">system prompt</text>
+                <path d="M 290 94 L 422 94" stroke="var(--cyan)" stroke-width="2.5" marker-end="url(#cap-y)"/>
+                <path d="M 290 174 L 422 174" stroke="var(--cyan)" stroke-width="2.5" marker-end="url(#cap-y)"/>
+                <path d="M 290 254 L 422 254" stroke="var(--cyan)" stroke-width="2.5" marker-end="url(#cap-y)"/>
+                <!-- the loop: cyan = the normal path -->
+                <circle cx="700" cy="175" r="60" fill="#12181a" stroke="var(--ink-faint)" stroke-width="2.5"/>
+                <text x="700" y="184" text-anchor="middle" class="node-label" fill="var(--ink-dim)">agent</text>
+                <circle cx="1150" cy="175" r="60" fill="#12181a" stroke="var(--ink-faint)" stroke-width="2.5"/>
+                <text x="1150" y="184" text-anchor="middle" class="node-label" fill="var(--ink-dim)">tools</text>
+                <path d="M 754 148 C 870 82, 1000 82, 1096 148" fill="none" stroke="var(--cyan)" stroke-width="3" marker-end="url(#cap-y)"/>
+                <path d="M 1096 202 C 1000 268, 870 268, 754 202" fill="none" stroke="var(--cyan)" stroke-width="3" marker-end="url(#cap-y)"/>
+                <circle r="7" fill="var(--cyan)">
+                    <animateMotion dur="3.2s" repeatCount="indefinite" path="M 1096 202 C 1000 268, 870 268, 754 202"/>
+                </circle>
+                <text x="925" y="182" text-anchor="middle" class="edge-label" fill="var(--cyan)">the normal loop</text>
+                <!-- the cap chip: now INSIDE the bracket, the framework's -->
+                <rect x="470" y="252" width="280" height="52" rx="10" fill="#12181a" stroke="var(--ink-faint)" stroke-width="2"/>
+                <text x="610" y="285" text-anchor="middle" class="edge-label" fill="var(--ink-dim)" font-weight="600">recursion_limit = 25</text>
+                <!-- the runaway trip: coral, and only this -->
+                <path d="M 1206 200 C 1390 260, 1300 330, 1050 330 C 920 330, 830 316, 764 292" fill="none" stroke="var(--coral)" stroke-width="3" stroke-dasharray="14 8" marker-end="url(#cap-r)"/>
+                <text x="1080" y="358" text-anchor="middle" class="edge-label" fill="var(--coral)">runaway &mdash; step 26 trips the cap</text>
+            </svg>
+        </div>
+        <div class="diagram-caption reveal" style="max-width:1660px;">Second beat of the 2.1 bracket &mdash; the cap chip changed sides: <b style="color:var(--ink); font-style:normal;">the L10 lesson moved inside the framework.</b></div>
     </div>
     <div class="chrome-page">07 / 14</div>
     <div class="chrome-nav">&larr; &rarr; navigate</div>
@@ -841,26 +881,34 @@ table.ledger td.warn-cell { color: var(--coral); }
                     <animateMotion dur="3s" repeatCount="indefinite" path="M 884 274 C 880 306, 830 306, 778 272"/>
                 </circle>
                 <text x="830" y="335" text-anchor="middle" class="edge-label" fill="var(--cyan)">one loop: tool or finish</text>
-                <!-- four coral break-out arrows, one per signal -->
+                <!-- four break-out arrows, one per signal: coral = the single-loop shape breaking; the destinations are legitimate L15 territory -->
                 <path d="M 668 195 C 590 150, 540 120, 476 92" fill="none" stroke="var(--coral)" stroke-width="3.5" marker-end="url(#br-c)"/>
-                <rect x="40" y="30" width="430" height="96" rx="10" fill="#12181a" stroke="var(--coral)" stroke-width="2.5"/>
-                <text x="255" y="72" text-anchor="middle" class="node-label">second model</text>
+                <rect x="40" y="30" width="430" height="96" rx="10" fill="transparent" stroke="var(--ink-faint)" stroke-width="2.5" stroke-dasharray="10 8"/>
+                <text x="255" y="72" text-anchor="middle" class="node-label" fill="var(--ink-dim)">second model</text>
                 <text x="255" y="106" text-anchor="middle" class="edge-label" fill="var(--ink-dim)">a cheap router &middot; a costly planner</text>
+                <rect x="374" y="13" width="110" height="34" rx="17" fill="#0a0e13" stroke="var(--ink-faint)" stroke-width="2" stroke-dasharray="6 6"/>
+                <text x="429" y="36" text-anchor="middle" class="edge-label" fill="var(--ink-dim)">&rarr; L15</text>
                 <path d="M 992 195 C 1070 150, 1120 120, 1184 92" fill="none" stroke="var(--coral)" stroke-width="3.5" marker-end="url(#br-c)"/>
-                <rect x="1190" y="30" width="430" height="96" rx="10" fill="#12181a" stroke="var(--coral)" stroke-width="2.5"/>
-                <text x="1405" y="72" text-anchor="middle" class="node-label">non-tool branch</text>
+                <rect x="1190" y="30" width="430" height="96" rx="10" fill="transparent" stroke="var(--ink-faint)" stroke-width="2.5" stroke-dasharray="10 8"/>
+                <text x="1405" y="72" text-anchor="middle" class="node-label" fill="var(--ink-dim)">non-tool branch</text>
                 <text x="1405" y="106" text-anchor="middle" class="edge-label" fill="var(--ink-dim)">not just "tool or finish"</text>
+                <rect x="1524" y="13" width="110" height="34" rx="17" fill="#0a0e13" stroke="var(--ink-faint)" stroke-width="2" stroke-dasharray="6 6"/>
+                <text x="1579" y="36" text-anchor="middle" class="edge-label" fill="var(--ink-dim)">&rarr; L15</text>
                 <path d="M 668 285 C 590 330, 540 360, 476 388" fill="none" stroke="var(--coral)" stroke-width="3.5" marker-end="url(#br-c)"/>
-                <rect x="40" y="354" width="430" height="96" rx="10" fill="#12181a" stroke="var(--coral)" stroke-width="2.5"/>
-                <text x="255" y="396" text-anchor="middle" class="node-label">custom node</text>
+                <rect x="40" y="354" width="430" height="96" rx="10" fill="transparent" stroke="var(--ink-faint)" stroke-width="2.5" stroke-dasharray="10 8"/>
+                <text x="255" y="396" text-anchor="middle" class="node-label" fill="var(--ink-dim)">custom node</text>
                 <text x="255" y="430" text-anchor="middle" class="edge-label" fill="var(--ink-dim)">validate &middot; summarize &middot; sub-agent</text>
+                <rect x="374" y="337" width="110" height="34" rx="17" fill="#0a0e13" stroke="var(--ink-faint)" stroke-width="2" stroke-dasharray="6 6"/>
+                <text x="429" y="360" text-anchor="middle" class="edge-label" fill="var(--ink-dim)">&rarr; L15</text>
                 <path d="M 992 285 C 1070 330, 1120 360, 1184 388" fill="none" stroke="var(--coral)" stroke-width="3.5" marker-end="url(#br-c)"/>
-                <rect x="1190" y="354" width="430" height="96" rx="10" fill="#12181a" stroke="var(--coral)" stroke-width="2.5"/>
-                <text x="1405" y="396" text-anchor="middle" class="node-label">state beyond messages</text>
+                <rect x="1190" y="354" width="430" height="96" rx="10" fill="transparent" stroke="var(--ink-faint)" stroke-width="2.5" stroke-dasharray="10 8"/>
+                <text x="1405" y="396" text-anchor="middle" class="node-label" fill="var(--ink-dim)">state beyond messages</text>
                 <text x="1405" y="430" text-anchor="middle" class="edge-label" fill="var(--ink-dim)">a budget &middot; a scratchpad &middot; a plan</text>
+                <rect x="1524" y="337" width="110" height="34" rx="17" fill="#0a0e13" stroke="var(--ink-faint)" stroke-width="2" stroke-dasharray="6 6"/>
+                <text x="1579" y="360" text-anchor="middle" class="edge-label" fill="var(--ink-dim)">&rarr; L15</text>
             </svg>
         </div>
-        <div class="diagram-caption reveal" style="max-width:1660px;">Any <b style="color:var(--coral); font-style:normal;">one arrow</b> means you've outgrown the one-liner &mdash; you have left the shallow single-loop shape.</div>
+        <div class="diagram-caption reveal" style="max-width:1660px;">Any <b style="color:var(--coral); font-style:normal;">one arrow</b> means you've outgrown the one-liner &mdash; coral is the single-loop shape breaking. The destinations are legitimate <b style="color:var(--ink); font-style:normal;">L15 territory</b>, not failures.</div>
     </div>
     <div class="chrome-page">09 / 14</div>
     <div class="chrome-nav">&larr; &rarr; navigate</div>
@@ -922,21 +970,41 @@ table.ledger td.warn-cell { color: var(--coral); }
         <h2 class="headline">Knowing where the ceiling is <span class="it">is the skill</span></h2>
     </div>
     <div class="body-area">
-        <div class="duo reveal" style="align-items:stretch;">
-            <div class="panel" style="border-color:var(--coral);">
-                <div class="panel-head" style="color:var(--coral); font-weight:600;">over-engineering</div>
-                <div style="font-size:23px; line-height:1.5; color:var(--ink-dim);">Reaching for a <b style="color:var(--ink);">hand-built graph on a single loop</b> &mdash; the L10-objective-4 mistake: a framework where 50 lines would do.</div>
+        <!-- 3.2's ceiling motif, re-shown with the two coral mis-placements -->
+        <div class="reveal" style="max-width:1660px;">
+            <!-- above the ceiling -->
+            <div style="display:flex; gap:28px; align-items:stretch;">
+                <div style="flex:1; border:2px dashed var(--ink-faint); border-radius:10px; background:transparent; padding:16px 24px;">
+                    <div style="font-size:19px; letter-spacing:0.08em; text-transform:uppercase; color:var(--ink-dim);">up here: explicit <b style="color:var(--ink);">StateGraph</b> &mdash; L15</div>
+                    <div style="font-size:21px; color:var(--ink-faint); margin-top:6px;">branching flows belong at this altitude</div>
+                </div>
+                <div style="flex:1.35; border:2px solid var(--coral); border-radius:10px; background:#12181a; padding:16px 24px; transform:translateY(12px);">
+                    <div style="font-size:19px; letter-spacing:0.08em; text-transform:uppercase; color:var(--coral); font-weight:600;">under-engineering &mdash; a one-liner clinging above the line</div>
+                    <div style="font-size:21px; color:var(--ink-dim); margin-top:6px;">refusing to leave <code style="color:var(--cyan); background:rgba(82,232,200,0.08); padding:1px 7px; border-radius:3px;">create_agent</code> when the flow genuinely branches</div>
+                </div>
             </div>
-            <div style="display:flex; align-items:center;"><span class="chip" style="white-space:nowrap;">the line: is it still one loop?</span></div>
-            <div class="panel" style="border-color:var(--coral);">
-                <div class="panel-head" style="color:var(--coral); font-weight:600;">under-engineering</div>
-                <div style="font-size:23px; line-height:1.5; color:var(--ink-dim);">Refusing to <b style="color:var(--ink);">leave the one-liner</b> when the flow genuinely branches.</div>
+            <!-- the ceiling line: cyan = the line itself -->
+            <div style="display:flex; align-items:center; gap:24px; margin:24px 0;">
+                <div style="flex:1; border-top:3px dashed var(--cyan);"></div>
+                <div style="font-size:20px; color:var(--cyan); letter-spacing:0.08em; text-transform:uppercase;">the ceiling &mdash; is it still one loop?</div>
+                <div style="flex:1; border-top:3px dashed var(--cyan);"></div>
+            </div>
+            <!-- below the ceiling -->
+            <div style="display:flex; gap:28px; align-items:stretch;">
+                <div style="flex:1; border:2px solid var(--cyan); border-radius:10px; background:#12181a; padding:16px 24px;">
+                    <div style="font-size:19px; letter-spacing:0.08em; text-transform:uppercase; color:var(--cyan);">down here: <b>create_agent</b> &mdash; the right altitude for one loop</div>
+                    <div style="font-size:21px; color:var(--ink-dim); margin-top:6px;">model &middot; tools &middot; system prompt &mdash; nothing more needed</div>
+                </div>
+                <div style="flex:1.35; border:2px solid var(--coral); border-radius:10px; background:#12181a; padding:16px 24px; transform:translateY(-12px);">
+                    <div style="font-size:19px; letter-spacing:0.08em; text-transform:uppercase; color:var(--coral); font-weight:600;">over-engineering &mdash; a hand-wired StateGraph crammed below the line</div>
+                    <div style="font-size:21px; color:var(--ink-dim); margin-top:6px;">the L10-objective-4 mistake: a framework where 50 lines would do</div>
+                </div>
             </div>
         </div>
-        <ul class="points reveal" style="margin-top:34px; max-width:1660px;">
-            <li class="point">Two opposite mistakes <b>bracket the line</b> &mdash; neither reflex (always hand-build, never leave the one-liner) is right.</li>
+        <ul class="points reveal" style="margin-top:26px; max-width:1660px;">
+            <li class="point">Two opposite mistakes <b>bracket the line</b> &mdash; neither reflex (always hand-build, never leave the one-liner) is right. Both mis-placements are <span class="warn">genuine failures</span>; the line and the right altitude stay cyan.</li>
         </ul>
-        <div class="callout reveal" style="max-width:1400px;"><p>L11 teaches the shallow side of that line: use <span style="color:var(--cyan);">create_agent</span> until the control flow stops being a single loop. L15 teaches the other side.</p></div>
+        <div class="callout reveal" style="max-width:1500px; margin-top:20px; padding:20px 32px;"><p>L11 teaches the shallow side of that line: use <span style="color:var(--cyan);">create_agent</span> until the control flow stops being a single loop. L15 teaches the other side.</p></div>
     </div>
     <div class="chrome-page">11 / 14</div>
     <div class="chrome-nav">&larr; &rarr; navigate</div>
@@ -1000,7 +1068,51 @@ table.ledger td.warn-cell { color: var(--coral); }
         <ul class="points reveal">
             <li class="point">All three are the same trap: <b>the convenience hides the machinery, but the machinery is still there.</b> Having built the L10 loop by hand, read <code>create_agent</code> as <i>that, packaged</i>.</li>
         </ul>
-        <table class="ledger reveal" style="margin-top:18px;">
+        <!-- the lesson's three motifs in miniature: loop-with-cap / bracket / ceiling -->
+        <div class="reveal" style="display:flex; gap:30px; margin-top:2px; max-width:1660px;">
+            <div style="flex:1; border:1px solid var(--cyan-rule); border-radius:10px; padding:8px 18px; display:flex; align-items:center; gap:18px;">
+                <svg viewBox="0 0 170 60" width="170" height="60" style="flex-shrink:0;">
+                    <circle cx="40" cy="18" r="12" fill="#12181a" stroke="var(--ink-faint)" stroke-width="2"/>
+                    <circle cx="110" cy="18" r="12" fill="#12181a" stroke="var(--ink-faint)" stroke-width="2"/>
+                    <path d="M 51 11 C 64 1, 86 1, 99 11" fill="none" stroke="var(--cyan)" stroke-width="2"/>
+                    <path d="M 99 25 C 86 35, 64 35, 51 25" fill="none" stroke="var(--cyan)" stroke-width="2"/>
+                    <rect x="50" y="38" width="50" height="20" rx="5" fill="none" stroke="var(--ink-faint)" stroke-width="2"/>
+                    <text x="75" y="54" text-anchor="middle" class="edge-label" fill="var(--ink-dim)">25</text>
+                    <path d="M 121 26 C 138 38, 130 52, 104 50" fill="none" stroke="var(--coral)" stroke-width="2" stroke-dasharray="8 5"/>
+                </svg>
+                <div>
+                    <div style="font-size:20px; color:var(--coral); font-weight:600;">"it can't run away"</div>
+                    <div class="chip" style="font-size:20px; padding:3px 14px; margin-top:5px;">know the cap: 25</div>
+                </div>
+            </div>
+            <div style="flex:1; border:1px solid var(--cyan-rule); border-radius:10px; padding:8px 18px; display:flex; align-items:center; gap:18px;">
+                <svg viewBox="0 0 170 60" width="170" height="60" style="flex-shrink:0;">
+                    <rect x="56" y="4" width="106" height="52" rx="8" fill="none" stroke="var(--ink-faint)" stroke-width="2" stroke-dasharray="8 6"/>
+                    <circle cx="92" cy="30" r="10" fill="#12181a" stroke="var(--ink-faint)" stroke-width="2"/>
+                    <circle cx="132" cy="30" r="10" fill="#12181a" stroke="var(--ink-faint)" stroke-width="2"/>
+                    <path d="M 100 23 C 107 17, 117 17, 124 23" fill="none" stroke="var(--ink-faint)" stroke-width="1.5"/>
+                    <path d="M 124 37 C 117 43, 107 43, 100 37" fill="none" stroke="var(--ink-faint)" stroke-width="1.5"/>
+                    <rect x="6" y="20" width="34" height="20" rx="5" fill="rgba(82,232,200,0.08)" stroke="var(--cyan)" stroke-width="2"/>
+                    <path d="M 40 30 L 54 30" stroke="var(--cyan)" stroke-width="2"/>
+                </svg>
+                <div>
+                    <div style="font-size:20px; color:var(--coral); font-weight:600;">un-debuggable magic</div>
+                    <div class="chip" style="font-size:20px; padding:3px 14px; margin-top:5px;">read the messages</div>
+                </div>
+            </div>
+            <div style="flex:1; border:1px solid var(--cyan-rule); border-radius:10px; padding:8px 18px; display:flex; align-items:center; gap:18px;">
+                <svg viewBox="0 0 170 60" width="170" height="60" style="flex-shrink:0;">
+                    <rect x="45" y="2" width="80" height="18" rx="5" fill="none" stroke="var(--ink-faint)" stroke-width="2" stroke-dasharray="8 6"/>
+                    <path d="M 10 30 L 160 30" stroke="var(--cyan)" stroke-width="2.5" stroke-dasharray="10 7"/>
+                    <rect x="45" y="40" width="80" height="18" rx="5" fill="rgba(82,232,200,0.08)" stroke="var(--cyan)" stroke-width="2"/>
+                </svg>
+                <div>
+                    <div style="font-size:20px; color:var(--coral); font-weight:600;">wrong altitude</div>
+                    <div class="chip" style="font-size:20px; padding:3px 14px; margin-top:5px;">watch the ceiling</div>
+                </div>
+            </div>
+        </div>
+        <table class="ledger gotcha reveal" style="margin-top:8px;">
             <thead><tr><th style="width:440px;">Gotcha</th><th>Cure</th><th style="width:380px;">Where you saw it</th></tr></thead>
             <tbody>
                 <tr>
@@ -1014,13 +1126,13 @@ table.ledger td.warn-cell { color: var(--coral); }
                     <td>section 2 + slide 1.1 &mdash; every knob has an L10 twin</td>
                 </tr>
                 <tr>
-                    <td><span class="warn" style="color:var(--coral); font-weight:600;">Wrong altitude</span> &mdash; hand-building a graph when the one-liner fits, or clinging to it after the flow branches</td>
+                    <td><span class="warn" style="color:var(--coral); font-weight:600;">Wrong altitude</span> &mdash; hand-building when one line fits, or clinging when the flow branches</td>
                     <td>stay on <code>create_agent</code> until control flow stops being one loop &mdash; then drop to an explicit graph (<b>L15</b>)</td>
                     <td>section 3 &mdash; the ceiling, this whole discussion</td>
                 </tr>
             </tbody>
         </table>
-        <div class="diagram-caption reveal" style="margin-top:22px;">Knowing where the ceiling is <b style="color:var(--ink); font-style:normal;">is</b> the shallow-agent skill.</div>
+        <div class="diagram-caption reveal" style="margin-top:0;">Knowing where the ceiling is <b style="color:var(--ink); font-style:normal;">is</b> the shallow-agent skill.</div>
     </div>
     <div class="chrome-page">13 / 14</div>
     <div class="chrome-nav">&larr; &rarr; navigate</div>
