@@ -1,3 +1,9 @@
+## v0.22.0 (2026-07-06)
+
+### Feat
+
+- **L07**: build lecture HTML deck + add tool-calling diagrams
+
 ## v0.21.0 (2026-07-06)
 
 ### Feat
