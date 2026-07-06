@@ -1,3 +1,9 @@
+## v0.21.0 (2026-07-06)
+
+### Feat
+
+- **L06**: build lecture HTML deck + add reasoning diagrams
+
 ## v0.20.0 (2026-07-06)
 
 ### Feat
