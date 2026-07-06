@@ -15,15 +15,16 @@ recurring drift risk below.
 
 ## Status (19 lecture outlines)
 
-**Progress: 3 built (L0102, L0202, L0305) · 1 needs rescale (L1002) · 15 pending.**
+**Progress: 4 built (L0102, L0202, L0305, L0402) · 1 needs rescale (L1002) · 14 pending.**
 
 | Lesson item | Deck? | Scale | Note |
 | --- | --- | --- | --- |
 | L0102 | ✅ | classroom | done + consistent with outline (13 diagrams built, 36 total) |
 | L0202 | ✅ | classroom | done + consistent with outline (persona slide, 38 total) |
 | L0305 | ✅ | classroom | done (was L0304; L03 renumbered for a new L0302 LangChain/LangGraph primer notebook; outline reshaped prose→slides, 4 diagrams, 12 slides) |
+| L0402 | ✅ | classroom | done (7 diagrams incl. 2 added to §1; 3 ledger tables, 2 code blocks, 26 slides) |
 | L1002 | ⚠️ | **OLD** | **known off** — built pre-classroom-scale; needs the rescale below |
-| L0402, L0502, L0505, L0602, L0702, L0802, L0902, L0905, L1102, L1105, L1206, L1307, L2202, L2205, L2302 | ❌ | — | no deck yet (15 outlines) |
+| L0502, L0505, L0602, L0702, L0802, L0902, L0905, L1102, L1105, L1206, L1307, L2202, L2205, L2302 | ❌ | — | no deck yet (14 outlines) |
 
 ## Open items
 

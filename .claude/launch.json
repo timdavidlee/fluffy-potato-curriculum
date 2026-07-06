@@ -35,6 +35,13 @@
       "runtimeArgs": ["-m", "http.server", "8126", "--directory", "src/fluffy_potato_curriculum/lessons/L03"],
       "port": 8126,
       "autoPort": true
+    },
+    {
+      "name": "static-preview-l04",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": ["-m", "http.server", "8127", "--directory", "src/fluffy_potato_curriculum/lessons/L04"],
+      "port": 8127,
+      "autoPort": true
     }
   ]
 }

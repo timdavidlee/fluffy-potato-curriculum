@@ -1,0 +1,1443 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>L04 — Directed graphs: sequential chaining</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500;1,9..144,600&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+/* ===========================================
+   THEME — Graph Canvas system
+   Fraunces (display serif) + IBM Plex Mono (everything else)
+   =========================================== */
+:root {
+    --stage-bg: #05070a;
+    --slide-bg: #0a0e13;
+    --cyan: #52e8c8;
+    --cyan-dim: #1f6f60;
+    --cyan-faint: rgba(82, 232, 200, 0.16);
+    --cyan-rule: rgba(82, 232, 200, 0.22);
+    --coral: #ff6b57;
+    --coral-dim: #7a3229;
+    --ink: #eef2f0;
+    --ink-dim: #8a9490;
+    --ink-faint: #4c5652;
+
+    --font-display: 'Fraunces', Georgia, serif;
+    --font-body: 'IBM Plex Mono', ui-monospace, monospace;
+
+    --edge-x: 130px;
+    --edge-top: 96px;
+    --edge-bottom: 64px;
+
+    --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+    --duration-normal: 0.7s;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body { font-family: var(--font-body); }
+
+/* ===========================================
+   FIXED 16:9 STAGE: MANDATORY BASE STYLES
+   (viewport-base.css, included in full)
+   =========================================== */
+html, body { width: 100%; height: 100%; margin: 0; overflow: hidden; background: var(--stage-bg, #000); }
+.deck-viewport { position: fixed; inset: 0; overflow: hidden; background: var(--stage-bg, #000); }
+.deck-stage { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; overflow: hidden; transform-origin: 0 0; background: var(--slide-bg, #fff); }
+.slide { position: absolute; inset: 0; width: 1920px; height: 1080px; overflow: hidden; display: block; visibility: hidden; opacity: 0; pointer-events: none; background: var(--slide-bg, #fff); }
+.slide.active, .slide.visible { visibility: visible; opacity: 1; pointer-events: auto; z-index: 1; }
+img, video, canvas, svg { max-width: 100%; max-height: 100%; }
+.deck-controls { position: fixed; left: 50%; bottom: 22px; transform: translateX(-50%); z-index: 1000; }
+@media print {
+    html, body { width: 1920px; height: auto; overflow: visible; background: #fff; }
+    .deck-viewport { position: static; overflow: visible; background: #fff; }
+    .deck-stage { position: static; width: auto; height: auto; transform: none !important; background: none; }
+    .slide { position: relative; display: block !important; visibility: visible !important; opacity: 1 !important; pointer-events: auto !important; width: 1920px; height: 1080px; break-after: page; page-break-after: always; }
+    .slide:last-child { break-after: auto; page-break-after: auto; }
+    .deck-controls { display: none !important; }
+}
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.2s !important; }
+}
+
+/* ===========================================
+   PERMANENT CANVAS TREATMENT
+   Dot-grid + corner glows live on the stage itself so every
+   slide (transparent bg) shows the same atmosphere underneath.
+   =========================================== */
+.deck-stage {
+    background:
+        radial-gradient(ellipse 900px 700px at 82% 12%, rgba(82,232,200,0.10) 0%, transparent 60%),
+        radial-gradient(ellipse 900px 700px at 10% 92%, rgba(255,107,87,0.07) 0%, transparent 60%),
+        var(--slide-bg);
+}
+.deck-stage::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(rgba(82,232,200,0.14) 1.4px, transparent 1.4px);
+    background-size: 64px 64px;
+    z-index: 0;
+}
+.slide { background: transparent; z-index: 1; }
+.slide.active, .slide.visible { z-index: 2; }
+
+/* ===========================================
+   REVEAL ANIMATION — staggered fade + rise
+   =========================================== */
+.reveal {
+    opacity: 0;
+    transform: translateY(22px);
+    transition: opacity var(--duration-normal) var(--ease-out-expo),
+                transform var(--duration-normal) var(--ease-out-expo);
+}
+.slide.visible .reveal { opacity: 1; transform: translateY(0); }
+.slide.visible .reveal:nth-child(1) { transition-delay: 0.05s; }
+.slide.visible .reveal:nth-child(2) { transition-delay: 0.15s; }
+.slide.visible .reveal:nth-child(3) { transition-delay: 0.25s; }
+.slide.visible .reveal:nth-child(4) { transition-delay: 0.35s; }
+.slide.visible .points.reveal .point:nth-child(1) { transition-delay: 0.30s; }
+.slide.visible .points.reveal .point:nth-child(2) { transition-delay: 0.38s; }
+.slide.visible .points.reveal .point:nth-child(3) { transition-delay: 0.46s; }
+.slide.visible .points.reveal .point:nth-child(4) { transition-delay: 0.54s; }
+.slide.visible .points.reveal .point:nth-child(5) { transition-delay: 0.62s; }
+.slide.visible .points .point {
+    opacity: 0;
+    transform: translateY(14px);
+    transition: opacity 0.5s var(--ease-out-expo), transform 0.5s var(--ease-out-expo);
+}
+.slide.visible .points.reveal .point { opacity: 1; transform: translateY(0); }
+
+/* ===========================================
+   CHROME — applies inside every slide
+   =========================================== */
+.chrome-tag {
+    position: absolute;
+    top: 52px;
+    left: var(--edge-x);
+    font-size: 16px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--cyan-dim);
+}
+.chrome-tag b { color: var(--cyan); font-weight: 500; }
+.chrome-page {
+    position: absolute;
+    bottom: 48px;
+    right: var(--edge-x);
+    font-size: 16px;
+    color: var(--ink-faint);
+    letter-spacing: 0.05em;
+}
+.chrome-nav {
+    position: absolute;
+    bottom: 48px;
+    left: var(--edge-x);
+    font-size: 15px;
+    color: var(--ink-faint);
+    letter-spacing: 0.06em;
+    opacity: 0.55;
+}
+
+/* ===========================================
+   TYPOGRAPHY PRIMITIVES
+   =========================================== */
+.eyebrow {
+    font-size: 22px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--cyan);
+    font-weight: 500;
+}
+.eyebrow::before { content: "◆ "; }
+
+.slide-index {
+    position: absolute;
+    top: var(--edge-top);
+    right: var(--edge-x);
+    font-size: 18px;
+    color: var(--ink-faint);
+    letter-spacing: 0.05em;
+}
+
+.topbar {
+    position: absolute;
+    top: var(--edge-top);
+    left: var(--edge-x);
+    right: var(--edge-x);
+    padding-bottom: 26px;
+    border-bottom: 1px solid var(--cyan-rule);
+}
+
+h2.headline {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 62px;
+    line-height: 1.1;
+    color: var(--ink);
+    letter-spacing: -0.005em;
+    margin-top: 18px;
+}
+h2.headline .it { font-style: italic; font-weight: 500; color: var(--cyan); }
+
+.lede {
+    font-size: 29px;
+    line-height: 1.5;
+    color: var(--ink-dim);
+    max-width: 1200px;
+    margin-top: 22px;
+}
+.lede b { color: var(--ink); font-weight: 500; }
+
+.body-area {
+    position: absolute;
+    top: 312px;
+    left: var(--edge-x);
+    right: var(--edge-x);
+    bottom: var(--edge-bottom);
+}
+
+.points { list-style: none; max-width: 1420px; }
+.points .point {
+    position: relative;
+    padding-left: 40px;
+    font-size: 29px;
+    line-height: 1.5;
+    color: var(--ink-dim);
+    margin-bottom: 15px;
+}
+.points .point::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 9px;
+    width: 12px;
+    height: 12px;
+    border: 2px solid var(--cyan);
+    border-radius: 50%;
+}
+.points .point b, .points .point .k { color: var(--ink); font-weight: 600; }
+.points .point code {
+    font-family: var(--font-body);
+    color: var(--cyan);
+    background: rgba(82,232,200,0.08);
+    padding: 1px 8px;
+    border-radius: 3px;
+    font-size: 0.9em;
+}
+.points .point .warn { color: var(--coral); font-weight: 600; }
+
+/* callout — emphasis statement */
+.callout {
+    margin-top: 28px;
+    padding: 28px 36px;
+    border-left: 3px solid var(--cyan);
+    background: rgba(82,232,200,0.05);
+    max-width: 1200px;
+}
+.callout p {
+    font-family: var(--font-display);
+    font-style: italic;
+    font-size: 38px;
+    line-height: 1.32;
+    color: var(--ink);
+}
+
+/* ===========================================
+   TABLE — ledger style
+   =========================================== */
+table.ledger { width: 100%; border-collapse: collapse; max-width: 1660px; }
+table.ledger th {
+    font-size: 19px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--cyan);
+    text-align: left;
+    padding: 0 22px 16px 0;
+    border-bottom: 1.5px solid var(--cyan-rule);
+    font-weight: 600;
+}
+table.ledger td {
+    font-size: 24px;
+    line-height: 1.38;
+    color: var(--ink-dim);
+    padding: 11px 20px 11px 0;
+    border-bottom: 1px solid rgba(82,232,200,0.10);
+    vertical-align: top;
+}
+table.ledger tr:last-child td { border-bottom: none; }
+table.ledger td.tag {
+    font-size: 23px;
+    color: var(--cyan);
+    font-weight: 500;
+    white-space: nowrap;
+}
+table.ledger td b { color: var(--ink); font-weight: 600; }
+table.ledger td code {
+    color: var(--cyan);
+    background: rgba(82,232,200,0.08);
+    padding: 1px 7px;
+    border-radius: 3px;
+    font-size: 0.92em;
+}
+table.ledger td.warn-cell { color: var(--coral); }
+
+/* ===========================================
+   DIAGRAM CONTAINERS
+   =========================================== */
+.diagram-frame {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.diagram-caption {
+    font-size: 25px;
+    line-height: 1.6;
+    color: var(--ink-dim);
+    font-style: italic;
+    max-width: 1300px;
+    margin-top: 18px;
+}
+.node-label { font-family: var(--font-body); font-weight: 600; font-size: 27px; fill: var(--ink); }
+.edge-label { font-family: var(--font-body); font-size: 20px; }
+
+/* ===========================================
+   CHAPTER (section divider) SLIDES — sparse
+   =========================================== */
+.slide-chapter { display: flex; flex-direction: column; justify-content: center; }
+.chapter-ghost {
+    position: absolute;
+    top: -40px;
+    right: 90px;
+    font-family: var(--font-display);
+    font-size: 480px;
+    font-weight: 600;
+    color: var(--cyan);
+    opacity: 0.07;
+    line-height: 1;
+    user-select: none;
+}
+.chapter-eyebrow {
+    position: absolute;
+    left: var(--edge-x);
+    top: 420px;
+    font-size: 20px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--cyan);
+}
+.chapter-eyebrow::before { content: "◆ "; }
+.chapter-title {
+    position: absolute;
+    left: var(--edge-x);
+    top: 468px;
+    right: 260px;
+    font-family: var(--font-display);
+    font-style: italic;
+    font-weight: 500;
+    font-size: 96px;
+    line-height: 1.08;
+    color: var(--ink);
+}
+.chapter-sub {
+    position: absolute;
+    left: var(--edge-x);
+    top: 690px;
+    font-size: 29px;
+    color: var(--ink-dim);
+    max-width: 1100px;
+    line-height: 1.6;
+    border-left: 2px solid var(--cyan-dim);
+    padding-left: 28px;
+}
+
+/* ===========================================
+   COVER SLIDE
+   =========================================== */
+.slide-cover .eyebrow { position: absolute; top: 108px; left: var(--edge-x); }
+.slide-cover h1 {
+    position: absolute;
+    top: 190px;
+    left: var(--edge-x);
+    width: 980px;
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 116px;
+    line-height: 1.05;
+    color: var(--ink);
+}
+.slide-cover h1 .it { font-style: italic; font-weight: 500; color: var(--cyan); }
+.slide-cover .claim {
+    position: absolute;
+    top: 636px;
+    left: var(--edge-x);
+    width: 920px;
+    font-size: 29px;
+    line-height: 1.6;
+    color: var(--ink-dim);
+}
+.slide-cover .claim b { color: var(--ink); font-weight: 600; }
+.slide-cover .meta-row {
+    position: absolute;
+    bottom: 100px;
+    left: var(--edge-x);
+    display: flex;
+    gap: 44px;
+    font-size: 21px;
+    color: var(--ink-dim);
+}
+.slide-cover .meta-row span b { color: var(--cyan); }
+.cover-diagram { position: absolute; right: 90px; top: 280px; width: 740px; height: 540px; }
+
+/* ===========================================
+   CLOSING SLIDE
+   =========================================== */
+.slide-closing { display: flex; flex-direction: column; justify-content: center; }
+.closing-statement {
+    position: absolute;
+    left: var(--edge-x);
+    top: 300px;
+    right: 260px;
+    font-family: var(--font-display);
+    font-style: italic;
+    font-weight: 500;
+    font-size: 56px;
+    line-height: 1.35;
+    color: var(--ink);
+}
+.closing-statement .k { color: var(--cyan); font-style: normal; font-weight: 600; }
+.closing-grid {
+    position: absolute;
+    left: var(--edge-x);
+    right: var(--edge-x);
+    bottom: 190px;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 40px;
+    border-top: 1px solid var(--cyan-rule);
+    padding-top: 30px;
+}
+.closing-grid .col .label {
+    font-size: 18px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--cyan);
+    margin-bottom: 10px;
+}
+.closing-grid .col .val {
+    font-size: 24px;
+    color: var(--ink-dim);
+    line-height: 1.5;
+}
+.closing-grid .col .val b { color: var(--ink); }
+
+/* ===========================================
+   OUTSIDE-STAGE UI: progress + nav buttons
+   (kept outside .deck-stage per skill rules)
+   =========================================== */
+.deck-progress {
+    position: fixed;
+    left: 0; right: 0; bottom: 0;
+    height: 3px;
+    background: rgba(82,232,200,0.08);
+    z-index: 500;
+}
+.deck-progress-bar {
+    height: 100%;
+    background: var(--cyan);
+    width: 0%;
+    transition: width 0.35s var(--ease-out-expo);
+}
+.deck-arrow {
+    position: fixed;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 52px; height: 52px;
+    border-radius: 50%;
+    border: 1px solid var(--cyan-rule);
+    background: rgba(10,14,19,0.6);
+    color: var(--cyan);
+    font-size: 20px;
+    cursor: pointer;
+    z-index: 500;
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.2s, border-color 0.2s;
+}
+.deck-arrow:hover { background: rgba(82,232,200,0.12); border-color: var(--cyan); }
+.deck-arrow.prev { left: 22px; }
+.deck-arrow.next { right: 22px; }
+
+/* Mobile/portrait: arrows can collide with the letterboxed stage; swipe covers nav there. */
+@media (max-width: 600px), (orientation: portrait) {
+    .deck-arrow { display: none; }
+}
+
+/* ===========================================
+   INLINE EDITING
+   =========================================== */
+.edit-hotzone { position: fixed; top: 0; left: 0; width: 80px; height: 80px; z-index: 10000; cursor: pointer; }
+.edit-toggle {
+    position: fixed; top: 14px; left: 14px;
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    border: 1px solid var(--cyan-rule);
+    background: rgba(10,14,19,0.85);
+    font-size: 17px;
+    cursor: pointer;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+    z-index: 10001;
+}
+.edit-toggle.show, .edit-toggle.active { opacity: 1; pointer-events: auto; }
+.edit-toggle.active { background: var(--cyan); }
+[contenteditable="true"] {
+    outline: 1px dashed var(--cyan-rule);
+    outline-offset: 4px;
+    cursor: text;
+}
+.save-toast {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--cyan);
+    color: #05070a;
+    font-family: var(--font-body);
+    font-size: 14px;
+    font-weight: 600;
+    padding: 10px 20px;
+    border-radius: 4px;
+    opacity: 0;
+    transition: opacity 0.3s, transform 0.3s;
+    z-index: 10002;
+    pointer-events: none;
+}
+.save-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* ===========================================
+   L0402 DIAGRAM HELPERS (appended per-deck)
+   Small classes reused by this deck's built visuals.
+   =========================================== */
+/* a graph node box */
+.gnode {
+    border: 2px solid var(--cyan);
+    border-radius: 10px;
+    background: #12181a;
+    padding: 18px 24px;
+    text-align: center;
+    font-family: var(--font-display);
+    font-size: 27px;
+    color: var(--ink);
+    line-height: 1.15;
+}
+.gnode.dim { border-color: var(--ink-faint); }        /* neutral plumbing node */
+.gnode.ghost { border-style: dashed; border-color: var(--ink-faint); background: transparent; color: var(--ink-dim); }
+.gnode .sub { font-family: var(--font-body); font-size: 16px; color: var(--ink-dim); margin-top: 6px; }
+/* a small model chip inside/under a node */
+.mchip {
+    display: inline-block;
+    font-family: var(--font-body);
+    font-size: 15px;
+    letter-spacing: 0.04em;
+    padding: 3px 11px;
+    border-radius: 20px;
+    margin-top: 9px;
+    border: 1px solid var(--cyan-rule);
+    color: var(--cyan);
+    background: rgba(82,232,200,0.06);
+}
+.mchip.haiku { border-color: var(--ink-faint); color: var(--ink-dim); background: transparent; }
+.mchip.sonnet { border-color: var(--cyan-rule); color: var(--cyan); background: rgba(82,232,200,0.08); }
+/* horizontal arrow between boxes */
+.garrow { color: var(--ink-faint); font-size: 34px; line-height: 1; }
+.garrow.cyan { color: var(--cyan); }
+/* a horizontal build-flow pill */
+.pill {
+    font-family: var(--font-body);
+    font-size: 20px;
+    color: var(--ink);
+    border: 1.5px solid var(--cyan-rule);
+    border-radius: 30px;
+    background: rgba(82,232,200,0.05);
+    padding: 12px 20px;
+    white-space: nowrap;
+}
+.pill .n { color: var(--cyan); font-weight: 600; }
+/* themed code block */
+pre.code {
+    font-family: var(--font-body);
+    background: #12181a;
+    border: 1px solid var(--cyan-rule);
+    border-radius: 10px;
+    padding: 22px 28px;
+    overflow: hidden;
+    max-width: 1420px;
+}
+pre.code code {
+    font-family: var(--font-body);
+    font-size: 21px;
+    line-height: 1.5;
+    color: var(--cyan);
+    white-space: pre;
+    display: block;
+}
+pre.code code .c { color: var(--ink-faint); }   /* comment */
+pre.code code .p { color: var(--ink-dim); }      /* plain / punctuation-ish */
+pre.code code .kw { color: var(--ink); font-weight: 600; }  /* keyword-ish emphasis */
+/* a labelled state-schema field row */
+.field-row {
+    font-family: var(--font-body);
+    font-size: 23px;
+    color: var(--ink-dim);
+    padding: 12px 0;
+    border-bottom: 1px solid rgba(82,232,200,0.10);
+}
+.field-row:last-child { border-bottom: none; }
+.field-row .fname { color: var(--ink); font-weight: 600; }
+.field-row .ftype { color: var(--cyan); }
+.field-row.reducer .ftype { color: var(--cyan); font-weight: 600; }
+.reducer-tag {
+    font-family: var(--font-body);
+    font-size: 15px;
+    color: var(--cyan);
+    border: 1px solid var(--cyan-rule);
+    background: rgba(82,232,200,0.08);
+    border-radius: 4px;
+    padding: 2px 9px;
+    margin-left: 10px;
+}
+</style>
+</head>
+<body>
+
+<div class="deck-viewport">
+<main class="deck-stage" id="deckStage">
+
+<!-- ============================================================ -->
+<!-- 01 — COVER                                                   -->
+<!-- ============================================================ -->
+<section class="slide slide-cover active">
+    <div class="eyebrow reveal">L04 &middot; Workflows &middot; 55 min</div>
+    <h1 class="reveal">Directed graphs: <span class="it">sequential</span> chaining</h1>
+    <div class="claim reveal"><b>In a workflow, the model lives inside the nodes; you own the edges.</b> Wire several typed nodes into a fixed, acyclic pipeline &mdash; a workflow, not an agent.</div>
+    <div class="meta-row reveal">
+        <span>Lesson &mdash; <b>L04</b></span>
+        <span>55 min</span>
+        <span>anchor &mdash; <b>Sonnet 4.6</b> heavy nodes &middot; <b>Haiku 4.5</b> light nodes</span>
+    </div>
+    <div class="cover-diagram reveal">
+        <svg viewBox="0 0 760 560" width="100%" height="100%">
+            <!-- fixed acyclic chain parse -> draft -> policy_check -> END -->
+            <path d="M 148 200 L 240 200" stroke="var(--cyan)" stroke-width="3" marker-end="url(#cov-a)"/>
+            <path d="M 372 200 L 464 200" stroke="var(--cyan)" stroke-width="3" marker-end="url(#cov-a)"/>
+            <path d="M 596 200 L 688 200" stroke="var(--cyan)" stroke-width="3" marker-end="url(#cov-a)"/>
+            <circle r="8" fill="var(--cyan)">
+                <animateMotion dur="3.2s" repeatCount="indefinite" path="M 60 200 L 700 200"/>
+            </circle>
+            <g>
+                <rect x="24" y="160" width="124" height="80" rx="12" fill="#12181a" stroke="var(--cyan)" stroke-width="2.5"/>
+                <text x="86" y="207" text-anchor="middle" class="node-label" font-size="23">parse</text>
+            </g>
+            <g>
+                <rect x="248" y="160" width="124" height="80" rx="12" fill="#12181a" stroke="var(--cyan)" stroke-width="2.5"/>
+                <text x="310" y="207" text-anchor="middle" class="node-label" font-size="23">draft</text>
+            </g>
+            <g>
+                <rect x="472" y="160" width="124" height="80" rx="12" fill="#12181a" stroke="var(--cyan)" stroke-width="2.5"/>
+                <text x="534" y="200" text-anchor="middle" class="node-label" font-size="19">policy_</text>
+                <text x="534" y="223" text-anchor="middle" class="node-label" font-size="19">check</text>
+            </g>
+            <text x="724" y="207" text-anchor="middle" class="node-label" font-size="21" fill="var(--ink-dim)">END</text>
+            <!-- crossed-out back-edge: no loop yet -->
+            <path d="M 534 260 C 400 400, 240 400, 86 260" fill="none" stroke="var(--coral)" stroke-width="2.5" stroke-dasharray="9 8" opacity="0.7"/>
+            <line x1="290" y1="330" x2="330" y2="372" stroke="var(--coral)" stroke-width="3"/>
+            <line x1="330" y1="330" x2="290" y2="372" stroke="var(--coral)" stroke-width="3"/>
+            <text x="310" y="425" text-anchor="middle" class="edge-label" fill="var(--coral)">no back-edge &mdash; that's L11</text>
+            <defs>
+                <marker id="cov-a" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="var(--cyan)"/></marker>
+            </defs>
+        </svg>
+    </div>
+    <div class="chrome-page">01 / 26</div>
+    <div class="chrome-nav">L04 &middot; sequential chaining</div>
+</section>
+
+<!-- ============================================================ -->
+<!-- 02 — SECTION 1 DIVIDER                                        -->
+<!-- ============================================================ -->
+<section class="slide slide-chapter">
+    <div class="chrome-tag reveal">L04 &middot; <b>WORKFLOWS</b></div>
+    <div class="chapter-ghost reveal">01</div>
+    <div class="chapter-eyebrow reveal">Section 1</div>
+    <div class="chapter-title reveal">The lesson in <span style="color:var(--cyan); font-style:normal;">one claim</span></div>
+    <div class="chapter-sub reveal">One node becomes several, wired in a fixed order. A workflow is where the developer owns the path &mdash; not the model.</div>
+    <div class="chrome-page">02 / 26</div>
+</section>
+
+<!-- ============================================================ -->
+<!-- 03 — SLIDE 1.1                                                -->
+<!-- ============================================================ -->
+<section class="slide">
+    <div class="chrome-tag">L04 &middot; <b>WORKFLOWS</b></div>
+    <div class="topbar reveal">
+        <div class="eyebrow">Slide 1.1</div>
+        <h2 class="headline">One node becomes several, <span class="it">wired in order</span></h2>
+    </div>
+    <div class="body-area">
+        <ul class="points reveal">
+            <li class="point">In <b>L03</b> you built a <code>StateGraph</code> at its smallest: one typed node. Now you wire <b>several</b> such nodes into a fixed sequence &mdash; a <b>workflow</b>, not an agent.</li>
+            <li class="point">Your control flow becomes a <b>graph</b>: explicit nodes wired by edges <i>you</i> lay out. The model lives <b>inside</b> the nodes; it never decides what runs next.</li>
+            <li class="point"><b>L05</b> adds a <b>conditional</b> edge on these same primitives; <b>L11</b> later adds exactly one more thing &mdash; a back-edge &mdash; to make an agent.</li>
+        </ul>
+        <div class="diagram-frame reveal" style="gap:44px; margin-top:34px;">
+            <div style="text-align:center;">
+                <div class="gnode dim" style="padding:22px 34px;">node<div class="sub">L03 &mdash; one box</div></div>
+            </div>
+            <div class="garrow cyan">&rarr;</div>
+            <div style="display:flex; align-items:center; gap:16px;">
+                <div class="gnode">parse</div>
+                <div class="garrow cyan">&rarr;</div>
+                <div class="gnode">draft</div>
+                <div class="garrow cyan">&rarr;</div>
+                <div class="gnode">policy_check</div>
+                <div class="garrow cyan">&rarr;</div>
+                <div class="gnode dim" style="font-size:22px;">END</div>
+            </div>
+        </div>
+        <div class="diagram-caption reveal">One node (L03) &rarr; several wired in order (L04).</div>
+    </div>
+    <div class="chrome-page">03 / 26</div>
+    <div class="chrome-nav">&larr; &rarr; navigate</div>
+</section>
+
+<!-- ============================================================ -->
+<!-- 04 — SLIDE 1.2                                                -->
+<!-- ============================================================ -->
+<section class="slide">
+    <div class="chrome-tag">L04 &middot; <b>WORKFLOWS</b></div>
+    <div class="topbar reveal">
+        <div class="eyebrow">Slide 1.2</div>
+        <h2 class="headline">Workflow vs. agent &mdash; <span class="it">the headline distinction</span></h2>
+    </div>
+    <div class="body-area reveal">
+        <table class="ledger">
+            <thead><tr><th></th><th>Workflow (L04&ndash;L05)</th><th>Agent (L11)</th></tr></thead>
+            <tbody>
+                <tr><td class="tag">Who owns the path?</td><td>the <b>developer</b> &mdash; fixed logic</td><td class="warn-cell">the <b>model</b> decides</td></tr>
+                <tr><td class="tag">Graph shape</td><td><b>acyclic</b> (DAG) &mdash; always reaches <code>END</code></td><td class="warn-cell"><b>cyclic</b> &mdash; loops model &rarr; tools &rarr; model</td></tr>
+                <tr><td class="tag">Where the model works</td><td><i>inside</i> nodes (extract, draft)</td><td class="warn-cell">inside nodes <b>and</b> chooses the path</td></tr>
+                <tr><td class="tag">Predictability</td><td>same input &rarr; same path</td><td class="warn-cell">varies; the model may loop</td></tr>
+            </tbody>
+        </table>
+        <div class="diagram-caption reveal" style="margin-top:22px;">The model is involved in <b>both</b>. Agency is about who controls the <i>path</i> &mdash; not whether a model is called. You're building the <b>simplest</b> workflow: no branches yet.</div>
+    </div>
+    <div class="chrome-page">04 / 26</div>
+    <div class="chrome-nav">&larr; &rarr; navigate</div>
+</section>
+
+<!-- ============================================================ -->
+<!-- 05 — SLIDE 1.3                                                -->
+<!-- ============================================================ -->
+<section class="slide">
+    <div class="chrome-tag">L04 &middot; <b>WORKFLOWS</b></div>
+    <div class="topbar reveal">
+        <div class="eyebrow">Slide 1.3</div>
+        <h2 class="headline">The sentence to <span class="it">carry through</span> the lesson</h2>
+    </div>
+    <div class="body-area">
+        <div class="callout reveal" style="margin-top:0;"><p>In a workflow, the model lives inside the nodes; <span style="color:var(--cyan); font-style:normal; font-weight:600;">you own the edges.</span></p></div>
+        <div class="diagram-frame reveal" style="width:1560px; height:420px; margin-top:20px;">
+            <svg viewBox="0 0 1560 420" width="100%" height="100%">
+                <!-- forward acyclic chain -->
+                <path d="M 288 150 L 384 150" stroke="var(--cyan)" stroke-width="3" marker-end="url(#s13-a)"/>
+                <path d="M 672 150 L 768 150" stroke="var(--cyan)" stroke-width="3" marker-end="url(#s13-a)"/>
+                <path d="M 1056 150 L 1152 150" stroke="var(--cyan)" stroke-width="3" marker-end="url(#s13-a)"/>
+                <text x="336" y="128" text-anchor="middle" class="edge-label" fill="var(--cyan)">fixed</text>
+                <text x="720" y="128" text-anchor="middle" class="edge-label" fill="var(--cyan)">fixed</text>
+                <text x="1104" y="128" text-anchor="middle" class="edge-label" fill="var(--cyan)">fixed</text>
+                <text x="720" y="55" text-anchor="middle" class="edge-label" fill="var(--cyan)" font-size="22">&#9670; you own these forward edges</text>
+                <!-- nodes with model chip inside -->
+                <g>
+                    <rect x="120" y="106" width="168" height="88" rx="12" fill="#12181a" stroke="var(--cyan)" stroke-width="2.5"/>
+                    <text x="204" y="145" text-anchor="middle" class="node-label" font-size="24">parse</text>
+                    <rect x="152" y="156" width="104" height="26" rx="13" fill="rgba(82,232,200,0.06)" stroke="var(--cyan-rule)"/>
+                    <text x="204" y="174" text-anchor="middle" class="edge-label" font-size="15" fill="var(--cyan)">model</text>
+                </g>
+                <g>
+                    <rect x="504" y="106" width="168" height="88" rx="12" fill="#12181a" stroke="var(--cyan)" stroke-width="2.5"/>
+                    <text x="588" y="145" text-anchor="middle" class="node-label" font-size="24">draft</text>
+                    <rect x="536" y="156" width="104" height="26" rx="13" fill="rgba(82,232,200,0.06)" stroke="var(--cyan-rule)"/>
+                    <text x="588" y="174" text-anchor="middle" class="edge-label" font-size="15" fill="var(--cyan)">model</text>
+                </g>
+                <g>
+                    <rect x="888" y="106" width="168" height="88" rx="12" fill="#12181a" stroke="var(--cyan)" stroke-width="2.5"/>
+                    <text x="972" y="145" text-anchor="middle" class="node-label" font-size="21">policy_check</text>
+                    <rect x="920" y="156" width="104" height="26" rx="13" fill="rgba(82,232,200,0.06)" stroke="var(--cyan-rule)"/>
+                    <text x="972" y="174" text-anchor="middle" class="edge-label" font-size="15" fill="var(--cyan)">model</text>
+                </g>
+                <text x="1200" y="158" text-anchor="middle" class="node-label" font-size="22" fill="var(--ink-dim)">END</text>
+                <!-- crossed-out dashed coral back-edge -->
+                <path d="M 972 210 C 640 360, 540 360, 204 210" fill="none" stroke="var(--coral)" stroke-width="2.5" stroke-dasharray="10 8" opacity="0.65"/>
+                <line x1="568" y1="300" x2="608" y2="342" stroke="var(--coral)" stroke-width="3.5"/>
+                <line x1="608" y1="300" x2="568" y2="342" stroke="var(--coral)" stroke-width="3.5"/>
+                <text x="588" y="392" text-anchor="middle" class="edge-label" fill="var(--coral)" font-size="21">no back-edge yet &mdash; a loop here would make it L11's agent</text>
+                <defs>
+                    <marker id="s13-a" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="var(--cyan)"/></marker>
+                </defs>
+            </svg>
+        </div>
+        <div class="diagram-caption reveal" style="margin-top:2px;">Every edge in L04 is <b>fixed</b> &mdash; <code>A &rarr; B</code>, always. Nothing to branch on yet; that arrives in L05.</div>
+    </div>
+    <div class="chrome-page">05 / 26</div>
+    <div class="chrome-nav">&larr; &rarr; navigate</div>
+</section>
+
+<!-- ============================================================ -->
+<!-- 06 — SECTION 2 DIVIDER                                        -->
+<!-- ============================================================ -->
+<section class="slide slide-chapter">
+    <div class="chrome-tag reveal">L04 &middot; <b>WORKFLOWS</b></div>
+    <div class="chapter-ghost reveal">02</div>
+    <div class="chapter-eyebrow reveal">Section 2</div>
+    <div class="chapter-title reveal">The StateGraph <span style="color:var(--cyan); font-style:normal;">primitives</span></div>
+    <div class="chapter-sub reveal">Vocabulary, continued from L03: the five-line build, nodes, state and reducers, edges, entry point, END, and the DAG.</div>
+    <div class="chrome-page">06 / 26</div>
+</section>
+
+<!-- ============================================================ -->
+<!-- 07 — SLIDE 2.1                                                -->
+<!-- ============================================================ -->
+<section class="slide">
+    <div class="chrome-tag">L04 &middot; <b>WORKFLOWS</b></div>
+    <div class="topbar reveal">
+        <div class="eyebrow">Slide 2.1</div>
+        <h2 class="headline">The <span class="it">five-line</span> build</h2>
+    </div>
+    <div class="body-area">
+        <div class="diagram-frame reveal" style="flex-wrap:wrap; gap:12px; justify-content:flex-start; margin-top:6px;">
+            <div class="pill"><span class="n">1</span> StateGraph(State)</div>
+            <div class="garrow">&rarr;</div>
+            <div class="pill"><span class="n">2</span> add_node &times;N</div>
+            <div class="garrow">&rarr;</div>
+            <div class="pill"><span class="n">3</span> set_entry_point</div>
+            <div class="garrow">&rarr;</div>
+            <div class="pill"><span class="n">4</span> add_edge</div>
+            <div class="garrow">&rarr;</div>
+            <div class="pill"><span class="n">5</span> compile()</div>
+            <div class="garrow">&rarr;</div>
+            <div class="pill">invoke(input)</div>
+        </div>
+        <pre class="code reveal" style="margin-top:24px;"><code><span class="kw">from</span> langgraph.graph <span class="kw">import</span> StateGraph, END
+
+builder = StateGraph(TicketState)        <span class="c"># 1. typed state schema</span>
+builder.add_node(<span class="p">"parse"</span>, parse)         <span class="c"># 2. add nodes</span>
+builder.add_node(<span class="p">"draft"</span>, draft)
+builder.set_entry_point(<span class="p">"parse"</span>)         <span class="c"># 3. where it starts</span>
+builder.add_edge(<span class="p">"parse"</span>, <span class="p">"draft"</span>)       <span class="c"># 4. wire edges</span>
+builder.add_edge(<span class="p">"draft"</span>, END)
+app = builder.compile()                  <span class="c"># 5. compile to runnable</span>
+result = app.invoke({<span class="p">"ticket"</span>: <span class="p">"..."</span>})   <span class="c">#    invoke on input</span></code></pre>
+        <div class="diagram-caption reveal" style="margin-top:14px;">Same recipe as L03 &mdash; but with <b>several</b> nodes and edges <i>between</i> them. New wiring, no new primitive.</div>
+    </div>
+    <div class="chrome-page">07 / 26</div>
+    <div class="chrome-nav">&larr; &rarr; navigate</div>
+</section>
+
+<!-- ============================================================ -->
+<!-- 08 — SLIDE 2.2                                                -->
+<!-- ============================================================ -->
+<section class="slide">
+    <div class="chrome-tag">L04 &middot; <b>WORKFLOWS</b></div>
+    <div class="topbar reveal">
+        <div class="eyebrow">Slide 2.2</div>
+        <h2 class="headline">Node &mdash; a typed function that <span class="it">returns an update</span></h2>
+    </div>
+    <div class="body-area">
+        <ul class="points reveal">
+            <li class="point">A <b>node</b> is a plain function: it reads state and returns a <b>partial update</b> &mdash; a dict of just the fields it changed, <i>not</i> the whole state. LangGraph merges it for you.</li>
+            <li class="point">A node does <b>one unit of work</b> and hands back an update &mdash; nothing more. What's new here: <i>several</i> nodes now share one state object.</li>
+        </ul>
+        <pre class="code reveal" style="margin-top:24px;"><code><span class="kw">def</span> parse(state: TicketState) -> dict[str, object]:
+    <span class="c"># Extract structured fields (a light step &rarr; Haiku)</span>
+    reply = haiku.invoke(<span class="p">f"Extract the issue from: {state['ticket']}"</span>)
+    <span class="kw">return</span> {<span class="p">"parsed"</span>: reply.content}   <span class="c"># only the field it changed</span></code></pre>
+    </div>
+    <div class="chrome-page">08 / 26</div>
+    <div class="chrome-nav">&larr; &rarr; navigate</div>
+</section>
+
+<!-- ============================================================ -->
+<!-- 09 — SLIDE 2.3                                                -->
+<!-- ============================================================ -->
+<section class="slide">
+    <div class="chrome-tag">L04 &middot; <b>WORKFLOWS</b></div>
+    <div class="topbar reveal">
+        <div class="eyebrow">Slide 2.3</div>
+        <h2 class="headline">State &amp; reducer &mdash; <span class="it">the data that flows</span></h2>
+    </div>
+    <div class="body-area" style="display:flex; align-items:flex-start; gap:64px;">
+        <ul class="points reveal" style="flex:1; max-width:none;">
+            <li class="point"><b>State</b> is a typed object (a <code>TypedDict</code>) threaded through every node &mdash; here through <b>several</b> nodes in turn.</li>
+            <li class="point">A <b>reducer</b> is the rule that merges an update into state, <i>per field</i>. The default <b>overwrites</b>; an <code>Annotated[list, add]</code> field <b>appends</b>. Your first genuinely new primitive in L04.</li>
+            <li class="point">Same machinery you'll reuse in <b>L11</b> for an agent's <i>message history</i> &mdash; met here first, on a simpler acyclic graph.</li>
+        </ul>
+        <div class="diagram-frame reveal" style="flex-direction:column; align-items:stretch; width:600px; flex-shrink:0;">
+            <div style="border:2px solid var(--cyan); border-radius:12px; background:#12181a; padding:8px 30px 14px;">
+                <div style="font-family:var(--font-body); font-size:19px; color:var(--cyan); letter-spacing:0.08em; text-transform:uppercase; padding:14px 0 4px;">TicketState</div>
+                <div class="field-row"><span class="fname">ticket</span>: <span class="ftype">str</span></div>
+                <div class="field-row"><span class="fname">parsed</span>: <span class="ftype">str</span></div>
+                <div class="field-row"><span class="fname">draft</span>: <span class="ftype">str</span></div>
+                <div class="field-row reducer"><span class="fname">steps</span>: <span class="ftype">Annotated[list[str], add]</span><span class="reducer-tag">append reducer</span></div>
+            </div>
+        </div>
+    </div>
+    <div class="chrome-page">09 / 26</div>
+    <div class="chrome-nav">&larr; &rarr; navigate</div>
+</section>
+
+<!-- ============================================================ -->
+<!-- 10 — SLIDE 2.4                                                -->
+<!-- ============================================================ -->
+<section class="slide">
+    <div class="chrome-tag">L04 &middot; <b>WORKFLOWS</b></div>
+    <div class="topbar reveal">
+        <div class="eyebrow">Slide 2.4</div>
+        <h2 class="headline">What belongs in state &mdash; <span class="it">and what doesn't</span></h2>
+    </div>
+    <div class="body-area">
+        <ul class="points reveal">
+            <li class="point"><b>In state:</b> data that flows between nodes &mdash; the extracted fields, intermediate drafts.</li>
+            <li class="point"><b>Not in state:</b> the model client and configuration. Those are <b>dependencies you wire in at build time</b>, not data that flows.</li>
+            <li class="point">You construct a <code>ChatAnthropic</code> client once and <b>close over it</b> in the node &mdash; you don't thread it through <code>invoke</code>.</li>
+        </ul>
+    </div>
+    <div class="chrome-page">10 / 26</div>
+    <div class="chrome-nav">&larr; &rarr; navigate</div>
+</section>
+
+<!-- ============================================================ -->
+<!-- 11 — SLIDE 2.5                                                -->
+<!-- ============================================================ -->
+<section class="slide">
+    <div class="chrome-tag">L04 &middot; <b>WORKFLOWS</b></div>
+    <div class="topbar reveal">
+        <div class="eyebrow">Slide 2.5</div>
+        <h2 class="headline">Edge, entry point, <span class="it">END, DAG</span></h2>
+    </div>
+    <div class="body-area">
+        <ul class="points reveal">
+            <li class="point"><b>Edge</b> &mdash; a fixed transition <code>A &rarr; B</code>, taken every time: <code>add_edge("parse", "draft")</code>. L05 adds a second kind (the conditional edge).</li>
+            <li class="point"><b>Entry point</b> &mdash; where execution starts (<code>set_entry_point</code>).</li>
+            <li class="point"><b>END</b> &mdash; the sentinel where execution stops; every path in a workflow reaches it.</li>
+            <li class="point"><b>DAG</b> (directed acyclic graph) &mdash; <b>no back-edges</b>: every edge moves forward. That absence is exactly what makes this a <i>workflow</i>, not an agent.</li>
+        </ul>
+    </div>
+    <div class="chrome-page">11 / 26</div>
+    <div class="chrome-nav">&larr; &rarr; navigate</div>
+</section>
+
+<!-- ============================================================ -->
+<!-- 12 — SECTION 3 DIVIDER                                        -->
+<!-- ============================================================ -->
+<section class="slide slide-chapter">
+    <div class="chrome-tag reveal">L04 &middot; <b>WORKFLOWS</b></div>
+    <div class="chapter-ghost reveal">03</div>
+    <div class="chapter-eyebrow reveal">Section 3</div>
+    <div class="chapter-title reveal">The pattern &mdash; <span style="color:var(--cyan); font-style:normal;">prompt chaining</span></div>
+    <div class="chapter-sub reveal">Decompose a task into a fixed sequence of focused model calls &mdash; and the honest trade-off for doing so.</div>
+    <div class="chrome-page">12 / 26</div>
+</section>
+
+<!-- ============================================================ -->
+<!-- 13 — SLIDE 3.1                                                -->
+<!-- ============================================================ -->
+<section class="slide">
+    <div class="chrome-tag">L04 &middot; <b>WORKFLOWS</b></div>
+    <div class="topbar reveal">
+        <div class="eyebrow">Slide 3.1</div>
+        <h2 class="headline">Decompose a task into a <span class="it">fixed sequence</span></h2>
+    </div>
+    <div class="body-area">
+        <ul class="points reveal">
+            <li class="point"><b>Prompt chaining</b>: a fixed chain of nodes where each step's output feeds the next. Running example: a support-ticket pipeline &mdash; <b>parse &rarr; draft &rarr; policy-check</b>.</li>
+            <li class="point">Each node is a <b>separate model call with a focused prompt</b> &mdash; not one mega-prompt doing everything.</li>
+        </ul>
+        <div class="diagram-frame reveal" style="gap:20px; margin-top:44px;">
+            <div class="gnode" style="padding:24px 40px;">parse</div>
+            <div class="garrow cyan">&rarr;</div>
+            <div class="gnode" style="padding:24px 40px;">draft</div>
+            <div class="garrow cyan">&rarr;</div>
+            <div class="gnode" style="padding:24px 40px;">policy_check</div>
+            <div class="garrow cyan">&rarr;</div>
+            <div class="gnode dim" style="padding:24px 34px; font-size:23px;">END</div>
+        </div>
+        <div class="diagram-caption reveal">Two forward arrows, no back-edge &mdash; a strictly linear chain.</div>
+    </div>
+    <div class="chrome-page">13 / 26</div>
+    <div class="chrome-nav">&larr; &rarr; navigate</div>
+</section>
+
+<!-- ============================================================ -->
+<!-- 14 — SLIDE 3.2                                                -->
+<!-- ============================================================ -->
+<section class="slide">
+    <div class="chrome-tag">L04 &middot; <b>WORKFLOWS</b></div>
+    <div class="topbar reveal">
+        <div class="eyebrow">Slide 3.2</div>
+        <h2 class="headline">Why decompose instead of <span class="it">one big prompt?</span></h2>
+    </div>
+    <div class="body-area reveal">
+        <table class="ledger" style="max-width:1500px;">
+            <thead><tr><th>For</th><th>Against</th></tr></thead>
+            <tbody>
+                <tr><td>each prompt is small and reliable</td><td class="warn-cell">more model calls = more cost / latency (the L01 trade)</td></tr>
+                <tr><td>each step is individually testable</td><td class="warn-cell">a strictly linear chain is near break-even vs. a plain function</td></tr>
+                <tr><td>failures are localized to one node</td><td>&nbsp;</td></tr>
+            </tbody>
+        </table>
+        <div class="diagram-caption reveal" style="margin-top:24px;">For a <i>strictly linear</i> three-step task the graph is near break-even. The real payoff shows up once you add <b>branching</b> (L05), shared state, and tracing (L12).</div>
+    </div>
+    <div class="chrome-page">14 / 26</div>
+    <div class="chrome-nav">&larr; &rarr; navigate</div>
+</section>
+
+<!-- ============================================================ -->
+<!-- 15 — SECTION 4 DIVIDER                                        -->
+<!-- ============================================================ -->
+<section class="slide slide-chapter">
+    <div class="chrome-tag reveal">L04 &middot; <b>WORKFLOWS</b></div>
+    <div class="chapter-ghost reveal">04</div>
+    <div class="chapter-eyebrow reveal">Section 4</div>
+    <div class="chapter-title reveal">Each node can bind <span style="color:var(--cyan); font-style:normal;">its own model</span></div>
+    <div class="chapter-sub reveal">A node is an independent call &mdash; so you can mix a cheap model and a capable one across one graph.</div>
+    <div class="chrome-page">15 / 26</div>
+</section>
+
+<!-- ============================================================ -->
+<!-- 16 — SLIDE 4.1                                                -->
+<!-- ============================================================ -->
+<section class="slide">
+    <div class="chrome-tag">L04 &middot; <b>WORKFLOWS</b></div>
+    <div class="topbar reveal">
+        <div class="eyebrow">Slide 4.1</div>
+        <h2 class="headline">The mechanism: a node is an <span class="it">independent call</span></h2>
+    </div>
+    <div class="body-area">
+        <ul class="points reveal">
+            <li class="point">Because each node is its <i>own</i> model call, you can construct your own <code>ChatAnthropic(model=...)</code> for each &mdash; letting you <b>mix models per node</b>.</li>
+            <li class="point">Use a <b>cheap, fast</b> model (<b>Haiku 4.5</b>) for light steps &mdash; extract, summarize &mdash; and a <b>capable</b> model (<b>Sonnet 4.6</b>) for heavy reasoning &mdash; draft, analyze.</li>
+        </ul>
+        <div class="diagram-frame reveal" style="gap:18px; margin-top:40px;">
+            <div style="text-align:center;">
+                <div class="gnode dim" style="padding:22px 34px;">parse</div>
+                <div class="mchip haiku">Haiku 4.5 &middot; cheap</div>
+            </div>
+            <div class="garrow cyan" style="margin-top:-30px;">&rarr;</div>
+            <div style="text-align:center;">
+                <div class="gnode" style="padding:22px 34px;">draft</div>
+                <div class="mchip sonnet">Sonnet 4.6 &middot; capable</div>
+            </div>
+            <div class="garrow cyan" style="margin-top:-30px;">&rarr;</div>
+            <div style="text-align:center;">
+                <div class="gnode" style="padding:22px 34px;">policy_check</div>
+                <div class="mchip sonnet">Sonnet 4.6 &middot; capable</div>
+            </div>
+            <div class="garrow cyan" style="margin-top:-30px;">&rarr;</div>
+            <div style="text-align:center;">
+                <div class="gnode dim" style="padding:22px 30px; font-size:22px;">END</div>
+            </div>
+        </div>
+        <div class="diagram-caption reveal">The extraction step is cheap; the reasoning steps are where the spend goes.</div>
+    </div>
+    <div class="chrome-page">16 / 26</div>
+    <div class="chrome-nav">&larr; &rarr; navigate</div>
+</section>
+
+<!-- ============================================================ -->
+<!-- 17 — SLIDE 4.2                                                -->
+<!-- ============================================================ -->
+<section class="slide">
+    <div class="chrome-tag">L04 &middot; <b>WORKFLOWS</b></div>
+    <div class="topbar reveal">
+        <div class="eyebrow">Slide 4.2</div>
+        <h2 class="headline">Mechanism here; the <span class="it">decision framework</span> is L14's</h2>
+    </div>
+    <div class="body-area">
+        <ul class="points reveal">
+            <li class="point">Here you're seeing only <b>that</b> you can mix and <b>how</b> &mdash; per-node <code>ChatAnthropic(model=...)</code> &mdash; with a light cost/latency aside.</li>
+            <li class="point">The full <i>which-model</i> decision framework &mdash; capability vs. latency vs. cost, budgets, "small model for routing, capable for reasoning" &mdash; is <b>L14's</b> job.</li>
+            <li class="point">The two reinforce; neither re-teaches the other. <b>L05</b> reuses this same mechanism for its classifier node.</li>
+        </ul>
+    </div>
+    <div class="chrome-page">17 / 26</div>
+    <div class="chrome-nav">&larr; &rarr; navigate</div>
+</section>
+
+<!-- ============================================================ -->
+<!-- 18 — SECTION 5 DIVIDER                                        -->
+<!-- ============================================================ -->
+<section class="slide slide-chapter">
+    <div class="chrome-tag reveal">L04 &middot; <b>WORKFLOWS</b></div>
+    <div class="chapter-ghost reveal">05</div>
+    <div class="chapter-eyebrow reveal">Section 5</div>
+    <div class="chapter-title reveal">Why a graph: control flow <span style="color:var(--cyan); font-style:normal;">as data</span></div>
+    <div class="chapter-sub reveal">A graph turns control flow into inspectable data &mdash; and its determinism is a feature, not a limitation.</div>
+    <div class="chrome-page">18 / 26</div>
+</section>
+
+<!-- ============================================================ -->
+<!-- 19 — SLIDE 5.1                                                -->
+<!-- ============================================================ -->
+<section class="slide">
+    <div class="chrome-tag">L04 &middot; <b>WORKFLOWS</b></div>
+    <div class="topbar reveal">
+        <div class="eyebrow">Slide 5.1</div>
+        <h2 class="headline">A graph turns control flow into <span class="it">inspectable data</span></h2>
+    </div>
+    <div class="body-area" style="display:flex; align-items:center; gap:56px;">
+        <div style="flex:1; min-width:0;">
+            <ul class="points reveal" style="max-width:none;">
+                <li class="point">You can <b>list, draw, and reason about</b> nodes and edges &mdash; unlike <code>if</code>/<code>while</code> buried in Python.</li>
+                <li class="point">LangGraph renders it: <code>get_graph().draw_mermaid()</code> (text) or <code>draw_mermaid_png()</code> (image). The picture <i>is</i> the control flow &mdash; no API key needed.</li>
+            </ul>
+        </div>
+        <div class="diagram-frame reveal" style="flex-direction:column; align-items:stretch; width:760px; flex-shrink:0; gap:0;">
+            <div style="display:flex; align-items:stretch; gap:26px;">
+                <pre class="code" style="margin:0; flex:1; padding:16px 20px;"><code style="font-size:17px;">reply = parse(ticket)
+draft = write(reply)
+ok = policy(draft)
+<span class="kw">return</span> draft</code></pre>
+                <div style="display:flex; flex-direction:column; align-items:center; gap:10px; padding:8px 0;">
+                    <div class="gnode" style="padding:9px 20px; font-size:19px;">parse</div>
+                    <div class="garrow cyan" style="font-size:22px;">&darr;</div>
+                    <div class="gnode" style="padding:9px 20px; font-size:19px;">draft</div>
+                    <div class="garrow cyan" style="font-size:22px;">&darr;</div>
+                    <div class="gnode" style="padding:9px 14px; font-size:17px;">policy_check</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="diagram-caption reveal" style="position:absolute; left:var(--edge-x); bottom:36px;">Same logic; the graph is data you can inspect.</div>
+    <div class="chrome-page">19 / 26</div>
+    <div class="chrome-nav">&larr; &rarr; navigate</div>
+</section>
+
+<!-- ============================================================ -->
+<!-- 20 — SLIDE 5.2                                                -->
+<!-- ============================================================ -->
+<section class="slide">
+    <div class="chrome-tag">L04 &middot; <b>WORKFLOWS</b></div>
+    <div class="topbar reveal">
+        <div class="eyebrow">Slide 5.2</div>
+        <h2 class="headline">A first taste of tracing <span class="it">(not a prerequisite)</span></h2>
+    </div>
+    <div class="body-area">
+        <ul class="points reveal">
+            <li class="point">The demo gives an <b>optional</b> taste of routing spans to <b>Langfuse</b> &mdash; the same self-hosted instance <b>L12</b> teaches in full.</li>
+            <li class="point">Reading a structured trace, comparing runs, diagnosing failures from a trace alone is entirely <b>L12's</b> job, several lessons away.</li>
+            <li class="point">If Langfuse isn't configured, the workflow runs <b>exactly the same</b>; you just won't see the spans. Nothing in L04 depends on tracing.</li>
+        </ul>
+    </div>
+    <div class="chrome-page">20 / 26</div>
+    <div class="chrome-nav">&larr; &rarr; navigate</div>
+</section>
+
+<!-- ============================================================ -->
+<!-- 21 — SLIDE 5.3                                                -->
+<!-- ============================================================ -->
+<section class="slide">
+    <div class="chrome-tag">L04 &middot; <b>WORKFLOWS</b></div>
+    <div class="topbar reveal">
+        <div class="eyebrow">Slide 5.3</div>
+        <h2 class="headline">Determinism is a feature, <span class="it">not a limitation</span></h2>
+    </div>
+    <div class="body-area">
+        <ul class="points reveal">
+            <li class="point">Your workflow takes the <b>same path</b> on the same input: predictable, cheaper, lower-latency, and <b>trivially testable</b>.</li>
+            <li class="point">That testability is half the reason to prefer workflows: a tiny eval set (the L13 discipline) is cheap and honest.</li>
+            <li class="point">The model <i>inside</i> a node is still non-deterministic &mdash; a draft's wording varies. The <b>path</b> is what's stable, and that's the whole lesson.</li>
+        </ul>
+    </div>
+    <div class="chrome-page">21 / 26</div>
+    <div class="chrome-nav">&larr; &rarr; navigate</div>
+</section>
+
+<!-- ============================================================ -->
+<!-- 22 — SECTION 6 DIVIDER                                        -->
+<!-- ============================================================ -->
+<section class="slide slide-chapter">
+    <div class="chrome-tag reveal">L04 &middot; <b>WORKFLOWS</b></div>
+    <div class="chapter-ghost reveal">06</div>
+    <div class="chapter-eyebrow reveal">Section 6</div>
+    <div class="chapter-title reveal">Two DAG gotchas, <span style="color:var(--cyan); font-style:normal;">named</span></div>
+    <div class="chapter-sub reveal">Both share one root: in a workflow you own two things the model doesn't &mdash; the path, and which model runs each node.</div>
+    <div class="chrome-page">22 / 26</div>
+</section>
+
+<!-- ============================================================ -->
+<!-- 23 — SLIDE 6.1                                                -->
+<!-- ============================================================ -->
+<section class="slide">
+    <div class="chrome-tag">L04 &middot; <b>WORKFLOWS</b></div>
+    <div class="topbar reveal">
+        <div class="eyebrow">Slide 6.1</div>
+        <h2 class="headline">The two pitfalls to catch when you <span class="it">wire your own</span></h2>
+    </div>
+    <div class="body-area reveal">
+        <table class="ledger">
+            <thead><tr><th>Gotcha</th><th>Cure</th><th>Where you saw it</th></tr></thead>
+            <tbody>
+                <tr>
+                    <td class="tag warn-cell">"My DAG is deterministic"</td>
+                    <td>the <b>path</b> is fixed; the model's output <i>inside</i> a node still varies. Keep the graph acyclic <b>on purpose</b> &mdash; loop on the model's own output and you've built an agent. Name the crossing, don't slide into it.</td>
+                    <td>&sect;5.3 + &sect;2.5 (a DAG is "no back-edge") + slide 1.2</td>
+                </tr>
+                <tr>
+                    <td class="tag warn-cell">Wrong model per node</td>
+                    <td>cheap model for classify / extract, capable for reasoning. The <i>mechanism</i> is per-node <code>ChatAnthropic(model=...)</code> (&sect;4); the <i>which-model</i> framework is L14.</td>
+                    <td>&sect;4 + the <code>parse</code>=Haiku / <code>draft</code>=Sonnet chain in the L0403 demo</td>
+                </tr>
+            </tbody>
+        </table>
+        <div class="diagram-caption reveal" style="margin-top:22px;">The first is where the spine blurs: a model <i>inside</i> a node isn't agency &mdash; agency is the model choosing the <b>path</b>, the back-edge L11 adds.</div>
+    </div>
+    <div class="chrome-page">23 / 26</div>
+    <div class="chrome-nav">&larr; &rarr; navigate</div>
+</section>
+
+<!-- ============================================================ -->
+<!-- 24 — SECTION 7 DIVIDER                                        -->
+<!-- ============================================================ -->
+<section class="slide slide-chapter">
+    <div class="chrome-tag reveal">L04 &middot; <b>WORKFLOWS</b></div>
+    <div class="chapter-ghost reveal">07</div>
+    <div class="chapter-eyebrow reveal">Section 7</div>
+    <div class="chapter-title reveal">Bridge to <span style="color:var(--cyan); font-style:normal;">L05</span></div>
+    <div class="chapter-sub reveal">One more primitive &mdash; the conditional edge &mdash; then the workflow-vs-agent contrast closes out.</div>
+    <div class="chrome-page">24 / 26</div>
+</section>
+
+<!-- ============================================================ -->
+<!-- 25 — SLIDE 7.1                                                -->
+<!-- ============================================================ -->
+<section class="slide">
+    <div class="chrome-tag">L04 &middot; <b>WORKFLOWS</b></div>
+    <div class="topbar reveal">
+        <div class="eyebrow">Slide 7.1</div>
+        <h2 class="headline">One more primitive, then the <span class="it">workflow-vs-agent</span> close</h2>
+    </div>
+    <div class="body-area">
+        <ul class="points reveal">
+            <li class="point">Everything here &mdash; <code>StateGraph</code>, nodes, fixed edges, typed state, reducers, compile/invoke &mdash; carries into <b>L05 unchanged</b>.</li>
+            <li class="point">L05 adds exactly one new primitive: the <b>conditional edge</b> &mdash; a routing function chosen at runtime instead of a fixed <code>A &rarr; B</code>.</li>
+            <li class="point">L05 is also where the full <b>workflow vs. agent</b> contrast closes out &mdash; once you've seen both a fixed chain (here) and a routed branch (L05), before L11 hands the model that control.</li>
+        </ul>
+    </div>
+    <div class="chrome-page">25 / 26</div>
+    <div class="chrome-nav">&larr; &rarr; navigate</div>
+</section>
+
+<!-- ============================================================ -->
+<!-- 26 — CLOSING                                                  -->
+<!-- ============================================================ -->
+<section class="slide slide-closing">
+    <div class="chrome-tag reveal">L04 &middot; <b>WORKFLOWS</b></div>
+    <div class="closing-statement reveal">In a workflow, the model lives inside the nodes; <span class="k">you own the edges</span> &mdash; a fixed, acyclic chain that takes the same path every time.</div>
+    <div class="closing-grid reveal">
+        <div class="col">
+            <div class="label">Next</div>
+            <div class="val"><b>L05</b> &mdash; the conditional edge, and the workflow-vs-agent close</div>
+        </div>
+        <div class="col">
+            <div class="label">Practice</div>
+            <div class="val"><b>L0404 lab</b> wire your own parse&rarr;draft&rarr;check chain<br><b>Mix models</b> Haiku + Sonnet per node</div>
+        </div>
+        <div class="col">
+            <div class="label">Companions</div>
+            <div class="val">Live demo <b>L0403</b> prompt chaining<br>Reducers &amp; state reused in <b>L11</b></div>
+        </div>
+    </div>
+    <div class="chrome-page">26 / 26</div>
+</section>
+
+</main>
+</div>
+
+<!-- Outside-stage UI: progress bar + arrow nav + editing controls -->
+<div class="deck-progress"><div class="deck-progress-bar" id="progressBar"></div></div>
+<button class="deck-arrow prev" id="prevBtn" aria-label="Previous slide">&#8592;</button>
+<button class="deck-arrow next" id="nextBtn" aria-label="Next slide">&#8594;</button>
+<div class="edit-hotzone" id="editHotzone"></div>
+<button class="edit-toggle" id="editToggle" title="Edit mode (E)">&#9998;</button>
+<div class="save-toast" id="saveToast">Saved</div>
+
+<script>
+/* ===========================================
+   SLIDE PRESENTATION CONTROLLER
+   =========================================== */
+class SlidePresentation {
+    constructor() {
+        this.slides = Array.from(document.querySelectorAll('.slide'));
+        this.currentSlide = 0;
+        this.stage = document.getElementById('deckStage');
+        this.progressBar = document.getElementById('progressBar');
+        this.setupStageScale();
+        this.setupKeyboardNav();
+        this.setupTouchNav();
+        this.setupWheelNav();
+        this.setupArrowButtons();
+        this.showSlide(0);
+    }
+
+    setupStageScale() {
+        const scale = () => {
+            const factor = Math.min(window.innerWidth / 1920, window.innerHeight / 1080);
+            const x = (window.innerWidth - 1920 * factor) / 2;
+            const y = (window.innerHeight - 1080 * factor) / 2;
+            this.stage.style.transform = `translate(${x}px, ${y}px) scale(${factor})`;
+        };
+        scale();
+        window.addEventListener('resize', scale);
+    }
+
+    setupKeyboardNav() {
+        document.addEventListener('keydown', (e) => {
+            if (e.target.getAttribute('contenteditable') === 'true') return;
+            if (['ArrowRight', 'ArrowDown', ' ', 'PageDown'].includes(e.key)) {
+                e.preventDefault();
+                this.next();
+            } else if (['ArrowLeft', 'ArrowUp', 'PageUp'].includes(e.key)) {
+                e.preventDefault();
+                this.prev();
+            } else if (e.key === 'Home') {
+                this.showSlide(0);
+            } else if (e.key === 'End') {
+                this.showSlide(this.slides.length - 1);
+            }
+        });
+    }
+
+    setupTouchNav() {
+        let startX = 0;
+        this.stage.addEventListener('touchstart', (e) => { startX = e.touches[0].clientX; }, { passive: true });
+        this.stage.addEventListener('touchend', (e) => {
+            const dx = e.changedTouches[0].clientX - startX;
+            if (Math.abs(dx) > 60) { dx < 0 ? this.next() : this.prev(); }
+        }, { passive: true });
+    }
+
+    setupWheelNav() {
+        let locked = false;
+        window.addEventListener('wheel', (e) => {
+            if (locked) return;
+            if (Math.abs(e.deltaY) < 24) return;
+            locked = true;
+            e.deltaY > 0 ? this.next() : this.prev();
+            setTimeout(() => { locked = false; }, 500);
+        }, { passive: true });
+    }
+
+    setupArrowButtons() {
+        document.getElementById('nextBtn').addEventListener('click', () => this.next());
+        document.getElementById('prevBtn').addEventListener('click', () => this.prev());
+    }
+
+    next() { this.showSlide(this.currentSlide + 1); }
+    prev() { this.showSlide(this.currentSlide - 1); }
+
+    showSlide(index) {
+        this.currentSlide = Math.max(0, Math.min(index, this.slides.length - 1));
+        this.slides.forEach((slide, i) => {
+            slide.classList.toggle('active', i === this.currentSlide);
+            slide.classList.toggle('visible', i === this.currentSlide);
+        });
+        this.progressBar.style.width = `${((this.currentSlide + 1) / this.slides.length) * 100}%`;
+    }
+}
+
+/* ===========================================
+   INLINE EDITING — hover hotzone + E key
+   =========================================== */
+class InlineEditor {
+    constructor() {
+        this.isActive = false;
+        this.toggle = document.getElementById('editToggle');
+        this.hotzone = document.getElementById('editHotzone');
+        this.toast = document.getElementById('saveToast');
+        this.editableSelector = 'h1, h2, h3, p, li, span, td, th, div.claim, div.lede, div.chapter-sub, div.diagram-caption';
+        this.hideTimeout = null;
+        this.bindEvents();
+        this.restore();
+    }
+
+    bindEvents() {
+        this.toggle.addEventListener('click', () => this.toggleEditMode());
+        this.hotzone.addEventListener('click', () => this.toggleEditMode());
+        this.hotzone.addEventListener('mouseenter', () => { clearTimeout(this.hideTimeout); this.toggle.classList.add('show'); });
+        this.hotzone.addEventListener('mouseleave', () => this.scheduleHide());
+        this.toggle.addEventListener('mouseenter', () => clearTimeout(this.hideTimeout));
+        this.toggle.addEventListener('mouseleave', () => this.scheduleHide());
+        document.addEventListener('keydown', (e) => {
+            if ((e.key === 'e' || e.key === 'E') && e.target.getAttribute('contenteditable') !== 'true') {
+                this.toggleEditMode();
+            }
+            if (e.key === 's' && (e.metaKey || e.ctrlKey) && this.isActive) {
+                e.preventDefault();
+                this.save();
+            }
+        });
+    }
+
+    scheduleHide() {
+        this.hideTimeout = setTimeout(() => {
+            if (!this.isActive) this.toggle.classList.remove('show');
+        }, 400);
+    }
+
+    toggleEditMode() {
+        this.isActive = !this.isActive;
+        this.toggle.classList.toggle('active', this.isActive);
+        const stage = document.getElementById('deckStage');
+        const editableEls = stage.querySelectorAll(this.editableSelector);
+        editableEls.forEach((el) => {
+            if (el.closest('svg')) return;
+            el.setAttribute('contenteditable', this.isActive ? 'true' : 'false');
+        });
+        if (!this.isActive) this.save();
+    }
+
+    save() {
+        try {
+            const html = document.getElementById('deckStage').innerHTML;
+            localStorage.setItem('l0402-deck-content', html);
+            this.showToast();
+        } catch (err) {
+            console.warn('Could not save deck content', err);
+        }
+    }
+
+    restore() {
+        try {
+            const saved = localStorage.getItem('l0402-deck-content');
+            if (saved) document.getElementById('deckStage').innerHTML = saved;
+        } catch (err) {
+            console.warn('Could not restore deck content', err);
+        }
+    }
+
+    showToast() {
+        this.toast.classList.add('show');
+        setTimeout(() => this.toast.classList.remove('show'), 1400);
+    }
+}
+
+new SlidePresentation();
+new InlineEditor();
+</script>
+</body>
+</html>
