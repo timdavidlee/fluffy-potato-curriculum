@@ -23,8 +23,10 @@ estimated duration: 45
 - Now you're adding the **conditional edge**: a **routing function** reads state at runtime and
   returns the *name* of the next node, wired with `add_conditional_edges("classify", route,
   {...})`.
-- diagram: `classify` fanning out via a dashed conditional edge to `billing` / `technical` /
-  `general`, all three arrows converging into `END`.
+- diagram: two edge types side by side — on the left a solid **fixed** edge `A → B` (taken every
+  time, tagged "L04"); on the right a dashed **conditional** edge where one `classify` node forks to
+  three schematic branches that reconverge to `END`, tagged "new: a routing function picks the
+  branch at runtime."
 
 ### slide 1.2 The decider — what your routing function is allowed to read
 
@@ -44,6 +46,11 @@ builder.add_conditional_edges("classify", route,
     {"billing": "billing", "technical": "technical", "general": "general"})
 ```
 
+- diagram: a central `route(state)` function with three **cyan** allowed inputs feeding into it —
+  "derived / computed state", "a model's classification label", "direct user input" — and one
+  **coral** input "did the model ask for a tool?" crossed out and tagged "L11 only." Caption: three
+  things the decider may read; one it may not.
+
 ## section 2. The routing pattern — classify, then branch
 
 ### slide 2.1 An entry classifier that fans out
@@ -56,6 +63,9 @@ builder.add_conditional_edges("classify", route,
   **cheap, fast model** (Haiku 4.5); the branches do the real reasoning, so run those on the
   **capable model** (Sonnet 4.6). This is the *mechanism* of mixed-model design — you'll get the
   full decision framework in **[L14](../L14/objectives.md)**.
+- diagram: the concrete router — a `classify` node badged **Haiku 4.5** ("cheap: just emits a
+  label") fanning via a dashed conditional edge to three branch nodes `billing` / `technical` /
+  `general`, each badged **Sonnet 4.6** ("capable: the real reasoning"), all converging into `END`.
 
 ### slide 2.2 Determinism: the workhorse proof
 
@@ -94,6 +104,10 @@ builder.add_conditional_edges("classify", route,
 - The general pattern for most real conditional workflows: route on the user's choice first, then
   run a model-driven **node** inside the chosen branch. Keep this rule in mind: **the user (or your
   own logic) owns the edge; the model can still do work inside a node.**
+- diagram: two identical router shapes side by side — same entry → conditional edge → converging
+  branches — differing only in the **decider**: the left one's fork is tagged "model classification
+  (§2)", the right one's "direct user input (§3) — no model in the decision." Caption: same shape,
+  different decider.
 
 ## section 4. When developer-controlled branching is enough
 
