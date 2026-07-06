@@ -120,6 +120,10 @@ estimated duration: 80
   never silently return an empty string.
 - One tag-violation teaches you more than ten clean runs: it proves the contract is best-effort,
   which is exactly why your parser exists.
+- diagram: a defensive parse flow — a model response that broke the contract (a missing
+  `</answer>`, the answer outside the tag, or two `<answer>` blocks) feeding a parser: try the
+  `<answer>` regex (happy path, cyan) → a fallback → and a **coral** "fail loud" terminal, captioned
+  "never silently return an empty string."
 
 ### slide 3.4 Why the separation matters downstream
 
@@ -140,6 +144,10 @@ estimated duration: 80
   - **Single-prompt** — one round-trip; the model answers, critiques, and revises inline.
   - **Two-step** — two round-trips; you feed the first answer into a second call (possibly a
     different prompt or a different model). More expensive, more controllable.
+- diagram: the two self-critique shapes side by side — **single-prompt** (one round-trip: a single
+  call where the model answers → critiques → revises inline) vs **two-step** (two round-trips: call 1
+  produces the answer, then call 2 — possibly a different prompt or model — critiques and revises
+  it), the two-step tagged "a whole extra round-trip: costlier, more controllable."
 
 ### slide 4.2 The sycophancy failure mode
 
@@ -192,6 +200,11 @@ estimated duration: 80
   plausible-but-wrong justification and the model follows it off a cliff — CoT *lowers* accuracy.
 - **Tight-latency, user-facing flows.** A chat UI or real-time agent often can't afford CoT on every
   call even when it would help accuracy — your latency budget says no.
+- diagram: three compact panels of reasoning backfiring — (1) an **easy** task (a 2-token answer
+  weighed down by a 200-token CoT preamble: cost + latency, no accuracy gain); (2) a **trap** task
+  (free-form reasoning building a plausible-but-wrong path the model then follows off a cliff —
+  accuracy *drops*, mark it coral); (3) a **latency-bound** flow (a real-time chat/agent whose budget
+  says no even when CoT would help).
 
 ### slide 5.3 Make the trade-off on purpose
 
