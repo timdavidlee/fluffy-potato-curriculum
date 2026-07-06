@@ -1108,7 +1108,7 @@ table.ledger td.warn-cell { color: var(--coral); }
             <tbody>
                 <tr><td class="tag">Validation</td><td>bad arguments</td><td>name the field + the constraint</td><td>correct the field and retry</td></tr>
                 <tr><td class="tag">Recoverable runtime</td><td>rate limit, timeout, transient API failure</td><td>signal "try again" without burning budget</td><td>retry (or the runtime retries silently)</td></tr>
-                <tr><td class="tag">Unrecoverable</td><td>entity doesn't exist, no permission</td><td>be clear and <b>final</b></td><td class="warn-cell">stop retrying; report or route around</td></tr>
+                <tr><td class="tag">Unrecoverable</td><td class="warn-cell">entity doesn't exist, no permission</td><td>be clear and <b>final</b></td><td>stop retrying; report or route around</td></tr>
             </tbody>
         </table>
         <ul class="points reveal" style="margin-top:34px;">

@@ -25,8 +25,9 @@ estimated duration: 15
 - Today introduces **no new control flow.** Model → tool → model until termination is the L10
   skeleton, unchanged. The only new thing is *who writes the loop.*
 - diagram: the bare L10 loop as a circular flow — `model` → `tool` → back to `model`, the loop
-  arrow in cyan, a small exit arrow to *done* when the model stops asking; caption *"the loop you
-  wrote by hand in L10."* This motif repeats all lesson — this is its plainest form.
+  arrow in cyan, a small **ink-faint** exit arrow to *done* when the model stops asking (the cyan
+  cycle stays the only emphasized path); caption *"the loop you wrote by hand in L10."* This motif
+  repeats all lesson — this is its plainest form.
 
 ### slide 1.2 The one-liner, named now
 
@@ -43,6 +44,10 @@ agent = create_agent(model, [calculator, lookup, flaky_fetch], system_prompt=...
 - **Shallow agent, defined:** one model, one tool set, one decision point that either calls a tool
   or finishes. That is *exactly* the L10 agent graph. Not a deep agent (planning / memory /
   reflection — L18). Shallow ≠ lesser; most production agents are shallow.
+- diagram: one cyan box holding the shallow agent's three chips — *model · tools · one decision
+  point* — beside a **dashed ink-faint ghost box** of deep-agent chips (*planning / memory /
+  reflection → L18*). explicitly no coral — deep isn't a failure, just later. Pre-echoes the
+  container framing slide 4.1 lands on.
 
 [↑ Back to top](#from-loop-to-graph-draw-what-create_agent-wraps)
 
@@ -52,8 +57,9 @@ agent = create_agent(model, [calculator, lookup, flaky_fetch], system_prompt=...
 
 - In [L04](../L04/objectives.md)/[L05](../L05/objectives.md) you wired a **workflow** — a directed
   *acyclic* graph. *You* owned the path; the model never decided what ran next.
-- diagram: L04's DAG — `start → step A → step B → end`, straight arrows, no loop back. A caption:
-  *"the developer owns every edge."*
+- diagram: L04's DAG — `start → step A → step B → end`, straight arrows, no loop back, every
+  chain edge drawn **cyan** ("the developer owns every edge" — it's the cyan dropping to ink-faint
+  in 2.2 that makes the back-edge read as the change). Caption: *"the developer owns every edge."*
 
 ### slide 2.2 An agent adds exactly one thing: a back-edge
 
@@ -75,10 +81,11 @@ agent = create_agent(model, [calculator, lookup, flaky_fetch], system_prompt=...
 
 - Draw the shallow-agent graph piece by piece — this is a *picture of the L10 graph you wired by
   hand*, not something you build today.
-- diagram: two nodes and the wiring —
-  `__start__ → agent`; a **conditional exit** out of `agent`: (tool call) → `tools`, (plain text) →
-  `__end__`; and a fixed **back-edge** `tools → agent`. Label the `tools → agent` arrow **"the
-  back-edge / the cycle."**
+- diagram: two nodes and the wiring — nodes as cyan boxes: `__start__ → agent`; a **conditional
+  exit** out of `agent`: (tool call) → `tools`, (plain text) → `__end__` with the exit path
+  **ink-faint**; and a fixed **back-edge** `tools → agent` emphasized **cyan** — it *is* the point.
+  No coral anywhere. Label the `tools → agent` arrow **"the back-edge / the cycle."** This is the
+  motif 3.2 and 3.3 reuse — draw it to be redrawn.
 
 ```text
         ┌─────────────────────────────┐
@@ -99,6 +106,12 @@ agent = create_agent(model, [calculator, lookup, flaky_fetch], system_prompt=...
   for it. If you can't make this mapping yet, slow down — *this mapping is the objective.* Two rows
   are the payoff: your hand-written `route` **is** the prebuilt `tools_condition`, and your
   `ToolNode` is the *same* `ToolNode` — the framework just packaged what you already wrote.
+- diagram: the slide-3.1 graph re-drawn with the graph plumbing dropped to **ink-faint** and a
+  **cyan argument chip** pinned to each piece — `model` on the agent node, `tools` on the ToolNode,
+  `tools_condition` on the conditional exit, *"built in"* on the back-edge, and `system_prompt` /
+  `recursion_limit` chips at the margins. Cyan = what you pass in, ink-faint = wiring the framework
+  owns; no coral. Middle of the 3.1 (bare) → 3.2 (annotated) → 3.3 (traced) triple — the payoff
+  picture above the table.
 
 | You wired by hand in L10 | `create_agent` gives you |
 | --- | --- |
@@ -142,6 +155,10 @@ agent = create_agent(model, [calculator, lookup, flaky_fetch], system_prompt=...
   explicit conditional edges) is **[L15](../../CURRICULUM_PRD.md)'s** job.
 - The point of the diagram is only this: `create_agent` is **not magic** — it is the graph you
   already wired, packaged.
+- diagram: an outer cyan `create_agent(model, [tools], system_prompt=…)` box physically containing
+  the small slide-3.1 graph, plus one **dashed ink-faint ghost chip** — *"assemble it node-by-node:
+  StateGraph → L15."* Block/nested; no coral. The loop motif's "shrunk inside a wrapper" beat —
+  the literal picture of the lecture title.
 
 ### slide 4.2 The step cap did not disappear
 
@@ -164,5 +181,8 @@ agent = create_agent(model, [calculator, lookup, flaky_fetch], system_prompt=...
   named pattern — **ReAct** (reason, act, repeat). L15 drops below the one-liner to build that
   graph explicitly and surveys the others (plan-and-execute, supervisor, …). Today you have the
   one-liner and a picture of what it wraps.
+- diagram: the loop motif small, in cyan, with a **"ReAct"** label pinned on it, and beside it a
+  **dashed ink-faint row** of sibling patterns — *plan-and-execute · supervisor → L15*. Bookends
+  slide 1.1's plainest-form loop.
 
 [↑ Back to top](#from-loop-to-graph-draw-what-create_agent-wraps)

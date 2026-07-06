@@ -43,7 +43,8 @@ agent = create_agent(
 - Change the **system prompt** once and re-run the *same* task: same agent, different instruction.
 - diagram: two runs of the identical `create_agent` call side by side — left prompt *"answer in one
   sentence"*, right prompt *"show your reasoning step by step"* — same tools, same loop, different
-  final-answer shape.
+  final-answer shape. Both panels cyan-bordered, the differing system-prompt chip highlighted,
+  everything shared ink-faint — no coral: both runs are correct.
 - The point is *"same agent, new instruction,"* not a dramatic behavior change. If a behavior swap
   doesn't show, swap the *format* of the answer — that always lands.
 
@@ -72,6 +73,10 @@ agent = create_agent(
   `recursion_limit` in the run config to change it).
 - A runaway agent still trips it, and tripping it is **still a signal worth investigating** — the
   L10 lesson didn't go away, it moved inside the framework.
+- diagram: re-show 2.1's *"managed by `create_agent`"* bracket with an ink-faint `recursion_limit`
+  (25) cap chip now drawn **inside** the bracket, and a coral runaway arc tripping it — cyan loop
+  for the normal path, coral only for the runaway trip, cap chip ink-faint (the framework's).
+  Second beat of the 2.1 bracket: "it moved inside" is literally a chip changing sides.
 
 [↑ Back to top](#the-config-surface-and-where-the-one-liner-ends)
 
@@ -86,15 +91,17 @@ agent = create_agent(
   - a **custom node** (validate, summarize, call a sub-agent);
   - **state beyond the message list** (a running budget, a scratchpad, a plan).
 - Any one of those is the signal: you have left the shallow single-loop shape.
-- diagram: the single tool-or-finish loop drawn small and cyan at center, with four coral arrows
-  breaking out of it, one per signal — *second model*, *non-tool branch*, *custom node*, *state
-  beyond messages*. Caption: *"any one arrow means you've outgrown the one-liner."*
+- diagram: the single tool-or-finish loop drawn small and cyan at center, with four arrows breaking
+  out of it, one per signal — coral on the **arrows only** (the single-loop shape breaking), the
+  destination boxes dashed ink-faint, each tagged *"→ L15"* — these are legitimate needs, not
+  failures. Caption: *"any one arrow means you've outgrown the one-liner."*
 
 ### slide 3.2 That's exactly the door into L15
 
 - diagram: a "ceiling" line. Below it, labeled *`create_agent` (shallow, single loop)*: model,
-  tools, prompt. Above it, labeled *explicit `StateGraph` (L15)*: custom nodes, branches, reducers,
-  state schema, and the named patterns (**ReAct, plan-and-execute, supervisor, …**).
+  tools, prompt — cyan (you are here). Above it, labeled *explicit `StateGraph` (L15)*: custom
+  nodes, branches, reducers, state schema, and the named patterns (**ReAct, plan-and-execute,
+  supervisor, …**) — dashed ink-faint (deferred), matching 3.4's ladder discipline.
 - When the control flow branches, you **drop to an explicit `StateGraph`** and wire nodes / edges /
   reducers yourself. Building that graph — and the patterns on top of it — is
   **[L15](../../CURRICULUM_PRD.md)**. L11 names the door; L15 opens it.
@@ -105,6 +112,10 @@ agent = create_agent(
   - **Over-engineering:** reaching for a hand-built graph on a single loop — the L10-objective-4
     mistake (a framework where 50 lines would do).
   - **Under-engineering:** refusing to leave the one-liner when the flow genuinely branches.
+- diagram: re-show 3.2's ceiling line with two coral mis-placements — a hand-wired `StateGraph`
+  crammed **below** the line (over-engineering) and a straining one-liner clinging **above** it
+  (under-engineering); cyan for the line and the right altitude, coral for both mistakes (genuine
+  failures). Third beat of the ceiling picture (3.1 → 3.2 → 3.3).
 - L11 teaches the **shallow** side of that line: *use `create_agent` until the control flow stops
   being a single loop.* L15 teaches the other side.
 
@@ -138,5 +149,8 @@ agent = create_agent(
 
 - Knowing where the ceiling is *is* the shallow-agent skill — neither reflex (always hand-build, or
   never leave the one-liner) is right.
+- diagram: a light triptych of the lesson's three motifs in miniature — loop-with-cap / bracket /
+  ceiling — each tagged with its coral gotcha name and a cyan cure chip. A motif bookend; the table
+  carries the content, keep it light.
 
 [↑ Back to top](#the-config-surface-and-where-the-one-liner-ends)

@@ -37,9 +37,10 @@ estimated duration: 80
   and how to call it.
 - So every design choice optimizes for **the model's ability to choose and use the tool correctly on
   first read** — not for the human author's ergonomics.
-- diagram: two columns — "Human consumer (IDE, autocomplete, docs, co-worker)" vs "LLM consumer (name
-  + description + schema + return shape, read once)" — with an arrow noting the model has only the
-  right column.
+- diagram: two columns — "Human consumer (IDE, autocomplete, docs, co-worker)" in ink-faint vs the
+  "LLM consumer" column in cyan, drawn as a four-pill spec card (name · description · schema · return
+  shape, read once) — an arrow noting the model has only the right column. The four-pill spec card is
+  the lesson's reusable motif: later slides re-show it with one field lit.
 
 ### slide 1.3 The four judgment calls, in one breath
 
@@ -64,6 +65,9 @@ estimated duration: 80
 - It also has a cost shadow ([L01](../L01/L0101_intro.md)): every tool eats system-prompt tokens,
   adds a per-turn decision, and adds another wrong-tool failure mode. *More tools ≠ more capable
   agent.* A 5-tool agent the model can navigate beats a 20-tool agent it gets lost in.
+- diagram: a bar chart of system-prompt token cost climbing with each tool added — the 5-tool bar
+  cyan, the 20-tool bar coral and much taller, with a coral "wrong-tool pick" annotation; pre-echoes
+  4.4's tool-soup extreme.
 
 ### slide 2.2 Four signals a tool *is* warranted
 
@@ -114,6 +118,9 @@ estimated duration: 80
 - Anti-patterns: cryptic abbreviations (`lu`, `gx2`), overlapping names across tools (`get_user` and
   `fetch_user` in the same registry), and — worst — **names that hide a side effect** (`get_user`
   that also *creates* one). A name that lies about what the tool does is a tool that will be misused.
+- diagram: a registry strip of bare name pills, as the model sees them — one cyan descriptive name
+  against coral pills for `lu` / `gx2`, the overlapping `get_user` + `fetch_user` pair, and a
+  `get_user`-that-creates carrying a hidden-side-effect tag.
 
 ### slide 3.2 The description is the most important field
 
@@ -125,6 +132,10 @@ estimated duration: 80
 - A weak description is the single most common cause of an unused or a misused tool.
   [Demo 2](L0805_lecture.ipynb) makes this concrete — same name, same schema, three descriptions,
   three very different behaviors.
+- diagram: three tool-spec cards side by side — name + schema rows identical and ink-faint, only the
+  description row differing and lit cyan; each card arrows to a different outcome chip — cyan "called
+  correctly", ink-faint "never called", coral "misused". Debut of the description-lit spec-card motif
+  (1.2's four-pill card re-shown with one field highlighted).
 
 ### slide 3.3 What a good description must answer
 
@@ -133,8 +144,9 @@ estimated duration: 80
   - *What does this tool do?*
   - *When should the model reach for it — and when should it not?*
   - *What does it return* (the shape, so the model can plan its next turn)?
-- diagram: a single tool description annotated with four call-outs — "what it does", "when to use",
-  "when NOT to use", "what it returns" — over the same block of prose.
+- diagram: re-show the 1.2 spec card with the description pill expanded into its block of prose,
+  annotated with four cyan call-outs — "what it does", "when to use", "when NOT to use", "what it
+  returns"; the other pills stay ink-faint.
 
 ### slide 3.4 Write for the model, not the human reader
 
@@ -159,6 +171,10 @@ estimated duration: 80
 - A **loose schema** (one free-form `details: str`, everything optional) pushes the ambiguity *into
   the tool implementation*, which then rejects calls in ad-hoc ways the model can't anticipate — or,
   worse, silently "succeeds" on a malformed call.
+- diagram: two-up contrast, the spec card's schema row lit — the tight schema cyan (required / enum /
+  typed rows) converting a fuzzy call into a validation-error arrow cycling back to the model; the
+  loose schema coral (one `details: str` blob) passing the fuzziness straight through to a coral
+  "ad-hoc rejection / silent success" box.
 
 ### slide 4.2 The pieces of a good schema
 
@@ -183,6 +199,8 @@ estimated duration: 80
 - This is exactly why **errors** (section 6) matter as a second line of defense: the schema rejects bad
   *shape*; the tool's runtime errors reject bad *truth*. [Demo 3](L0807_lecture.ipynb) shows the model
   guessing a well-formed-but-fake value that passes validation and only fails at lookup.
+- diagram: a flow with two gates — the call passes a cyan "schema gate" (shape OK) then fails at a
+  coral "truth gate" (no such user); a dashed ink-faint pointer notes "handled by errors — §6".
 
 ### slide 4.4 The two extremes to avoid
 
@@ -190,8 +208,9 @@ estimated duration: 80
   near-identical options to pick through and picks wrong.
 - **Too-generic tools** → the kitchen sink: a single tool with twenty parameters the model
   misconfigures.
-- diagram: a dial from "20 narrow tools (tool soup)" on the left through "a focused 5-tool set" in the
-  middle to "1 tool, 20 params (kitchen sink)" on the right, with the middle marked "navigable".
+- diagram: a three-position spectrum row — "20 narrow tools (tool soup)" on the left and "1 tool,
+  20 params (kitchen sink)" on the right both coral, the middle "focused 5-tool set" cyan and marked
+  "navigable".
 - **LLM tools ≠ REST endpoints.** REST conventions optimize for human readability and HTTP semantics;
   LLM tools optimize for *being chosen and called correctly from a description*. A `GET /users/{id}`
   and a `POST /users` may collapse into one LLM tool with an `action` parameter — or split differently.
@@ -209,8 +228,10 @@ estimated duration: 80
   - **Successful call, no data** — the call worked, but there's nothing to return (e.g. a lookup with
     no match). This is **not** an error.
   - **Error** — the call could not be completed.
-- diagram: three branches off a tool call — `{"results": [...]}`, `{"found": false}`,
-  `{"error": ...}` — each leading to a different model next-turn.
+- diagram: a three-branch fan off a tool call, each branch landing on a different model next-turn —
+  `{"results": [...]}` cyan, `{"found": false}` ink-faint *on purpose* (its neutrality — not an
+  error — is exactly 5.2's teaching point), `{"error": ...}` coral. This fan is a motif: 5.2 and 6.2
+  re-show it.
 
 ### slide 5.2 Why "no data" must not look like an error
 
@@ -218,6 +239,9 @@ estimated duration: 80
   (it might be transient) or to report (it's final). Conflating them produces undefined behavior.
 - A clean `{"found": false}` is a *final, unrecoverable* signal — the model reports back or asks for a
   better key, and does **not** retry. [Demo 4](L0809_lecture.ipynb) shows this path explicitly.
+- diagram: two-up motif repeat of 5.1's fan — left panel coral: `{"found": false}` and
+  `{"error": ...}` merged into one shape, the model's retry loop spinning; right panel cyan: the two
+  shapes distinct, no retry.
 
 [↑ Back to top](#designing-good-tools-name-schema-and-error-as-interface)
 
@@ -244,6 +268,10 @@ estimated duration: 80
 
 - The shape of the error *is* the interface. An undocumented error class produces **undefined model
   behavior** — so add expected error shapes to the tool description.
+- diagram: re-show 5.1's fan zoomed into its error branch — an `{"error": ...}` box fanning to three
+  next-turn chips: validation → cyan "fix the field" arrow looping back to the call; recoverable
+  runtime → cyan dashed retry loop; unrecoverable → a stop chip with the retry loop struck through in
+  coral; plumbing ink-faint.
 
 ### slide 6.3 Write the error like a system message
 
@@ -251,8 +279,9 @@ estimated duration: 80
   actionable and retries with the same wrong call.
 - Good: `{"error": "validation", "field": "user_id", "message": "must be a UUID, got 'tim@example.com'"}`.
   The model knows *which* field, *why* it was rejected, and *how* to fix it.
-- diagram: the same failing call, two error returns side by side — a greyed-out stack trace ("model:
-  ¯\\_(ツ)_/¯") vs a structured `{error, field, message}` ("model: oh, I'll pass a UUID").
+- diagram: the same failing call, two error returns side by side — the raw stack-trace panel coral
+  ("model: ¯\\_(ツ)_/¯") vs the structured `{error, field, message}` panel cyan ("model: oh, I'll
+  pass a UUID").
 - The [L0808 lab](L0808_lab_empty.ipynb) has you take raw stack traces and rewrite each into an
   informative `{error, field, message}` payload — pure Python, no model needed.
 
@@ -333,6 +362,9 @@ estimated duration: 80
   the design pressures.
 - A poorly designed tool exposed via MCP is still a poorly designed tool — just available to more
   clients. L09 leans on the L08 vocabulary throughout.
+- diagram: re-show the 1.2 spec card unchanged — all four fields cyan — wrapped in a dashed ink-faint
+  "MCP envelope" with dashed transport arrows out to several client chips; caption "packaging lands
+  in L09; the card inside doesn't change." Motif bookend.
 
 ### slide 9.2 What to carry forward
 

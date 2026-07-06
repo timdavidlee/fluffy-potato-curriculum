@@ -30,9 +30,9 @@ estimated duration: 80
   tool-call format. The *tool* is the same; the *glue* is different every time.
 - The pain, stated precisely: **a tool designed for one client requires N separate integrations to be
   reused across N clients.** Three clients × five tools = fifteen integrations, all hand-maintained.
-- diagram: one `book_meeting` tool box at the top with three arrows down to three differently-shaped
-  "registration" boxes labeled "Anthropic SDK", "other framework", "IDE plugin" — same tool, three
-  different wrappers.
+- diagram: one `book_meeting` tool box in cyan at the top fanning down to three differently-shaped
+  "registration" boxes ("Anthropic SDK", "other framework", "IDE plugin") — registration boxes and
+  fan arrows ink-faint (the glue is neutral plumbing); the "N integrations" pain tag in coral.
 
 ### slide 1.2 The duplication is glue, not logic
 
@@ -57,15 +57,19 @@ estimated duration: 80
 
 - Say it as a chant: **discover, invoke, package.** Those are the three nouns MCP owns. Everything else
   about your tool — what it does, how it's named, what it returns — is unchanged.
+- diagram: re-show 1.1's fan with the glue collapsed — before panel keeps the N bespoke-wrapper
+  arrows coral; after panel has one cyan arrow into an "MCP server" box and one standardized wire
+  out to the same three clients, both cyan.
 
 ### slide 1.4 Where MCP sits in the stack
 
 - MCP sits **between** the client (the agent or app the user runs) and the tool implementation (a
   server process). It is *not* a model feature, *not* an SDK feature, *not* Anthropic-specific. It is
   an open protocol.
-- diagram: a vertical stack — `model` at top, then `client (agent/app)`, then a labeled wire
-  `← MCP →`, then `server (tool implementation)`. The model and the server never touch directly; the
-  client brokers everything.
+- diagram: a vertical stack — `model` at top, then `client (agent/app)`, a labeled wire `← MCP →`,
+  then `server (tool implementation)`. Client, server, and wire cyan; the model row ink-faint
+  ("never touches the server directly"). This stack is the lesson's boundary motif — 3.2, 3.4, 4.3,
+  and 5.1 re-show it with one change.
 - Let go of one confusion now: *"MCP is a Claude thing."* It is an open protocol with many clients
   and many servers, written in many languages, used by many models. This course uses Python and Claude
   because the rest of the course does — not because MCP is tied to either.
@@ -109,7 +113,8 @@ estimated duration: 80
   are identical.
 - diagram: two JSON blocks side by side for the same `book_meeting` tool — left labeled "L07 inline
   definition (`input_schema`)", right labeled "MCP tool spec (`inputSchema`)" — with every line
-  identical except the one renamed key, which is highlighted.
+  identical except the one renamed key, which is highlighted cyan — the rename is the point, not an
+  error.
 - The offline demo [L0903](L0903_lecture.ipynb) does this translation in code, both directions, and
   asserts the JSON Schema survives the move byte-for-byte. The [L0904 lab](L0904_lab_empty.ipynb) has
   you validate and translate a spec yourself — pure Python, no `mcp` package, no model.
@@ -125,6 +130,9 @@ estimated duration: 80
 - Back-reference [L08](../L08/objectives.md): *"more tools ≠ more capable agent."* A server that
   exposes 20 tools to every client floods every client's prompt with 20 descriptions, dilutes the
   model's attention, and raises the wrong-tool failure rate. **Curate the published surface.**
+- diagram: server box publishing its tool list into three connecting clients' system-prompt boxes —
+  a curated 3-chip list cyan vs. a coral 20-chip flood diluting the prompt. 4.4 re-shows this same
+  picture from the builder's side.
 
 [↑ Back to top](#mcp-the-portable-tool-contract-the-boundary-and-when-it-pays)
 
@@ -141,6 +149,9 @@ estimated duration: 80
 | **stdio** | server is a child process the client launches and pipes to over stdin/stdout | local development, single-user tools, lowest friction | shared services, remote access, many concurrent clients |
 | **HTTP/SSE** | server is a separate (possibly remote) process the client connects to over the network | shared/remote services, multiple clients, independent deployment | a quick local script (more setup than it's worth) |
 
+- diagram: two-up blocks — stdio: the server box nested inside the client machine's boundary as a
+  child process over stdin/stdout pipes; HTTP/SSE: separate boxes across a network wire. Both
+  panels cyan (neither is wrong), boundaries ink-faint, no coral.
 - Rule of thumb: **stdio for local development, HTTP/SSE for anything shared.** Choosing wrong is
   recoverable but annoying.
 
@@ -152,8 +163,9 @@ estimated duration: 80
   3. The server **replies** with its published tool specs (`name`, `description`, `inputSchema` each).
   4. The client **registers** those specs as tools available to the model — they go into the system
      prompt just like an inline tool definition would.
-- diagram: client → `list_tools` request → server; server → `[tool spec, tool spec, ...]` → client;
-  client → "these are now available to the model".
+- diagram: the 1.4 stack turned into a sequence — client → `list_tools` request → server; server →
+  `[tool spec, tool spec, ...]` → client; client → "these are now available to the model". The
+  connect step ink-faint plumbing; the ask/reply/register steps cyan.
 - The shift in ownership is the lesson: inline tools are known to the agent at **code-write time**; MCP
   tools are known at **connect time**, and the *server* decides what's on the list.
 
@@ -176,6 +188,10 @@ estimated duration: 80
 - The model's view is **identical to L07**. MCP is invisible to it — it lives entirely in steps 2–4,
   which are the *client's* job and the *operator's* config. The slide-outline lecture
   [L0905](L0905_lecture.md) walks the real connection code (shown, not run here).
+- diagram: flow strip model → client → server → client → model with steps 2–4 wrapped in a dashed
+  ink-faint bracket "invisible to the model"; the model-side messages (`AIMessage` out,
+  `ToolMessage` back) cyan, tagged "same as L07"; no coral. This is 1.4's stack rotated into a
+  sequence — say so.
 
 ### slide 3.4 New failure modes live on the wire
 
@@ -190,6 +206,11 @@ estimated duration: 80
 | **Version mismatch** | client and server speak different protocol versions | handshake rejected or degraded |
 | **Missing credentials** | the *server* lacks a key the tool needs | the tool *result* is an auth error (not a transport error) |
 
+- diagram: re-show 1.4's model/client/`← MCP →`/server stack with four coral pins where each
+  failure lives — the server box (not running), the wire (transport disconnect), the handshake
+  (version mismatch), and inside the server (missing credentials, with a cyan callout: it comes
+  back as a well-shaped tool result, not a transport error); the healthy stack cyan, plumbing
+  ink-faint.
 - Tie back to [L08](../L08/objectives.md)'s error classes: a transport disconnect is a **recoverable**
   error (retry may work); a version mismatch is **unrecoverable** (fix config). The model treats a
   well-shaped error as new context exactly as before — the difference is the error can now originate on
@@ -222,6 +243,10 @@ estimated duration: 80
 | the parameter schema (types, required, per-field descriptions) | an entry point (none → a `__main__` block that starts the server) |
 | the error shape (`{error, field, message}`) | the result now crosses a process boundary as serialized JSON |
 
+- diagram: two-up inline vs. MCP-server with the four L08 design rows (name / description / schema /
+  error shape) drawn as one cyan block spanning both panels unchanged; the packaging deltas
+  (registration, transport, `__main__`, serialized boundary) as ink-faint chips on the right panel
+  only — neither side coral.
 - The headline: **same tool, same model, same prompt, same recovery behavior** — even though the tool
   now lives in a separate process and reaches the model through MCP. The L08 design discipline does the
   work; MCP just moves the bytes.
@@ -234,10 +259,10 @@ estimated duration: 80
 - The discipline: **catch exceptions inside the tool and return them as a structured tool result**, the
   same [L08](../L08/objectives.md) `{error, field, message}` shape. The model gets actionable context;
   the server stays up.
-- diagram: two paths from a `duration_minutes: 999999` call — top path: exception escapes → server
-  crashes → client sees a transport error (bad); bottom path: server catches it → returns
-  `{error: "validation", field: "duration_minutes", message: "must be 15–240"}` → model fixes its call
-  (good).
+- diagram: two paths from a `duration_minutes: 999999` call — top path coral: exception escapes →
+  server crashes → client sees a transport error; bottom path cyan: server catches it → returns
+  `{error: "validation", field: "duration_minutes", message: "must be 15–240"}` → model fixes its
+  call.
 - This is L08's error design, now load-bearing for *availability*, not just helpfulness.
 
 ### slide 4.4 You own the published surface
@@ -277,7 +302,8 @@ estimated duration: 80
 - diagram: a simple chart — x-axis "number of consumers (1 → many)", y-axis "value"; a flat coral
   line labeled "MCP's costs (process, transport, versioning, deployment)" and a rising cyan line
   labeled "MCP's benefits (portability × consumers)" crossing it; the crossing marked "break-even —
-  the decision rule in one picture" (inline wins left of it, MCP wins right).
+  the decision rule in one picture" (inline wins left of it, MCP wins right). This chart is the
+  section-5 motif — 5.3 and 5.4 re-show it with one change.
 
 ### slide 5.3 Three scenarios, three answers
 
@@ -291,6 +317,10 @@ estimated duration: 80
 
 - The middle row is the canonical MCP case. The outer rows are the cautionary ones: don't reach for MCP
   for a one-off (complexity that buys nothing), and weigh the overhead when latency is tight.
+- diagram: re-show 5.2's break-even chart with three labelled dots — the one-off script deep in the
+  "inline wins" zone, its wasted-cost gap to the coral line shaded coral; the multi-consumer tool
+  far right on the cyan benefit line; the latency-sensitive tool at the line with a coral "per-call
+  overhead compounds" annotation; axes ink-faint.
 
 ### slide 5.4 The decision is a gradient, not a gate
 
@@ -302,6 +332,10 @@ estimated duration: 80
   reuse that never arrives. The break-even is "one" for a tool you *know* will be reused and "many" for
   a one-off. The [L0907 lab](L0907_lab_empty.ipynb) has you encode this ledger as a small decision
   function and run it over example tools — pure Python, no `mcp` package.
+- diagram: third beat of the break-even motif — the 5.2 chart with one tool-dot and a cyan arrow
+  moving it rightward across the break-even as consumers appear, plus a dashed ink-faint arrow for
+  the consumer that never arrives ("don't pay the tax for this one"); coral reserved for the cost
+  line only.
 
 ### slide 5.5 A word on security and credentials
 
@@ -346,6 +380,9 @@ estimated duration: 80
   tool** (L09), justified by section 5's trade-offs. L10 will likely use the simpler one (inline) for
   the core teaching — but the loop is *indifferent* to where the tool lives, and that indifference is
   itself a validation of MCP's value proposition.
+- diagram: model→tool→model loop with the back-edge dashed cyan ("L10 — the loop"); the tool slot
+  shows two interchangeable chips — inline / MCP-served — both cyan ("the loop is indifferent");
+  dashed = lands next lesson, no coral.
 - One sentence to L10: *you can now design a tool, package it for portability, and decide which packaging
   fits — next you'll put it in a loop and let the model call it until the task is done.*
 

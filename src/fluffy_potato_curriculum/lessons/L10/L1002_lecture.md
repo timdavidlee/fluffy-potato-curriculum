@@ -23,6 +23,10 @@ estimated duration: 75
 - An **agent** takes those same primitives — typed state, nodes, a conditional edge — and adds exactly
   **one** new thing: a **back-edge** from the tool node to the model node. That single edge hands the
   model the decision of what runs next.
+- diagram: two-up — left the L04/L05 forward chain, nodes and edges ink-faint, captioned "you own
+  every edge"; right the same graph with exactly one added arc, the **back-edge**, the ONLY cyan
+  element on the slide ("the one new thing") — no coral anywhere. Motif debut: match L04's chain
+  rendering and L0505 2.3's two-up; this picture pre-echoes 2.1.
 - Here's the one line to hold onto: **the back-edge is the cycle, and the cycle is the agent.**
   Everything in this lecture is just a closer look at that one edge — how it loops, when it *stops*
   looping, and what happens when a tool breaks mid-cycle.
@@ -65,8 +69,10 @@ estimated duration: 75
 - Before we write any Python, notice that the entire agent fits in two nodes and two edges, plus a
   conditional exit.
 - diagram: `__start__ → agent`; a **conditional edge** out of `agent` (`route`: has `.tool_calls`?
-  → `tools` : → `__end__`); the **back-edge** `tools → agent`. Label the `tools → agent` arrow **"the
-  back-edge / the cycle."**
+  → `tools` : → `__end__`); the **back-edge** `tools → agent`, labelled **"the back-edge / the
+  cycle."** Nodes and the back-edge cyan — the back-edge is the point, never coral;
+  `__start__`/`__end__` and the forward plumbing ink-faint. This is the lesson motif: 3.2, 4.3, 5.1,
+  and 5.5 all re-show this exact picture with one change.
 
 ```text
         ┌─────────────────────────────┐
@@ -92,6 +98,9 @@ estimated duration: 75
   each node's returned `messages` get **appended** to the running conversation instead of substituted.
   That's *why* the conversation grows every turn — the `agent` node adds one `AIMessage`, and the
   `tools` node adds one `ToolMessage` per call.
+- diagram: two-up — left "L04 default": a state key whose old value is struck through in coral
+  ("overwritten, lost"); right "L10": a message pill-stack growing downward, existing pills
+  ink-faint, the newly appended pill cyan. Reuses the L02/L07 message-pill-stack motif.
 - text: `add_messages` also pairs messages by id, so the history stays well-formed as it accumulates.
   That reducer is **half** of Rule 1 — it's *how* the message-history invariant holds without you
   writing any bookkeeping.
@@ -113,9 +122,9 @@ estimated duration: 75
   those calls has to be answered by a matching `ToolMessage` (paired by `tool_call_id`) before the next
   model call. In a hand-rolled loop, getting that pairing wrong is the #1 bug — `ToolNode` owns it for
   you. It's still worth understanding *what* the invariant is, so you can debug it when something breaks it.
-- diagram: two columns. Left "correct": `AIMessage[tool_calls #a, #b]` → `ToolMessage #a` →
-  `ToolMessage #b`. Right "broken": `AIMessage[tool_calls #a, #b]` → `ToolMessage #a` with a red X
-  and the caption "missing #b → API error". `ToolNode` always does the left column.
+- diagram: two columns. Left "correct" in cyan: `AIMessage[tool_calls #a, #b]` → `ToolMessage #a` →
+  `ToolMessage #b`. Right "broken" in coral: `AIMessage[tool_calls #a, #b]` → `ToolMessage #a`, the
+  break and the caption "missing #b → API error" both coral. `ToolNode` always does the left column.
 - text: and `ToolNode` is **not magic** — picture what's inside it: it's the L07 dispatch step,
   prebuilt. The same `ToolNode` runs L09's MCP-exposed tools without any change; only the tool objects
   differ.
@@ -136,6 +145,9 @@ estimated duration: 75
   `{"agent": …}` → `{"tools": …}` → `{"agent": …}` … Try naming each moment control crosses the
   back-edge. This stream is also your on-ramp to L12 tracing — the same run, routed to a structured
   tracer later.
+- diagram: the `stream_mode="updates"` chunk sequence as a pill strip — `{"agent": …}`
+  `{"tools": …}` `{"agent": …}` … — with a cyan arc over each back-edge crossing; a dashed
+  ink-faint tail chip "→ L12 tracer".
 
 [↑ Back to top](#cyclic-graphs-the-react-agent-loop)
 
@@ -163,6 +175,9 @@ estimated duration: 75
 
 - text: **natural** termination is the only one that means "the answer is ready." Every other condition
   means "we stopped it" — a halt, not a completion.
+- diagram: re-show the 2.1 graph with `route`'s exit fanned into four labelled branches — natural →
+  `END` cyan (the only branch that means "done"); `recursion_limit` coral (forced halt);
+  token-budget and loop-detection dashed ink-faint ("custom routing — sketched in 3.5").
 
 ### slide 3.3 `recursion_limit` is a safety net, not a correctness tool
 
@@ -174,8 +189,10 @@ estimated duration: 75
 - text: `recursion_limit` lives on `invoke`, not in the graph shape — the *same* compiled graph runs
   with any cap. It counts **super-steps** (node visits), so an agent that calls one tool per turn burns
   roughly two steps (`agent`, `tools`) per cycle.
-- diagram: a runaway trace — cycles 1..3 each showing a `lookup(args=…)` with identical args, then
-  step 7 boxed in red with "recursion_limit=6 exceeded → GraphRecursionError".
+- diagram: a runaway trace — cycles 1..3 each showing a `lookup(args=…)` chip with identical args,
+  the chips coral (same call, no progress), the cycle chrome ink-faint; mark ≈2 super-steps
+  (`agent`, `tools`) per cycle so the count is visible, then step 7 boxed in coral with
+  "recursion_limit=6 exceeded → GraphRecursionError".
 
 ### slide 3.4 What to surface on a non-natural stop
 
@@ -198,6 +215,8 @@ estimated duration: 75
   call counts: a model calling the same tool three times with *different* args may be exploring correctly.
 - text: all of this reinforces the section-1 framing — **in a graph, termination is just another
   routing decision** (the L05 skill, now pointed at `END`).
+- diagram: re-show the 3.2 fan with the two dashed ink-faint branches (token-budget, loop-detection)
+  promoted to solid cyan — same picture, two branches promoted.
 
 [↑ Back to top](#cyclic-graphs-the-react-agent-loop)
 
@@ -210,7 +229,9 @@ estimated duration: 75
 - text: L10 teaches the **graph** what to do when the tool *can't even return* — when it raised, or
   handed back the wrong shape. Those are **different layers**, and the graph owns the second one.
 - diagram: a stack — top box "tool author (L08): return errors as data" over a bottom box "graph
-  (L10): `ToolNode` catches raises, sets `status='error'`" — with the model sitting above both.
+  (L10): `ToolNode` catches raises, sets `status='error'`" — with the model sitting above both in
+  ink/cyan. Both handler layers cyan (they're cures, not failures); the only coral element is the
+  raise arrow entering the graph layer, not the layer itself.
 
 ### slide 4.2 Three failure modes at the graph level
 
@@ -233,6 +254,10 @@ estimated duration: 75
 - text: compare that to `handle_tool_errors=False`: now the exception **escapes the node and kills the
   whole `invoke`.** One buggy tool crashes the agent. Flipping that single argument is the beat to watch
   in the failure demo — one word, and it's crash vs. recover.
+- diagram: contrast two-up, the 2.1 graph small twice — left `False`: a coral raise arrow escaping
+  the `tools` node, a coral X through the whole invoke; right `True`: the raise converted to a
+  `ToolMessage(status="error")` pill riding the back-edge in cyan (recovery is the happy path; the
+  error pill may carry a thin coral tag).
 - text: with it on, a buggy tool **degrades into a message** instead of crashing the agent. The model
   gets the error and can retry with corrected arguments, reach for a different tool, or apologize to
   the user — its call, not the graph's.
@@ -264,6 +289,9 @@ estimated duration: 75
 - text: put the hand-wired graph next to a bare `while` loop doing the same model→tool→model round,
   and they're the **same skeleton**: the `agent` node is "call the model," the `tools` node is "run
   the tools," and the conditional back-edge is "got tool calls? go again : stop."
+- diagram: two-up alignment — the 2.1 graph left, a 4-line `while` pseudocode block right, cyan
+  tie-lines pairing agent ↔ "call the model", tools ↔ "run tools", conditional back-edge ↔ "got
+  tool_calls? go again". Both panels cyan/ink — explicitly no coral; neither side is the wrong one.
 - text: so the graph form didn't change *what* happens — it drew the control flow as **data** (nodes
   and edges). That's exactly what makes it packageable (L11) and inspectable (L12).
 
@@ -310,6 +338,9 @@ estimated duration: 75
   no-memory / re-send cost from L01 and L07, now compounding once per loop iteration. And note the cap
   bounds the *number* of turns, not the *size* of each turn's history — a short run on a huge context
   still overflows. Different budgets.
+- diagram: cumulative-token staircase, one column per cycle — cyan = that turn's new tokens, coral =
+  the growing re-sent block (history + re-sent schemas) beneath. Explicit re-show of the L01 8.3 /
+  L07 4.2 staircase — third beat of the cross-lesson motif: "same staircase, now compounding per loop."
 
 ### slide 5.5 The minimum-viable trace, and the bridge to L11 and L12
 
@@ -322,6 +353,9 @@ estimated duration: 75
   routing is the prebuilt `tools_condition` you wrote by hand as `route`, and the back-edge is built
   in. Because you wired it yourself, that one-liner lands as "the thing I already built, packaged" —
   not a black box.
+- diagram: re-show the 2.1 graph unchanged, wrapped in a dashed ink-faint box labelled
+  `create_agent(...)`, three chips pinned to its parts — `MessagesState`, `ToolNode`,
+  `tools_condition` (dashed = lands next lesson). Motif bookend: this is the picture L11 opens on.
 - text: one sentence to leave L10 with: *an agent is a cyclic graph around a stateless model — an
   `agent` node calls the model, `route` asks "any tool calls?", a `tools` node runs them, and a
   back-edge loops around — until `route` returns `END` or `recursion_limit` fires; and when a tool

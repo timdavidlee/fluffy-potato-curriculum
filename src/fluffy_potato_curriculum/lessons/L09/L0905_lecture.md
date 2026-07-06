@@ -24,7 +24,8 @@ estimated duration: 20
 - Recall the [L0902 lecture](L0902_lecture.md) section 1 pain: each inline client needed tool-specific
   *integration code*. With MCP, adding a server is a **config entry**, not an integration.
 - diagram: contrast — left, three boxes of per-client integration code (the inline world); right, a
-  single small config block naming the server (the MCP world).
+  single small config block naming the server (the MCP world). Inline boxes ink-faint (inline isn't a
+  failure, just costly), config block cyan.
 - The whole point of slide 1.1: the cost of "add this tool to my agent" drops from *write an
   integration* to *name a server*.
 
@@ -47,6 +48,9 @@ server_config = {
 - Note what is *absent*: any tool-specific code. The config says *how to start the server*, never *what
   tools it has* — the client learns the tools at connect time (section 2). Compare to an HTTP/SSE
   server, where the config would carry a URL instead of a launch command.
+- diagram: small block diagram — a cyan config-entry box spawning a child-process server box over
+  stdio pipes; a dashed ink-faint alternate chip "HTTP/SSE — `url` instead of a command"; a
+  struck-through absent field ("no tool list here — learned at connect time").
 
 [↑ Back to top](#connecting-to-an-existing-mcp-server-wire-shape-walkthrough)
 
@@ -57,6 +61,10 @@ server_config = {
 - The client connects over the transport and issues a **list-tools** request. The server replies with
   its published tool specs. This is the step inline tools don't have — the client *discovers* the tool
   list instead of shipping with it.
+- diagram: the two-lane client↔server sequence frame (the motif debut — slide 4.1 re-shows these exact
+  lanes with the server lane dead): an `initialize()` arc (version negotiation), then `list_tools()`
+  out and the published specs arc back. Cyan = the returning specs arc (the point — "tools you didn't
+  ship with"); ink-faint = the initialize plumbing; node boxes cyan.
 - text: the connect-and-discover shape (pseudocode against a typical MCP client API).
 
 ```python
@@ -85,6 +93,10 @@ async with connect_stdio(server_config) as session:
 
 - The point worth sitting with: the client now "knows about tools it did not ship with." Ownership of
   the tool list has moved to the **server author** ([L0902 lecture](L0902_lecture.md) slide 2.3).
+- diagram: re-show 2.1's two-lane sequence with the reply payload zoomed — one spec card
+  (`name`/`description`/`inputSchema`) in cyan travelling off the server lane into a "model's tool
+  registry / system prompt" box; transport ink-faint; caption "exactly the L08 design surface,
+  serialized."
 
 [↑ Back to top](#connecting-to-an-existing-mcp-server-wire-shape-walkthrough)
 
@@ -96,8 +108,9 @@ async with connect_stdio(server_config) as session:
   [L07](../L07/objectives.md). The client routes it over the transport; the server runs the tool and
   returns a structured result; the client feeds it back as a `ToolMessage`.
 - diagram: `model (AIMessage.tool_calls)` → `client routes over transport` → `server runs book_meeting`
-  → `client wraps as ToolMessage` → `model (final answer)`. Steps 2–4 are the MCP hop; the model never
-  sees them.
+  → `client wraps as ToolMessage` → `model (final answer)`. Steps 2–4 grouped in a cyan-faint
+  "invisible to the model" container, hop boxes neutral, model endpoints cyan; the model-visible
+  `AIMessage.tool_calls`/`ToolMessage` pills visually echo L07's message strip (cross-lesson motif).
 - text: the call shape (pseudocode).
 
 ```python
@@ -116,6 +129,9 @@ print(result.content)  # the server's structured tool result, fed back to the mo
 - From the model's seat, this is the **same** `AIMessage.tool_calls` / `ToolMessage` exchange as
   [L07](../L07/objectives.md). MCP is invisible to it — it lives entirely in the client's routing and
   the operator's config.
+- diagram: re-show 3.1's round-trip with the MCP-hop container dimmed to ink-faint/hazed ("invisible
+  from the model's seat"); the `AIMessage.tool_calls` and `ToolMessage` endpoints cyan and identical
+  to the inline-L07 shape. explicitly no coral — neither side is a failure.
 - That invisibility is the proof of the abstraction: the model designed-for in L08 and the loop coming
   in [L10](../L10/objectives.md) both work *unchanged* whether the tool is inline or MCP-served.
 
@@ -127,10 +143,11 @@ print(result.content)  # the server's structured tool result, fed back to the mo
 
 - Watch what happens if the server process stops mid-conversation and the prompt gets re-issued: the
   client surfaces a **transport error** to the model — a failure mode an inline tool *cannot* have.
-- diagram: a conversation timeline — call 1 crosses the wire to a live server and returns a result
-  (cyan); between calls the server box goes dark ("server stops"); call 2 hits the dead boundary and
-  bounces back as a coral "transport error — connection refused" the model reads as context; caption:
-  "the tool didn't fail — the *boundary* did; inline tools cannot fail this way."
+- diagram: a conversation timeline on the same two-lane frame as 2.1 — call 1 crosses the wire to a
+  live server and returns a result (cyan); between calls the server stops (stopped server = dashed
+  coral outline); call 2 hits the dead boundary and bounces back as a coral "transport error —
+  connection refused" the model reads as context; caption: "the tool didn't fail — the *boundary*
+  did; inline tools cannot fail this way."
 - table: the boundary-specific failures (mirrors [L0902 lecture](L0902_lecture.md) slide 3.4) and how
   the model reacts.
 
@@ -148,6 +165,9 @@ print(result.content)  # the server's structured tool result, fed back to the mo
 
 - Restart the server, re-run the prompt — recovery. The lesson: cross-process tools add an
   **operational** dimension inline tools don't have. Someone has to keep the server alive.
+- diagram: re-show 4.1's timeline with an operator arrow restarting the server — the dashed-coral
+  stopped box flips back to a solid cyan live box — and call 3 succeeding in cyan; coral stays only
+  on the historical failed call 2. Completes the motif's live → stopped → restarted arc.
 - This operational tax is one row in the [L0902 lecture](L0902_lecture.md) section 5 cost ledger, made
   concrete: "a transport to keep healthy" is not abstract once you've watched a stopped server break a
   conversation.
@@ -161,6 +181,9 @@ print(result.content)  # the server's structured tool result, fed back to the mo
 - After this walkthrough you can read a server's published tool list and predict what the model will
   see, and you can trace an `AIMessage.tool_calls` → transport → server → `ToolMessage` round-trip and
   name where it can fail.
+- diagram: recap bookend — the full two-lane client↔server wire small, annotated with where each
+  section lived (config / discovery / call / failure); server lane dashed cyan, labeled "you build
+  this side next — [L0906](L0906_lecture.ipynb)" (deferred, not failure).
 - Next: [L0906](L0906_lecture.ipynb) shows the *other* side of the wire — **building** the server whose
   tools you just discovered (also shown, not run here). The offline [L0904 lab](L0904_lab_empty.ipynb)
   has you validate and translate the spec these handshakes exchange.
