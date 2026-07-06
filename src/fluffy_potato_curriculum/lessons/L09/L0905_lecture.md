@@ -127,6 +127,10 @@ print(result.content)  # the server's structured tool result, fed back to the mo
 
 - Watch what happens if the server process stops mid-conversation and the prompt gets re-issued: the
   client surfaces a **transport error** to the model — a failure mode an inline tool *cannot* have.
+- diagram: a conversation timeline — call 1 crosses the wire to a live server and returns a result
+  (cyan); between calls the server box goes dark ("server stops"); call 2 hits the dead boundary and
+  bounces back as a coral "transport error — connection refused" the model reads as context; caption:
+  "the tool didn't fail — the *boundary* did; inline tools cannot fail this way."
 - table: the boundary-specific failures (mirrors [L0902 lecture](L0902_lecture.md) slide 3.4) and how
   the model reacts.
 

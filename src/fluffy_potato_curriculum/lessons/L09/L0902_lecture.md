@@ -274,6 +274,10 @@ estimated duration: 80
 
 - The asymmetry to internalize: **costs are immediate and roughly fixed; benefits compound with the
   number of consumers.** That asymmetry *is* the decision rule.
+- diagram: a simple chart — x-axis "number of consumers (1 → many)", y-axis "value"; a flat coral
+  line labeled "MCP's costs (process, transport, versioning, deployment)" and a rising cyan line
+  labeled "MCP's benefits (portability × consumers)" crossing it; the crossing marked "break-even —
+  the decision rule in one picture" (inline wins left of it, MCP wins right).
 
 ### slide 5.3 Three scenarios, three answers
 
