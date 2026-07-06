@@ -26,6 +26,11 @@ estimated duration: 75
   function and feed the result back. This is the foundation of every agent later in the course.
 - But it is not magic, and it is not a new model capability. It is a **protocol** the model was
   trained to participate in.
+- diagram: two stacked lanes contrasting the eras — top lane "L01–L06" shows
+  `model → text → your code reads it` with a note "nothing the model said ever *ran*" (all neutral
+  ink-faint); bottom lane "L07" shows `model → tool call → your code runs the function → result →
+  model` as a closed loop (the run + result legs in cyan) — caption: "the model gains the ability to
+  *act* by asking your code to run something; the loop, not the model, does the work."
 
 ### slide 1.2 A tool call is just more tokens
 
@@ -70,6 +75,11 @@ estimated duration: 75
   function *is* the schema.
 - The model never sees your Python function. It sees only that inferred *definition* — the name, the
   prose, and the argument schema. That is the entire contract.
+- diagram: a typed Python `calculator(expression: str) -> str` function box on the left, an arrow
+  through `bind_tools` in the middle, producing a tool *definition* card on the right (name ·
+  description · argument JSON-Schema); a dashed boundary separates "your code" from "what the model
+  sees" so that only the definition crosses it — caption: "the model never sees your function, only
+  the inferred definition; the typed function *is* the schema."
 
 ### slide 2.2 The five mechanical steps
 
@@ -170,6 +180,10 @@ estimated duration: 75
   - the tool **result** lives in the message history for *every* subsequent turn.
 - This is L01's per-token cost shadow, now attached to tools. Nothing here is hypothetical — the
   demos print the token counts.
+- diagram: a three-turn conversation timeline with two cost sites called out in coral — the tool
+  *definition* re-sent in the prompt of *every* request (site 1, paid once per turn) and the tool
+  *result* carried forward in the history of *every* later turn (site 2, accumulating); caption:
+  "stateless means you pay for the definition on every turn and the result forever after."
 
 ### slide 4.2 A worked cost example
 
@@ -208,6 +222,11 @@ estimated duration: 75
 | **Calls the tool** | a tool call in `.tool_calls` with valid arguments | the model judged the tool useful and proposed a well-formed call |
 | **Answers without it** | text in `.content`, an empty `.tool_calls` | the model judged the tool unnecessary — a registered tool is an *option*, never an obligation |
 | **Calls it with bad arguments** | a tool call with malformed / missing / invented arguments | the model hallucinated; **your application must catch this** |
+
+- diagram: one prompt-plus-tool at the left fanning into three branches — "calls the tool" (valid
+  args, cyan happy path), "answers without it" (empty `.tool_calls`, neutral ink-faint), and "calls
+  it with bad arguments" (malformed / invented, coral); caption: "one offer, three possible replies —
+  your code must tell which happened and validate the third."
 
 ### slide 5.2 The model can hallucinate a tool call
 

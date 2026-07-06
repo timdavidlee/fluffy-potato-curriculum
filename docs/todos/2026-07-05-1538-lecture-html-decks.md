@@ -15,7 +15,7 @@ recurring drift risk below.
 
 ## Status (19 lecture outlines)
 
-**Progress: 7 built (L0102, L0202, L0305, L0402, L0502, L0505, L0602) · 1 needs rescale (L1002) · 11 pending.**
+**Progress: 8 built (L0102, L0202, L0305, L0402, L0502, L0505, L0602, L0702) · 1 needs rescale (L1002) · 10 pending.**
 
 | Lesson item | Deck? | Scale | Note |
 | --- | --- | --- | --- |
@@ -26,8 +26,9 @@ recurring drift risk below.
 | L0502 | ✅ | classroom | done (routing; 4 diagrams — 1 enhanced + 3 added to a diagram-starved outline; 1 code block, 15 slides) |
 | L0505 | ✅ | classroom | done (workflow-vs-agent close; 3 diagrams incl. the back-edge money slide, 2 ledger tables, 15 slides) |
 | L0602 | ✅ | classroom | done (reasoning; 6 diagrams — 3 added incl. self-critique + when-it-hurts; 2 ledger tables, 28 slides) |
+| L0702 | ✅ | classroom | done (tool calling; 8 diagrams — 4 added incl. two-era lanes, bind_tools boundary, cost-twice, three-outcome fan; 6 ledger tables, 30 slides) |
 | L1002 | ⚠️ | **OLD** | **known off** — built pre-classroom-scale; needs the rescale below |
-| L0702, L0802, L0902, L0905, L1102, L1105, L1206, L1307, L2202, L2205, L2302 | ❌ | — | no deck yet (11 outlines) |
+| L0802, L0902, L0905, L1102, L1105, L1206, L1307, L2202, L2205, L2302 | ❌ | — | no deck yet (10 outlines) |
 
 ## Open items
 
@@ -38,9 +39,9 @@ recurring drift risk below.
   L10-specific diagram-helper classes + inline SVG `font-size="N"` attributes, then **verify no slide
   overflows** the stage (L10 has a 7-row arc table + several SVG diagrams — the dense ones to watch).
   L10's diagrams are hand-crafted and good; **hand-scale, don't regenerate** (preserves the art).
-- **Build decks for the 11 remaining outlines.** Each via the `build-lecture-deck` skill (copy the
+- **Build decks for the 10 remaining outlines.** Each via the `build-lecture-deck` skill (copy the
   sample, map the outline, build diagrams, verify). Rough priority: the rest of the core arc first
-  (L07–L09, L11–L13), then the mini/standalone items (L22, L23). No hard dependency between
+  (L08–L09, L11–L13), then the mini/standalone items (L22, L23). No hard dependency between
   them — can be done incrementally, one lesson at a time.
   - **First, review the outline's `diagram:` coverage** — an outline may under-specify diagrams on
     visual slides, and the deck is only as good as its directives. L01 needed 4 added (slides 1.3,
