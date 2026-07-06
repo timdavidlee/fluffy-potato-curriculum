@@ -58,6 +58,10 @@ agent = create_agent(
   - **no `route` to write** — the conditional exit is the prebuilt `tools_condition`;
   - **no `add_messages` reducer, no state schema** — the message list is threaded for you (`MessagesState`);
   - **no message-history bookkeeping** — the `ToolMessage` append after each tool call is automatic.
+- diagram: the shallow-agent graph (agent / tools / back-edge, the L1102 motif) drawn inside a
+  large ink-faint *"managed by `create_agent`"* bracket — nodes, back-edge, `tools_condition`
+  routing, and `MessagesState` all shaded neutral as the framework's. Outside the bracket, three
+  cyan plugs feeding in: **model**, **tools**, **system prompt** — the only parts that are yours.
 - Contrast with L10, where **all** of that was yours to wire. That is the trade: you give up the
   knobs, you get the boilerplate for free.
 
@@ -82,6 +86,9 @@ agent = create_agent(
   - a **custom node** (validate, summarize, call a sub-agent);
   - **state beyond the message list** (a running budget, a scratchpad, a plan).
 - Any one of those is the signal: you have left the shallow single-loop shape.
+- diagram: the single tool-or-finish loop drawn small and cyan at center, with four coral arrows
+  breaking out of it, one per signal — *second model*, *non-tool branch*, *custom node*, *state
+  beyond messages*. Caption: *"any one arrow means you've outgrown the one-liner."*
 
 ### slide 3.2 That's exactly the door into L15
 
@@ -111,6 +118,9 @@ agent = create_agent(
 - The mental model you now hold — the shallow agent as *the ReAct pattern, prebuilt* — is the thing
   **L15** builds on top of. Ask its opening question and stop there: *what do you build when a
   single tool-calling loop isn't the right shape?*
+- diagram: a ladder of the arc — **L10** hand-built loop → **L11** `create_agent` (you are here,
+  cyan) → **L12** read the run as a trace → **L13** judge it with an eval set → **L15** explicit
+  `StateGraph`. Future rungs dashed (deferred), the L11 rung solid cyan.
 
 ### slide 3.5 Three shallow-agent gotchas, named
 

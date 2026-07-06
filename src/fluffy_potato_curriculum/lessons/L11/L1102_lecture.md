@@ -24,6 +24,9 @@ estimated duration: 15
   you wrote."** L11 is that fancier version, in one line.
 - Today introduces **no new control flow.** Model → tool → model until termination is the L10
   skeleton, unchanged. The only new thing is *who writes the loop.*
+- diagram: the bare L10 loop as a circular flow — `model` → `tool` → back to `model`, the loop
+  arrow in cyan, a small exit arrow to *done* when the model stops asking; caption *"the loop you
+  wrote by hand in L10."* This motif repeats all lesson — this is its plainest form.
 
 ### slide 1.2 The one-liner, named now
 
@@ -58,6 +61,9 @@ agent = create_agent(model, [calculator, lookup, flaky_fetch], system_prompt=...
   the model and hands it the decision of what runs next.
 - text: *a workflow is acyclic and developer-driven; the **back-edge** that hands the path to the
   model is what makes it an agent.*
+- diagram: the *same* DAG as slide 2.1 (same boxes, same positions, edges now ink-faint) with
+  exactly **one new edge** drawn in: a cyan arrow curving from the last step back up to the model
+  step. Nothing else changes. Caption: *"one edge — the model now owns the path."*
 - **The back-edge is the cycle, and the cycle is the agent.** Keep this sentence; the rest of the
   lesson is a picture of it.
 
@@ -114,6 +120,10 @@ agent = create_agent(model, [calculator, lookup, flaky_fetch], system_prompt=...
 
 - Follow a run with your finger: `agent` → (tool call?) → `tools` → back-edge → `agent` → (no tool
   call) → `__end__`.
+- diagram: the slide-3.1 graph repeated, with one run traced onto it as numbered cyan step badges —
+  ① `agent`, ② yes → `tools`, ③ the back-edge (emphasized), ④ `agent` again, ⑤ no tool call →
+  `__end__`. Untraveled edges stay ink-faint; the back-edge carries the *"the cycle is the agent"*
+  label.
 - Point at the back-edge and say it out loud: **that cycle is the agent.**
 - The conditional exit *is* the L10 branch. "Is there a tool call?" used to be an `if` in your
   Python; `create_agent` makes it a routing decision inside the graph. **The decision is identical;
@@ -140,6 +150,10 @@ agent = create_agent(model, [calculator, lookup, flaky_fetch], system_prompt=...
   `invoke` in L10 (LangGraph's default is 25 loop steps; you can raise or lower it in the run config).
 - A runaway agent still hits that cap, and **hitting it is still a signal worth investigating** —
   exactly the L10 lesson, restated.
+- diagram: the loop motif again with a step counter ticking up beside it — `1, 2, 3, …` in
+  ink-faint, a hard coral cap line at **25** labeled `recursion_limit` (run config), and a coral
+  *"runaway run stops here — investigate, don't just raise the cap"* callout where the ticks hit
+  the line.
 
 ### slide 4.3 What's next
 

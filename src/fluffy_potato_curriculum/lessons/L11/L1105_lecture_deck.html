@@ -1,0 +1,1227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>L11 · The config surface, and where the one-liner ends</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500;1,9..144,600&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+/* ===========================================
+   THEME — Graph Canvas system
+   Fraunces (display serif) + IBM Plex Mono (everything else)
+   =========================================== */
+:root {
+    --stage-bg: #05070a;
+    --slide-bg: #0a0e13;
+    --cyan: #52e8c8;
+    --cyan-dim: #1f6f60;
+    --cyan-faint: rgba(82, 232, 200, 0.16);
+    --cyan-rule: rgba(82, 232, 200, 0.22);
+    --coral: #ff6b57;
+    --coral-dim: #7a3229;
+    --ink: #eef2f0;
+    --ink-dim: #8a9490;
+    --ink-faint: #4c5652;
+
+    --font-display: 'Fraunces', Georgia, serif;
+    --font-body: 'IBM Plex Mono', ui-monospace, monospace;
+
+    --edge-x: 130px;
+    --edge-top: 96px;
+    --edge-bottom: 64px;
+
+    --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+    --duration-normal: 0.7s;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body { font-family: var(--font-body); }
+
+/* ===========================================
+   FIXED 16:9 STAGE: MANDATORY BASE STYLES
+   (viewport-base.css, included in full)
+   =========================================== */
+html, body { width: 100%; height: 100%; margin: 0; overflow: hidden; background: var(--stage-bg, #000); }
+.deck-viewport { position: fixed; inset: 0; overflow: hidden; background: var(--stage-bg, #000); }
+.deck-stage { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; overflow: hidden; transform-origin: 0 0; background: var(--slide-bg, #fff); }
+.slide { position: absolute; inset: 0; width: 1920px; height: 1080px; overflow: hidden; display: block; visibility: hidden; opacity: 0; pointer-events: none; background: var(--slide-bg, #fff); }
+.slide.active, .slide.visible { visibility: visible; opacity: 1; pointer-events: auto; z-index: 1; }
+img, video, canvas, svg { max-width: 100%; max-height: 100%; }
+.deck-controls { position: fixed; left: 50%; bottom: 22px; transform: translateX(-50%); z-index: 1000; }
+@media print {
+    html, body { width: 1920px; height: auto; overflow: visible; background: #fff; }
+    .deck-viewport { position: static; overflow: visible; background: #fff; }
+    .deck-stage { position: static; width: auto; height: auto; transform: none !important; background: none; }
+    .slide { position: relative; display: block !important; visibility: visible !important; opacity: 1 !important; pointer-events: auto !important; width: 1920px; height: 1080px; break-after: page; page-break-after: always; }
+    .slide:last-child { break-after: auto; page-break-after: auto; }
+    .deck-controls { display: none !important; }
+}
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.2s !important; }
+}
+
+/* ===========================================
+   PERMANENT CANVAS TREATMENT
+   Dot-grid + corner glows live on the stage itself so every
+   slide (transparent bg) shows the same atmosphere underneath.
+   =========================================== */
+.deck-stage {
+    background:
+        radial-gradient(ellipse 900px 700px at 82% 12%, rgba(82,232,200,0.10) 0%, transparent 60%),
+        radial-gradient(ellipse 900px 700px at 10% 92%, rgba(255,107,87,0.07) 0%, transparent 60%),
+        var(--slide-bg);
+}
+.deck-stage::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(rgba(82,232,200,0.14) 1.4px, transparent 1.4px);
+    background-size: 64px 64px;
+    z-index: 0;
+}
+.slide { background: transparent; z-index: 1; }
+.slide.active, .slide.visible { z-index: 2; }
+
+/* ===========================================
+   REVEAL ANIMATION — staggered fade + rise
+   =========================================== */
+.reveal {
+    opacity: 0;
+    transform: translateY(22px);
+    transition: opacity var(--duration-normal) var(--ease-out-expo),
+                transform var(--duration-normal) var(--ease-out-expo);
+}
+.slide.visible .reveal { opacity: 1; transform: translateY(0); }
+.slide.visible .reveal:nth-child(1) { transition-delay: 0.05s; }
+.slide.visible .reveal:nth-child(2) { transition-delay: 0.15s; }
+.slide.visible .reveal:nth-child(3) { transition-delay: 0.25s; }
+.slide.visible .reveal:nth-child(4) { transition-delay: 0.35s; }
+.slide.visible .points.reveal .point:nth-child(1) { transition-delay: 0.30s; }
+.slide.visible .points.reveal .point:nth-child(2) { transition-delay: 0.38s; }
+.slide.visible .points.reveal .point:nth-child(3) { transition-delay: 0.46s; }
+.slide.visible .points.reveal .point:nth-child(4) { transition-delay: 0.54s; }
+.slide.visible .points.reveal .point:nth-child(5) { transition-delay: 0.62s; }
+.slide.visible .points .point {
+    opacity: 0;
+    transform: translateY(14px);
+    transition: opacity 0.5s var(--ease-out-expo), transform 0.5s var(--ease-out-expo);
+}
+.slide.visible .points.reveal .point { opacity: 1; transform: translateY(0); }
+
+/* ===========================================
+   CHROME — applies inside every slide
+   =========================================== */
+.chrome-tag {
+    position: absolute;
+    top: 52px;
+    left: var(--edge-x);
+    font-size: 16px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--cyan-dim);
+}
+.chrome-tag b { color: var(--cyan); font-weight: 500; }
+.chrome-page {
+    position: absolute;
+    bottom: 48px;
+    right: var(--edge-x);
+    font-size: 16px;
+    color: var(--ink-faint);
+    letter-spacing: 0.05em;
+}
+.chrome-nav {
+    position: absolute;
+    bottom: 48px;
+    left: var(--edge-x);
+    font-size: 15px;
+    color: var(--ink-faint);
+    letter-spacing: 0.06em;
+    opacity: 0.55;
+}
+
+/* ===========================================
+   TYPOGRAPHY PRIMITIVES
+   =========================================== */
+.eyebrow {
+    font-size: 22px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--cyan);
+    font-weight: 500;
+}
+.eyebrow::before { content: "◆ "; }
+
+.slide-index {
+    position: absolute;
+    top: var(--edge-top);
+    right: var(--edge-x);
+    font-size: 18px;
+    color: var(--ink-faint);
+    letter-spacing: 0.05em;
+}
+
+.topbar {
+    position: absolute;
+    top: var(--edge-top);
+    left: var(--edge-x);
+    right: var(--edge-x);
+    padding-bottom: 26px;
+    border-bottom: 1px solid var(--cyan-rule);
+}
+
+h2.headline {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 62px;
+    line-height: 1.1;
+    color: var(--ink);
+    letter-spacing: -0.005em;
+    margin-top: 18px;
+}
+h2.headline .it { font-style: italic; font-weight: 500; color: var(--cyan); }
+
+.lede {
+    font-size: 29px;
+    line-height: 1.5;
+    color: var(--ink-dim);
+    max-width: 1200px;
+    margin-top: 22px;
+}
+.lede b { color: var(--ink); font-weight: 500; }
+
+.body-area {
+    position: absolute;
+    top: 312px;
+    left: var(--edge-x);
+    right: var(--edge-x);
+    bottom: var(--edge-bottom);
+}
+
+.points { list-style: none; max-width: 1420px; }
+.points .point {
+    position: relative;
+    padding-left: 40px;
+    font-size: 29px;
+    line-height: 1.5;
+    color: var(--ink-dim);
+    margin-bottom: 15px;
+}
+.points .point::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 9px;
+    width: 12px;
+    height: 12px;
+    border: 2px solid var(--cyan);
+    border-radius: 50%;
+}
+.points .point b, .points .point .k { color: var(--ink); font-weight: 600; }
+.points .point code {
+    font-family: var(--font-body);
+    color: var(--cyan);
+    background: rgba(82,232,200,0.08);
+    padding: 1px 8px;
+    border-radius: 3px;
+    font-size: 0.9em;
+}
+.points .point .warn { color: var(--coral); font-weight: 600; }
+
+/* callout — emphasis statement */
+.callout {
+    margin-top: 28px;
+    padding: 28px 36px;
+    border-left: 3px solid var(--cyan);
+    background: rgba(82,232,200,0.05);
+    max-width: 1200px;
+}
+.callout p {
+    font-family: var(--font-display);
+    font-style: italic;
+    font-size: 38px;
+    line-height: 1.32;
+    color: var(--ink);
+}
+
+/* ===========================================
+   TABLE — ledger style
+   =========================================== */
+table.ledger { width: 100%; border-collapse: collapse; max-width: 1660px; }
+table.ledger th {
+    font-size: 19px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--cyan);
+    text-align: left;
+    padding: 0 22px 16px 0;
+    border-bottom: 1.5px solid var(--cyan-rule);
+    font-weight: 600;
+}
+table.ledger td {
+    font-size: 24px;
+    line-height: 1.38;
+    color: var(--ink-dim);
+    padding: 11px 20px 11px 0;
+    border-bottom: 1px solid rgba(82,232,200,0.10);
+    vertical-align: top;
+}
+table.ledger tr:last-child td { border-bottom: none; }
+table.ledger td.tag {
+    font-size: 23px;
+    color: var(--cyan);
+    font-weight: 500;
+    white-space: nowrap;
+}
+table.ledger td b { color: var(--ink); font-weight: 600; }
+table.ledger td code {
+    color: var(--cyan);
+    background: rgba(82,232,200,0.08);
+    padding: 1px 7px;
+    border-radius: 3px;
+    font-size: 0.92em;
+}
+table.ledger td.warn-cell { color: var(--coral); }
+
+/* ===========================================
+   DIAGRAM CONTAINERS
+   =========================================== */
+.diagram-frame {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.diagram-caption {
+    font-size: 25px;
+    line-height: 1.6;
+    color: var(--ink-dim);
+    font-style: italic;
+    max-width: 1300px;
+    margin-top: 18px;
+}
+.node-label { font-family: var(--font-body); font-weight: 600; font-size: 27px; fill: var(--ink); }
+.edge-label { font-family: var(--font-body); font-size: 20px; }
+
+/* ===========================================
+   CHAPTER (section divider) SLIDES — sparse
+   =========================================== */
+.slide-chapter { display: flex; flex-direction: column; justify-content: center; }
+.chapter-ghost {
+    position: absolute;
+    top: -40px;
+    right: 90px;
+    font-family: var(--font-display);
+    font-size: 480px;
+    font-weight: 600;
+    color: var(--cyan);
+    opacity: 0.07;
+    line-height: 1;
+    user-select: none;
+}
+.chapter-eyebrow {
+    position: absolute;
+    left: var(--edge-x);
+    top: 420px;
+    font-size: 20px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--cyan);
+}
+.chapter-eyebrow::before { content: "◆ "; }
+.chapter-title {
+    position: absolute;
+    left: var(--edge-x);
+    top: 468px;
+    right: 260px;
+    font-family: var(--font-display);
+    font-style: italic;
+    font-weight: 500;
+    font-size: 96px;
+    line-height: 1.08;
+    color: var(--ink);
+}
+.chapter-sub {
+    position: absolute;
+    left: var(--edge-x);
+    top: 690px;
+    font-size: 29px;
+    color: var(--ink-dim);
+    max-width: 1100px;
+    line-height: 1.6;
+    border-left: 2px solid var(--cyan-dim);
+    padding-left: 28px;
+}
+
+/* ===========================================
+   COVER SLIDE
+   =========================================== */
+.slide-cover .eyebrow { position: absolute; top: 108px; left: var(--edge-x); }
+.slide-cover h1 {
+    position: absolute;
+    top: 190px;
+    left: var(--edge-x);
+    width: 980px;
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 116px;
+    line-height: 1.05;
+    color: var(--ink);
+}
+.slide-cover h1 .it { font-style: italic; font-weight: 500; color: var(--cyan); }
+.slide-cover .claim {
+    position: absolute;
+    top: 636px;
+    left: var(--edge-x);
+    width: 920px;
+    font-size: 29px;
+    line-height: 1.6;
+    color: var(--ink-dim);
+}
+.slide-cover .claim b { color: var(--ink); font-weight: 600; }
+.slide-cover .meta-row {
+    position: absolute;
+    bottom: 100px;
+    left: var(--edge-x);
+    display: flex;
+    gap: 44px;
+    font-size: 21px;
+    color: var(--ink-dim);
+}
+.slide-cover .meta-row span b { color: var(--cyan); }
+.cover-diagram { position: absolute; right: 90px; top: 280px; width: 740px; height: 540px; }
+
+/* ===========================================
+   CLOSING SLIDE
+   =========================================== */
+.slide-closing { display: flex; flex-direction: column; justify-content: center; }
+.closing-statement {
+    position: absolute;
+    left: var(--edge-x);
+    top: 300px;
+    right: 260px;
+    font-family: var(--font-display);
+    font-style: italic;
+    font-weight: 500;
+    font-size: 56px;
+    line-height: 1.35;
+    color: var(--ink);
+}
+.closing-statement .k { color: var(--cyan); font-style: normal; font-weight: 600; }
+.closing-grid {
+    position: absolute;
+    left: var(--edge-x);
+    right: var(--edge-x);
+    bottom: 190px;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 40px;
+    border-top: 1px solid var(--cyan-rule);
+    padding-top: 30px;
+}
+.closing-grid .col .label {
+    font-size: 18px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--cyan);
+    margin-bottom: 10px;
+}
+.closing-grid .col .val {
+    font-size: 24px;
+    color: var(--ink-dim);
+    line-height: 1.5;
+}
+.closing-grid .col .val b { color: var(--ink); }
+
+/* ===========================================
+   OUTSIDE-STAGE UI: progress + nav buttons
+   (kept outside .deck-stage per skill rules)
+   =========================================== */
+.deck-progress {
+    position: fixed;
+    left: 0; right: 0; bottom: 0;
+    height: 3px;
+    background: rgba(82,232,200,0.08);
+    z-index: 500;
+}
+.deck-progress-bar {
+    height: 100%;
+    background: var(--cyan);
+    width: 0%;
+    transition: width 0.35s var(--ease-out-expo);
+}
+.deck-arrow {
+    position: fixed;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 52px; height: 52px;
+    border-radius: 50%;
+    border: 1px solid var(--cyan-rule);
+    background: rgba(10,14,19,0.6);
+    color: var(--cyan);
+    font-size: 20px;
+    cursor: pointer;
+    z-index: 500;
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.2s, border-color 0.2s;
+}
+.deck-arrow:hover { background: rgba(82,232,200,0.12); border-color: var(--cyan); }
+.deck-arrow.prev { left: 22px; }
+.deck-arrow.next { right: 22px; }
+
+/* Mobile/portrait: arrows can collide with the letterboxed stage; swipe covers nav there. */
+@media (max-width: 600px), (orientation: portrait) {
+    .deck-arrow { display: none; }
+}
+
+/* ===========================================
+   INLINE EDITING
+   =========================================== */
+.edit-hotzone { position: fixed; top: 0; left: 0; width: 80px; height: 80px; z-index: 10000; cursor: pointer; }
+.edit-toggle {
+    position: fixed; top: 14px; left: 14px;
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    border: 1px solid var(--cyan-rule);
+    background: rgba(10,14,19,0.85);
+    font-size: 17px;
+    cursor: pointer;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+    z-index: 10001;
+}
+.edit-toggle.show, .edit-toggle.active { opacity: 1; pointer-events: auto; }
+.edit-toggle.active { background: var(--cyan); }
+[contenteditable="true"] {
+    outline: 1px dashed var(--cyan-rule);
+    outline-offset: 4px;
+    cursor: text;
+}
+.save-toast {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--cyan);
+    color: #05070a;
+    font-family: var(--font-body);
+    font-size: 14px;
+    font-weight: 600;
+    padding: 10px 20px;
+    border-radius: 4px;
+    opacity: 0;
+    transition: opacity 0.3s, transform 0.3s;
+    z-index: 10002;
+    pointer-events: none;
+}
+.save-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* ===========================================
+   DECK-SPECIFIC HELPERS (appended per FRONTEND-STYLE.md §5)
+   =========================================== */
+/* code slide — classroom-scale mono block */
+.code-block {
+    font-family: var(--font-body);
+    font-size: 23px;
+    line-height: 1.55;
+    background: #12181a;
+    border: 1px solid var(--cyan-rule);
+    border-radius: 10px;
+    padding: 24px 32px;
+    color: var(--ink);
+    max-width: 1660px;
+    white-space: pre;
+    overflow: hidden;
+}
+.code-block .nm { color: var(--cyan); font-weight: 600; }
+.code-block .cm { color: var(--ink-faint); }
+.code-block .st { color: var(--ink-dim); }
+/* two-up contrast panels */
+.duo { display: flex; gap: 40px; }
+.duo .panel {
+    flex: 1;
+    border: 2px solid var(--ink-faint);
+    border-radius: 10px;
+    background: #12181a;
+    padding: 24px 28px;
+}
+.duo .panel .panel-head { font-size: 19px; color: var(--ink-faint); letter-spacing: 0.06em; margin-bottom: 14px; }
+.chip {
+    display: inline-block;
+    border: 2px solid var(--cyan);
+    border-radius: 999px;
+    background: rgba(82,232,200,0.08);
+    color: var(--cyan);
+    font-size: 22px;
+    font-weight: 600;
+    padding: 8px 22px;
+}
+.chip.ghost { border-style: dashed; border-color: var(--ink-faint); background: transparent; color: var(--ink-dim); font-weight: 400; }
+/* ladder / staircase steps */
+.ladder { display: flex; align-items: flex-end; gap: 20px; }
+.ladder .rung {
+    width: 168px;
+    border: 2px dashed var(--ink-faint);
+    border-radius: 10px;
+    background: transparent;
+    padding: 16px 14px;
+    text-align: center;
+}
+.ladder .rung .lnum { font-size: 26px; font-weight: 700; color: var(--ink-dim); }
+.ladder .rung .lsub { font-size: 17px; line-height: 1.4; color: var(--ink-faint); margin-top: 6px; }
+.ladder .rung.done { border-style: solid; }
+.ladder .rung.here { border: 2px solid var(--cyan); background: rgba(82,232,200,0.10); }
+.ladder .rung.here .lnum { color: var(--cyan); }
+.ladder .rung.here .lsub { color: var(--ink-dim); }
+</style>
+</head>
+<body>
+
+<div class="deck-viewport">
+<main class="deck-stage" id="deckStage">
+
+<!-- ============================================================ -->
+<!-- 01 — COVER                                                   -->
+<!-- ============================================================ -->
+<section class="slide slide-cover active">
+    <div class="eyebrow reveal">L11 &middot; Shallow agents &middot; closing demo</div>
+    <h1 class="reveal">The config <span class="it">surface</span> &mdash; and where the one-liner ends</h1>
+    <div class="claim reveal"><b>A shallow agent exposes exactly three knobs &mdash; model, tools, system prompt.</b> Everything else is the framework's. This demo walks that surface, then asks the question that ends the one-liner.</div>
+    <div class="meta-row reveal">
+        <span>lesson &mdash; <b>L11</b></span>
+        <span>duration &mdash; <b>15 min</b></span>
+        <span>anchor &mdash; <b>Claude Sonnet 4.6</b></span>
+    </div>
+    <div class="cover-diagram reveal">
+        <svg viewBox="0 0 760 560" width="100%" height="100%">
+            <defs>
+                <marker id="cov-a" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="var(--cyan)"/></marker>
+                <marker id="cov-n" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="var(--ink-faint)"/></marker>
+            </defs>
+            <!-- three cyan knob plugs -->
+            <rect x="20" y="80" width="200" height="52" rx="8" fill="rgba(82,232,200,0.08)" stroke="var(--cyan)" stroke-width="2"/>
+            <text x="120" y="113" text-anchor="middle" class="edge-label" fill="var(--cyan)" font-weight="600">model</text>
+            <rect x="20" y="200" width="200" height="52" rx="8" fill="rgba(82,232,200,0.08)" stroke="var(--cyan)" stroke-width="2"/>
+            <text x="120" y="233" text-anchor="middle" class="edge-label" fill="var(--cyan)" font-weight="600">tools</text>
+            <rect x="20" y="320" width="200" height="52" rx="8" fill="rgba(82,232,200,0.08)" stroke="var(--cyan)" stroke-width="2"/>
+            <text x="120" y="353" text-anchor="middle" class="edge-label" fill="var(--cyan)" font-weight="600">system prompt</text>
+            <!-- plugs feed the constructor -->
+            <path d="M 220 106 C 300 106, 320 180, 372 196" fill="none" stroke="var(--cyan)" stroke-width="2.5" marker-end="url(#cov-a)"/>
+            <path d="M 220 226 L 372 222" fill="none" stroke="var(--cyan)" stroke-width="2.5" marker-end="url(#cov-a)"/>
+            <path d="M 220 346 C 300 346, 320 260, 372 246" fill="none" stroke="var(--cyan)" stroke-width="2.5" marker-end="url(#cov-a)"/>
+            <!-- the constructor -->
+            <rect x="380" y="176" width="290" height="90" rx="10" fill="#12181a" stroke="var(--cyan)" stroke-width="2.5"/>
+            <text x="525" y="230" text-anchor="middle" class="node-label">create_agent</text>
+            <!-- it returns the loop -->
+            <path d="M 525 266 L 525 336" fill="none" stroke="var(--ink-faint)" stroke-width="3" marker-end="url(#cov-n)"/>
+            <text x="548" y="310" class="edge-label" fill="var(--ink-dim)">returns the loop</text>
+            <circle cx="445" cy="440" r="60" fill="#12181a" stroke="var(--ink-faint)" stroke-width="2"/>
+            <text x="445" y="449" text-anchor="middle" class="node-label" fill="var(--ink-dim)">agent</text>
+            <circle cx="640" cy="440" r="60" fill="#12181a" stroke="var(--ink-faint)" stroke-width="2"/>
+            <text x="640" y="449" text-anchor="middle" class="node-label" fill="var(--ink-dim)">tools</text>
+            <path d="M 500 405 C 540 380, 590 380, 588 407" fill="none" stroke="var(--ink-faint)" stroke-width="2.5" marker-end="url(#cov-n)"/>
+            <path d="M 588 474 C 590 500, 540 500, 500 476" fill="none" stroke="var(--ink-faint)" stroke-width="2.5" marker-end="url(#cov-n)"/>
+            <circle r="7" fill="var(--cyan)">
+                <animateMotion dur="3.2s" repeatCount="indefinite" path="M 588 474 C 590 500, 540 500, 500 476"/>
+            </circle>
+        </svg>
+    </div>
+    <div class="chrome-page">01 / 14</div>
+    <div class="chrome-nav">L1105 &middot; runs on the L1103 agent</div>
+</section>
+
+<!-- ============================================================ -->
+<!-- 02 — SECTION 1 DIVIDER                                       -->
+<!-- ============================================================ -->
+<section class="slide slide-chapter">
+    <div class="chrome-tag reveal">L11 &middot; <b>CONFIG SURFACE</b></div>
+    <div class="chapter-ghost reveal">01</div>
+    <div class="chapter-eyebrow reveal">Section 1</div>
+    <div class="chapter-title reveal">The three knobs <span style="color:var(--cyan); font-style:normal;">a shallow agent uses</span></div>
+    <div class="chapter-sub reveal">Same agent as the build demo &mdash; now we walk the whole config surface it actually exposes. It is shorter than you think.</div>
+    <div class="chrome-page">02 / 14</div>
+</section>
+
+<!-- ============================================================ -->
+<!-- 03 — SLIDE 1.1: model, tools, system prompt                  -->
+<!-- ============================================================ -->
+<section class="slide">
+    <div class="chrome-tag">L11 &middot; <b>CONFIG SURFACE</b></div>
+    <div class="topbar reveal">
+        <div class="eyebrow">Slide 1.1</div>
+        <h2 class="headline">Model, tools, system prompt &mdash; <span class="it">that's the surface</span></h2>
+    </div>
+    <div class="body-area">
+        <div class="code-block reveal">agent = <span class="nm">create_agent</span>(
+    model,                              <span class="cm"># 1. the model  (ChatAnthropic, Sonnet 4.6)</span>
+    [calculator, lookup, flaky_fetch],  <span class="cm"># 2. the tools  (a plain list of callables)</span>
+    system_prompt=<span class="st">"You are a precise assistant. Use the tools; do not answer from memory."</span>,  <span class="cm"># 3.</span>
+)</div>
+        <table class="ledger reveal" style="margin-top:34px;">
+            <thead><tr><th style="width:280px;">Knob</th><th>What it controls</th><th>L10 equivalent</th></tr></thead>
+            <tbody>
+                <tr><td class="tag">model</td><td>which chat model runs the <code>agent</code> node</td><td>the <code>model</code> you bound in the <code>agent</code> node</td></tr>
+                <tr><td class="tag">tools</td><td>the callables the model may invoke</td><td>the <code>TOOLS</code> list your <code>ToolNode</code> ran</td></tr>
+                <tr><td class="tag">system prompt</td><td>the standing instruction prepended to the conversation</td><td>the system message you prepended by hand</td></tr>
+            </tbody>
+        </table>
+        <ul class="points reveal" style="margin-top:26px;">
+            <li class="point"><b>That's it. Three knobs.</b> Everything else <code>create_agent</code> handles.</li>
+        </ul>
+    </div>
+    <div class="chrome-page">03 / 14</div>
+    <div class="chrome-nav">&larr; &rarr; navigate</div>
+</section>
+
+<!-- ============================================================ -->
+<!-- 04 — SLIDE 1.2: swap one knob, same agent                    -->
+<!-- ============================================================ -->
+<section class="slide">
+    <div class="chrome-tag">L11 &middot; <b>CONFIG SURFACE</b></div>
+    <div class="topbar reveal">
+        <div class="eyebrow">Slide 1.2</div>
+        <h2 class="headline">Swap one knob, <span class="it">same agent</span></h2>
+    </div>
+    <div class="body-area">
+        <div class="duo reveal">
+            <div class="panel">
+                <div class="panel-head">run A &mdash; create_agent(model, tools, system_prompt=&hellip;)</div>
+                <div class="chip" style="font-size:21px;">"answer in one sentence"</div>
+                <div style="font-size:18px; color:var(--ink-faint); margin:16px 0 10px;">same tools &middot; same loop &middot; same task</div>
+                <div style="border:1px solid var(--cyan-rule); border-radius:8px; padding:14px 18px; font-size:20px; color:var(--ink-dim);">The answer, in exactly one sentence.</div>
+            </div>
+            <div class="panel">
+                <div class="panel-head">run B &mdash; create_agent(model, tools, system_prompt=&hellip;)</div>
+                <div class="chip" style="font-size:21px;">"show your reasoning step by step"</div>
+                <div style="font-size:18px; color:var(--ink-faint); margin:16px 0 10px;">same tools &middot; same loop &middot; same task</div>
+                <div style="border:1px solid var(--cyan-rule); border-radius:8px; padding:14px 18px; font-size:20px; color:var(--ink-dim); line-height:1.6;">1. First, look up the value&hellip;<br>2. Then compute the ratio&hellip;<br>3. So the answer is&hellip;</div>
+            </div>
+        </div>
+        <div class="diagram-caption reveal">Change the <b style="color:var(--ink); font-style:normal;">system prompt</b> once and re-run the same task &mdash; identical call otherwise, different final-answer shape.</div>
+        <ul class="points reveal" style="margin-top:20px;">
+            <li class="point">The point is <b>"same agent, new instruction"</b> &mdash; not a dramatic behavior change. If behavior doesn't visibly swap, swap the <b>format</b> of the answer: that always lands.</li>
+        </ul>
+    </div>
+    <div class="chrome-page">04 / 14</div>
+    <div class="chrome-nav">&larr; &rarr; navigate</div>
+</section>
+
+<!-- ============================================================ -->
+<!-- 05 — SECTION 2 DIVIDER                                       -->
+<!-- ============================================================ -->
+<section class="slide slide-chapter">
+    <div class="chrome-tag reveal">L11 &middot; <b>CONFIG SURFACE</b></div>
+    <div class="chapter-ghost reveal">02</div>
+    <div class="chapter-eyebrow reveal">Section 2</div>
+    <div class="chapter-title reveal">What you did <span style="color:var(--cyan); font-style:normal;">NOT have to touch</span></div>
+    <div class="chapter-sub reveal">In L10 all of this was yours to wire. Here it is the framework's &mdash; that is the trade.</div>
+    <div class="chrome-page">05 / 14</div>
+</section>
+
+<!-- ============================================================ -->
+<!-- 06 — SLIDE 2.1: managed by create_agent                      -->
+<!-- ============================================================ -->
+<section class="slide">
+    <div class="chrome-tag">L11 &middot; <b>CONFIG SURFACE</b></div>
+    <div class="topbar reveal">
+        <div class="eyebrow">Slide 2.1</div>
+        <h2 class="headline">The graph and the state are <span class="it">managed for you</span></h2>
+    </div>
+    <div class="body-area">
+        <div class="diagram-frame reveal" style="margin-top:6px;">
+            <svg viewBox="0 0 1660 560" width="1660" height="560">
+                <defs>
+                    <marker id="mg-a" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="var(--ink-faint)"/></marker>
+                    <marker id="mg-c" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="var(--cyan)"/></marker>
+                </defs>
+                <!-- the bracket: everything inside is the framework's -->
+                <rect x="520" y="16" width="1120" height="528" rx="14" fill="none" stroke="var(--ink-faint)" stroke-width="2.5" stroke-dasharray="12 9"/>
+                <text x="1080" y="54" text-anchor="middle" class="edge-label" fill="var(--ink-dim)" font-weight="600">managed by create_agent &mdash; no graph to wire, no route to write</text>
+                <!-- neutral nodes: agent / tools -->
+                <circle cx="830" cy="230" r="78" fill="#12181a" stroke="var(--ink-faint)" stroke-width="2.5"/>
+                <text x="830" y="239" text-anchor="middle" class="node-label" fill="var(--ink-dim)">agent</text>
+                <circle cx="1330" cy="230" r="78" fill="#12181a" stroke="var(--ink-faint)" stroke-width="2.5"/>
+                <text x="1330" y="239" text-anchor="middle" class="node-label" fill="var(--ink-dim)">tools</text>
+                <!-- forward edge + prebuilt routing -->
+                <path d="M 905 195 C 1030 120, 1150 120, 1258 195" fill="none" stroke="var(--ink-faint)" stroke-width="3" marker-end="url(#mg-a)"/>
+                <text x="1082" y="128" text-anchor="middle" class="edge-label" fill="var(--ink-dim)">tools_condition (prebuilt)</text>
+                <!-- back edge -->
+                <path d="M 1258 268 C 1150 344, 1030 344, 905 268" fill="none" stroke="var(--ink-faint)" stroke-width="3" marker-end="url(#mg-a)"/>
+                <text x="1082" y="352" text-anchor="middle" class="edge-label" fill="var(--ink-dim)">ToolMessage appended &mdash; automatic</text>
+                <circle r="7" fill="var(--ink-dim)">
+                    <animateMotion dur="3.4s" repeatCount="indefinite" path="M 1258 268 C 1150 344, 1030 344, 905 268"/>
+                </circle>
+                <!-- conditional exit -->
+                <path d="M 790 302 L 715 400" fill="none" stroke="var(--ink-faint)" stroke-width="3" marker-end="url(#mg-a)"/>
+                <text x="660" y="435" class="edge-label" fill="var(--ink-dim)">finish &rarr; end</text>
+                <!-- state, threaded for you -->
+                <rect x="940" y="430" width="290" height="64" rx="8" fill="#12181a" stroke="var(--ink-faint)" stroke-width="2"/>
+                <text x="1085" y="470" text-anchor="middle" class="node-label" fill="var(--ink-dim)">MessagesState</text>
+                <text x="1390" y="470" class="edge-label" fill="var(--ink-faint)">no reducer, no schema</text>
+                <!-- the three plugs: the only parts that are yours -->
+                <rect x="60" y="90" width="280" height="64" rx="10" fill="rgba(82,232,200,0.08)" stroke="var(--cyan)" stroke-width="2.5"/>
+                <text x="200" y="130" text-anchor="middle" class="node-label" fill="var(--cyan)">model</text>
+                <rect x="60" y="248" width="280" height="64" rx="10" fill="rgba(82,232,200,0.08)" stroke="var(--cyan)" stroke-width="2.5"/>
+                <text x="200" y="288" text-anchor="middle" class="node-label" fill="var(--cyan)">tools</text>
+                <rect x="60" y="406" width="280" height="64" rx="10" fill="rgba(82,232,200,0.08)" stroke="var(--cyan)" stroke-width="2.5"/>
+                <text x="200" y="446" text-anchor="middle" class="node-label" fill="var(--cyan)">system prompt</text>
+                <path d="M 340 122 L 512 122" stroke="var(--cyan)" stroke-width="3" marker-end="url(#mg-c)"/>
+                <path d="M 340 280 L 512 280" stroke="var(--cyan)" stroke-width="3" marker-end="url(#mg-c)"/>
+                <path d="M 340 438 L 512 438" stroke="var(--cyan)" stroke-width="3" marker-end="url(#mg-c)"/>
+            </svg>
+        </div>
+        <div class="diagram-caption reveal" style="max-width:1660px;">Everything inside the dashed bracket &mdash; nodes, back-edge, routing, state &mdash; is the framework's. The three cyan plugs are yours. <b style="color:var(--ink); font-style:normal;">The trade: you give up the knobs, you get the boilerplate for free.</b></div>
+    </div>
+    <div class="chrome-page">06 / 14</div>
+    <div class="chrome-nav">&larr; &rarr; navigate</div>
+</section>
+
+<!-- ============================================================ -->
+<!-- 07 — SLIDE 2.2: the step cap is a default now                -->
+<!-- ============================================================ -->
+<section class="slide">
+    <div class="chrome-tag">L11 &middot; <b>CONFIG SURFACE</b></div>
+    <div class="topbar reveal">
+        <div class="eyebrow">Slide 2.2</div>
+        <h2 class="headline">The step cap is still there &mdash; <span class="it">just a default now</span></h2>
+    </div>
+    <div class="body-area">
+        <ul class="points reveal">
+            <li class="point">In L10 you set <code>recursion_limit</code> on <code>invoke</code> yourself; here you don't have to &mdash; the cap still exists as the framework's <b>recursion / step limit</b> (LangGraph's default is <b>25 steps</b>; set <code>recursion_limit</code> in the run config to change it).</li>
+            <li class="point">A runaway agent still trips it &mdash; and tripping it is <span class="warn">still a signal worth investigating</span>, not noise to raise the limit past.</li>
+        </ul>
+        <div class="callout reveal"><p>The L10 lesson didn't go away &mdash; it moved inside the framework.</p></div>
+    </div>
+    <div class="chrome-page">07 / 14</div>
+    <div class="chrome-nav">&larr; &rarr; navigate</div>
+</section>
+
+<!-- ============================================================ -->
+<!-- 08 — SECTION 3 DIVIDER                                       -->
+<!-- ============================================================ -->
+<section class="slide slide-chapter">
+    <div class="chrome-tag reveal">L11 &middot; <b>CONFIG SURFACE</b></div>
+    <div class="chapter-ghost reveal">03</div>
+    <div class="chapter-eyebrow reveal">Section 3</div>
+    <div class="chapter-title reveal">The ceiling: <span style="color:var(--cyan); font-style:normal;">when you'd drop below the one-liner</span></div>
+    <div class="chapter-sub reveal">Three knobs cover a lot &mdash; until the control flow stops being a single tool-or-finish loop.</div>
+    <div class="chrome-page">08 / 14</div>
+</section>
+
+<!-- ============================================================ -->
+<!-- 09 — SLIDE 3.1: the question that ends the one-liner         -->
+<!-- ============================================================ -->
+<section class="slide">
+    <div class="chrome-tag">L11 &middot; <b>CONFIG SURFACE</b></div>
+    <div class="topbar reveal">
+        <div class="eyebrow">Slide 3.1</div>
+        <h2 class="headline">The question that <span class="it">ends the one-liner</span></h2>
+    </div>
+    <div class="body-area">
+        <ul class="points reveal">
+            <li class="point">Ask it out loud: <b>"what would make you outgrow this one line?"</b> &mdash; the moment your control flow stops being a single <b>tool-or-finish loop</b>.</li>
+        </ul>
+        <div class="diagram-frame reveal" style="margin-top:4px;">
+            <svg viewBox="0 0 1660 480" width="1660" height="480">
+                <defs>
+                    <marker id="br-c" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="var(--coral)"/></marker>
+                    <marker id="br-y" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="var(--cyan)"/></marker>
+                </defs>
+                <!-- the single tool-or-finish loop, small and cyan at center -->
+                <circle cx="720" cy="240" r="64" fill="#12181a" stroke="var(--cyan)" stroke-width="2.5"/>
+                <text x="720" y="249" text-anchor="middle" class="node-label">agent</text>
+                <circle cx="940" cy="240" r="64" fill="#12181a" stroke="var(--cyan)" stroke-width="2.5"/>
+                <text x="940" y="249" text-anchor="middle" class="node-label">tools</text>
+                <path d="M 778 208 C 830 175, 880 175, 884 206" fill="none" stroke="var(--cyan)" stroke-width="2.5" marker-end="url(#br-y)"/>
+                <path d="M 884 274 C 880 306, 830 306, 778 272" fill="none" stroke="var(--cyan)" stroke-width="2.5" marker-end="url(#br-y)"/>
+                <circle r="7" fill="var(--cyan)">
+                    <animateMotion dur="3s" repeatCount="indefinite" path="M 884 274 C 880 306, 830 306, 778 272"/>
+                </circle>
+                <text x="830" y="335" text-anchor="middle" class="edge-label" fill="var(--cyan)">one loop: tool or finish</text>
+                <!-- four coral break-out arrows, one per signal -->
+                <path d="M 668 195 C 590 150, 540 120, 476 92" fill="none" stroke="var(--coral)" stroke-width="3.5" marker-end="url(#br-c)"/>
+                <rect x="40" y="30" width="430" height="96" rx="10" fill="#12181a" stroke="var(--coral)" stroke-width="2.5"/>
+                <text x="255" y="72" text-anchor="middle" class="node-label">second model</text>
+                <text x="255" y="106" text-anchor="middle" class="edge-label" fill="var(--ink-dim)">a cheap router &middot; a costly planner</text>
+                <path d="M 992 195 C 1070 150, 1120 120, 1184 92" fill="none" stroke="var(--coral)" stroke-width="3.5" marker-end="url(#br-c)"/>
+                <rect x="1190" y="30" width="430" height="96" rx="10" fill="#12181a" stroke="var(--coral)" stroke-width="2.5"/>
+                <text x="1405" y="72" text-anchor="middle" class="node-label">non-tool branch</text>
+                <text x="1405" y="106" text-anchor="middle" class="edge-label" fill="var(--ink-dim)">not just "tool or finish"</text>
+                <path d="M 668 285 C 590 330, 540 360, 476 388" fill="none" stroke="var(--coral)" stroke-width="3.5" marker-end="url(#br-c)"/>
+                <rect x="40" y="354" width="430" height="96" rx="10" fill="#12181a" stroke="var(--coral)" stroke-width="2.5"/>
+                <text x="255" y="396" text-anchor="middle" class="node-label">custom node</text>
+                <text x="255" y="430" text-anchor="middle" class="edge-label" fill="var(--ink-dim)">validate &middot; summarize &middot; sub-agent</text>
+                <path d="M 992 285 C 1070 330, 1120 360, 1184 388" fill="none" stroke="var(--coral)" stroke-width="3.5" marker-end="url(#br-c)"/>
+                <rect x="1190" y="354" width="430" height="96" rx="10" fill="#12181a" stroke="var(--coral)" stroke-width="2.5"/>
+                <text x="1405" y="396" text-anchor="middle" class="node-label">state beyond messages</text>
+                <text x="1405" y="430" text-anchor="middle" class="edge-label" fill="var(--ink-dim)">a budget &middot; a scratchpad &middot; a plan</text>
+            </svg>
+        </div>
+        <div class="diagram-caption reveal" style="max-width:1660px;">Any <b style="color:var(--coral); font-style:normal;">one arrow</b> means you've outgrown the one-liner &mdash; you have left the shallow single-loop shape.</div>
+    </div>
+    <div class="chrome-page">09 / 14</div>
+    <div class="chrome-nav">&larr; &rarr; navigate</div>
+</section>
+
+<!-- ============================================================ -->
+<!-- 10 — SLIDE 3.2: the door into L15                            -->
+<!-- ============================================================ -->
+<section class="slide">
+    <div class="chrome-tag">L11 &middot; <b>CONFIG SURFACE</b></div>
+    <div class="topbar reveal">
+        <div class="eyebrow">Slide 3.2</div>
+        <h2 class="headline">That's exactly the <span class="it">door into L15</span></h2>
+    </div>
+    <div class="body-area">
+        <div class="reveal" style="max-width:1660px;">
+            <!-- above the ceiling: L15, deferred -->
+            <div style="border:2px dashed var(--ink-faint); border-radius:10px; background:transparent; padding:22px 30px;">
+                <div style="font-size:19px; letter-spacing:0.1em; text-transform:uppercase; color:var(--ink-dim); margin-bottom:14px;">explicit <b style="color:var(--ink);">StateGraph</b> &mdash; L15</div>
+                <div style="display:flex; gap:16px; flex-wrap:wrap;">
+                    <span class="chip ghost">custom nodes</span>
+                    <span class="chip ghost">branches</span>
+                    <span class="chip ghost">reducers</span>
+                    <span class="chip ghost">state schema</span>
+                    <span class="chip ghost">ReAct &middot; plan-and-execute &middot; supervisor &middot; &hellip;</span>
+                </div>
+            </div>
+            <!-- the ceiling line -->
+            <div style="display:flex; align-items:center; gap:24px; margin:26px 0;">
+                <div style="flex:1; border-top:3px dashed var(--ink-dim);"></div>
+                <div style="font-size:20px; color:var(--ink); letter-spacing:0.08em; text-transform:uppercase;">the ceiling &mdash; control flow stops being one loop</div>
+                <div style="flex:1; border-top:3px dashed var(--ink-dim);"></div>
+            </div>
+            <!-- below the ceiling: create_agent, yours today -->
+            <div style="border:2px solid var(--cyan); border-radius:10px; background:#12181a; padding:22px 30px;">
+                <div style="font-size:19px; letter-spacing:0.1em; text-transform:uppercase; color:var(--cyan); margin-bottom:14px;"><b>create_agent</b> &mdash; shallow, single loop</div>
+                <div style="display:flex; gap:16px;">
+                    <span class="chip">model</span>
+                    <span class="chip">tools</span>
+                    <span class="chip">system prompt</span>
+                </div>
+            </div>
+        </div>
+        <ul class="points reveal" style="margin-top:30px; max-width:1660px;">
+            <li class="point">When the control flow branches, you <b>drop to an explicit <code>StateGraph</code></b> and wire nodes / edges / reducers yourself. Building that graph &mdash; and the patterns on top &mdash; is <b>L15</b>. L11 names the door; L15 opens it.</li>
+        </ul>
+    </div>
+    <div class="chrome-page">10 / 14</div>
+    <div class="chrome-nav">&larr; &rarr; navigate</div>
+</section>
+
+<!-- ============================================================ -->
+<!-- 11 — SLIDE 3.3: knowing where the ceiling is IS the skill    -->
+<!-- ============================================================ -->
+<section class="slide">
+    <div class="chrome-tag">L11 &middot; <b>CONFIG SURFACE</b></div>
+    <div class="topbar reveal">
+        <div class="eyebrow">Slide 3.3</div>
+        <h2 class="headline">Knowing where the ceiling is <span class="it">is the skill</span></h2>
+    </div>
+    <div class="body-area">
+        <div class="duo reveal" style="align-items:stretch;">
+            <div class="panel" style="border-color:var(--coral);">
+                <div class="panel-head" style="color:var(--coral); font-weight:600;">over-engineering</div>
+                <div style="font-size:23px; line-height:1.5; color:var(--ink-dim);">Reaching for a <b style="color:var(--ink);">hand-built graph on a single loop</b> &mdash; the L10-objective-4 mistake: a framework where 50 lines would do.</div>
+            </div>
+            <div style="display:flex; align-items:center;"><span class="chip" style="white-space:nowrap;">the line: is it still one loop?</span></div>
+            <div class="panel" style="border-color:var(--coral);">
+                <div class="panel-head" style="color:var(--coral); font-weight:600;">under-engineering</div>
+                <div style="font-size:23px; line-height:1.5; color:var(--ink-dim);">Refusing to <b style="color:var(--ink);">leave the one-liner</b> when the flow genuinely branches.</div>
+            </div>
+        </div>
+        <ul class="points reveal" style="margin-top:34px; max-width:1660px;">
+            <li class="point">Two opposite mistakes <b>bracket the line</b> &mdash; neither reflex (always hand-build, never leave the one-liner) is right.</li>
+        </ul>
+        <div class="callout reveal" style="max-width:1400px;"><p>L11 teaches the shallow side of that line: use <span style="color:var(--cyan);">create_agent</span> until the control flow stops being a single loop. L15 teaches the other side.</p></div>
+    </div>
+    <div class="chrome-page">11 / 14</div>
+    <div class="chrome-nav">&larr; &rarr; navigate</div>
+</section>
+
+<!-- ============================================================ -->
+<!-- 12 — SLIDE 3.4: where you land                               -->
+<!-- ============================================================ -->
+<section class="slide">
+    <div class="chrome-tag">L11 &middot; <b>CONFIG SURFACE</b></div>
+    <div class="topbar reveal">
+        <div class="eyebrow">Slide 3.4</div>
+        <h2 class="headline">Where <span class="it">you land</span></h2>
+    </div>
+    <div class="body-area" style="display:flex; gap:60px; align-items:center;">
+        <ul class="points reveal" style="max-width:780px; flex-shrink:0;">
+            <li class="point">You can now build a shallow agent <b>two ways</b> &mdash; by hand (L10) and in one line (L11) &mdash; and you know they're the <b>same loop</b>.</li>
+            <li class="point">The returned <b>message history</b> is the raw material the next lessons read as a <b>trace</b> (L12) and judge with an <b>eval set</b> (L13).</li>
+            <li class="point">The shallow agent is <b>the ReAct pattern, prebuilt</b> &mdash; L15 builds on that. Its opening question, and stop there: <i>what do you build when a single tool-calling loop isn't the right shape?</i></li>
+        </ul>
+        <div class="reveal" style="flex:1;">
+            <div class="ladder" style="justify-content:center;">
+                <div class="rung done">
+                    <div class="lnum">L10</div>
+                    <div class="lsub">hand-built loop</div>
+                </div>
+                <div class="rung here" style="margin-bottom:70px;">
+                    <div class="lnum">L11</div>
+                    <div class="lsub">create_agent<br><b style="color:var(--cyan);">you are here</b></div>
+                </div>
+                <div class="rung" style="margin-bottom:140px;">
+                    <div class="lnum">L12</div>
+                    <div class="lsub">read the run as a trace</div>
+                </div>
+                <div class="rung" style="margin-bottom:210px;">
+                    <div class="lnum">L13</div>
+                    <div class="lsub">judge it with an eval set</div>
+                </div>
+                <div class="rung" style="margin-bottom:280px;">
+                    <div class="lnum">L15</div>
+                    <div class="lsub">explicit StateGraph</div>
+                </div>
+            </div>
+            <div class="diagram-caption" style="text-align:center; max-width:none;">solid = built &middot; cyan = today &middot; dashed = still to come</div>
+        </div>
+    </div>
+    <div class="chrome-page">12 / 14</div>
+    <div class="chrome-nav">&larr; &rarr; navigate</div>
+</section>
+
+<!-- ============================================================ -->
+<!-- 13 — SLIDE 3.5: three shallow-agent gotchas, named           -->
+<!-- ============================================================ -->
+<section class="slide">
+    <div class="chrome-tag">L11 &middot; <b>CONFIG SURFACE</b></div>
+    <div class="topbar reveal">
+        <div class="eyebrow">Slide 3.5</div>
+        <h2 class="headline">Three shallow-agent gotchas, <span class="it">named</span></h2>
+    </div>
+    <div class="body-area">
+        <ul class="points reveal">
+            <li class="point">All three are the same trap: <b>the convenience hides the machinery, but the machinery is still there.</b> Having built the L10 loop by hand, read <code>create_agent</code> as <i>that, packaged</i>.</li>
+        </ul>
+        <table class="ledger reveal" style="margin-top:18px;">
+            <thead><tr><th style="width:440px;">Gotcha</th><th>Cure</th><th style="width:380px;">Where you saw it</th></tr></thead>
+            <tbody>
+                <tr>
+                    <td><span class="warn" style="color:var(--coral); font-weight:600;">"It's prebuilt, it can't run away"</span> &mdash; trusting the one-liner not to loop forever</td>
+                    <td>the step cap didn't vanish, it moved behind the constructor &mdash; know where it lives; hitting it is a <b>signal</b>, exactly as in L10</td>
+                    <td>slide 2.2 &mdash; the cap is a default now</td>
+                </tr>
+                <tr>
+                    <td><span class="warn" style="color:var(--coral); font-weight:600;">Un-debuggable magic</span> &mdash; can't map a bad run back to agent &rarr; tools &rarr; back-edge</td>
+                    <td>debug it <b>as the L10 loop it is</b>: read the returned <code>messages</code>, find the turn that went wrong &mdash; the framework hid the wiring, not the behavior</td>
+                    <td>section 2 + slide 1.1 &mdash; every knob has an L10 twin</td>
+                </tr>
+                <tr>
+                    <td><span class="warn" style="color:var(--coral); font-weight:600;">Wrong altitude</span> &mdash; hand-building a graph when the one-liner fits, or clinging to it after the flow branches</td>
+                    <td>stay on <code>create_agent</code> until control flow stops being one loop &mdash; then drop to an explicit graph (<b>L15</b>)</td>
+                    <td>section 3 &mdash; the ceiling, this whole discussion</td>
+                </tr>
+            </tbody>
+        </table>
+        <div class="diagram-caption reveal" style="margin-top:22px;">Knowing where the ceiling is <b style="color:var(--ink); font-style:normal;">is</b> the shallow-agent skill.</div>
+    </div>
+    <div class="chrome-page">13 / 14</div>
+    <div class="chrome-nav">&larr; &rarr; navigate</div>
+</section>
+
+<!-- ============================================================ -->
+<!-- 14 — CLOSING                                                 -->
+<!-- ============================================================ -->
+<section class="slide slide-closing">
+    <div class="chrome-tag reveal">L11 &middot; <b>CONFIG SURFACE</b></div>
+    <div class="closing-statement reveal">One line, three knobs, the <span class="k">same loop</span> underneath &mdash; and now you know exactly where the one-liner <span class="k">ends</span>.</div>
+    <div class="closing-grid reveal">
+        <div class="col">
+            <div class="label">Next</div>
+            <div class="val"><b>L12</b> read the run as a trace<br><b>L13</b> judge it with an eval set<br><b>L15</b> explicit StateGraph</div>
+        </div>
+        <div class="col">
+            <div class="label">Practice</div>
+            <div class="val"><b>L1104 lab</b> &mdash; the last problem exercises exactly this config surface</div>
+        </div>
+        <div class="col">
+            <div class="label">Companions</div>
+            <div class="val">Build-and-run notebook <b>L1103</b><br>Loop anatomy deck <b>L1102</b></div>
+        </div>
+    </div>
+    <div class="chrome-page">14 / 14</div>
+</section>
+
+</main>
+</div>
+
+<!-- Outside-stage UI: progress bar + arrow nav + editing controls -->
+<div class="deck-progress"><div class="deck-progress-bar" id="progressBar"></div></div>
+<button class="deck-arrow prev" id="prevBtn" aria-label="Previous slide">&#8592;</button>
+<button class="deck-arrow next" id="nextBtn" aria-label="Next slide">&#8594;</button>
+<div class="edit-hotzone" id="editHotzone"></div>
+<button class="edit-toggle" id="editToggle" title="Edit mode (E)">&#9998;</button>
+<div class="save-toast" id="saveToast">Saved</div>
+
+<script>
+/* ===========================================
+   SLIDE PRESENTATION CONTROLLER
+   =========================================== */
+class SlidePresentation {
+    constructor() {
+        this.slides = Array.from(document.querySelectorAll('.slide'));
+        this.currentSlide = 0;
+        this.stage = document.getElementById('deckStage');
+        this.progressBar = document.getElementById('progressBar');
+        this.setupStageScale();
+        this.setupKeyboardNav();
+        this.setupTouchNav();
+        this.setupWheelNav();
+        this.setupArrowButtons();
+        this.showSlide(0);
+    }
+
+    setupStageScale() {
+        const scale = () => {
+            const factor = Math.min(window.innerWidth / 1920, window.innerHeight / 1080);
+            const x = (window.innerWidth - 1920 * factor) / 2;
+            const y = (window.innerHeight - 1080 * factor) / 2;
+            this.stage.style.transform = `translate(${x}px, ${y}px) scale(${factor})`;
+        };
+        scale();
+        window.addEventListener('resize', scale);
+    }
+
+    setupKeyboardNav() {
+        document.addEventListener('keydown', (e) => {
+            if (e.target.getAttribute('contenteditable') === 'true') return;
+            if (['ArrowRight', 'ArrowDown', ' ', 'PageDown'].includes(e.key)) {
+                e.preventDefault();
+                this.next();
+            } else if (['ArrowLeft', 'ArrowUp', 'PageUp'].includes(e.key)) {
+                e.preventDefault();
+                this.prev();
+            } else if (e.key === 'Home') {
+                this.showSlide(0);
+            } else if (e.key === 'End') {
+                this.showSlide(this.slides.length - 1);
+            }
+        });
+    }
+
+    setupTouchNav() {
+        let startX = 0;
+        this.stage.addEventListener('touchstart', (e) => { startX = e.touches[0].clientX; }, { passive: true });
+        this.stage.addEventListener('touchend', (e) => {
+            const dx = e.changedTouches[0].clientX - startX;
+            if (Math.abs(dx) > 60) { dx < 0 ? this.next() : this.prev(); }
+        }, { passive: true });
+    }
+
+    setupWheelNav() {
+        let locked = false;
+        window.addEventListener('wheel', (e) => {
+            if (locked) return;
+            if (Math.abs(e.deltaY) < 24) return;
+            locked = true;
+            e.deltaY > 0 ? this.next() : this.prev();
+            setTimeout(() => { locked = false; }, 500);
+        }, { passive: true });
+    }
+
+    setupArrowButtons() {
+        document.getElementById('nextBtn').addEventListener('click', () => this.next());
+        document.getElementById('prevBtn').addEventListener('click', () => this.prev());
+    }
+
+    next() { this.showSlide(this.currentSlide + 1); }
+    prev() { this.showSlide(this.currentSlide - 1); }
+
+    showSlide(index) {
+        this.currentSlide = Math.max(0, Math.min(index, this.slides.length - 1));
+        this.slides.forEach((slide, i) => {
+            slide.classList.toggle('active', i === this.currentSlide);
+            slide.classList.toggle('visible', i === this.currentSlide);
+        });
+        this.progressBar.style.width = `${((this.currentSlide + 1) / this.slides.length) * 100}%`;
+    }
+}
+
+/* ===========================================
+   INLINE EDITING — hover hotzone + E key
+   =========================================== */
+class InlineEditor {
+    constructor() {
+        this.isActive = false;
+        this.toggle = document.getElementById('editToggle');
+        this.hotzone = document.getElementById('editHotzone');
+        this.toast = document.getElementById('saveToast');
+        this.editableSelector = 'h1, h2, h3, p, li, span, td, th, div.claim, div.lede, div.chapter-sub, div.diagram-caption';
+        this.hideTimeout = null;
+        this.bindEvents();
+        this.restore();
+    }
+
+    bindEvents() {
+        this.toggle.addEventListener('click', () => this.toggleEditMode());
+        this.hotzone.addEventListener('click', () => this.toggleEditMode());
+        this.hotzone.addEventListener('mouseenter', () => { clearTimeout(this.hideTimeout); this.toggle.classList.add('show'); });
+        this.hotzone.addEventListener('mouseleave', () => this.scheduleHide());
+        this.toggle.addEventListener('mouseenter', () => clearTimeout(this.hideTimeout));
+        this.toggle.addEventListener('mouseleave', () => this.scheduleHide());
+        document.addEventListener('keydown', (e) => {
+            if ((e.key === 'e' || e.key === 'E') && e.target.getAttribute('contenteditable') !== 'true') {
+                this.toggleEditMode();
+            }
+            if (e.key === 's' && (e.metaKey || e.ctrlKey) && this.isActive) {
+                e.preventDefault();
+                this.save();
+            }
+        });
+    }
+
+    scheduleHide() {
+        this.hideTimeout = setTimeout(() => {
+            if (!this.isActive) this.toggle.classList.remove('show');
+        }, 400);
+    }
+
+    toggleEditMode() {
+        this.isActive = !this.isActive;
+        this.toggle.classList.toggle('active', this.isActive);
+        const stage = document.getElementById('deckStage');
+        const editableEls = stage.querySelectorAll(this.editableSelector);
+        editableEls.forEach((el) => {
+            if (el.closest('svg')) return;
+            el.setAttribute('contenteditable', this.isActive ? 'true' : 'false');
+        });
+        if (!this.isActive) this.save();
+    }
+
+    save() {
+        try {
+            const html = document.getElementById('deckStage').innerHTML;
+            localStorage.setItem('l1105-deck-content', html);
+            this.showToast();
+        } catch (err) {
+            console.warn('Could not save deck content', err);
+        }
+    }
+
+    restore() {
+        try {
+            const saved = localStorage.getItem('l1105-deck-content');
+            if (saved) document.getElementById('deckStage').innerHTML = saved;
+        } catch (err) {
+            console.warn('Could not restore deck content', err);
+        }
+    }
+
+    showToast() {
+        this.toast.classList.add('show');
+        setTimeout(() => this.toast.classList.remove('show'), 1400);
+    }
+}
+
+new SlidePresentation();
+new InlineEditor();
+</script>
+</body>
+</html>
