@@ -59,6 +59,12 @@ estimated duration: 75
 | **Tool** (the function) | does the real work and returns a value | talk to the model directly — it only ever sees what your application passes it |
 
 - The model **proposes**; the application **disposes**; the tool **computes**. Say it as a chant.
+- diagram: the chant as a three-actor flow, left to right — under **model proposes**, a cyan
+  tool-call card (name + args + id — just emitted tokens); under **application disposes**, a cyan
+  gate that reads, validates, and runs (the application owns this middle step — that's the point,
+  so both it and the proposal it inspects are cyan); under **tool computes**, a neutral ink-faint
+  function box that only ever sees what the gate passes it — caption: "the model proposes; the
+  application disposes; the tool computes."
 
 [↑ Back to top](#tool-calling-the-protocol-the-round-trip-and-who-runs-what)
 
@@ -94,8 +100,10 @@ estimated duration: 75
 | 4 | **dispatch**: match the name, validate args, run the function | you | the function's return value |
 | 5 | **continue**: send the result back as a `ToolMessage` | you | the result, tagged with the same id |
 
-- diagram: the five steps as a horizontal pipeline, with steps 1–2 and 4–5 shaded as "application"
-  and step 3 shaded as "model".
+- diagram: the five steps as a horizontal pipeline — steps 1–2 and 4–5 in cyan (the application's
+  work bookends the exchange; your code is the point), step 3 in neutral ink / ghost styling (the
+  model's one contribution, deliberately not highlighted); this pipeline is a reusable motif —
+  later slides can re-show it with a single step lit to say "you are here."
 
 ### slide 2.3 The tool definition is a contract about shape
 
@@ -107,6 +115,10 @@ estimated duration: 75
   - stop the model from inventing a tool name that doesn't exist.
 - **The application validates; the model proposes.** Come back to this sentence any time you catch
   yourself expecting the schema to *enforce* something.
+- diagram: a two-up contrast — a cyan panel "what the definition gives" (tools of *this shape*
+  exist: name · description · argument schema) beside a coral panel "what it does **not** give"
+  (force a call · validate arguments · block invented tool names, each row struck through) —
+  caption: "a contract about shape, not a guarantee about behavior."
 
 ### slide 2.4 The model decides whether to call — that's a reasoning step
 
@@ -118,6 +130,10 @@ estimated duration: 75
 - A quick look ahead — you won't need it yet: "what makes a tool worth adding, well-named, and
   well-described?" is [L08](../L08/objectives.md)'s whole job. For now, just notice that the
   description visibly moves behavior.
+- diagram: a fork flow — one prompt-plus-bound-tool box at the left splitting into two branches:
+  "emits a tool call" in cyan and "answers directly" in neutral ink-faint (a perfectly legitimate
+  outcome, so explicitly *not* coral) — caption: "an offer, never a command." This fork seeds slide
+  5.1's three-branch fan, which adds the failure branch.
 
 [↑ Back to top](#tool-calling-the-protocol-the-round-trip-and-who-runs-what)
 
@@ -130,7 +146,10 @@ estimated duration: 75
   detail you can optimize away.
 - diagram: four labeled boxes left to right —
   `HumanMessage(question) → AIMessage(tool_calls) → ToolMessage(result) → AIMessage(final)` — with
-  the producer written under each.
+  the producer written under each, and the boxes colour-coded *by producer*: the human's message
+  ink-faint, the model's two `AIMessage`s ink, and the application's `ToolMessage` cyan (the
+  message *your code* writes is the point). This strip is the section-3 motif — slides 3.2 and 3.4
+  re-show it unchanged with one thing added.
 - table: the four messages of a successful round-trip.
 
 | # | Message type | Carries | Produced by |
@@ -148,8 +167,10 @@ estimated duration: 75
 - With a single tool and a single call, the id feels redundant. It stops being redundant the moment
   more than one call is in flight (a forward-link to [L10](../L10/objectives.md)'s agent loop). Build
   the habit now.
-- diagram: an arrow drawn from the `tool_call_id` on message 3's `ToolMessage` back to the matching
-  id in message 2's tool call.
+- diagram: the same four-message strip from slide 3.1, unchanged, with exactly one thing added — a
+  cyan arc drawn from the `tool_call_id` on message 3's `ToolMessage` back to the matching id in
+  message 2's tool call. Motif repeat: the only new ink on the slide is the thread — caption: "the
+  id is how your application says *this result answers that request*."
 
 ### slide 3.3 The tool result rides in its own `ToolMessage`
 
@@ -158,6 +179,10 @@ estimated duration: 75
   code speaking on the tool's behalf.
 - So the history carries **three** message types — human, ai, and tool — not just a human↔assistant
   back-and-forth. The role a message carries marks its **protocol position**, not who is a person.
+- diagram: a two-up contrast of where the result rides — a coral panel showing the wrong mental
+  model (the tool's output stuffed inside an `AIMessage`, struck through) beside a cyan panel with
+  the result in its own distinct tool-role `ToolMessage` pill — caption: "a third role in the
+  history — your code speaking for the tool, not the assistant speaking."
 
 ### slide 3.4 The model is stateless across calls
 
@@ -168,6 +193,11 @@ estimated duration: 75
   the same `bind_tools` handle, it was re-attached automatically.
 - Statelessness is why the next section is about cost — re-sending everything on every call is not
   free.
+- diagram: the four-message strip from slide 3.1 re-shown on top; beneath it, the request that
+  produces message 4 drawn as one big box *physically containing* copies of messages 1–3 **plus**
+  the tool-definition card again, the re-packed contents and a cyan label "re-sent, not remembered"
+  making the correction (nothing coral — this is how it works, not a failure). Motif repeat that
+  closes the 3.1 → 3.2 → 3.4 arc and hands off to 4.1, where re-sending gets its coral price tag.
 
 [↑ Back to top](#tool-calling-the-protocol-the-round-trip-and-who-runs-what)
 
@@ -199,6 +229,11 @@ estimated duration: 75
 - The lesson: every tool you add is a standing tax on every request, paid whether or not the model
   uses it. This is why [L08](../L08/objectives.md) asks "should this be a tool at all?" and why
   L16 (context management) comes back to it.
+- diagram: the table as a cost staircase (ladder flavor) — ten turn-columns left to right, each
+  stacking one more coral ~500-token definition block on the pile the previous turn already paid,
+  climbing to ~5,000 tokens by turn 10; beside the tallest column, a cyan punchline chip
+  "tool calls made: **0**" — caption: "the definition is a standing tax, billed every turn before
+  the tool ever runs."
 
 ### slide 4.3 Where this cost reasoning returns
 
@@ -236,6 +271,10 @@ estimated duration: 75
   call will teach you more than ten clean runs**, because it proves the contract is best-effort.
 - The remedy is not a better schema (that's an L08 conversation) — it is that **the application
   validates; the model proposes.** Validation is not optional.
+- diagram: one tool-call card with the four failure modes pinned to it as coral tags — wrong
+  argument *types* · *missing* required argument · *extra* invented argument · a tool *name that
+  doesn't exist* — and beneath the card a single cyan "application validates" gate that catches all
+  four — caption: "the schema stopped none of these at generation time; your gate is the remedy."
 
 ### slide 5.3 Tool calls are not deterministic
 
@@ -243,6 +282,11 @@ estimated duration: 75
   slightly different arguments each time.
 - This is *why* you validate every call rather than trusting a clean dry-run. A round-trip that
   worked at your desk can fumble in class — that variance is the point, not a bug.
+- diagram: slide 5.1's three-branch fan drawn three times side by side (run 1 / run 2 / run 3),
+  the identical prompt-plus-tool at the left of each; a *different* branch lights up each run in
+  its 5.1 colour (cyan valid call, ink-faint direct answer, coral bad arguments) while the other
+  two fade to ink-faint. Motif repeat — same offer, three different replies — caption: "same
+  prompt, same schema, three runs, three outcomes; this is why every call gets validated."
 
 ### slide 5.4 A brief word on forcing a call
 

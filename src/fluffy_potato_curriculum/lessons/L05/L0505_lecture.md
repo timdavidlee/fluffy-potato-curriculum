@@ -22,7 +22,9 @@ estimated duration: 12
   was a DAG**: trace any path with your finger and every arrow goes forward; it always reaches
   `END`.
 - diagram: L04's chain `parse → draft → policy_check → END` with a finger-trace arrow showing
-  "forward only, always terminates."
+  "forward only, always terminates." Render it to **visually match the L04 deck's chain** (same
+  node shapes, cyan forward edges, `END` in ink-faint) — a cross-lesson motif, so students
+  recognize the exact graph they built.
 - The model did real work *inside* the nodes (parse, classify, draft), but **you wired every
   edge.** That's the definition of a workflow.
 
@@ -47,8 +49,11 @@ estimated duration: 12
 - L11 keeps **all** of the above and adds exactly one thing: a **conditional edge that loops back
   to the model**. After the model node, the graph either routes to a `tools` node and **loops back
   to the model**, or routes to `END`.
-- diagram: the acyclic chain on the left; on the right the same shape with one new **dashed
+- diagram: the acyclic chain on the left; on the right the same shape with one new **dashed cyan
   back-edge** curving from the model node to `tools` and back — labeled "the only thing L11 adds."
+  The back-edge is **cyan, not coral**: it's the point of the slide — the one addition — not a
+  failure; dashed says "you draw it in L11." These two shapes plus the back-edge are the deck's
+  motif — 2.3 and 4.2 re-show them.
 - That single back-edge hands the **model** control of the path: *it* decides whether to call a
   tool and go again, or stop. The acyclic **workflow** becomes a cyclic, model-driven **agent**.
 
@@ -69,6 +74,10 @@ estimated duration: 12
 - You might think "but the classifier was the model deciding" — it wasn't: the model produced a
   *label in state*; your routing function read that label and chose the edge. The model never
   chose the edge, and **it never looped.**
+- diagram: two-up reusing both deck motifs — left, the L05 router in **cyan** (classifier writes
+  a *label into state*, **you** own the conditional edge, no cycle anywhere); right, 2.1's agent
+  shape with the **dashed cyan back-edge** (the model's own decision picks the edge, *and* it
+  loops). Caption: a conditional edge alone isn't an agent — it takes both.
 
 ## section 3. When to use which
 
@@ -109,3 +118,6 @@ estimated duration: 12
 - **A workflow is a graph whose path you wire (acyclic); an agent is a graph whose path the model
   drives (cyclic). The line between them is a single back-edge.**
 - Next lesson, you draw that edge. Everything else, you already built.
+- diagram: motif bookend — re-show 2.1's two shapes small, side by side: the acyclic workflow
+  ("path you wire") and the same shape with the **dashed cyan back-edge**, now tagged "you draw
+  this edge next lesson." Nothing else changes between the panels — that's the sentence, drawn.

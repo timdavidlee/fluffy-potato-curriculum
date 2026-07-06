@@ -39,9 +39,11 @@ estimated duration: 85
   hedges across ` helium` (~0.28), ` carbon`, ` nitrogen`, … It *ranks* candidates; it doesn't
   *know* the answer. The word "distribution" is the one to hold onto — section 4 (model scale) and
   section 5 (temperature) are both about *reshaping this exact distribution*.
-- diagram: a bar chart over candidate next tokens after `Water is made of hydrogen and` — a tall
-  bar (`oxygen`) with a real runner-up (`helium`) and a scatter of short bars — labeled "the model
-  ranks; the sampler picks."
+- diagram: a bar chart over candidate next tokens after `Water is made of hydrogen and` — the tall
+  `oxygen` bar in cyan (the point: the model's leading candidate), runner-up `helium` and the
+  scatter of short tail bars in ink-faint — labeled "the model ranks; the sampler picks." This
+  distribution chart is the lesson's recurring motif: sections 4 and 5 re-show it with one thing
+  changed.
 
 ### slide 1.3 The consequence that runs the rest of the lesson: no memory
 
@@ -77,6 +79,11 @@ estimated duration: 85
   spell anything. Common strings get a short encoding; rare strings are spelled out in more pieces.
   Most modern tokenizers use **BPE** (byte-pair encoding) or a close cousin, *learned* from
   training data — so different vendors' tokenizers split the same string differently.
+- diagram: a three-panel contrast on the same sentence — a whole-word panel in coral (an unbounded
+  word list spilling past the panel's edge, "no fixed list covers language"), a character panel in
+  coral (one very long strand of single letters, "long and low-signal"), and a sub-word panel in
+  cyan (a handful of composable chunks) — the compromise is the only panel that stays fixed *and*
+  spells anything.
 
 ### slide 2.3 A token is really an integer
 
@@ -133,8 +140,10 @@ estimated duration: 85
 - Example (local GPT-2 ladder, `Water is made of hydrogen and`): ` oxygen` carries ~0.46 of the
   mass on the small model (124M), ~0.63 on medium (355M), and ~0.84 on the large one (774M) — the
   top token grows and the tail thins as the model scales. Same loop, sharper prediction.
-- diagram: three stacked bar charts (small / medium / large) over the same candidate tokens — the
-  top bar grows taller and the tail flattens as size increases.
+- diagram: small-multiples of the slide-1.2 distribution chart — the same bar chart drawn three
+  times side by side (small / medium / large model) over the same candidate tokens, the cyan
+  `oxygen` bar growing (~0.46 → ~0.63 → ~0.84) and the ink-faint tail thinning as size increases —
+  the 1.2 motif with one thing changed: model scale.
 
 ### slide 4.2 What this is — and is not
 
@@ -154,8 +163,10 @@ estimated duration: 85
   **flattens** it (more candidates become competitive).
 - It does not change what the model "knows" — only how aggressively the sampler commits to the most
   likely token.
-- diagram: the same bar chart at three temperatures — `temp 0` (one tall bar), `temp ≈ 0.7` (a few
-  competitive bars), `temp ≈ 1.0+` (many similar-height bars).
+- diagram: the slide-1.2 distribution chart as small-multiples at three temperatures — `temp 0`
+  (one tall cyan bar, tail near zero), `temp ≈ 0.7` (a few competitive bars, the top one still
+  cyan), `temp ≈ 1.0+` (many similar-height ink-faint bars, no clear winner) — the 1.2 motif again,
+  one thing changed: temperature.
 
 ### slide 5.2 Temperature 0 is *low* variance, not *zero* variance
 
@@ -164,6 +175,9 @@ estimated duration: 85
 - But even at temperature 0, output can differ across runs: floating-point non-determinism,
   server-side batching, and tie-breaking between equally-likely tokens all leak through. Frame it as
   *low* variance from day one, or a future eval that flakes will look like a bug when it's expected.
+- diagram: a two-up contrast of run columns — five stacked output rows at `temp 0` (near-identical,
+  ink-faint, except one coral row where run 3 differs anyway) beside five rows at `temp 1` (visibly
+  varied wording, ink-faint) — the single coral row is the point: *low* variance, not *zero*.
 
 ### slide 5.3 Other sampling controls, and how to choose
 
@@ -204,6 +218,10 @@ estimated duration: 85
   thing that made the output good is now **overhead you carry on every call**.
 - This is the hinge into budgeting: you have just built up overhead on purpose. Section 8 is the
   bill.
+- diagram: the same two-sequential-calls picture from slide 1.3, with one change: a labeled
+  **preamble** chip sits at the head of each request — cyan in call 1 (the context that made the
+  output good), coral in call 2, tagged "re-sent overhead" — the identical block, carried and
+  billed again.
 
 ## section 7. Budgeting, part one — the context window (space)
 
@@ -216,6 +234,11 @@ estimated duration: 85
   own response.
 - Anchor number: **Claude Sonnet 4.6 has a 200,000-token standard window.** (A 1M-token
   long-context variant also exists; we use 200k as the course default.)
+- diagram: a horizontal bar sized to 200k tokens, segmented with every competitor labeled —
+  `preamble | conversation history | current input | reserved for output`, plus a dashed
+  ink-faint `tool definitions` segment ("lands in L07") — the output reservation in cyan (the
+  segment people forget to leave room for), the rest ink-faint. This window bar is the motif for
+  the whole section: 7.2 zooms in on it, 7.3 breaks it.
 
 ### slide 7.2 The window meter and reserving room for the answer
 
@@ -238,6 +261,10 @@ estimated duration: 85
 - The dangerous one is **silent truncation**: no error, but the model no longer has information you
   assumed it had. It also motivates later lessons — context management (L19) and RAG (L21) exist to
   *push back* on window pressure rather than just buying a bigger window.
+- diagram: the section's 200k window bar re-shown three times, one per failure mode — overflowing
+  past the right edge in coral (hard rejection, loud), the oldest history segment struck through
+  while the call still "succeeds" (silent truncation), and the mid-context segment hazed/faded
+  (quality degradation) — the same bar from 7.1/7.2, three ways to lose.
 
 ## section 8. Budgeting, part two — cost (money)
 
@@ -245,16 +272,18 @@ estimated duration: 85
 
 - Billing is per token, with **separate input and output rates**, on **every** call. No free
   server-side memory: the re-sent preamble and history are re-billed each turn.
-- diagram: a single call annotated `input_tokens × input_rate + output_tokens × output_rate =
-  call cost`.
+- diagram: one call drawn as a two-segment cost block — an input segment and an output segment
+  side by side, each labeled with its token count × rate, summing into one `call cost` bar; inside
+  the input segment, the re-sent preamble + history portion is coral ("re-billed every turn") and
+  the fresh turn is cyan.
 
 ### slide 8.2 The input/output asymmetry
 
 - Output tokens typically cost **3–5× more** than input tokens.
 - Consequence that flips intuition: a **long prompt + short answer** is often *cheaper* than a
   **short prompt + long answer**. Paying to read is cheaper than paying to write.
-- diagram: two bars — "2k-in / 50-out" vs. "50-in / 2k-out" — the second taller, labeled "output is
-  the expensive direction."
+- diagram: two cost bars — "2k-in / 50-out" in cyan (the cheaper shape, despite the long prompt)
+  vs. "50-in / 2k-out" in coral and visibly taller — labeled "output is the expensive direction."
 
 ### slide 8.3 The conversation-history staircase (with the preamble riding along)
 
@@ -273,6 +302,9 @@ estimated duration: 85
 
 - This staircase is exactly what **prompt caching** and context management (L19) and retrieval (L21)
   exist to fight. Just the name for now — the fix comes later.
+- diagram: the cumulative-token staircase — five steps, one per turn, each step a stacked bar
+  where the new ~200 tokens are cyan and the re-sent block beneath (preamble + all prior turns) is
+  coral and growing — by turn 5 the coral you re-pay dwarfs the cyan you actually typed.
 
 ### slide 8.4 Order-of-magnitude: from "free" to "a real budget"
 
@@ -295,6 +327,11 @@ estimated duration: 85
 - The one sentence to leave with: *everything you front-load to make the model predict better is
   overhead you re-send, re-count, and re-pay on every call — so every prompt is a budget decision in
   tokens, dollars, and window space at once.*
+- diagram: the slide-1.1 prediction loop one last time, now annotated with each section's addition
+  — sub-word token chips on the input (§2–3), the cyan sharpened distribution (§4, §6), a
+  temperature dial on the sampler (§5), and a coral ring around the outside for the re-sent
+  preamble + history counted against window and bill (§7–8) — the whole lesson on the one picture
+  it opened with.
 
 ### slide 9.2 What L02 does with this
 

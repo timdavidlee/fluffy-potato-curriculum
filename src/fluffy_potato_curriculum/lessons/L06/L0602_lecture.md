@@ -34,8 +34,10 @@ estimated duration: 80
   it cold, with no working shown.
 - So the reasoning text isn't a window into a hidden thought process — it *is* the process. The
   tokens are the computation.
-- diagram: two prompts side by side — "Q → A" (cold) vs "Q → step1 → step2 → step3 → A" (CoT) — with
-  an arrow noting that the second conditions A on the intermediate tokens.
+- diagram: two prompts side by side — "Q → A" (cold, ink-faint) vs "Q → step1 → step2 → step3 → A"
+  (CoT), the intermediate step-tokens in **cyan** (they're the point) — with an arrow noting that
+  the second conditions A on those tokens. This two-prompt contrast is the lesson's reusable motif:
+  slide 2.4 re-shows it with results attached.
 
 ### slide 1.3 The four techniques you'll pick up
 
@@ -71,8 +73,10 @@ estimated duration: 80
 - **Worked-example few-shot.** Reuse L02's few-shot lever: show the model one or two fully-worked
   problem→reasoning→answer examples, then the real problem. It imitates the *reasoning style*, not
   just the answer format.
-- diagram: a dial from "free-form (cheap, loose)" → "numbered (structured)" → "worked-example
-  (most guided, most tokens)".
+- diagram: a three-step ladder of CoT triggers, each step taller (more tokens, more control) —
+  "free-form (cheap, loose)" → "numbered scaffold (structured)" → "worked-example (most guided,
+  most tokens)" — with the production step (numbered scaffold) in **cyan** and the other two steps
+  ink-faint; nothing here is a failure, so no coral.
 
 ### slide 2.3 The shape of the reasoning matters
 
@@ -89,6 +93,10 @@ estimated duration: 80
   changed — accuracy, structure, latency, token count. The contrast is your evidence.
 - This with/against comparison is exactly what the L0604 lab has you build, and what
   [Demo 1](L0603_lecture.ipynb) shows you live.
+- diagram: slide 1.2's two-prompt contrast re-shown (same motif, one change) — the same input run
+  cold vs with the CoT scaffold, each panel now annotated with its result, output-token count, and
+  latency; the intermediate step-tokens stay **cyan**, because they're what bought the accuracy
+  delta the annotations show.
 
 [↑ Back to top](#teaching-an-llm-to-think-chain-of-thought-scratchpads-and-self-critique)
 
@@ -101,6 +109,9 @@ estimated duration: 80
   answer.
 - The fix is a **scratchpad**: ask the model to reason inside `<thinking>…</thinking>` and put only
   the final answer inside `<answer>…</answer>`.
+- diagram: the *before* to slide 3.2's split block — one tall ink-faint blob of free-form reasoning
+  with the answer a tiny buried line at the bottom, and a **coral** "?" arrow from downstream code
+  poking at the blob, unable to find it. Slides 3.2–3.4 re-show this same response block, fixed.
 
 ### slide 3.2 Tags are a contract, not a capability
 
@@ -131,6 +142,9 @@ estimated duration: 80
 - **UX** — you can show the user the answer and hide (or collapse) the reasoning.
 - **Evals & tracing** — a clean answer field is what L12 (tracing) and L13 (evaluation) score against;
   reasoning logged separately is debugging gold without polluting the metric.
+- diagram: slide 3.2's split block re-shown (same motif, one change) — three **cyan** arrows now
+  fan out of the `<answer>` block, labeled *parsing code*, *user-facing UI*, and *evals & tracing
+  (L12/L13)*; the greyed `<thinking>` block sits above with no arrows leaving it.
 
 [↑ Back to top](#teaching-an-llm-to-think-chain-of-thought-scratchpads-and-self-critique)
 
@@ -147,7 +161,9 @@ estimated duration: 80
 - diagram: the two self-critique shapes side by side — **single-prompt** (one round-trip: a single
   call where the model answers → critiques → revises inline) vs **two-step** (two round-trips: call 1
   produces the answer, then call 2 — possibly a different prompt or model — critiques and revises
-  it), the two-step tagged "a whole extra round-trip: costlier, more controllable."
+  it), the two-step tagged "a whole extra round-trip: costlier, more controllable." Both shapes stay
+  cyan/neutral here — no failure yet. This answer→critic flow is the section's motif: slide 4.2
+  re-shows it failing, slide 4.3 re-shows it fixed.
 
 ### slide 4.2 The sycophancy failure mode
 
@@ -157,6 +173,9 @@ estimated duration: 80
 - A critic with **no new information** is a weak critic. It has nothing to disagree *with*.
 - Watch for this every time you reach for self-critique — that's sycophancy, and it's the failure
   mode to keep in mind.
+- diagram: slide 4.1's answer→critic flow re-shown (same motif, one change) — the critic (same
+  model, same prompt, reading its own answer) stamps a **coral** "yes, looks right" loop straight
+  back onto the original answer; no new-information arrow enters the picture anywhere.
 
 ### slide 4.3 Mitigations — inject new information
 
@@ -171,6 +190,10 @@ estimated duration: 80
 
 - The common thread: your critique is only as good as the *new information* it brings. Re-asking the
   same model the same way is theatre.
+- diagram: the third beat of the slide-4.1 motif — the same answer→critic flow, now with a **cyan**
+  new-information arrow feeding the critic (a skeptical framing, a second model, an adversarial
+  role, or ground truth), the one added arrow that turns 4.2's coral rubber-stamp into a real
+  critique.
 
 ### slide 4.4 Single-prompt vs two-step — the trade-off
 
@@ -191,6 +214,9 @@ estimated duration: 80
   for you.
 - This is the first lesson where you must consciously weigh reasoning *quality* against *cost*. That
   trade-off returns in L13 (model power) and L16 (context management).
+- diagram: bar chart of output tokens for the same task — a zero-shot bar (ink-faint) beside a CoT
+  bar **3–10× taller in coral** (the balloon is the cost you pay), with a matching latency pair of
+  bars alongside making the second price visible.
 
 ### slide 5.2 Three cases where it backfires
 
@@ -213,6 +239,10 @@ estimated duration: 80
   table of tasks.
 - Heuristic: reach for reasoning when the task is in the help-class from section 2 *and* the budget
   allows; skip it when the task is easy, latency-bound, or prone to talked-into-it errors.
+- diagram: a decision-tree flow — "in section 2's help-class?" → "latency/cost budget allows?" —
+  with the reason branch in **cyan** and the answer-cold branch in **ink-faint** (answering cold is
+  a legitimate outcome, not a failure — no coral here); this is the exact decision the L0610 lab
+  has you make and defend.
 
 [↑ Back to top](#teaching-an-llm-to-think-chain-of-thought-scratchpads-and-self-critique)
 
@@ -225,6 +255,10 @@ estimated duration: 80
 - Everything you learned in L06 applies inside that loop — eliciting reasoning about *which* tool to
   call, separating that reasoning from the tool-call output, and recognizing when reasoning about the
   tool is wasted.
+- diagram: your first look at the agent loop — a flow where the model node's reasoning step (a
+  **cyan** chip, the piece you now own) decides between answering directly and calling a tool, with
+  the tool node and its back-edge into the model drawn **dashed ink-faint** ("lands in L07" —
+  deferred, not a failure).
 
 ### slide 6.2 What to carry forward
 

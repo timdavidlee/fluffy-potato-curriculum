@@ -64,8 +64,12 @@ builder.add_conditional_edges("classify", route,
   **capable model** (Sonnet 4.6). This is the *mechanism* of mixed-model design — you'll get the
   full decision framework in **[L14](../L14/objectives.md)**.
 - diagram: the concrete router — a `classify` node badged **Haiku 4.5** ("cheap: just emits a
-  label") fanning via a dashed conditional edge to three branch nodes `billing` / `technical` /
+  label") fanning via a **dashed** conditional edge to three branch nodes `billing` / `technical` /
   `general`, each badged **Sonnet 4.6** ("capable: the real reasoning"), all converging into `END`.
+  Colour intent: the Sonnet badges are **cyan** (the real reasoning is the point); the Haiku badge
+  is **ink-faint / neutral** — cheap is a design choice, **not coral** (coral means failure, and
+  nothing here fails). This router is the section's motif: 2.2 and 2.3 re-show it with one thing
+  changed.
 
 ### slide 2.2 Determinism: the workhorse proof
 
@@ -74,6 +78,10 @@ builder.add_conditional_edges("classify", route,
   doesn't.
 - This is what separates a workflow's routing from an agent's: a conditional edge, even though
   it's "runtime-chosen," is a deterministic function of state, not a coin flip.
+- diagram: the 2.1 router drawn twice side by side ("run 1" / "run 2"), the **same cyan `billing`
+  path** lit in both runs; under each, a short reply snippet in **ink-faint** whose wording
+  differs slightly. Motif repeat of 2.1 with one thing changed — the wording varies, the path
+  doesn't.
 
 ### slide 2.3 The fallback / default branch
 
@@ -82,6 +90,11 @@ builder.add_conditional_edges("classify", route,
   rather than letting the routing function raise.
 - Treat this as a first-class design requirement, not an afterthought — it's a habit worth having
   before you run into messier real-world classifiers.
+- diagram: third beat of the 2.1 router motif — an unexpected label (e.g. `"refund??"`) arrives
+  in **coral** and is routed via a **coral dashed** edge into the **cyan** `general` fallback
+  node, which still converges to `END`; beside it, a crossed-out **coral** `KeyError` box shows
+  the alternative when no default branch exists. Coral = the surprise and the crash you avoided;
+  cyan = the fallback that handles it.
 
 ## section 3. Branch on the user, not the model
 
@@ -96,6 +109,11 @@ builder.add_conditional_edges("classify", route,
   through. The *interactive* version — a graph that **pauses mid-run to ask** and resumes on the
   answer — needs LangGraph's `interrupt` plus a checkpointer, and you'll get that in
   **[L17](../L17/objectives.md)** (human-in-the-loop).
+- diagram: the router motif with a different decider — a **cyan** initial-state chip
+  (`user_choice: "escalate"`) feeding the conditional fork directly, with **no model node** in
+  the decision path; off to the side, a **dashed ink-faint ghost** box "pause mid-run and ask →
+  `interrupt`, lands in L17." Cyan = the user's value driving the edge; dashed faint = deferred,
+  not this lesson.
 
 ### slide 3.2 Same shape, different decider — and they compose
 
@@ -119,6 +137,10 @@ builder.add_conditional_edges("classify", route,
   set of steps isn't enumerable ahead of time.
 - Watch for the common failure mode: building an agent to do what a two-branch router would do
   just as well, at a fraction of the cost and unpredictability.
+- diagram: two-up with paired bars — left panel, the known-paths **router** in **cyan** with a
+  short cost bar; right panel, an **agent** doing the same two-branch job in **coral** with a
+  visibly taller cost bar, tagged "open-ended steps, priced every run." Cyan = the right-sized
+  tool; coral = the cost of handing over control you never needed to give away.
 
 ### slide 4.2 Bridge to L0505
 
@@ -126,3 +148,8 @@ builder.add_conditional_edges("classify", route,
   matter how many branches it has.
 - You'll get the full workflow-vs-agent recap and close — what carries into L11, what precisely
   changes, and when to reach for which — in [L0505_lecture.md](L0505_lecture.md).
+- diagram: a triptych of tiny graphs — L04's chain, this lesson's model-classified router, and
+  the user-input router — all drawn **cyan** and all acyclic ("still workflows, however many
+  branches"); floating beside them, one unattached **dashed ink-faint** back-edge tagged
+  "→ L0505 / L11" — the only piece you haven't drawn yet. Dashed faint = deferred; nothing here
+  is a failure, so no coral.
