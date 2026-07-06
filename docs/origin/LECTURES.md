@@ -147,7 +147,16 @@ Rule 2: under the sections define the following slide elements:
 
 - **text**: the default content. If no prefix is added, the bullet is assumed to be text.
 
-- **diagram**: a one-line description of what the diagram is showing
+- **diagram**: describe a *visual to build* (not prose) — what it shows, what's highlighted, and the
+  contrast or quantity it makes concrete. **Lean on visuals generously**: if a point can be *shown*,
+  add a `diagram:` — a lecture should be visual-forward, not a wall of bullets, so most content slides
+  earn one. **Repeating the same visual with one thing changed is encouraged, not redundant** — the
+  same bar chart at three temperatures, the same block diagram with the next arrow added; a motif that
+  recurs across a section teaches better than one-off pictures. The deck renderer turns each directive
+  into a real CSS/SVG visual per
+  [`slide_theme/FRONTEND-STYLE.md`](../../src/fluffy_potato_curriculum/lessons/slide_theme/FRONTEND-STYLE.md)
+  §5 — write the directive with its flavors (flow · block/contrast · **bar-chart** · ladder · stack)
+  and colour discipline (cyan = the point, coral = the failure/cost) in mind.
 
 - **table**: a one-line description of what the table is showing
 

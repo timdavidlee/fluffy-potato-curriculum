@@ -160,7 +160,16 @@ Reveal animation: add `reveal` to top-level blocks for a staggered fade-and-rise
 ## 5. Diagrams — "show, not tell"
 
 A `diagram:` directive in the outline is a *visual to build*, never text to print. Render it inside a
-`.diagram-frame` with a short `.diagram-caption`. Two techniques (both shown in `sample_deck.html`):
+`.diagram-frame` with a short `.diagram-caption`.
+
+**Use visuals generously.** If a point can be *shown*, show it — a strong deck is visual-forward, not
+a wall of bullets. Reach for a diagram even on slides the outline left as prose when the idea is
+inherently visual. And **visual repetition is a feature, not redundancy**: re-showing the *same*
+chart or block with one thing changed — a taller bar, one more arrow, the next temperature — is one
+of the strongest teaching moves. A motif that recurs across a section lands harder than one-off
+pictures; reach for it on purpose.
+
+Two build techniques (both shown in `sample_deck.html`):
 
 - **CSS block diagrams** (preferred for boxes/stacks/grids) — plain `<div>`s with the box style below.
   More robust than hand-plotted SVG; use for nested boxes, two-up contrasts, pill lists, stacked
@@ -185,6 +194,36 @@ Rules of thumb: cyan node/edge = normal path; coral node/edge = the failure bran
 edges = neutral plumbing; dashed = deferred / out-of-scope ("this lands in a later lesson"). Append
 any small helper classes you need to the end of the `<style>` block — don't edit the shared rules
 above them.
+
+### Diagram flavors
+
+Pick the flavor that fits the point. Most are CSS blocks; flows/charts are SVG (or CSS bars). The
+colour discipline above holds for every one — colour *is* the meaning.
+
+| Flavor | What it is | Build with | Examples |
+| --- | --- | --- | --- |
+| **Flow / cycle** | steps or a loop joined by arrows | SVG `<circle>`/box nodes + `<path>` + `marker-end`; animate a `<circle>` on a cycle | token-generation loop, parser fallback, the agent back-edge |
+| **Block / nested / scope** | labelled boxes, nesting, chips | CSS box vocabulary above; dashed = out-of-scope | container-vs-contents, scope fence |
+| **Contrast / two-up** | two panels side by side, one cyan (good) one coral (bad) | CSS flex row of two boxes | right vs wrong, before/after, two placements |
+| **Quantitative / bar chart** | bars whose size encodes a number | CSS bars (below) or SVG `<rect>`s | token-probability distribution, cost comparison, a segmented context-window bar, small-multiples |
+| **Ladder / staircase** | a stepped progression, each step taller/costlier | CSS stacked steps or SVG | cost ×10 → ×100, the cumulative-token staircase |
+| **Stack / message list** | labelled rows/pills stacked in order | CSS pills | `messages=[…]`, the `<thinking>`/`<answer>` split |
+
+**Quantitative / bar chart** is the flavor the token/cost lessons (e.g. L01) lean on hardest and the
+one most likely to recur as small-multiples (the *same* chart at temp 0 / 0.7 / 1.2; a distribution
+under a small vs large model). Colour makes the point: the bar you're calling attention to is
+**cyan**, the expensive/bad one **coral**, context bars **`--ink-faint`**. A minimal CSS recipe
+(append to the `<style>` block):
+
+```css
+/* a bar chart: a flex row of columns; each bar's height (%) encodes its value */
+.chart  { display: flex; align-items: flex-end; gap: 18px; height: 360px; }
+.chart .bar { width: 84px; background: var(--ink-faint); border-radius: 6px 6px 0 0; }
+.chart .bar.hi  { background: var(--cyan); }    /* the bar you're making a point about */
+.chart .bar.bad { background: var(--coral); }   /* the expensive / failure bar */
+.chart .bar .val { /* a value/label above or below each bar (font-body, ~20px) */ }
+/* set each bar's height inline, e.g. <div class="bar hi" style="height:78%"> */
+```
 
 ---
 
