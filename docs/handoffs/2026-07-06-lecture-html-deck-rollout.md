@@ -8,22 +8,27 @@ run the next lesson end-to-end.
 
 ## State right now
 
-**Merged to main (13 decks):** L0102, L0202, L0305 (PR #113–#116), L0402 (#117), L0502 + L0505
-(#118, v0.20.0), L0602 (#119, v0.21.0), L0702 (#120, v0.22.0), L0802 (#121, v0.23.0), and
-L0902 + L0905 (the PR that carried this handoff doc).
+**Merged to main (15 decks):** L0102, L0202, L0305 (PR #113–#116), L0402 (#117), L0502 + L0505
+(#118, v0.20.0), L0602 (#119, v0.21.0), L0702 (#120, v0.22.0), L0802 (#121, v0.23.0),
+L0902 + L0905 (#125, v0.24.0), and L1102 + L1105 (the PR that carried this update).
 
-**Next action if resuming cold:** start the per-lesson cycle (below) at **L1102 + L1105**.
+**Next action if resuming cold:** start the per-lesson cycle (below) at **L1206**, then **L1307**.
 
 **Loose ends outside this effort (do NOT bulldoze):**
 
 - Worktree `l01-deck` (branch `worktree-l01-deck`) predates this effort and has unrelated
   uncommitted changes — leave it alone.
 
-## Remaining work (7 outlines + 1 rescale)
+## Remaining work (5 outlines + 1 rescale)
 
-Priority order: **L1102, L1105, L1206, L1307** (core arc), then **L2202, L2205, L2302** (mini/
-standalone). Plus the **L1002 rescale** — it was built pre-classroom-scale; the todo's "[known off]"
+Priority order: **L1206, L1307** (core arc), then **L2202, L2205, L2302** (mini/standalone).
+Plus the **L1002 rescale** — it was built pre-classroom-scale; the todo's "[known off]"
 item has the exact transform. L10's diagrams are hand-crafted: **hand-scale, don't regenerate.**
+
+One process note from the L11 run: the background deck-builder subagents repeatedly stalled trying
+to emit the whole deck in one giant Write — brief them to build the file **incrementally** (head/CSS
++ cover first, then append 3–5 slides per Edit), which got both decks out cleanly. Port allocation
+so far: L09 → 8132, L11 → 8133, next lesson takes 8134, …
 
 ## The per-lesson cycle (repeat verbatim)
 
