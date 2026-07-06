@@ -15,7 +15,7 @@ recurring drift risk below.
 
 ## Status (19 lecture outlines)
 
-**Progress: 9 built (L0102, L0202, L0305, L0402, L0502, L0505, L0602, L0702, L0802) · 1 needs rescale (L1002) · 9 pending.**
+**Progress: 11 built (L0102, L0202, L0305, L0402, L0502, L0505, L0602, L0702, L0802, L0902, L0905) · 1 needs rescale (L1002) · 7 pending.**
 
 | Lesson item | Deck? | Scale | Note |
 | --- | --- | --- | --- |
@@ -28,8 +28,10 @@ recurring drift risk below.
 | L0602 | ✅ | classroom | done (reasoning; 6 diagrams — 3 added incl. self-critique + when-it-hurts; 2 ledger tables, 28 slides) |
 | L0702 | ✅ | classroom | done (tool calling; 8 diagrams — 4 added incl. two-era lanes, bind_tools boundary, cost-twice, three-outcome fan; 6 ledger tables, 30 slides) |
 | L0802 | ✅ | classroom | done (tool design; 7 diagrams — 2 added: worked-test flow + hidden-side-effect panels; 6 ledger tables, 37 slides) |
+| L0902 | ✅ | classroom | done (MCP contract + boundary; 6 diagrams — 1 added: §5.2 break-even chart; 9 ledger tables, 32 slides) |
+| L0905 | ✅ | classroom | done (MCP wire-shape walkthrough; 3 diagrams — 1 added: §4.1 boundary-failure timeline; 2 ledger tables, 16 slides) |
 | L1002 | ⚠️ | **OLD** | **known off** — built pre-classroom-scale; needs the rescale below |
-| L0902, L0905, L1102, L1105, L1206, L1307, L2202, L2205, L2302 | ❌ | — | no deck yet (9 outlines) |
+| L1102, L1105, L1206, L1307, L2202, L2205, L2302 | ❌ | — | no deck yet (7 outlines) |
 
 ## Open items
 
@@ -40,9 +42,9 @@ recurring drift risk below.
   L10-specific diagram-helper classes + inline SVG `font-size="N"` attributes, then **verify no slide
   overflows** the stage (L10 has a 7-row arc table + several SVG diagrams — the dense ones to watch).
   L10's diagrams are hand-crafted and good; **hand-scale, don't regenerate** (preserves the art).
-- **Build decks for the 9 remaining outlines.** Each via the `build-lecture-deck` skill (copy the
+- **Build decks for the 7 remaining outlines.** Each via the `build-lecture-deck` skill (copy the
   sample, map the outline, build diagrams, verify). Rough priority: the rest of the core arc first
-  (L09, L11–L13), then the mini/standalone items (L22, L23). No hard dependency between
+  (L11–L13), then the mini/standalone items (L22, L23). No hard dependency between
   them — can be done incrementally, one lesson at a time.
   - **First, review the outline's `diagram:` coverage** — an outline may under-specify diagrams on
     visual slides, and the deck is only as good as its directives. L01 needed 4 added (slides 1.3,
