@@ -1,3 +1,9 @@
+## v0.20.0 (2026-07-06)
+
+### Feat
+
+- **L05**: build L0502 & L0505 lecture HTML decks + routing diagrams
+
 ## v0.19.0 (2026-07-06)
 
 ### Feat
