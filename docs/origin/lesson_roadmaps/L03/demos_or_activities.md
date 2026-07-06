@@ -16,7 +16,7 @@ Each demo is a self-contained block with:
 - **What to highlight** — the moment(s) where the teacher should slow down and say the takeaway out loud.
 - **If the demo misbehaves** — graceful fallback for when the model surprises you (it will).
 
-The demos are ordered to match the four learning objectives from [objectives.md](objectives.md). Demo 1 wraps a single LLM call as a typed node (objectives 1 & 2); Demo 2 compiles, invokes, and inspects that same node in isolation (objective 3); Demo 3 is a short contrast-and-discussion beat, not a build, that lands *why* a node is the unit worth wiring (objective 4). They build on each other — Demo 2 reuses Demo 1's node and state unchanged, and Demo 3 reuses Demo 1's code as the "explicit node" side of its comparison. Run them in order.
+A short **framework primer** (a read/run-alone student notebook, *not* a teacher-driven demo) precedes the three demos below — it introduces LangChain's client and the LangChain-vs-LangGraph split so the demos can spend their time on the node, not on "what is `ChatAnthropic`." The demos themselves are ordered to match the four learning objectives from [objectives.md](objectives.md). Demo 1 wraps a single LLM call as a typed node (objectives 1 & 2); Demo 2 compiles, invokes, and inspects that same node in isolation (objective 3); Demo 3 is a short contrast-and-discussion beat, not a build, that lands *why* a node is the unit worth wiring (objective 4). They build on each other — Demo 2 reuses Demo 1's node and state unchanged, and Demo 3 reuses Demo 1's code as the "explicit node" side of its comparison. Run them in order.
 
 > **The spine of L03: one node, nothing wired to it.** L03 is the *first* LangGraph lesson and it deliberately stops at one node — no edges between nodes, no branching, no loop. Keep saying **"state goes in, state comes out"** and **"a node is one LLM call you wire."** The entire lesson is building toward the single sentence a student should leave with: *"you just wired one step — next lesson, you wire several of them together."*
 
@@ -31,6 +31,26 @@ The teacher should have, before the first demo starts:
 - LangGraph's own run/stream output ready to call (`stream()` on the compiled graph) — **not** Langfuse. Real trace tooling is [L12](../L12/objectives.md); name it as a forward pointer, don't reach for it.
 
 > Why one node, one model, one dataset: L03's entire pedagogical job is to make "what is a node" land cleanly before any wiring exists. Every extra moving part (a second model, a second node, a tracing platform) borrows attention from that one idea and belongs to a later lesson instead.
+
+## Framework primer — Meet LangChain & LangGraph (before Demo 1)
+
+**Format:** a short **student-facing primer notebook** ([L0302_lecture.ipynb](../../../../src/fluffy_potato_curriculum/lessons/L03/L0302_lecture.ipynb)), read/run before the build demos — not a teacher-driven demo. It isolates *what a framework is* and the minimal **LangChain** surface the demos assume, so Demo 1 can spend its time on the *node*, not on "what is `ChatAnthropic`."
+
+**Goal:** bridge the L02→L03 cliff. Students leave the hand-rolled `potato_llm` seam and meet a framework, a native client, and graph vocabulary all at once; this primer separates "call LangChain's model client" from "wire a LangGraph node" so neither lands cold.
+
+**What it covers (≈12 min):**
+
+1. **Why a framework now?** — from the `potato_llm` seam to a framework's own client abstraction; still just an API call underneath, same key through `common/config.py`.
+2. **`ChatAnthropic` live** — build one client, `.invoke()` a plain string, read `.content`.
+3. **Messages in, message out** — `SystemMessage`/`HumanMessage` are L02's system/user roles as objects; `.invoke([...])` returns one `AIMessage`.
+4. **LangChain vs LangGraph** — the load-bearing distinction: *LangChain talks to the model; LangGraph wires steps.* A node is one LangChain call wrapped so an orchestrator can plug it in.
+
+**What to highlight:**
+
+- **Keep "framework" concrete** — scaffolding for a common job, not magic. The primer's whole job is to make "LangChain vs LangGraph" a clean two-box picture before Demo 1 fuses them inside a node.
+- **Reserve "harness."** Say plainly that the model-driven **agent loop** (often called a *harness*) is **L10–L11**, not now — L03–L05 are **workflows** you wire. Naming the boundary here keeps "harness" from leaking into the graph lessons.
+
+**If it misbehaves:** the two live calls are tiny and gated on a key — with no key set the primer still runs (the calls skip) and the concepts stand on their own; run the calls later when a key is available.
 
 ## Demo 1 — Wrapping one LLM call as a typed node (Objectives 1 & 2)
 
