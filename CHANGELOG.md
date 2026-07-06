@@ -1,3 +1,9 @@
+## v0.25.0 (2026-07-06)
+
+### Feat
+
+- **L11**: build lecture HTML decks + add shallow-agent diagrams
+
 ## v0.24.0 (2026-07-06)
 
 ### Feat
