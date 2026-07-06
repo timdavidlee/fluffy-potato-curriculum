@@ -26,6 +26,9 @@ estimated duration: 55
   out. The model lives *inside* the nodes; it never decides what runs next.
 - [L05](../L05/objectives.md) adds a **conditional** edge on the same primitives; L11 later reuses
   everything here and adds exactly one more thing — a back-edge — to make an agent.
+- diagram: L03's single `node` box on the left growing into L04's fixed chain on the right — one box
+  `node`, an arrow, then three wired boxes `parse → draft → policy_check → END`, captioned "one node
+  (L03) → several wired in order (L04)."
 
 ### slide 1.2 Workflow vs. agent — the headline distinction (first pass)
 
@@ -47,6 +50,10 @@ estimated duration: 55
 - **In a workflow, the model lives inside the nodes; you own the edges.**
 - Every edge you write in L04 is **fixed** — `A → B`, always. There's nothing to branch on yet;
   that arrives in L05.
+- diagram: a fixed acyclic chain `parse → draft → policy_check → END`, each node showing a small
+  "model" chip *inside* it and the forward edges labeled "you own these (fixed)"; a faint dashed
+  back-edge from the last node curving to the first is crossed out and labeled "no back-edge yet — a
+  loop here would make it L11's agent."
 
 ## section 2. The StateGraph primitives (vocabulary, continued from L03)
 
