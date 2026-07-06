@@ -542,12 +542,12 @@ table.ledger td.warn-cell { color: var(--coral); }
             <path d="M 610 400 C 500 520, 260 520, 150 400" fill="none" stroke="var(--cyan-dim)" stroke-width="3"/>
             <circle cx="180" cy="160" r="86" fill="#12181a" stroke="var(--cyan)" stroke-width="2.5"/>
             <text x="180" y="169" text-anchor="middle" class="node-label">agent</text>
-            <circle cx="610" cy="400" r="86" fill="#12181a" stroke="var(--coral)" stroke-width="2.5"/>
+            <circle cx="610" cy="400" r="86" fill="#12181a" stroke="var(--cyan)" stroke-width="2.5"/>
             <text x="610" y="409" text-anchor="middle" class="node-label">tools</text>
             <circle r="9" fill="var(--cyan)">
                 <animateMotion dur="3.4s" repeatCount="indefinite" path="M 610 400 C 500 520, 260 520, 150 400"/>
             </circle>
-            <text x="380" y="490" text-anchor="middle" class="edge-label" fill="var(--coral)">the back-edge / the cycle</text>
+            <text x="380" y="490" text-anchor="middle" class="edge-label" fill="var(--cyan)">the back-edge / the cycle</text>
             <text x="470" y="90" text-anchor="middle" class="edge-label" fill="#5b6b66">tool call?</text>
         </svg>
     </div>
@@ -664,25 +664,25 @@ table.ledger td.warn-cell { color: var(--coral); }
                 <text x="20" y="120" class="edge-label" fill="var(--ink-dim)">__start__</text>
                 <path d="M 380 100 C 480 20, 560 20, 640 100" fill="none" stroke="var(--ink-faint)" stroke-width="3" marker-end="url(#arrow)"/>
                 <text x="500" y="55" text-anchor="middle" class="edge-label" fill="var(--ink-dim)">tool call?</text>
-                <path d="M 640 200 C 560 300, 480 300, 380 220" fill="none" stroke="var(--coral)" stroke-width="3.5" marker-end="url(#arrowc)"/>
-                <circle r="8" fill="var(--coral)">
+                <path d="M 640 200 C 560 300, 480 300, 380 220" fill="none" stroke="var(--cyan)" stroke-width="3.5" marker-end="url(#arrowcy)"/>
+                <circle r="8" fill="var(--cyan)">
                     <animateMotion dur="3s" repeatCount="indefinite" path="M 640 200 C 560 300, 480 300, 380 220"/>
                 </circle>
-                <text x="500" y="320" text-anchor="middle" class="edge-label" fill="var(--coral)">back-edge (the cycle)</text>
+                <text x="500" y="320" text-anchor="middle" class="edge-label" fill="var(--cyan)">back-edge (the cycle)</text>
                 <path d="M 300 250 L 300 340" stroke="var(--ink-faint)" stroke-width="3" marker-end="url(#arrow)"/>
                 <text x="330" y="300" class="edge-label" fill="var(--ink-dim)">no tool call</text>
                 <text x="230" y="400" class="edge-label" fill="var(--ink)" font-size="22" font-weight="600">__end__</text>
                 <circle cx="300" cy="160" r="80" fill="#12181a" stroke="var(--cyan)" stroke-width="2.5"/>
                 <text x="300" y="168" text-anchor="middle" class="node-label">agent</text>
-                <circle cx="720" cy="160" r="80" fill="#12181a" stroke="var(--coral)" stroke-width="2.5"/>
+                <circle cx="720" cy="160" r="80" fill="#12181a" stroke="var(--cyan)" stroke-width="2.5"/>
                 <text x="720" y="168" text-anchor="middle" class="node-label">tools</text>
                 <defs>
                     <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="var(--ink-faint)"/></marker>
-                    <marker id="arrowc" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="var(--coral)"/></marker>
+                    <marker id="arrowcy" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="var(--cyan)"/></marker>
                 </defs>
             </svg>
         </div>
-        <div class="diagram-caption reveal" style="max-width:600px;">Read it as a sentence: the <b style="color:var(--ink)">agent</b> node calls the model; <code>route</code> asks &ldquo;any tool calls?&rdquo;; the <b style="color:var(--ink)">tools</b> node runs them; the <b style="color:var(--coral); font-style:normal;">back-edge</b> loops back to <code>agent</code>; and when there are no tool calls, <code>route</code> exits to <code>__end__</code>.</div>
+        <div class="diagram-caption reveal" style="max-width:600px;">Read it as a sentence: the <b style="color:var(--ink)">agent</b> node calls the model; <code>route</code> asks &ldquo;any tool calls?&rdquo;; the <b style="color:var(--ink)">tools</b> node runs them; the <b style="color:var(--cyan); font-style:normal;">back-edge</b> loops back to <code>agent</code>; and when there are no tool calls, <code>route</code> exits to <code>__end__</code>.</div>
     </div>
     <div class="chrome-page">07 / 30</div>
     <div class="chrome-nav">← → navigate</div>
@@ -944,8 +944,8 @@ table.ledger td.warn-cell { color: var(--coral); }
                 <div style="font-size:15px; letter-spacing:0.1em; text-transform:uppercase; color:var(--cyan); margin-bottom:10px;">tool author (L08)</div>
                 <div style="font-size:20px; color:var(--ink-dim);">return errors as data</div>
             </div>
-            <div style="border:1.5px solid var(--coral); padding:26px 30px; background:rgba(255,107,87,0.05);">
-                <div style="font-size:15px; letter-spacing:0.1em; text-transform:uppercase; color:var(--coral); margin-bottom:10px;">graph (L10)</div>
+            <div style="border:1.5px solid var(--cyan); padding:26px 30px; background:rgba(82,232,200,0.05);">
+                <div style="font-size:15px; letter-spacing:0.1em; text-transform:uppercase; color:var(--cyan); margin-bottom:10px;">graph (L10)</div>
                 <div style="font-size:20px; color:var(--ink-dim);"><code>ToolNode</code> catches raises, sets <code>status='error'</code></div>
             </div>
         </div>

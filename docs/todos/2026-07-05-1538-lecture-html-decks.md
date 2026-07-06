@@ -37,6 +37,12 @@ recurring drift risk below.
 
 ## Open items
 
+- **[drift] The 2026-07-06 diagram-coverage reviews densified all built outlines** — the L01–L07
+  decks lag their outlines per
+  [2026-07-06-1408-diagram-review-l01-l07.md](2026-07-06-1408-diagram-review-l01-l07.md), and the
+  L08–L11 decks per [2026-07-06-1439-diagram-review-l08-l11.md](2026-07-06-1439-diagram-review-l08-l11.md)
+  (which also lists the deck colour fixes already applied and a rebuild order). Every ✅ row above
+  predates that densify — rebuild before presenting.
 - **[known off] Rescale L1002 deck to the classroom type-scale.** It sits at the old sizes
   (`--edge-bottom: 90px`, bullets 25px, cells 21px, SVG labels 18–24px). Apply the same transform
   used on L02: shared-CSS type bump + reclaim vertical space (`--edge-bottom` 90→64, `body-area`
