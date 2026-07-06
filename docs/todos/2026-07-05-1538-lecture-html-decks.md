@@ -15,7 +15,7 @@ recurring drift risk below.
 
 ## Status (19 lecture outlines)
 
-**Progress: 6 built (L0102, L0202, L0305, L0402, L0502, L0505) · 1 needs rescale (L1002) · 12 pending.**
+**Progress: 7 built (L0102, L0202, L0305, L0402, L0502, L0505, L0602) · 1 needs rescale (L1002) · 11 pending.**
 
 | Lesson item | Deck? | Scale | Note |
 | --- | --- | --- | --- |
@@ -25,8 +25,9 @@ recurring drift risk below.
 | L0402 | ✅ | classroom | done (7 diagrams incl. 2 added to §1; 3 ledger tables, 2 code blocks, 26 slides) |
 | L0502 | ✅ | classroom | done (routing; 4 diagrams — 1 enhanced + 3 added to a diagram-starved outline; 1 code block, 15 slides) |
 | L0505 | ✅ | classroom | done (workflow-vs-agent close; 3 diagrams incl. the back-edge money slide, 2 ledger tables, 15 slides) |
+| L0602 | ✅ | classroom | done (reasoning; 6 diagrams — 3 added incl. self-critique + when-it-hurts; 2 ledger tables, 28 slides) |
 | L1002 | ⚠️ | **OLD** | **known off** — built pre-classroom-scale; needs the rescale below |
-| L0602, L0702, L0802, L0902, L0905, L1102, L1105, L1206, L1307, L2202, L2205, L2302 | ❌ | — | no deck yet (12 outlines) |
+| L0702, L0802, L0902, L0905, L1102, L1105, L1206, L1307, L2202, L2205, L2302 | ❌ | — | no deck yet (11 outlines) |
 
 ## Open items
 
@@ -37,9 +38,9 @@ recurring drift risk below.
   L10-specific diagram-helper classes + inline SVG `font-size="N"` attributes, then **verify no slide
   overflows** the stage (L10 has a 7-row arc table + several SVG diagrams — the dense ones to watch).
   L10's diagrams are hand-crafted and good; **hand-scale, don't regenerate** (preserves the art).
-- **Build decks for the 12 remaining outlines.** Each via the `build-lecture-deck` skill (copy the
+- **Build decks for the 11 remaining outlines.** Each via the `build-lecture-deck` skill (copy the
   sample, map the outline, build diagrams, verify). Rough priority: the rest of the core arc first
-  (L06–L09, L11–L13), then the mini/standalone items (L22, L23). No hard dependency between
+  (L07–L09, L11–L13), then the mini/standalone items (L22, L23). No hard dependency between
   them — can be done incrementally, one lesson at a time.
   - **First, review the outline's `diagram:` coverage** — an outline may under-specify diagrams on
     visual slides, and the deck is only as good as its directives. L01 needed 4 added (slides 1.3,
