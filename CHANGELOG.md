@@ -1,3 +1,9 @@
+## v0.19.0 (2026-07-06)
+
+### Feat
+
+- **L04**: build lecture HTML deck + add section-1 diagrams
+
 ## v0.18.0 (2026-07-06)
 
 ### Feat
