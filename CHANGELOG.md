@@ -1,3 +1,9 @@
+## v0.27.0 (2026-07-07)
+
+### Feat
+
+- **lessons**: rebuild L08-L11 decks to densified outlines at classroom scale
+
 ## v0.26.0 (2026-07-07)
 
 ### Feat
