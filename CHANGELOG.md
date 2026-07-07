@@ -1,3 +1,9 @@
+## v0.29.1 (2026-07-07)
+
+### Fix
+
+- **lessons**: fill _TODO_ model answers in lab solution keys (#134)
+
 ## v0.29.0 (2026-07-07)
 
 ### Feat
