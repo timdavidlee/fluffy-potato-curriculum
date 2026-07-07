@@ -1,3 +1,9 @@
+## v0.29.0 (2026-07-07)
+
+### Feat
+
+- **L04**: expand single-example demo/lab cells to all 3 tickets
+
 ## v0.28.0 (2026-07-07)
 
 ### Feat
