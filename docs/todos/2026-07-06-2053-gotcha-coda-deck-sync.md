@@ -37,14 +37,20 @@ Run the standard deck cycle from
 [../handoffs/2026-07-06-lecture-html-deck-rollout.md](../handoffs/2026-07-06-lecture-html-deck-rollout.md)
 (the `build-lecture-deck` skill → FRONTEND-STYLE.md → sample_deck.html), per deck:
 
-- [ ] **L2205 deck** — rebuild §3 as two slides (3.1 description strips, 3.2 three-homes container
-      row + handoff); renumber the deck's section/slide counters and the `NN / TOTAL` footer to
-      match the added slide. Safe to do now (no conflict).
-- [ ] **L0505 deck** — rebuild **after** main's slide-2.4 work lands, from the merged outline: add
-      the §4 coda slide (three coral vignettes) and the renumbered §5 bridge. Reconcile with the
-      slide-2.4 deck edits in the same pass.
-- [ ] Browser-QA both per the handoff (overflow sweep, SVG `getBBox` bounds, classroom-scale type,
-      unique localStorage key, sequential `NN / TOTAL`).
+- [x] **L2205 deck** — split §3 into two slides in place (3.1 description-fault strips re-showing
+      L2202 4.2; 3.2 three-homes container row + L23 Demo 5 handoff), updated slide 1.1's motif
+      cross-ref (`3.1`→`3.2`) and the §3 divider sub, renumbered every `NN / TOTAL` footer to `/ 17`.
+- [x] **L0505 deck** — both prerequisites had already landed on `origin/main` (slide 2.4 in
+      `5198ab0`, coda outline in `894d67c`), so rebuilt from the merged base: inserted the new §4
+      divider + slide 4.1 (three coral vignettes) after 3.2 and renumbered the bridge §4→§5
+      (5.1/5.2). Footers → `/ 18`. (No stale `2.3 and 4.2` cross-ref existed in the deck to update.)
+- [x] Browser-QA both — overflow sweep clean on every new slide; screenshot-verified all four
+      new-diagram slides render as real CSS/SVG visuals; unique localStorage keys; sequential
+      `NN / TOTAL`. Note: two *pre-existing* L2205 clips (slide 1.1 ≈14px, slide 5.2 ≈42px) are
+      byte-identical to the committed deck and left untouched — out of scope for this coda sync.
+
+**Done (2026-07-06).** Both decks synced to the merged outlines on branch
+`worktree-gotcha-coda-deck-sync` (deck HTML only; the outlines already landed in `894d67c`/`5198ab0`).
 
 ## Verify
 

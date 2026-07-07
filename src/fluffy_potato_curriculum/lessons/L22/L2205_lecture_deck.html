@@ -522,7 +522,7 @@ table.ledger td.warn-cell { color: var(--coral); }
 /* ===========================================
    PER-DECK HELPERS (appended per FRONTEND-STYLE §5)
    =========================================== */
-/* three-homes row motif (cover / 1.1 / 1.2 / 3.1 / 5.1) — all homes stay cyan on every beat */
+/* three-homes row motif (cover / 1.1 / 1.2 / 3.2 / 5.1) — all homes stay cyan on every beat */
 .homes-row { display: flex; gap: 24px; align-items: stretch; }
 .home { border: 2px solid var(--cyan); border-radius: 12px; background: #12181a; width: 345px; display: flex; flex-direction: column; overflow: hidden; flex-shrink: 0; }
 .home-head { font-size: 17px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--cyan); padding: 9px 16px; border-bottom: 1.5px solid var(--cyan-rule); white-space: nowrap; }
@@ -561,6 +561,17 @@ table.ledger td.warn-cell { color: var(--coral); }
 .rung.now .r-chip { border-color: var(--cyan); color: var(--cyan); background: rgba(82,232,200,0.07); }
 .rung.now .r-arrow { color: var(--cyan); font-weight: 600; }
 .rung.now .r-tag { color: var(--cyan); }
+/* description-fault strips (3.1 — cribbed from the L2202 slide 4.2 recap) */
+.strip { display: flex; align-items: center; gap: 14px; padding: 10px 18px; border: 1.5px solid rgba(76,86,82,0.45); border-radius: 10px; }
+.strip-chip { font-size: 19px; padding: 5px 14px; border-radius: 7px; border: 1.5px solid var(--ink-faint); color: var(--ink-dim); background: #12181a; white-space: nowrap; }
+.strip-chip.ok { border-color: var(--cyan); color: var(--cyan); background: rgba(82,232,200,0.07); }
+.strip-chip.bad { border-color: var(--coral); color: var(--coral); background: rgba(255,107,87,0.06); }
+.strip-chip.ghost { border-style: dashed; background: transparent; color: var(--ink-faint); }
+.strip-arrow { color: var(--ink-faint); font-size: 24px; line-height: 1; }
+.strip-arrow.ok { color: var(--cyan); }
+.strip-arrow.bad { color: var(--coral); }
+.strip-tag { margin-left: auto; font-size: 18px; font-weight: 600; color: var(--coral); white-space: nowrap; }
+.strip-tag.ok { color: var(--cyan); }
 </style>
 </head>
 <body>
@@ -604,7 +615,7 @@ table.ledger td.warn-cell { color: var(--coral); }
             <text x="580" y="474" text-anchor="middle" class="edge-label" fill="var(--ink-dim)" font-style="italic">read on demand</text>
         </svg>
     </div>
-    <div class="chrome-page">01 / 16</div>
+    <div class="chrome-page">01 / 17</div>
     <div class="chrome-nav">L22 &middot; where a capability lives</div>
 </section>
 
@@ -617,7 +628,7 @@ table.ledger td.warn-cell { color: var(--coral); }
     <div class="chapter-eyebrow reveal">Section 1</div>
     <div class="chapter-title reveal">The decision: <span style="color:var(--cyan); font-style:normal;">where should it live?</span></div>
     <div class="chapter-sub reveal">Match a capability to its home by its shape &mdash; the heuristic first, then four concrete calls.</div>
-    <div class="chrome-page">02 / 16</div>
+    <div class="chrome-page">02 / 17</div>
 </section>
 
 <!-- 03 — slide 1.1 The heuristic -->
@@ -664,9 +675,9 @@ table.ledger td.warn-cell { color: var(--coral); }
                 </div>
             </div>
         </div>
-        <div class="diagram-caption reveal" style="max-width:1660px;">never &ldquo;skill or tool?&rdquo; in the abstract &mdash; <b style="color:var(--ink);">where does <i>this particular</i> capability belong?</b> This exact row recurs in 1.2, 3.1 and 5.1.</div>
+        <div class="diagram-caption reveal" style="max-width:1660px;">never &ldquo;skill or tool?&rdquo; in the abstract &mdash; <b style="color:var(--ink);">where does <i>this particular</i> capability belong?</b> This exact row recurs in 1.2, 3.2 and 5.1.</div>
     </div>
-    <div class="chrome-page">03 / 16</div>
+    <div class="chrome-page">03 / 17</div>
     <div class="chrome-nav">&larr; &rarr; navigate</div>
 </section>
 
@@ -711,7 +722,7 @@ table.ledger td.warn-cell { color: var(--coral); }
         </div>
         <div class="diagram-caption reveal" style="max-width:1660px; text-align:center; margin-top:14px;">second beat of the row &mdash; every chip lands in its right home, all cyan; coral is reserved for &sect;3&rsquo;s mis-placements.</div>
     </div>
-    <div class="chrome-page">04 / 16</div>
+    <div class="chrome-page">04 / 17</div>
     <div class="chrome-nav">&larr; &rarr; navigate</div>
 </section>
 
@@ -724,7 +735,7 @@ table.ledger td.warn-cell { color: var(--coral); }
     <div class="chapter-eyebrow reveal">Section 2</div>
     <div class="chapter-title reveal">Skills compose with tools &mdash; <span style="color:var(--cyan); font-style:normal;">they don&rsquo;t replace them</span></div>
     <div class="chapter-sub reveal">The skill is the procedure; the tools are the operations it orchestrates.</div>
-    <div class="chrome-page">05 / 16</div>
+    <div class="chrome-page">05 / 17</div>
 </section>
 
 <!-- 06 — slide 2.1 A skill orchestrates tools -->
@@ -770,7 +781,7 @@ table.ledger td.warn-cell { color: var(--coral); }
             <div class="diagram-caption reveal" style="max-width:880px; text-align:center; margin-top:10px;">the skill is the <i>procedure</i>; the tools are the <i>operations</i> &mdash; no coral: nothing here fails.</div>
         </div>
     </div>
-    <div class="chrome-page">06 / 16</div>
+    <div class="chrome-page">06 / 17</div>
     <div class="chrome-nav">&larr; &rarr; navigate</div>
 </section>
 
@@ -815,7 +826,7 @@ table.ledger td.warn-cell { color: var(--coral); }
             <div class="diagram-caption reveal" style="max-width:880px; text-align:center; margin-top:12px;">2.1&rsquo;s picture, one step further &mdash; disclosure&rsquo;s third layer, echoing L2202&rsquo;s rings.</div>
         </div>
     </div>
-    <div class="chrome-page">07 / 16</div>
+    <div class="chrome-page">07 / 17</div>
     <div class="chrome-nav">&larr; &rarr; navigate</div>
 </section>
 
@@ -827,58 +838,96 @@ table.ledger td.warn-cell { color: var(--coral); }
     <div class="chapter-ghost reveal">03</div>
     <div class="chapter-eyebrow reveal">Section 3</div>
     <div class="chapter-title reveal">The <span style="color:var(--cyan); font-style:normal;">anti-patterns</span></div>
-    <div class="chapter-sub reveal">Three ways to put a capability in the wrong home &mdash; and what each mistake costs.</div>
-    <div class="chrome-page">08 / 16</div>
+    <div class="chapter-sub reveal">Four faults on two axes &mdash; the description decides <i>whether it loads</i> (3.1); the container decides <i>whether it should be a skill at all</i> (3.2).</div>
+    <div class="chrome-page">08 / 17</div>
 </section>
 
-<!-- 09 — slide 3.1 Three ways to put a capability in the wrong home -->
+<!-- 09 — slide 3.1 The description decides whether the skill loads -->
 <section class="slide">
     <div class="chrome-tag">L22 &middot; <b>PLACEMENT</b></div>
     <div class="topbar reveal">
         <div class="eyebrow">Slide 3.1</div>
-        <h2 class="headline">Three ways to pick <span class="it">the wrong home</span></h2>
+        <h2 class="headline">The description decides <span class="it">whether the skill loads</span></h2>
+    </div>
+    <div class="body-area">
+        <ul class="points reveal">
+            <li class="point">Two of the four are <b>description</b> faults &mdash; promoted here from <b>L2202 &sect;4.2</b>. The description is the trigger, so it alone decides <i>whether</i> a skill loads at all.</li>
+            <li class="point"><b>Too vague &rarr; never fires.</b> <span class="warn">&ldquo;helps with customer stuff&rdquo;</span> silently fails to load when needed. <b>Fix:</b> state <i>when</i> it applies &mdash; a design artifact (the skill analogue of L08&rsquo;s tool-naming craft), not a label.</li>
+            <li class="point"><b>Too broad / colliding &rarr; fires wrongly.</b> triggers on the wrong inputs, or overlaps a neighbor so selection degrades across the shelf. <b>Fix:</b> discriminating, mutually-distinct descriptions &mdash; the collision <b>L23 Demo 5</b> scales to a skill <i>system</i> (&sect;3.2).</li>
+        </ul>
+        <div class="reveal" style="display:flex; flex-direction:column; gap:12px; margin-top:22px; max-width:1560px;">
+            <div class="strip" style="border-color:var(--cyan-rule); background:rgba(82,232,200,0.04);">
+                <span class="strip-chip">request</span><span class="strip-arrow ok">&rarr;</span>
+                <span class="strip-chip ok">a tight description matches</span><span class="strip-arrow ok">&rarr;</span>
+                <span class="strip-chip ok">body loads</span>
+                <span class="strip-tag ok">the healthy fire</span>
+            </div>
+            <div class="strip">
+                <span class="strip-chip">request</span><span class="strip-arrow bad">&#8674;</span>
+                <span class="strip-chip ghost">description too vague &mdash; no match</span><span class="strip-arrow bad">&#8674;</span>
+                <span class="strip-chip ghost">body never arrives</span>
+                <span class="strip-tag">needed, never fired</span>
+            </div>
+            <div class="strip">
+                <span class="strip-chip">every request</span><span class="strip-arrow bad">&rarr;</span>
+                <span class="strip-chip bad">description too broad</span><span class="strip-arrow bad">&rarr;</span>
+                <span class="strip-chip bad">body loads every turn</span>
+                <span class="strip-tag"><s>token savings</s> &mdash; gone</span>
+            </div>
+        </div>
+        <div class="diagram-caption reveal" style="max-width:1560px;">re-showing L2202 slide 4.2&rsquo;s strips &mdash; <b style="color:var(--ink);">cyan = the description that discriminates; coral = the two that can&rsquo;t.</b></div>
+    </div>
+    <div class="chrome-page">09 / 17</div>
+    <div class="chrome-nav">&larr; &rarr; navigate</div>
+</section>
+
+<!-- 10 — slide 3.2 The container decides whether it should be a skill at all -->
+<section class="slide">
+    <div class="chrome-tag">L22 &middot; <b>PLACEMENT</b></div>
+    <div class="topbar reveal">
+        <div class="eyebrow">Slide 3.2</div>
+        <h2 class="headline">The container decides <span class="it">whether it should be a skill at all</span></h2>
     </div>
     <div class="body-area">
         <table class="ledger reveal">
-            <thead><tr><th style="width:36%;">Anti-pattern</th><th style="width:40%;">Why it hurts</th><th>Fix</th></tr></thead>
+            <thead><tr><th style="width:46%;">Mis-placement &mdash; the blurred line</th><th style="width:30%;">Why it hurts</th><th>Fix</th></tr></thead>
             <tbody>
-                <tr><td class="warn-cell">occasionally-needed instructions crammed into the <b style="color:var(--coral);">system prompt</b></td><td>always-on cost for sometimes-needed content; crowds the window</td><td class="tag">make it a skill</td></tr>
-                <tr><td class="warn-cell">a <b style="color:var(--coral);">tool</b> built for procedural know-how</td><td>rigid &mdash; multi-step &ldquo;how to phrase a refusal&rdquo; doesn&rsquo;t fit a schema</td><td class="tag">make it a skill</td></tr>
-                <tr><td class="warn-cell">a <b style="color:var(--coral);">skill</b> made for a one-line always-true rule</td><td>an extra load turn + a miss risk for something that should just always apply</td><td class="tag">put it in the system prompt</td></tr>
+                <tr><td><span class="warn">tool &harr; skill</span> blurred &mdash; a deterministic op with structured I/O wrapped in a <b>skill</b> the model reads, or procedural know-how forced into a <b>tool</b> schema</td><td>the op pays a read turn + a miss risk; the procedure is too rigid for a schema</td><td class="tag">match the shape</td></tr>
+                <tr><td><span class="warn">skill &harr; system-prompt</span> blurred &mdash; a one-line always-true rule made into a <b>skill</b>, or occasionally-needed instructions crammed into the <b>system prompt</b></td><td>the rule pays an extra load turn + miss risk; the prompt content is always-on cost crowding every call</td><td class="tag">match the cadence</td></tr>
             </tbody>
         </table>
-        <div class="diagram-frame reveal" style="position:relative; display:block; width:1660px; height:348px; margin-top:12px;">
-            <svg viewBox="0 0 1660 348" width="1660" height="348" style="position:absolute; inset:0;">
+        <div class="diagram-frame reveal" style="position:relative; display:block; width:1660px; height:300px; margin-top:10px;">
+            <svg viewBox="0 0 1660 300" width="1660" height="300" style="position:absolute; inset:0;">
                 <defs>
-                    <marker id="m31c" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="var(--cyan)"/></marker>
+                    <marker id="m32c" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="var(--cyan)"/></marker>
                 </defs>
-                <path d="M 470 66 C 620 4, 1040 4, 1188 66" fill="none" stroke="var(--cyan)" stroke-width="3" marker-end="url(#m31c)"/>
-                <path d="M 839 66 C 930 22, 1160 22, 1250 66" fill="none" stroke="var(--cyan)" stroke-width="3" marker-end="url(#m31c)"/>
-                <path d="M 1198 274 C 1100 334, 940 334, 845 274" fill="none" stroke="var(--cyan)" stroke-width="3" marker-end="url(#m31c)"/>
+                <path d="M 470 54 C 620 6, 1040 6, 1188 54" fill="none" stroke="var(--cyan)" stroke-width="3" marker-end="url(#m32c)"/>
+                <path d="M 839 54 C 930 18, 1160 18, 1250 54" fill="none" stroke="var(--cyan)" stroke-width="3" marker-end="url(#m32c)"/>
+                <path d="M 1198 234 C 1100 284, 940 284, 845 234" fill="none" stroke="var(--cyan)" stroke-width="3" marker-end="url(#m32c)"/>
             </svg>
-            <div class="homes-row" style="position:absolute; left:288px; top:70px;">
-                <div class="home" style="height:200px;">
+            <div class="homes-row" style="position:absolute; left:288px; top:58px;">
+                <div class="home" style="height:176px;">
                     <div class="home-head">tool &mdash; <span class="verb">called</span></div>
                     <div class="home-body"><div class="cap-chip bad" style="white-space:normal;">multi-step procedure</div></div>
                 </div>
-                <div class="home" style="height:200px;">
+                <div class="home" style="height:176px;">
                     <div class="home-head">system prompt &mdash; <span class="verb">always seen</span></div>
                     <div class="home-body"><div class="cap-chip bad" style="white-space:normal;">sometimes-needed instructions</div></div>
                 </div>
-                <div class="home" style="height:200px;">
+                <div class="home" style="height:176px;">
                     <div class="home-head">skill &mdash; <span class="verb">read on demand</span></div>
                     <div class="home-body"><div class="cap-chip bad" style="white-space:normal;">one-line always-true rule</div></div>
                 </div>
             </div>
         </div>
-        <div class="diagram-caption reveal" style="max-width:1660px;"><b style="color:var(--ink);">cost follows placement</b> &mdash; put a capability where its <b style="color:var(--ink);">usage pattern</b> says it belongs, not where it&rsquo;s convenient to drop. Coral marks the mis-placed chip only; the homes stay cyan, and the cyan arrows carry each chip to its right one.</div>
+        <div class="diagram-caption reveal" style="max-width:1660px;"><b style="color:var(--ink);">cost follows placement</b> &mdash; coral marks the wrong home, the cyan arrow carries each chip to the right one. <b style="color:var(--ink);">Hand off to L23 Demo 5</b> &mdash; these single-skill faults scale up to a skill <i>system</i>.</div>
     </div>
-    <div class="chrome-page">09 / 16</div>
+    <div class="chrome-page">10 / 17</div>
     <div class="chrome-nav">&larr; &rarr; navigate</div>
 </section>
 
 <!-- ============================================================ -->
-<!-- 10 — SECTION 4 DIVIDER                                       -->
+<!-- 11 — SECTION 4 DIVIDER                                       -->
 <!-- ============================================================ -->
 <section class="slide slide-chapter">
     <div class="chrome-tag reveal">L22 &middot; <b>PLACEMENT</b></div>
@@ -886,10 +935,10 @@ table.ledger td.warn-cell { color: var(--coral); }
     <div class="chapter-eyebrow reveal">Section 4</div>
     <div class="chapter-title reveal">The reveal: <span style="color:var(--cyan); font-style:normal;">you already built Agent Skills</span></div>
     <div class="chapter-sub reveal">Open a real SKILL.md from this repo &mdash; it is the loader from L2203, productized.</div>
-    <div class="chrome-page">10 / 16</div>
+    <div class="chrome-page">11 / 17</div>
 </section>
 
-<!-- 11 — slide 4.1 The loader you built, productized -->
+<!-- 12 — slide 4.1 The loader you built, productized -->
 <section class="slide">
     <div class="chrome-tag">L22 &middot; <b>PLACEMENT</b></div>
     <div class="topbar reveal">
@@ -947,11 +996,11 @@ table.ledger td.warn-cell { color: var(--coral); }
             <div class="diagram-caption reveal" style="max-width:1080px; text-align:center; margin-top:14px;">the same shape, side by side &mdash; both sides fully cyan, no coral anywhere: this slide is an equality.</div>
         </div>
     </div>
-    <div class="chrome-page">11 / 16</div>
+    <div class="chrome-page">12 / 17</div>
     <div class="chrome-nav">&larr; &rarr; navigate</div>
 </section>
 
-<!-- 12 — slide 4.2 The meta-punchline -->
+<!-- 13 — slide 4.2 The meta-punchline -->
 <section class="slide">
     <div class="chrome-tag">L22 &middot; <b>PLACEMENT</b></div>
     <div class="topbar reveal">
@@ -986,12 +1035,12 @@ table.ledger td.warn-cell { color: var(--coral); }
         </div>
         <div class="diagram-caption reveal" style="max-width:1400px; margin:16px auto 0; text-align:center;">the course-spine ladder &mdash; you met the mechanism before the product.</div>
     </div>
-    <div class="chrome-page">12 / 16</div>
+    <div class="chrome-page">13 / 17</div>
     <div class="chrome-nav">&larr; &rarr; navigate</div>
 </section>
 
 <!-- ============================================================ -->
-<!-- 13 — SECTION 5 DIVIDER                                       -->
+<!-- 14 — SECTION 5 DIVIDER                                       -->
 <!-- ============================================================ -->
 <section class="slide slide-chapter">
     <div class="chrome-tag reveal">L22 &middot; <b>PLACEMENT</b></div>
@@ -999,10 +1048,10 @@ table.ledger td.warn-cell { color: var(--coral); }
     <div class="chapter-eyebrow reveal">Section 5</div>
     <div class="chapter-title reveal">Capstone &mdash; <span style="color:var(--cyan); font-style:normal;">and where you go next</span></div>
     <div class="chapter-sub reveal">One sentence to leave with, and the road on from here.</div>
-    <div class="chrome-page">13 / 16</div>
+    <div class="chrome-page">14 / 17</div>
 </section>
 
-<!-- 14 — slide 5.1 The one sentence to leave with -->
+<!-- 15 — slide 5.1 The one sentence to leave with -->
 <section class="slide">
     <div class="chrome-tag">L22 &middot; <b>PLACEMENT</b></div>
     <div class="topbar reveal">
@@ -1043,11 +1092,11 @@ table.ledger td.warn-cell { color: var(--coral); }
         </div>
         <div class="diagram-caption reveal" style="max-width:1660px; text-align:center; margin-top:16px;">the motif&rsquo;s bookend &mdash; L2202&rsquo;s stuffed always-on window, now solved: only the skill&rsquo;s cost pops in just in time.</div>
     </div>
-    <div class="chrome-page">14 / 16</div>
+    <div class="chrome-page">15 / 17</div>
     <div class="chrome-nav">&larr; &rarr; navigate</div>
 </section>
 
-<!-- 15 — slide 5.2 What's next -->
+<!-- 16 — slide 5.2 What's next -->
 <section class="slide">
     <div class="chrome-tag">L22 &middot; <b>PLACEMENT</b></div>
     <div class="topbar reveal">
@@ -1112,12 +1161,12 @@ table.ledger td.warn-cell { color: var(--coral); }
             <div class="diagram-caption reveal" style="max-width:840px; text-align:center; margin-top:4px;">dashed ink-faint = deferred, not failure &mdash; nothing on this slide is coral.</div>
         </div>
     </div>
-    <div class="chrome-page">15 / 16</div>
+    <div class="chrome-page">16 / 17</div>
     <div class="chrome-nav">&larr; &rarr; navigate</div>
 </section>
 
 <!-- ============================================================ -->
-<!-- 16 — CLOSING                                                 -->
+<!-- 17 — CLOSING                                                 -->
 <!-- ============================================================ -->
 <section class="slide slide-closing">
     <div class="chrome-tag reveal">L22 &middot; <b>PLACEMENT</b></div>
@@ -1136,7 +1185,7 @@ table.ledger td.warn-cell { color: var(--coral); }
             <div class="val">your loader &mdash; <b>L2203_lecture.ipynb</b><br>the real thing &mdash; <b>author-lesson-roadmap/SKILL.md</b></div>
         </div>
     </div>
-    <div class="chrome-page">16 / 16</div>
+    <div class="chrome-page">17 / 17</div>
 </section>
 
 </main>
