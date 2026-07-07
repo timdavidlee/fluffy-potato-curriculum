@@ -1,3 +1,9 @@
+## v0.26.0 (2026-07-07)
+
+### Feat
+
+- **lessons**: rebuild L01-L07 lecture decks with new diagram directives
+
 ## v0.25.0 (2026-07-06)
 
 ### Feat
