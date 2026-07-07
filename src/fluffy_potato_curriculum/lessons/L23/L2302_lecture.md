@@ -25,6 +25,11 @@ estimated duration: 30
   is *always seen*.**
 - L22 authored *one* skill and treated "skill" as a single thing. That's the gap this lecture
   closes: skills come in a few recurring **shapes**, and the shape changes how you write them.
+- diagram: re-draw L22's placement strip — three containers side by side: `system prompt` (always
+  seen — a solid ink-faint always-on band), `tool` (*called* — a schema chip with a call arrow),
+  `skill` (*read* just in time — a card with a dashed "JIT load" arrow); the skill card is the only
+  cyan element, because it's the thread this lesson extends; no coral anywhere — nothing on this
+  slide is a failure
 
 ### 1.2 The organizing idea: center of gravity
 
@@ -32,10 +37,12 @@ estimated duration: 30
   (facts/data). The **archetype** is just *which one is the center of gravity.*
 - Instructions split further by whether they read as **ordered steps** (do this, then this) or
   **judgment criteria** (hold the work against these standards).
-- diagram: a triangle with corners labeled `instructions`, `scripts`, `resources`; the
-  `instructions` corner splits into two sub-labels `ordered steps` and `judgment criteria`; each
-  corner/branch is annotated with the archetype that sits there (script-centric, procedure-centric,
-  principle-centric, and the resource-centric aside)
+- diagram: the center-of-gravity triangle — corners labeled `instructions`, `scripts`, `resources`
+  joined by ink-faint neutral edges; the `instructions` corner splits into two sub-labels
+  `ordered steps` and `judgment criteria`; each corner/branch carries a cyan archetype chip
+  (script-centric, procedure-centric, principle-centric), except the resource-centric chip, which
+  is dashed ink-faint ("the aside — §3"). This triangle is the lesson's recurring motif: it comes
+  back with one corner lit at 1.3, as a mini inset on 2.1–2.3 and 3.1, and closes the deck at 5.2
 
 ### 1.3 Why classify first
 
@@ -43,6 +50,11 @@ estimated duration: 30
   skill well.
 - Mis-classifying produces a bad skill: prose-describing a deterministic step instead of scripting
   it; writing a linear procedure where a rule list belongs; standing up retrieval for six facts.
+- diagram: second beat of the 1.2 triangle — the three mis-classifications from the bullet pinned
+  as coral dots parked at the *wrong* corner, each with a tiny symptom tag ("prose where a script
+  belongs", "steps where rules belong", "retrieval for six facts"), and a cyan arrow relocating
+  each dot to its true corner; coral = the bad skill mis-filing produces, cyan = the correct
+  classification (the label picking your pen)
 - text: this is the *authoring* payoff of L23's first objective — you classify not to file
   paperwork, but because the label picks your pen.
 
@@ -57,8 +69,10 @@ estimated duration: 30
 - Good when the operation is **deterministic and better executed than reasoned through**.
 - text: real example in this repo — [`example_skills/get_order/SKILL.md`](example_skills/get_order/SKILL.md),
   a wrapper over a mock orders API (`get_order_api.py`) whose JSON is deliberately messy.
-- diagram: a thin markdown box labeled "when + how to call" pointing at a fat box labeled
-  "`get_order_api.py` (the real work)"; a speech bubble notes "run it, don't re-derive the contract"
+- diagram: a thin ink-faint markdown box labeled "when + how to call" pointing at a fat **cyan**
+  box labeled "`get_order_api.py` (the real work)" — cyan sits on the script because it's this
+  archetype's center of gravity; a speech bubble notes "run it, don't re-derive the contract"; a
+  mini 1.2-triangle inset in the corner with the `scripts` corner lit cyan (motif beat); no coral
 
 ### 2.2 Principle-centric — the review / rubric
 
@@ -69,6 +83,10 @@ estimated duration: 30
 - text: real examples in this repo — [`.claude/rules/python-style.md`](../../../../.claude/rules/python-style.md)
   and [`.claude/rules/pytest.md`](../../../../.claude/rules/pytest.md), or a `/code-review`-style
   "check the diff against these principles" skill.
+- diagram: the rubric shape — a **cyan** card of short scannable rule rows on the left (the center
+  of gravity), an ink-faint work artifact on the right, and a judgment arrow from each rule held
+  against the work; a mini 1.2-triangle inset with the `judgment criteria` branch lit cyan (motif
+  beat); explicitly no coral — nothing here is failing, the rule list itself is the point
 
 ### 2.3 Procedure-centric — the operating-model runbook
 
@@ -78,6 +96,11 @@ estimated duration: 30
 - Good when the value is **doing the steps in the right order every time**.
 - text: real example in this repo — [`author-lesson-roadmap`](../../../../.claude/skills/author-lesson-roadmap/SKILL.md)
   (read these docs in order → draft → cross-check → report). The skill that helped build this lesson.
+- diagram: the runbook shape — a vertical numbered-step flow in **cyan** (step 1 → step 2 →
+  a decision diamond → step N → a "done when …" terminator), the ordered path being the center of
+  gravity; one step delegates sideways to a small ink-faint script chip ("deterministic sub-step —
+  the 2.1 shape, borrowed"); a mini 1.2-triangle inset with the `ordered steps` branch lit cyan
+  (motif beat); no coral
 
 ### 2.4 Side by side — the discriminator
 
@@ -102,6 +125,11 @@ estimated duration: 30
 - It's the **cheap right answer when there are only a handful of terms** to know: the facts just
   sit in context when the skill loads.
 - text: taught as an *aside*, not one of the three you'll author today — but a real, common shape.
+- diagram: fourth motif beat — the 1.2 triangle with the `resources` corner lit cyan and the
+  reference/knowledge chip drawn dashed ink-faint ("real shape; an aside — not authored today");
+  beside it a small facts card (a half-dozen glossary rows) sitting comfortably whole inside an
+  ink-faint context-window bar; no coral — a handful of in-context facts is the *right* cheap
+  answer, not a failure
 
 ### 3.2 When it outgrows a skill: RAG
 
@@ -109,6 +137,11 @@ estimated duration: 30
   tool — that's **retrieval-augmented generation (RAG)**'s job (**full-course L21**, not part of
   the mini cut).
 - text: rule of thumb — a dozen definitions → a resource-centric skill; a document corpus → RAG.
+- diagram: the outgrow boundary on the segmented context-window bar (the L01 window-bar motif,
+  re-shown) — left: 3.1's small glossary chip fitting comfortably inside the bar, cyan; right: a
+  document corpus spilling past the bar's end in **coral** (the overflow is the failure); the cure
+  is a dashed ink-faint `RAG` box tagged "L21 — full course, not the mini cut" (dashed = deferred,
+  not taught here)
 
 [↑ Back to top](#top)
 
@@ -124,6 +157,11 @@ estimated duration: 30
   written as **judgment criteria**, not a linear procedure.
 - text: runbook → numbered, imperative, self-contained steps with explicit decision points and a
   clear done-condition; deterministic sub-steps delegated to scripts.
+- diagram: three `SKILL.md` cards side by side with *identical* ink-faint frontmatter bands
+  (`name` + `description` — the shared L22 format) and three differently-shaped **cyan** bodies:
+  a thin prose sliver plus a script chip / a scannable rule list / numbered steps with a decision
+  point — cyan on the body shapes because the shape is what changes; no coral, all three are
+  correct authoring; the bodies miniaturize the 2.1/2.2/2.3 visuals
 
 ### 4.2 The description is still the trigger — now across a set
 
@@ -132,13 +170,21 @@ estimated duration: 30
 - L23 adds a constraint: descriptions must stay **mutually distinct across the whole set** of
   skills, or the model can't reliably pick — the setup for the **description-collision** anti-pattern
   in [L2305](L2305_lecture.ipynb).
+- diagram: a registry strip of description pills, one per skill in the set, each cyan and mutually
+  distinct ("what it's for — and implicitly what it's not"); below, a dashed preview panel of two
+  pills whose wording overlaps, the overlap zone the only **coral** element, tagged "description
+  collision → L2305"; coral confined to the overlap (the failure), dashed = deferred to the
+  composition lecture
 
 ### 4.3 The wrong-shape mistake (preview of the anti-patterns)
 
 - Writing the wrong body shape is the archetype-level version of L22's "wrong container" mistake.
-- diagram: two side-by-side "bad" panels — (left) a runbook that *prose-describes* a deterministic
-  step in three verbose paragraphs instead of calling a script; (right) a rubric flattened into a
-  rigid numbered procedure that loses its "apply judgment" character
+- diagram: two side-by-side **coral** "bad" panels (both are the wrong body shape — coral marks the
+  failure, not one side of a good/bad pair) — (left) a runbook that *prose-describes* a
+  deterministic step in three verbose paragraphs instead of calling a script; (right) a rubric
+  flattened into a rigid numbered procedure that loses its "apply judgment" character; under each,
+  a small cyan cure chip showing the right shape in miniature (a script chip / a loose rule list —
+  echoes of the 2.1/2.2 visuals)
 - text: the cure is always the same — name the archetype, then let the body follow it.
 
 [↑ Back to top](#top)
@@ -163,6 +209,11 @@ estimated duration: 30
 
 - Real skills borrow across archetypes: a runbook that *calls* a script for one step; a review skill
   that *ends* by running a formatter; a runbook that opens with a short reference glossary.
+- diagram: closing motif beat — the 1.2 triangle one last time, with a real skill plotted as an
+  *interior* dot (not at a corner): a strong **cyan** pull-line to its primary corner and faint
+  ink-faint pull-lines to the other two ("borrows as needed"); no coral — borrowing isn't a
+  failure; a dashed chip beside the triangle points onward ("classify → author → compose:
+  L2303 lab, then L2304/L2305")
 - text: classify the **primary** shape so the authoring choices follow — then borrow as needed.
 - text: next up — the lab ([L2303](L2303_lab_empty.ipynb)) has you classify real skills and author
   one; then we wire skills together into a system.
