@@ -1,3 +1,9 @@
+## v0.33.0 (2026-07-07)
+
+### Feat
+
+- **local_ui**: serve lecture slide decks as raw HTML
+
 ## v0.32.0 (2026-07-07)
 
 ### Feat
