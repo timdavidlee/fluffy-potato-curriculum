@@ -33,6 +33,12 @@ injects them. No JS build step.
 - **`tracks.toml` is the source of truth** for track membership, order, and titles — the
   catalog layers a filesystem scan on top to discover the item files. Don't hardcode the
   lesson list here.
+- **Standalone `.html` slide decks** (`L<NN><II>_lecture_deck.html`) are cataloged as
+  `lecture_deck` items with `fmt="html"` (sidebar label from the `<title>` tag) and served
+  **verbatim** from `GET /api/lessons/{lesson}/items/{item}/raw` — a `FileResponse` through the
+  same `find_item` safe-lookup, *not* markdown-rendered. They're full documents, so the frontend
+  opens them in a new tab instead of injecting them, and the JSON item endpoint returns **415**
+  for them. Only `.md`/`.ipynb` go through `render.py`.
 - **`create_app(lessons_dir=...)`** takes the lessons root as a parameter so tests point it
   at a temp tree (`tests/local_ui/conftest.py` builds a fake one). Prefer that over patching.
 - **Path-traversal safety:** item content is resolved through `catalog.find_item`, which

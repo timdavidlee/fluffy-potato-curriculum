@@ -10,6 +10,7 @@ real one) so tests can point them at a temporary tree.
 
 from __future__ import annotations
 
+import html
 import json
 import re
 import tomllib
@@ -32,11 +33,12 @@ LESSONS_DIR = Path(__file__).resolve().parent.parent / "lessons"
 # prework ``K0302_demo.ipynb``. ``lesson`` captures the full id (letter + number).
 _ITEM_RE = re.compile(r"^(?P<lesson>[KL]\d{2})(?P<order>\d{2})_(?P<kind>[a-z_]+)$")
 
-_EXT_TO_FORMAT: dict[str, ItemFormat] = {".md": "markdown", ".ipynb": "notebook"}
+_EXT_TO_FORMAT: dict[str, ItemFormat] = {".md": "markdown", ".ipynb": "notebook", ".html": "html"}
 
 _KIND_LABELS: dict[ItemKind, str] = {
     "intro": "Intro",
     "lecture": "Lecture",
+    "lecture_deck": "Slides",
     "lab_empty": "Lab (empty)",
     "lab_solutions": "Lab (solutions)",
     "proctor_notes": "Proctor notes",
@@ -49,6 +51,7 @@ _KIND_LABELS: dict[ItemKind, str] = {
 _NUMBERED_KINDS: dict[str, ItemKind] = {
     "intro": "intro",
     "lecture": "lecture",
+    "lecture_deck": "lecture_deck",
     "lab_empty": "lab_empty",
     "lab_solutions": "lab_solutions",
     "guide": "guide",
@@ -60,6 +63,10 @@ _PROCTOR_ORDER = 9999
 
 # A markdown ATX H1 (``# Title``) — captures the heading text after the ``# ``.
 _H1_RE = re.compile(r"^#[ \t]+(?P<title>\S.*?)[ \t]*$", re.MULTILINE)
+
+# The ``<title>`` of a standalone HTML slide deck — its sidebar label, since a deck has
+# no markdown ``# H1``. Non-greedy and case-insensitive; spans newlines.
+_TITLE_RE = re.compile(r"<title[^>]*>(?P<title>.*?)</title>", re.IGNORECASE | re.DOTALL)
 
 
 def _item_title(kind: ItemKind, order: int, doc_title: str | None) -> str:
@@ -99,16 +106,22 @@ def _notebook_markdown_text(raw: str) -> str:
 
 
 def _doc_title(path: Path, fmt: ItemFormat) -> str | None:
-    """The file's own first ``# H1`` heading, or ``None`` if it has none.
+    """The file's own title heading, or ``None`` if it has none.
 
     Lets the sidebar show ``"2. Lecture — <title>"`` instead of the bare kind
-    label. For a notebook the heading lives in a markdown cell; for a ``.md``
-    file it's the document text itself.
+    label. For a notebook the heading lives in a markdown cell; for a ``.md`` file
+    it's the document text itself; for a standalone ``.html`` deck it's the
+    ``<title>`` tag.
     """
     try:
         raw = path.read_text()
     except OSError:
         return None
+    if fmt == "html":
+        match = _TITLE_RE.search(raw)
+        # A ``<title>`` can carry HTML entities (e.g. ``&middot;``); decode them so
+        # the sidebar shows the character, not the literal entity.
+        return html.unescape(match.group("title")).strip() if match else None
     text = _notebook_markdown_text(raw) if fmt == "notebook" else raw
     match = _H1_RE.search(text)
     return match.group("title") if match else None

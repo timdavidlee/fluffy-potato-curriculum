@@ -101,6 +101,12 @@ def lessons_dir(tmp_path: Path) -> Path:
     (l01 / "__init__.py").write_text("")
     (l01 / "L0101_intro.md").write_text("# Intro\nWelcome.")
     (l01 / "L0102_lecture.md").write_text("## Lecture\nContent.")
+    # The ``<title>`` carries an HTML entity on purpose, so the catalog is exercised
+    # decoding it for the sidebar while the raw route still serves it verbatim.
+    (l01 / "L0102_lecture_deck.html").write_text(
+        "<!doctype html><html><head><title>Deck &amp; slides</title></head>"
+        "<body><main>slides</main></body></html>"
+    )
     (l01 / "L0103_lab_empty.ipynb").write_text(json.dumps(_NOTEBOOK))
     (l01 / "L0103_lab_solutions.ipynb").write_text(json.dumps(_NOTEBOOK))
     (l01 / "PROCTOR_NOTES.md").write_text("# Proctor\nNotes.")

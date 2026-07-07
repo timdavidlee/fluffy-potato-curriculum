@@ -8,7 +8,7 @@ import pytest
 from fastapi.testclient import TestClient
 
 from fluffy_potato_curriculum.local_ui.app import create_app
-from tests.local_ui._api import get_json, get_status
+from tests.local_ui._api import get_header, get_json, get_status, get_text
 
 
 @pytest.fixture
@@ -42,6 +42,26 @@ def test_item_endpoint_returns_rendered_html(client: TestClient) -> None:
 
 def test_unknown_item_returns_404(client: TestClient) -> None:
     assert get_status(client, "/api/lessons/L01/items/nope") == 404
+
+
+def test_deck_json_endpoint_rejects_html(client: TestClient) -> None:
+    # A slide deck is a whole document, not an injectable fragment — 415, not rendered.
+    assert get_status(client, "/api/lessons/L01/items/L0102_lecture_deck") == 415
+
+
+def test_raw_endpoint_serves_deck_document(client: TestClient) -> None:
+    # Served verbatim: the full document, entity un-decoded (contrast the catalog label).
+    body = get_text(client, "/api/lessons/L01/items/L0102_lecture_deck/raw")
+    assert "<title>Deck &amp; slides</title>" in body
+
+
+def test_raw_endpoint_uses_html_content_type(client: TestClient) -> None:
+    ctype = get_header(client, "/api/lessons/L01/items/L0102_lecture_deck/raw", "content-type")
+    assert ctype.startswith("text/html")
+
+
+def test_raw_endpoint_unknown_item_returns_404(client: TestClient) -> None:
+    assert get_status(client, "/api/lessons/L01/items/nope/raw") == 404
 
 
 def test_index_page_served(client: TestClient) -> None:

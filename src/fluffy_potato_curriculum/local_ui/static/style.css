@@ -184,11 +184,14 @@ body {
 .item-list li.kind-proctor_notes,
 .item-list li.kind-guide         { --kind: #c678dd; } /* purple — intro & notes */
 .item-list li.kind-lecture,
+.item-list li.kind-lecture_deck,
 .item-list li.kind-demo          { --kind: #61afef; } /* blue — lecture */
 .item-list li.kind-lab_empty,
 .item-list li.kind-lab_solutions { --kind: #98c379; } /* green — labs */
 
-.item-list button {
+.item-list button,
+.item-list a {
+  display: block;
   width: 100%;
   text-align: left;
   border: 0;
@@ -197,11 +200,13 @@ body {
   font: inherit;
   font-size: 14px;
   color: var(--ink);
+  text-decoration: none;
   cursor: pointer;
   background: color-mix(in srgb, var(--kind, transparent) 8%, transparent);
 }
 
-.item-list button:hover {
+.item-list button:hover,
+.item-list a:hover {
   background: var(--accent-soft);
 }
 

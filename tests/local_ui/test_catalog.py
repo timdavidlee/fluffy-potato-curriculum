@@ -33,9 +33,9 @@ def test_lesson_records_track_membership(lessons_dir: Path) -> None:
 
 
 def test_scan_ignores_non_item_files(lessons_dir: Path) -> None:
-    # notes.txt must not be counted; 5 real items live in L01.
+    # notes.txt must not be counted; 6 real items live in L01 (incl. the .html deck).
     l01 = next(lesson for lesson in catalog.load_lessons(lessons_dir) if lesson.lesson_id == "L01")
-    assert l01.item_count == 5
+    assert l01.item_count == 6
 
 
 def test_items_are_ordered_intro_first_proctor_last(lessons_dir: Path) -> None:
@@ -44,6 +44,7 @@ def test_items_are_ordered_intro_first_proctor_last(lessons_dir: Path) -> None:
     assert [it.item_id for it in detail.items] == [
         "L0101_intro",
         "L0102_lecture",
+        "L0102_lecture_deck",
         "L0103_lab_empty",
         "L0103_lab_solutions",
         "PROCTOR_NOTES",
@@ -55,6 +56,7 @@ def test_items_are_ordered_intro_first_proctor_last(lessons_dir: Path) -> None:
     [
         ("L0101_intro", "intro"),
         ("L0102_lecture", "lecture"),
+        ("L0102_lecture_deck", "lecture_deck"),
         ("L0103_lab_empty", "lab_empty"),
         ("L0103_lab_solutions", "lab_solutions"),
         ("PROCTOR_NOTES", "proctor_notes"),
@@ -113,6 +115,31 @@ def test_find_item_cannot_escape_lessons_tree(lessons_dir: Path) -> None:
     # A traversal-style item_id has no matching catalog entry, so it resolves to None
     # rather than reading an arbitrary file.
     assert catalog.find_item("L01", "../../tracks", lessons_dir) is None
+
+
+# --- HTML slide decks (``lecture_deck``) ------------------------------------
+
+
+def test_deck_item_has_html_format(lessons_dir: Path) -> None:
+    detail = catalog.load_lesson_detail("L01", lessons_dir)
+    assert detail is not None
+    deck = next(it for it in detail.items if it.item_id == "L0102_lecture_deck")
+    assert deck.fmt == "html"
+
+
+def test_deck_title_uses_html_title_tag(lessons_dir: Path) -> None:
+    detail = catalog.load_lesson_detail("L01", lessons_dir)
+    assert detail is not None
+    deck = next(it for it in detail.items if it.item_id == "L0102_lecture_deck")
+    # The ``&amp;`` entity in the file's <title> is decoded for the sidebar label.
+    assert deck.title == "2. Slides — Deck & slides"
+
+
+def test_find_item_resolves_deck_to_html_path(lessons_dir: Path) -> None:
+    found = catalog.find_item("L01", "L0102_lecture_deck", lessons_dir)
+    assert found is not None
+    _item, path = found
+    assert path == lessons_dir / "L01" / "L0102_lecture_deck.html"
 
 
 # --- Prework (K<NN>) track --------------------------------------------------
