@@ -25,7 +25,7 @@ estimated duration: 20
 - text: **Langfuse** is an open-source (MIT) LLM observability platform. The cohort runs **one shared instructor instance** — you get a base URL + project keys, no signup, no seat cost.
 - text: it ingests **OpenTelemetry** spans. That is *why* `TraceEvent` was shaped the way it was in `common/tracing.py` — an approximate OTel/Langfuse shape — so exporting is a natural step, not a rewrite.
 - text: keys load through `common/config.py` (the pydantic-settings seam), **never hard-coded** — the same stance as every other live call in the course.
-- diagram: a **cyan** box "your instrumented `agent_graph.run(...)`" with a **cyan** arrow labeled "export (langfuse SDK / OTLP)" — the lesson's own contribution — pointing to a cyan-bordered box "shared Langfuse dashboard"; a second arrow from an `--ink-faint` **dashed** box "L11 LangGraph agent" pointing at the *same* dashboard (another lesson's trace, not today's work). Explicitly no coral anywhere. **This source→pipe→dashboard picture is the lesson's motif**: 3.2 splits the pipe in two, 5.1 dashes the export leg, 5.2 re-draws the fan as the bookend.
+- diagram: a **cyan** box "your instrumented `agent_graph.arun(...)`" with a **cyan** arrow labeled "export (langfuse SDK / OTLP)" — the lesson's own contribution — pointing to a cyan-bordered box "shared Langfuse dashboard"; a second arrow from an `--ink-faint` **dashed** box "L11 LangGraph agent" pointing at the *same* dashboard (another lesson's trace, not today's work). Explicitly no coral anywhere. **This source→pipe→dashboard picture is the lesson's motif**: 3.2 splits the pipe in two, 5.1 dashes the export leg, 5.2 re-draws the fan as the bookend.
 
 [↑ Back to top](#seeing-your-trace-in-langfuse)
 

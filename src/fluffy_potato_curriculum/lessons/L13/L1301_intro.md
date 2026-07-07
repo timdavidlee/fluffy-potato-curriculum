@@ -51,13 +51,13 @@ Use these terms verbatim — each maps onto a Langfuse concept, so learn both na
 | **Eval set** — cases + machinery to run/score them | a list of `EvalCase` | a **Dataset** |
 | **Case** — one input + what "good" means | `EvalCase(inputs, reference_outputs)` | a **Dataset item** (`input` + `expected_output`) |
 | **Scorer / check** — one run → a verdict | `Scorer` → `EvalResult(key, score, comment)` | a **score** (code-based) or **evaluator** (managed LLM-judge) |
-| **Runner / harness** — run every case, roll up | `evaluate(...)` (the concept sketch) | an **Experiment** over the dataset |
+| **Runner / harness** — run every case, roll up | `aevaluate(...)` (the concept sketch, awaited) | an **Experiment** over the dataset |
 | **Regression** — used to pass, now fails | — | pass→fail in the **run comparison** |
 | **Outcome vs. trajectory** — answer vs. path | reads `run.final_text` vs. `run.trace` | two scores on the same run |
 
 ## A note on the code you'll see
 
-The eval vocabulary is the shared module `fluffy_potato_curriculum.common.evals` — `EvalCase`, the `Scorer` protocol, `EvalResult`, a ~15-line `evaluate(...)` kept as an under-the-hood *concept sketch*, and the **Langfuse bridge** (`upload_dataset` maps cases onto a Langfuse Dataset; `emit_score` maps a scorer's verdict onto a Langfuse score). It sits alongside L10's `common/agent_graph.py` (`run(model, tools, user_msg)` → `RunResult`, the reference L10 ReAct graph — `common/agent_loop.py` is the kept-alongside by-hand version), L12's `common/tracing.py` (`TraceEvent`), and `common/tools.py` (`calculator`, `lookup`, `flaky_fetch`). The **concept** cells drive the graph with the scripted `FakeModel`, so they're deterministic and keyless; the **tooled** cells need the live cohort Langfuse (and, for the A/B, an `ANTHROPIC_API_KEY`) — they read their config through `common/config.py` (`require_langfuse()`), never a hard-coded key.
+The eval vocabulary is the shared module `fluffy_potato_curriculum.common.evals` — `EvalCase`, the `Scorer` protocol, `EvalResult`, a ~15-line `evaluate(...)` kept as an under-the-hood *concept sketch* (the notebooks `await` its async twin `aevaluate(...)` — the course default; see the K05 prework for why), and the **Langfuse bridge** (`upload_dataset` maps cases onto a Langfuse Dataset; `emit_score` maps a scorer's verdict onto a Langfuse score). It sits alongside L10's `common/agent_graph.py` (`await arun(model, tools, user_msg)` → `RunResult`, the reference L10 ReAct graph — `common/agent_loop.py` is the kept-alongside by-hand version), L12's `common/tracing.py` (`TraceEvent`), and `common/tools.py` (`calculator`, `lookup`, `flaky_fetch`). The **concept** cells drive the graph with the scripted `FakeModel`, so they're deterministic and keyless; the **tooled** cells need the live cohort Langfuse (and, for the A/B, an `ANTHROPIC_API_KEY`) — they read their config through `common/config.py` (`require_langfuse()`), never a hard-coded key.
 
 ## This is a first pass, on purpose
 

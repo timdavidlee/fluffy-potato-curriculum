@@ -36,6 +36,8 @@ COMMON GOTCHAS:
   usually still works but teaches the wrong model — correct it.
 - Reading `reply` instead of `reply.content`. The stub (like `ChatAnthropic`) returns an object;
   the text is on `.content`. Wrap in `str(...)` to satisfy the typed return.
+- Forgetting to `await` the `ainvoke(...)` call — a coroutine (not a reply) lands in the update,
+  and `.content` fails. The nodes are `async def`, so every stub call is an `await`.
 - Forgetting to append to `steps` in each node — then problem 4's path looks wrong.
 
 UNBLOCKERS: Remind them which stub each node uses — `parse` → `haiku`, `draft`/`policy_check` →
@@ -65,6 +67,8 @@ text is fine.
 COMMON GOTCHAS:
 - Forgetting `steps: []` in the initial state. With the `add` reducer, omitting the starting list
   can raise or behave oddly — always seed it (`{"ticket": ..., "steps": []}`).
+- Reaching for `chain_app.invoke(...)` — the nodes are async, so the graph runs with
+  `await chain_app.ainvoke(...)` (a notebook cell can `await` at top level).
 - Expecting the *draft text* to be stable. It's a stub, so here it is; with a real model the wording
   varies. The point is the **path** (`['parse','draft','policy_check']`) is stable — that's
   determinism.
@@ -72,17 +76,18 @@ COMMON GOTCHAS:
 UNBLOCKERS: If the path isn't all three names, send them back to problem 1 (reducer) or problem 2
 (missing `steps` append).
 
-TIME: 3–5 min. STRETCH: invoke on a different ticket and confirm the path is unchanged.
+TIME: 3–5 min. STRETCH: `ainvoke` on a different ticket and confirm the path is unchanged.
 
 ## L0404_lab problem 5 — From stub to real model (written)
 
 EXPECTED ANSWER: Change only the **client construction** — `haiku = StubChat(HAIKU)` →
 `haiku = ChatAnthropic(model=HAIKU, api_key=require_anthropic_key())` (same for `sonnet`). The
 **node code never changes** because `StubChat` and `ChatAnthropic` share the same interface the nodes
-rely on: `.invoke(prompt).content`. That shared shape is exactly why a seam/stub is swappable — the
-same point [L03's](../L03/objectives.md) lab problem 5 made with a single node.
+rely on: `await .ainvoke(prompt)` → a reply with `.content`. That shared shape is exactly why a
+seam/stub is swappable — the same point [L03's](../L03/objectives.md) lab problem 5 made with a
+single node.
 
-COMMON GOTCHAS: Students say "rewrite the nodes." Redirect: the nodes only call `.invoke(...).content`
-— that contract is identical, so the node bodies are untouched.
+COMMON GOTCHAS: Students say "rewrite the nodes." Redirect: the nodes only `await .ainvoke(...)` and
+read `.content` — that contract is identical, so the node bodies are untouched.
 
 TIME: 3–5 min.

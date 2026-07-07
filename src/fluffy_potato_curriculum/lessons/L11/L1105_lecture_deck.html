@@ -792,7 +792,7 @@ table.ledger.gotcha td { padding-top: 6px; padding-bottom: 6px; }
     </div>
     <div class="body-area">
         <ul class="points reveal">
-            <li class="point">In L10 you set <code>recursion_limit</code> on <code>invoke</code> yourself; here it's the framework's <b>recursion / step limit</b> by default &mdash; <b>25 steps</b> (set <code>recursion_limit</code> in the run config to change it).</li>
+            <li class="point">In L10 you set <code>recursion_limit</code> on <code>ainvoke</code> yourself; here it's the framework's <b>recursion / step limit</b> by default &mdash; <b>25 steps</b> (set <code>recursion_limit</code> in the run config to change it).</li>
             <li class="point">A runaway agent still trips it &mdash; and tripping it is <span class="warn">still a signal worth investigating</span>, not noise to raise the limit past.</li>
         </ul>
         <div class="diagram-frame reveal" style="margin-top:2px;">

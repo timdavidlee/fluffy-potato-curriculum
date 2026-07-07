@@ -116,12 +116,12 @@ agent = create_agent(model, [calculator, lookup, flaky_fetch], system_prompt=...
 | You wired by hand in L10 | `create_agent` gives you |
 | --- | --- |
 | `TypedDict` state + the `add_messages` reducer | `MessagesState` — the same thing, prebuilt (you don't declare it) |
-| the `agent` node: `model.bind_tools(...).invoke(...)` | the **`model`** argument |
+| the `agent` node: `model.bind_tools(...).ainvoke(...)` | the **`model`** argument |
 | `ToolNode(tools, handle_tool_errors=True)` | the **`tools`** argument (the *same* `ToolNode` inside) |
 | your hand-written `route` function | the prebuilt **`tools_condition`** |
 | `add_edge("tools", "agent")` — the back-edge | built in |
 | the system message you prepended | the **`system_prompt`** argument |
-| `recursion_limit` on `invoke` | the same knob, on the run config (default 25) |
+| `recursion_limit` on `ainvoke` | the same knob, on the run config (default 25) |
 
 - **The two "oh — it just packaged what I wrote" beats.** In L10 you already saw `ToolNode` revealed
   as "the message-history bookkeeping, prebuilt." The same move applies to the *edge*: the `route`
@@ -164,7 +164,7 @@ agent = create_agent(model, [calculator, lookup, flaky_fetch], system_prompt=...
 
 - A common misread: *"the one-liner removed the need for a step cap."* It didn't.
 - `create_agent` ships a **recursion / step limit** — the same `recursion_limit` you set on
-  `invoke` in L10 (LangGraph's default is 25 loop steps; you can raise or lower it in the run config).
+  `ainvoke` in L10 (LangGraph's default is 25 loop steps; you can raise or lower it in the run config).
 - A runaway agent still hits that cap, and **hitting it is still a signal worth investigating** —
   exactly the L10 lesson, restated.
 - diagram: the loop motif again with a step counter ticking up beside it — `1, 2, 3, …` in

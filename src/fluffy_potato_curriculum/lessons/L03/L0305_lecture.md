@@ -49,13 +49,13 @@ estimated duration: 9
 
 | Affordance | The node version | The inline function |
 | --- | --- | --- |
-| Tested in isolation | `invoke()` the one node, inspect its output | no seam to test one step alone |
+| Tested in isolation | `ainvoke()` the one node, inspect its output | no seam to test one step alone |
 | Composed & reordered | a unit an orchestrator can plug in, drop, or move | can't wire a step you never separated out |
 | Swapped | model / prompt changes without touching neighbors | internals and callers are tangled |
 | Seen at a glance | inspectable data (`draw_mermaid()`, nodes + edges) | you must read the body to know its shape |
 
 - diagram: the slide-1.1 two-up again, one change — the four affordances pinned on: left, the same
-  cyan `extract_node` box with four labeled seams (`invoke alone` · `compose` · `swap` · `draw`);
+  cyan `extract_node` box with four labeled seams (`ainvoke alone` · `compose` · `swap` · `draw`);
   right, the coral fused box with the same four labels struck through — "no seam, no affordance."
 
 ### slide 2.2 The through-line
@@ -71,7 +71,7 @@ estimated duration: 9
 ### slide 3.1 One node: not obviously worth it
 
 - For a **single** node, the ceremony is not obviously worth it over a plain function — and you
-  should say so out loud. `extract_app.invoke({"raw_text": ...})` is more setup than
+  should say so out loud. `await extract_app.ainvoke({"raw_text": ...})` is more setup than
   `extract_plain(...)`.
 - Discipline (good docstrings, tidy functions) gets an inline version partway to "organized." The
   difference: a typed state schema and a separate node make the seam **enforced by the structure**,

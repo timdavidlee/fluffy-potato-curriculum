@@ -900,7 +900,7 @@ pre.code.faint code, pre.code.faint code .kw { color: var(--ink-dim); font-weigh
             <div class="garrow">&rarr;</div>
             <div class="pill"><span class="n">5</span> compile()</div>
             <div class="garrow">&rarr;</div>
-            <div class="pill">invoke(input)</div>
+            <div class="pill">await ainvoke(input)</div>
         </div>
         <pre class="code reveal" style="margin-top:24px;"><code><span class="kw">from</span> langgraph.graph <span class="kw">import</span> StateGraph, END
 
@@ -910,8 +910,8 @@ builder.add_node(<span class="p">"draft"</span>, draft)
 builder.set_entry_point(<span class="p">"parse"</span>)         <span class="c"># 3. where it starts</span>
 builder.add_edge(<span class="p">"parse"</span>, <span class="p">"draft"</span>)       <span class="c"># 4. wire edges</span>
 builder.add_edge(<span class="p">"draft"</span>, END)
-app = builder.compile()                  <span class="c"># 5. compile to runnable</span>
-result = app.invoke({<span class="p">"ticket"</span>: <span class="p">"..."</span>})   <span class="c">#    invoke on input</span></code></pre>
+app = builder.compile()                        <span class="c"># 5. compile to runnable</span>
+result = <span class="kw">await</span> app.ainvoke({<span class="p">"ticket"</span>: <span class="p">"..."</span>})  <span class="c">#    await it on input</span></code></pre>
         <div class="diagram-caption reveal" style="margin-top:14px;">Same recipe as L03 &mdash; but with <b>several</b> nodes and edges <i>between</i> them. New wiring, no new primitive.</div>
     </div>
     <div class="chrome-page">07 / 26</div>
@@ -933,9 +933,9 @@ result = app.invoke({<span class="p">"ticket"</span>: <span class="p">"..."</spa
             <li class="point">A node does <b>one unit of work</b> and hands back an update &mdash; nothing more. What's new here: <i>several</i> nodes now share one state object.</li>
         </ul>
         <div class="reveal" style="display:flex; align-items:center; gap:44px; margin-top:24px;">
-            <pre class="code" style="margin:0; flex:1;"><code><span class="kw">def</span> parse(state: TicketState) -> dict[str, object]:
+            <pre class="code" style="margin:0; flex:1;"><code><span class="kw">async def</span> parse(state: TicketState) -> dict[str, object]:
     <span class="c"># Extract structured fields (a light step &rarr; Haiku)</span>
-    reply = haiku.invoke(<span class="p">f"Extract: {state['ticket']}"</span>)
+    reply = <span class="kw">await</span> haiku.ainvoke(<span class="p">f"Extract: {state['ticket']}"</span>)
     <span class="kw">return</span> {<span class="p">"parsed"</span>: reply.content}   <span class="c"># only what changed</span></code></pre>
             <div class="diagram-frame" style="width:640px; flex-shrink:0;">
                 <svg viewBox="0 0 640 300" width="640" height="300">
@@ -1025,7 +1025,7 @@ result = app.invoke({<span class="p">"ticket"</span>: <span class="p">"..."</spa
         <ul class="points reveal">
             <li class="point"><b>In state:</b> data that flows between nodes &mdash; the extracted fields, intermediate drafts.</li>
             <li class="point"><b>Not in state:</b> the model client and configuration. Those are <b>dependencies you wire in at build time</b>, not data that flows.</li>
-            <li class="point">You construct a <code>ChatAnthropic</code> client once and <b>close over it</b> in the node &mdash; you don't thread it through <code>invoke</code>.</li>
+            <li class="point">You construct a <code>ChatAnthropic</code> client once and <b>close over it</b> in the node &mdash; you don't thread it through <code>ainvoke</code>.</li>
         </ul>
     </div>
     <div class="chrome-page">10 / 26</div>
@@ -1292,18 +1292,18 @@ ok = policy(draft)
     <div class="chrome-tag">L04 &middot; <b>WORKFLOWS</b></div>
     <div class="topbar reveal">
         <div class="eyebrow">Slide 5.2</div>
-        <h2 class="headline">Watch it run &mdash; <span class="it">graph.stream</span>, the same tool from L03</h2>
+        <h2 class="headline">Watch it run &mdash; <span class="it">graph.astream</span>, the same tool from L03</h2>
     </div>
     <div class="body-area" style="display:flex; align-items:center; gap:56px;">
         <div style="flex:1; min-width:0;">
             <ul class="points reveal" style="max-width:none;">
-                <li class="point">Run with <code>stream_mode="updates"</code> instead of <code>invoke</code>: <b>one chunk per node, in the order they fire</b>.</li>
+                <li class="point">Run with <code>stream_mode="updates"</code> instead of <code>ainvoke</code>: <b>one chunk per node, in the order they fire</b>.</li>
                 <li class="point">That output is the <b>path made visible</b> &mdash; it confirms the route was developer-determined. Same built-in call you used in <b>L03</b>; nothing new to set up.</li>
                 <li class="point">Routing this same run to <b>Langfuse</b> for a structured, comparable trace is <b>L12's</b> job, several lessons away. Nothing in L04 depends on tracing.</li>
             </ul>
         </div>
         <div class="diagram-frame reveal" style="width:620px; flex-shrink:0;">
-            <pre class="code" style="margin:0; flex:1; padding:16px 20px;"><code style="font-size:17px;"><span class="kw">for</span> chunk <span class="kw">in</span> app.stream(inp, stream_mode=<span class="p">"updates"</span>):
+            <pre class="code" style="margin:0; flex:1; padding:16px 20px;"><code style="font-size:17px;"><span class="kw">async for</span> chunk <span class="kw">in</span> app.astream(inp, stream_mode=<span class="p">"updates"</span>):
     print(chunk)
 
 {<span class="p">'parse'</span>: {...}}

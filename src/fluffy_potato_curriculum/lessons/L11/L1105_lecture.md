@@ -68,7 +68,7 @@ agent = create_agent(
 
 ### slide 2.2 The step cap is still there, just a default now
 
-- In L10 you set `recursion_limit` on `invoke` yourself; here you don't have to — the cap still
+- In L10 you set `recursion_limit` on `ainvoke` yourself; here you don't have to — the cap still
   exists as the framework's **recursion / step limit** (LangGraph's default is 25 steps; set
   `recursion_limit` in the run config to change it).
 - A runaway agent still trips it, and tripping it is **still a signal worth investigating** — the

@@ -2,7 +2,7 @@
 
 ```yaml
 title: "A node is one LLM call you wire: state goes in, state comes out"
-keywords: langgraph, StateGraph, node, state, typed state, typeddict, compile, invoke, pure function, ChatAnthropic, single node, extract, first framework
+keywords: langgraph, StateGraph, node, state, typed state, typeddict, compile, ainvoke, pure function, ChatAnthropic, single node, extract, first framework
 estimated duration: 8
 ```
 
@@ -52,7 +52,7 @@ can plug it in.** Said a few ways, because it is the whole lesson:
    fields from a support ticket. Chaining narrow steps together is L04's entire subject; L03 just
    makes sure you can build *one* narrow step cleanly first.
 4. **One node is more ceremony than just calling a function — and that's the point.** A single-node
-   `StateGraph` (typed state, `compile`, `invoke`) is objectively more setup than
+   `StateGraph` (typed state, `compile`, `ainvoke`) is objectively more setup than
    `result = call_model(prompt)`. The payoff isn't visible yet at one node; it shows up in L04, when
    the *same* ceremony scales to many nodes with no per-node redesign. The payoff is coming, not yet
    arrived.
@@ -72,7 +72,8 @@ You will leave L03 able to define each of these — and they all reappear, uncha
 - **Entry point / `END`** — where execution starts, and the sentinel where it stops. In a one-node
   graph, the entry point *is* the node, and the node's only edge goes to `END`.
 - **Compile / invoke** — turning the declared graph into a runnable (`compile()`), then running it on
-  an input (`invoke()`). Two separate steps.
+  an input (`await app.ainvoke(...)` — the async twin of `invoke()`, the course default). Two
+  separate steps.
 - **Pure function over state** — the discipline a node follows: same relevant state in, same shape of
   update out, no hidden reads or side effects beyond its one LLM call.
 

@@ -91,7 +91,8 @@ foreshadows L2306.
 
 COMMON GOTCHAS: forgetting that the edge is literal — the upstream body must actually contain
 `load_skill("<downstream>")`. If the FakeModel script and the bodies disagree, `loaded_skills` won't
-show the expected path. Keep the scripted `tool_call` names matching real skill names.
+show the expected path. Keep the scripted `tool_call` names matching real skill names. The run is
+`await p1_agent.ainvoke(...)` — dropping the `await` returns a coroutine, not the messages dict.
 UNBLOCKERS: point at L2304 §2; the provided FakeModel script mirrors it. Print `list_skills()` to
 confirm the new skill registered.
 TIME: ~8 min. STRETCH: add a third stage and observe the path grow by one load.

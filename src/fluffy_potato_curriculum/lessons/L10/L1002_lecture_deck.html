@@ -863,8 +863,8 @@ table.ledger td.warn-cell { color: var(--coral); }
     </div>
     <div class="body-area">
         <ul class="points reveal">
-            <li class="point">The <code>agent</code> node is just a plain function: <code>state &rarr; {"messages": [reply]}</code>.</li>
-            <li class="point">Its body is a single line you already know from L07: <code>model.bind_tools(tools).invoke(state["messages"])</code>.</li>
+            <li class="point">The <code>agent</code> node is just a plain <code>async</code> function: <code>state &rarr; {"messages": [reply]}</code>.</li>
+            <li class="point">Its body is a single line you already know from L07: <code>await model.bind_tools(tools).ainvoke(state["messages"])</code>.</li>
             <li class="point">It returns the model's one <code>AIMessage</code> (maybe carrying <code>.tool_calls</code>) wrapped in the <code>messages</code> key, and the reducer appends it.</li>
             <li class="point"><b>The model is not aware of the graph at all</b> &mdash; every visit to <code>agent</code> is one independent round-trip. <span class="k">The loop lives in the edges.</span></li>
         </ul>
@@ -925,7 +925,7 @@ table.ledger td.warn-cell { color: var(--coral); }
             <li class="point">Two edges finish the graph. <code>route</code> is the L05 conditional edge; the back-edge is a plain <code>add_edge("tools", "agent")</code>.</li>
             <li class="point"><code>route(state)</code> returns <code>"tools"</code> when the last message has <code>.tool_calls</code>, and <code>END</code> otherwise &mdash; wire it with <code>add_conditional_edges</code>, set the entry point, <code>compile()</code>.</li>
             <li class="point">You write <code>route</code> by hand here; L11's prebuilt <code>tools_condition</code> is the <i>same</i> function, packaged.</li>
-            <li class="point">Watch the cycle turn with <code>graph.stream(task, stream_mode="updates")</code> &mdash; one chunk per node; try naming each moment control crosses the back-edge:</li>
+            <li class="point">Watch the cycle turn with <code>async for</code> over <code>graph.astream(task, stream_mode="updates")</code> &mdash; one chunk per node; try naming each moment control crosses the back-edge:</li>
         </ul>
         <div class="diagram-frame reveal" style="width:1660px; height:230px; margin-top:10px;">
             <svg viewBox="0 0 1660 230" width="100%" height="100%">
@@ -1077,7 +1077,7 @@ table.ledger td.warn-cell { color: var(--coral); }
         <ul class="points reveal">
             <li class="point">The cap bounds the damage when something goes wrong &mdash; a runaway model, a tool that always looks unfinished. It does <b>not</b> make answers correct.</li>
             <li class="point"><b>Hitting the cap is always a signal worth investigating</b> &mdash; a genuinely hard task, or a misbehaving agent. Treat <code>GraphRecursionError</code> as an alert, not noise.</li>
-            <li class="point"><code>recursion_limit</code> lives on <code>invoke</code>, not the graph shape. It counts <b>super-steps</b> (node visits) &mdash; one tool per turn &asymp; two steps per cycle:</li>
+            <li class="point"><code>recursion_limit</code> lives on <code>ainvoke</code>, not the graph shape. It counts <b>super-steps</b> (node visits) &mdash; one tool per turn &asymp; two steps per cycle:</li>
         </ul>
         <div class="reveal" style="display:flex; gap:26px; align-items:stretch; margin-top:22px;">
             <div class="cycle-box">
@@ -1273,7 +1273,7 @@ table.ledger td.warn-cell { color: var(--coral); }
     <div class="body-area">
         <ul class="points reveal">
             <li class="point">The whole exception-to-message behavior is one constructor argument: <code>ToolNode(tools, handle_tool_errors=True)</code>. A raise becomes a <code>ToolMessage(status="error")</code> the back-edge hands back.</li>
-            <li class="point">With <code>handle_tool_errors=False</code>, the exception <b>escapes the node and kills the whole <code>invoke</code></b> &mdash; <span class="warn">one buggy tool crashes the agent.</span></li>
+            <li class="point">With <code>handle_tool_errors=False</code>, the exception <b>escapes the node and kills the whole <code>ainvoke</code></b> &mdash; <span class="warn">one buggy tool crashes the agent.</span></li>
             <li class="point"><b>One word, and it's crash vs. recover</b> &mdash; a buggy tool degrades into a message; the model can retry, switch tools, or apologize. Its call, not the graph's.</li>
         </ul>
         <div class="reveal" style="display:flex; gap:40px; margin-top:18px;">
@@ -1296,7 +1296,7 @@ table.ledger td.warn-cell { color: var(--coral); }
                     <text x="580" y="268" text-anchor="middle" class="edge-label" fill="var(--coral)">raise escapes the node</text>
                     <line x1="120" y1="26" x2="600" y2="230" stroke="var(--coral)" stroke-width="5" opacity="0.6"/>
                     <line x1="600" y1="26" x2="120" y2="230" stroke="var(--coral)" stroke-width="5" opacity="0.6"/>
-                    <text x="360" y="292" text-anchor="middle" class="edge-label" fill="var(--coral)" font-weight="600">the whole invoke crashes</text>
+                    <text x="360" y="292" text-anchor="middle" class="edge-label" fill="var(--coral)" font-weight="600">the whole ainvoke crashes</text>
                 </svg>
             </div>
             <div style="flex:1;">
@@ -1501,8 +1501,8 @@ table.ledger td.warn-cell { color: var(--coral); }
         <table class="ledger reveal">
             <thead><tr><th>Gotcha</th><th>Cure</th><th>Where</th></tr></thead>
             <tbody>
-                <tr><td class="warn-cell"><b>No termination guard</b> &mdash; a cycle with no cap runs forever on one confused turn</td><td>an iteration cap on every <code>invoke</code>; hitting it is a signal to investigate, <b>never noise to swallow</b></td><td class="tag">section 3</td></tr>
-                <tr><td class="warn-cell"><b>Not handling tool failures</b> &mdash; a raise escapes <code>ToolNode</code>, crashes the <code>invoke</code></td><td><code>handle_tool_errors=True</code> turns the raise into a message &mdash; and no tracebacks at the model</td><td class="tag">section 4</td></tr>
+                <tr><td class="warn-cell"><b>No termination guard</b> &mdash; a cycle with no cap runs forever on one confused turn</td><td>an iteration cap on every <code>ainvoke</code>; hitting it is a signal to investigate, <b>never noise to swallow</b></td><td class="tag">section 3</td></tr>
+                <tr><td class="warn-cell"><b>Not handling tool failures</b> &mdash; a raise escapes <code>ToolNode</code>, crashes the <code>ainvoke</code></td><td><code>handle_tool_errors=True</code> turns the raise into a message &mdash; and no tracebacks at the model</td><td class="tag">section 4</td></tr>
                 <tr><td class="warn-cell"><b>Unbounded context growth</b> &mdash; <b>the silent one</b>: nothing errors, the bill just climbs</td><td>watch cumulative tokens; trimming/summarizing is <b>L19</b> &mdash; name it, don't build it here</td><td class="tag">slide 2.2</td></tr>
             </tbody>
         </table>

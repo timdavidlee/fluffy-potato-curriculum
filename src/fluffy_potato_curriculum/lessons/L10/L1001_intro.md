@@ -18,7 +18,7 @@ estimated duration: 10
 ## Where this lesson sits
 
 By L10 you have built graphs that flow **forward and stop**. [L04](../L04/objectives.md) wired a
-directed `StateGraph` — typed state, `add_node`, `add_edge`, `compile`, `invoke` — and
+directed `StateGraph` — typed state, `add_node`, `add_edge`, `compile`, `ainvoke` — and
 [L05](../L05/objectives.md) added a **conditional edge** (`add_conditional_edges` + a routing
 function) so a graph can branch. You have also seen the *mechanics* of tool calling
 ([L07](../L07/L0701_intro.md): `bind_tools`, `.tool_calls`, `ToolMessage`), the *design* of good
@@ -76,7 +76,7 @@ These three rules are the spine of the lesson — the lecture, the demo, and bot
 
 The hard part of an agent is the **control flow** — the cycle, the stop condition, the failure
 path — not the live model. So most of L10 runs on a tiny **stub model** (the course's `FakeModel`):
-a fake whose `.invoke(...)` returns the next *scripted* `AIMessage` off a list (a tool-call turn,
+a fake whose `.ainvoke(...)` returns the next *scripted* `AIMessage` off a list (a tool-call turn,
 then another, then a final text turn). Because `ToolNode` drives the *real* tools against those
 scripted calls, a scripted model makes the whole graph **deterministic**:
 
@@ -93,12 +93,17 @@ so you see the same graph drive live Claude.
 
 From here the course wires graphs with **LangGraph** and drives the model node through a **LangChain
 chat model**, not the raw Anthropic SDK — that is what keeps the agent provider-agnostic. The model
-node only ever touches a tiny slice of the interface: `model.bind_tools(tools)`, then
-`.invoke(messages)` → an `AIMessage` whose `.tool_calls` say which tools to run. Because that slice
+node only ever touches a tiny slice of the interface: `model.bind_tools(tools)`, then an awaited
+`.ainvoke(messages)` → an `AIMessage` whose `.tool_calls` say which tools to run. Because that slice
 is all the graph needs, the **live** demo (a real `ChatAnthropic` via `init_chat_model("anthropic:…")`,
 key through the config seam — never hard-coded) and the stub-model notebooks (the course's
-`FakeModel`, which implements the same `.bind_tools()` / `.invoke()`) run the **identical** graph
+`FakeModel`, which implements the same `.bind_tools()` / `.ainvoke()`) run the **identical** graph
 code. Swap the model object, keep the graph.
+
+> Every LangChain runnable ships each call in two flavors — blocking `.invoke(...)`/`.stream(...)`
+> and awaitable `.ainvoke(...)`/`.astream(...)`. The course defaults to the **async** ones, so you
+> `await` model and graph calls (a notebook cell can `await` at top level). *Why* async is the
+> default is the K05 prework's "why async for agents."
 
 One more vocabulary note: LangGraph labels the model-call node **`model`** in the rendered diagram;
 this lesson names it the **`agent`** node when we wire it by hand. Same node — `agent` and `model`

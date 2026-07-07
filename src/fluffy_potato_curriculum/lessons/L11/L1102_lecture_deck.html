@@ -892,12 +892,12 @@ agent = <span class="hl">create_agent</span>(model, [calculator, lookup, flaky_f
                     <thead><tr><th style="width:52%;">You wired by hand in L10</th><th>create_agent gives you</th></tr></thead>
                     <tbody>
                         <tr><td><code>TypedDict</code> state + <code>add_messages</code></td><td><code>MessagesState</code>, prebuilt for you</td></tr>
-                        <tr><td><code>agent</code> node (<code>bind_tools</code> + <code>invoke</code>)</td><td>the <b><code>model</code></b> argument</td></tr>
+                        <tr><td><code>agent</code> node (<code>bind_tools</code> + <code>ainvoke</code>)</td><td>the <b><code>model</code></b> argument</td></tr>
                         <tr><td><code>ToolNode(tools, handle_tool_errors)</code></td><td><b><code>tools</code></b> argument &mdash; <i>same</i> <code>ToolNode</code></td></tr>
                         <tr><td>your hand-written <code>route</code> function</td><td>the prebuilt <b><code>tools_condition</code></b></td></tr>
                         <tr><td><code>add_edge("tools","agent")</code></td><td><b>built in</b> &mdash; the back-edge</td></tr>
                         <tr><td>the system message you prepended</td><td>the <b><code>system_prompt</code></b> argument</td></tr>
-                        <tr><td><code>recursion_limit</code> on <code>invoke</code></td><td>same knob, run config, default 25</td></tr>
+                        <tr><td><code>recursion_limit</code> on <code>ainvoke</code></td><td>same knob, run config, default 25</td></tr>
                     </tbody>
                 </table>
                 <div class="diagram-caption reveal" style="margin-top:14px; max-width:1020px;">Two payoff rows: your <code style="font-style:normal; color:var(--cyan);">route</code> <b style="color:var(--ink); font-style:normal;">is</b> <code style="font-style:normal; color:var(--cyan);">tools_condition</code>, and your <code style="font-style:normal; color:var(--cyan);">ToolNode</code> is the <i>same</i> <code style="font-style:normal; color:var(--cyan);">ToolNode</code> &mdash; node and edge, both just packaged. (LangGraph labels the model-call node <code style="font-style:normal; color:var(--cyan);">model</code>; we called it <code style="font-style:normal; color:var(--cyan);">agent</code> in L10. Same node.)</div>
@@ -1074,7 +1074,7 @@ agent = <span class="hl">create_agent</span>(model, [calculator, lookup, flaky_f
     <div class="body-area">
         <ul class="points reveal">
             <li class="point">A common misread: <span class="warn">&ldquo;the one-liner removed the need for a step cap.&rdquo;</span> It didn&rsquo;t.</li>
-            <li class="point"><code>create_agent</code> ships the <b>same <code>recursion_limit</code></b> you set on <code>invoke</code> in L10 &mdash; default <b>25</b> loop steps; raise or lower it in the run config.</li>
+            <li class="point"><code>create_agent</code> ships the <b>same <code>recursion_limit</code></b> you set on <code>ainvoke</code> in L10 &mdash; default <b>25</b> loop steps; raise or lower it in the run config.</li>
             <li class="point">A runaway agent still hits that cap, and <b>hitting it is still a signal worth investigating</b> &mdash; exactly the L10 lesson, restated.</li>
         </ul>
         <div class="diagram-frame reveal" style="margin-top:26px;">

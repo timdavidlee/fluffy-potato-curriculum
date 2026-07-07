@@ -104,8 +104,13 @@ def calculator(expression: str) -> str:
 
 model = ChatAnthropic(model="claude-sonnet-4-6", api_key=require_anthropic_key(), max_tokens=512)
 model_with_tools = model.bind_tools([calculator])   # the definition is inferred from the function
-reply = model_with_tools.invoke([...])               # reply.tool_calls holds any requested calls
+reply = await model_with_tools.ainvoke([...])        # in a notebook cell; .tool_calls holds any requested calls
 ```
+
+> We call `await model.ainvoke(...)` — the **async** twin of LangChain's blocking `model.invoke(...)`.
+> Every LangChain chat model offers both; the course defaults to the async one, so you `await` model
+> calls (a notebook cell can `await` at top level). *Why* async is the default is the K05 prework's
+> "why async for agents."
 
 The key still loads through the config seam (`require_anthropic_key`) — we never hard-code it. Two
 of the labs are **offline pure Python** (no key needed): they hand you a *crafted* tool call (the

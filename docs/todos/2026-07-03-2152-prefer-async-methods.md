@@ -26,12 +26,11 @@ and materials async-first so they can lean on that concept. This resolves the "i
 from L01 vs. later" question: the concept lands in K05, the seams are async from the first lesson
 that uses them.
 
-## Progress (2026-07-04): the code seams are DONE; the notebooks are deferred
+## Progress (2026-07-06): DONE — seams *and* notebooks converted
 
-Chose "seams now, notebooks later" (the notebook conversion is folded into the active
-[LangChain notebook migration](2026-07-03-langchain-notebook-migration.md) so those files are
-touched once, when regenerated — the "don't touch twice" call below). The **seams** landed
-async-first with the existing sync names kept working, so nothing downstream broke:
+The seams landed async-first on 2026-07-04 (below). On **2026-07-06** the remaining notebook
+conversion — which the closed LangChain migration never picked up — was done directly as its own
+pass, so every lesson that makes a model/agent/eval call is now async-first end to end:
 
 - [x] **`potato_llm/`** — `chat`/`achat` on the `PotatoLLMClient` Protocol + both clients (each
       holds a lazily-built sync **and** async SDK client; shared `to_chat_response`).
@@ -41,16 +40,19 @@ async-first with the existing sync names kept working, so nothing downstream bro
       `TraceEvent` stay sync — pure/in-memory, no I/O to await.
 - [x] **Test tooling** — `pytest-asyncio` (dev dep) with `asyncio_mode = "auto"`; async sibling
       tests for every new entry point (marker-free `async def test_*`).
-- [~] **Lessons** — **L01 and L02 converted** (2026-07-04). The `potato_llm` intro lessons (L01–L02)
-      are *outside* the LangChain migration, so they convert safely now without collision: L01's live
-      cells (`L0107`, `L0108` lab pair, `L0109`) + the `L0101` intro snippet + `PROCTOR_NOTES`, and
-      all of L02's live cells (`L0203`/`L0205`/`L0207`/`L0209` lectures + the `L0206`/`L0210`
-      `_empty`/`_solutions` lab pairs) now `await client.achat(...)`. Verified per lesson: ruff
-      format/lint clean, every cell compiles as top-level-await (a keyed live restart-run-all is the
-      remaining human check). **Next: L03+**, deferred to the LangChain migration — converted as those
-      notebooks regenerate, so they're touched once.
-- [~] **`invoke` / `ainvoke` note** — added for L01 (`chat`/`achat` → K05 pointer at `L0101` intro,
-      `L0107` §2) and L02 (`L0203` Setup). Same one-liner to add per lesson as it's converted.
+- [x] **Lessons** — **all lessons converted**. L01/L02 (2026-07-04) `await client.achat(...)`.
+      L03–L08, L10–L13, L22–L23 (2026-07-06) now `await` their async twins: LangChain/agent
+      `.invoke`/`.stream` → `.ainvoke`/`.astream`; the shared graph's `run`/`trace_graph` →
+      `arun`/`atrace_graph` (L10/L12); the eval harness `evaluate` → `aevaluate` (L13). Lecture
+      notebooks, `_empty`/`_solutions` lab pairs, intro/outline markdown, `PROCTOR_NOTES`, and the
+      built `_lecture_deck.html` snippets were all updated together. Deliberately kept sync: tool
+      dispatch/execution, `TraceEvent`, pure in-memory helpers, and Langfuse v4
+      `dataset.run_experiment` (no async twin — its *task* callable went `async def` instead, which
+      the SDK supports). Verified: ruff format/lint clean, `pyright` 0 errors, `pytest` 360 pass,
+      every touched cell compiles as top-level-await, `_empty` outputs cleared. **Remaining human
+      check:** a keyed live restart-run-all of the gated live cells (same open item as L01/L02).
+- [x] **`invoke` / `ainvoke` note** — the short K05 pointer now lands once per lesson at its first
+      framework call site (L01–L08, L10–L13, L22–L23).
 
 ## Scope / where it lands
 
@@ -60,13 +62,13 @@ async-first with the existing sync names kept working, so nothing downstream bro
   I/O-bearing producers now have async twins; pure helpers (tools, `TraceEvent`) stay sync.
 - **Lessons** — notebooks `await` inside cells (Jupyter supports top-level `await`); labs’
   `_empty`/`_solutions` model async signatures. Introduce the async model early enough that the
-  agent-arc lessons (L10–L14) can lean on it. ⏳ deferred to the migration.
+  agent-arc lessons (L10–L14) can lean on it. ✅ done (2026-07-06) — all lessons converted.
 - **`invoke` / `ainvoke` note** — wherever a framework object's sync call first shows up
   (LangChain/LangGraph `.invoke()`, first met in L03/L04; the Anthropic/OpenAI SDKs' sync vs.
   async clients), add a **short note that both a sync (`.invoke()`) and an async (`.ainvoke()`)
   variant exist, that we default to the async one, → see K05's "why async for agents."** Keep it
   a one-liner pointer at the point of use, not a re-explanation — the reasoning lives in K05.
-  ⏳ deferred to the migration.
+  ✅ done — one pointer per lesson at its first framework call site.
 
 ## Open questions
 
@@ -75,8 +77,8 @@ async-first with the existing sync names kept working, so nothing downstream bro
 - **"why async for agents" beat** — resolved: it lives in **K05** as the canonical explainer;
   the framework lessons carry only a short `invoke`/`ainvoke` pointer back to it (see the
   *Scope / where it lands* note above), not a re-explanation.
-- Confirm interaction with the pending LangChain migration
-  (`2026-07-03-langchain-notebook-migration.md`) — cheapest to bake async in as those notebooks
-  are regenerated rather than touching them twice.
+- ~~Confirm interaction with the pending LangChain migration~~ — resolved: that migration closed
+  2026-07-04 *without* the async conversion, so L03+ was done as its own direct pass on
+  2026-07-06 rather than folded into a regeneration. No double-touch materialized.
 - Prework-track concerns (K breakout, gating, Docker stack, renumber) now live in
   [`2026-07-03-2211-k-prework-track.md`](2026-07-03-2211-k-prework-track.md).

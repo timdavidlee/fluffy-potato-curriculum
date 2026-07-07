@@ -782,7 +782,7 @@ table.ledger td.warn-cell { color: var(--coral); }
         <table class="ledger reveal">
             <thead><tr><th>Affordance</th><th>The node version</th><th>The inline function</th></tr></thead>
             <tbody>
-                <tr><td class="tag">Tested in isolation</td><td><code>invoke()</code> the one node, inspect its output</td><td class="warn-cell">no seam to test one step alone</td></tr>
+                <tr><td class="tag">Tested in isolation</td><td><code>ainvoke()</code> the one node, inspect its output</td><td class="warn-cell">no seam to test one step alone</td></tr>
                 <tr><td class="tag">Composed &amp; reordered</td><td>a unit an orchestrator can plug in, drop, or move</td><td class="warn-cell">can't wire a step you never separated out</td></tr>
                 <tr><td class="tag">Swapped</td><td>model / prompt changes without touching neighbors</td><td class="warn-cell">internals and callers are tangled</td></tr>
                 <tr><td class="tag">Seen at a glance</td><td>inspectable data (<code>draw_mermaid()</code>, nodes + edges)</td><td class="warn-cell">you must read the body to know its shape</td></tr>
@@ -794,7 +794,7 @@ table.ledger td.warn-cell { color: var(--coral); }
                     <div class="mo-name">extract_node</div>
                     <div class="mo-sub">typed state in &rarr;<br>state update out</div>
                 </div>
-                <div class="mo-pin" style="top:-16px; left:-34px;">invoke alone</div>
+                <div class="mo-pin" style="top:-16px; left:-34px;">ainvoke alone</div>
                 <div class="mo-pin" style="top:-16px; right:-34px;">compose</div>
                 <div class="mo-pin" style="bottom:-16px; left:-34px;">swap</div>
                 <div class="mo-pin" style="bottom:-16px; right:-34px;">draw</div>
@@ -808,7 +808,7 @@ table.ledger td.warn-cell { color: var(--coral); }
                         <div class="mo-half">summarize</div>
                     </div>
                 </div>
-                <div class="mo-pin mo-pin-x" style="top:-16px; left:-34px;">invoke alone</div>
+                <div class="mo-pin mo-pin-x" style="top:-16px; left:-34px;">ainvoke alone</div>
                 <div class="mo-pin mo-pin-x" style="top:-16px; right:-34px;">compose</div>
                 <div class="mo-pin mo-pin-x" style="bottom:-16px; left:-34px;">swap</div>
                 <div class="mo-pin mo-pin-x" style="bottom:-16px; right:-34px;">draw</div>
@@ -890,7 +890,7 @@ table.ledger td.warn-cell { color: var(--coral); }
     </div>
     <div class="body-area" style="display:flex; align-items:center; gap:70px;">
         <ul class="points reveal" style="max-width:760px; flex-shrink:0;">
-            <li class="point">For a <b>single</b> node the ceremony isn't obviously worth it over a plain function &mdash; <code>extract_app.invoke(...)</code> is more setup than <code>extract_plain(...)</code>.</li>
+            <li class="point">For a <b>single</b> node the ceremony isn't obviously worth it over a plain function &mdash; <code>await extract_app.ainvoke(...)</code> is more setup than <code>extract_plain(...)</code>.</li>
             <li class="point">Discipline gets an inline version partway. The difference: a typed state schema makes the seam <b>enforced by structure</b>, not a convention you keep up.</li>
             <li class="point">The value shows up at the <b>second step</b> &mdash; which is exactly the next lesson.</li>
         </ul>

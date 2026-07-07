@@ -11,9 +11,15 @@ Times are rough and assume a semi-technical student with basic Python who comple
 > **Why a stub model?** L10 is about GRAPH CONTROL FLOW (the model→tool→model cycle; termination; the
 > cap; failure handling). Scripting the model is the cleanest way to exercise that offline and
 > reproducibly — the same mocking stance as the project's tests. The `FakeModel` mimics a LangChain
-> chat model (`.bind_tools()` then `.invoke()` → a scripted `AIMessage`), and the prebuilt `ToolNode`
-> runs the *real* tools against those scripted calls, so the graph students wire is identical to the
-> live version in L1006.
+> chat model (`.bind_tools()` then an awaited `.ainvoke()` → a scripted `AIMessage`), and the prebuilt
+> `ToolNode` runs the *real* tools against those scripted calls, so the graph students wire is
+> identical to the live version in L1006.
+>
+> **Async, as everywhere in the course:** the `agent` node is `async def` (it awaits
+> `model.bind_tools(...).ainvoke(...)`), and runs are driven with `await graph.ainvoke(...)` /
+> `async for ... in graph.astream(...)` from the cell. The "forgot to `await`" symptom is a printed
+> coroutine object (or a LangGraph error about the sync path) instead of a state dict — see the K05
+> prework for the why.
 >
 > **New in L10 vs. L04/L05: the back-edge.** Students have built forward-only graphs (L04 `StateGraph`,
 > L05 conditional edge). The one new primitive is `add_edge("tools", "agent")` — the edge that loops
@@ -49,9 +55,10 @@ Times are rough and assume a semi-technical student with basic Python who comple
 - **Common gotchas:** **(the big one)** forgetting the **back-edge** `add_edge("tools", "agent")` — the
   graph then runs `agent → tools` once and stops, an L04 pipeline, not an agent. Other gotchas:
   returning the reply from `agent_node` as a bare `AIMessage` instead of `{"messages": [reply]}` (the
-  node must return a state update dict); passing the tools dict/among nodes wrong — `ToolNode(TOOLS)`
-  takes the *list*; forgetting `set_entry_point("agent")`; mismatched routing map keys (the dict must
-  map `"tools" → "tools"` and `END → END`).
+  node must return a state update dict); forgetting the `await` on `.ainvoke(...)` inside `agent_node`
+  (the node then returns a coroutine, not an `AIMessage`); passing the tools dict/among nodes wrong —
+  `ToolNode(TOOLS)` takes the *list*; forgetting `set_entry_point("agent")`; mismatched routing map
+  keys (the dict must map `"tools" → "tools"` and `END → END`).
 - **Unblockers:** walk the six wiring steps in the prompt in order. If stuck, point them at the L1003
   demo's `build_agent` cell — the structure is identical. The confirmation cell prints the nodes and
   checks `("tools", "agent")` is an edge; if the back-edge check is `False`, they dropped the
@@ -66,7 +73,7 @@ Times are rough and assume a semi-technical student with basic Python who comple
   `FakeModel(...)`; invoking with a bare string instead of `{"messages": [HumanMessage(...)]}`;
   expecting a different tool order (it's exactly `calculator` then `lookup`, then a text turn).
 - **Unblockers:** "`graph = build_agent(FakeModel(happy_script))`, then
-  `graph.invoke({"messages": [HumanMessage(content=...)]})`." The asserts pin the tool sequence to
+  `await graph.ainvoke({"messages": [HumanMessage(content=...)]})`." The asserts pin the tool sequence to
   `['calculator', 'lookup']` and the last message to a plain-text `AIMessage` (no tool calls).
 - **Time:** ~5 min.
 - **Key point:** natural termination = `route` returned `END` because the last reply had no tool
@@ -77,11 +84,12 @@ Times are rough and assume a semi-technical student with basic Python who comple
 - **Common gotchas:** scripting a **single** repeated `tool_reply` object and being surprised the
   runaway *self-terminates* — that's the `add_messages` id de-dup gotcha; the runaway needs *distinct*
   turns (`r0`, `r1`, …), which is exactly why the prompt uses a comprehension. Passing `recursion_limit`
-  as a positional arg instead of in the config dict (`invoke(state, {"recursion_limit": 6})`).
+  as a positional arg instead of in the config dict (`ainvoke(state, {"recursion_limit": 6})`).
   Expecting the error to be a plain `RuntimeError` — it's a `GraphRecursionError` (from
   `langgraph.errors`).
-- **Unblockers:** "Comprehension of ~8 distinct `lookup` turns; `invoke(state, {"recursion_limit": 6})`
-  inside `try/except GraphRecursionError` → `raised = True`." The assert pins `raised`.
+- **Unblockers:** "Comprehension of ~8 distinct `lookup` turns; `await` an
+  `ainvoke(state, {"recursion_limit": 6})` inside `try/except GraphRecursionError` → `raised = True`."
+  The assert pins `raised`.
 - **Time:** ~5 min.
 - **Key point:** a cyclic graph with no cap is a runaway waiting to happen. Hitting the cap is an
   **alert** worth investigating, not normal operation.
@@ -102,10 +110,10 @@ Times are rough and assume a semi-technical student with basic Python who comple
   confused when nothing crashes — the whole point is to pass `False` here; scripting a tool that
   *returns an error as data* (`https://error`) instead of one that **raises** (`https://crash`) — only
   a raise escapes; forgetting to wrap the crash script in `FakeModel`.
-- **Unblockers:** "`build_agent(FakeModel(crash_script), handle_tool_errors=False)`, then `invoke`
-  inside `try/except RuntimeError` and set `escaped = True`." The assert pins `escaped`.
+- **Unblockers:** "`build_agent(FakeModel(crash_script), handle_tool_errors=False)`, then `await` the
+  `ainvoke` inside `try/except RuntimeError` and set `escaped = True`." The assert pins `escaped`.
 - **Time:** ~7 min.
-- **Key point:** with error handling off, one buggy tool kills the whole `invoke`. That's the
+- **Key point:** with error handling off, one buggy tool kills the whole `ainvoke`. That's the
   motivation for the `True` case in Problem 2.
 
 ## L1005_lab problem 2 — `handle_tool_errors=True`: the crash becomes a message
