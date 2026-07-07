@@ -1,3 +1,9 @@
+## v0.28.0 (2026-07-07)
+
+### Feat
+
+- **lessons**: build the last 5 lecture decks, closing the rollout
+
 ## v0.27.0 (2026-07-07)
 
 ### Feat
