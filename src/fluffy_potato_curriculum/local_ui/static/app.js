@@ -117,15 +117,34 @@ function renderLesson(lesson) {
   return wrap;
 }
 
+// Short format tag shown on each item row.
+function itemBadgeLabel(fmt) {
+  if (fmt === "notebook") return "ipynb";
+  if (fmt === "html") return "slides ↗";
+  return "md";
+}
+
 function renderItemLink(lessonId, item) {
   const li = document.createElement("li");
   // Color-code the row by kind (lecture / lab / intro / …); see .kind-* in style.css.
   li.className = `kind-${item.kind}`;
-  const btn = document.createElement("button");
   const key = `${lessonId}/${item.item_id}`;
-  btn.innerHTML =
-    escapeHtml(item.title) +
-    `<span class="badge">${item.fmt === "notebook" ? "ipynb" : "md"}</span>`;
+  const badge = `<span class="badge">${itemBadgeLabel(item.fmt)}</span>`;
+
+  // Standalone HTML slide decks are full documents, not injectable fragments:
+  // link straight to the raw file and open it in its own tab.
+  if (item.fmt === "html") {
+    const link = document.createElement("a");
+    link.href = `/api/lessons/${lessonId}/items/${item.item_id}/raw`;
+    link.target = "_blank";
+    link.rel = "noopener";
+    link.innerHTML = escapeHtml(item.title) + badge;
+    li.appendChild(link);
+    return li;
+  }
+
+  const btn = document.createElement("button");
+  btn.innerHTML = escapeHtml(item.title) + badge;
   if (state.activeItem === key) btn.classList.add("active");
   btn.onclick = () => openItem(lessonId, item);
   li.appendChild(btn);
