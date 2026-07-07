@@ -65,9 +65,18 @@ Run everything through `uv` so the pinned `.venv` is used:
 | Tests | `uv run pytest` |
 | Guided commit | `uv run cz commit` |
 | Check commit message | `uv run cz check --rev HEAD` |
-| Bump version + changelog | `uv run cz bump` |
+| Bump version + changelog | `uv run cz bump` — **CI-owned; don't run by hand** (see Versioning below) |
 
 Before committing, the bar is: `uv run ruff format && uv run ruff check && uv run pyright && uv run pytest`.
+
+## Versioning
+
+Version bumps are **automated in CI — never run `cz bump` locally.**
+[`.github/workflows/bump.yml`](.github/workflows/bump.yml) runs it on every push to `main`: it
+reads the Conventional-Commit history since the last tag, bumps the version in `pyproject.toml`,
+regenerates `CHANGELOG.md`, and pushes a `bump: …` commit plus an annotated `vX.Y.Z` tag (annotated
+so `git push --follow-tags` actually ships it). Locally you only write Conventional Commit messages —
+which the `commit-msg` hook enforces — and let CI cut the release.
 
 ## Conventions
 
