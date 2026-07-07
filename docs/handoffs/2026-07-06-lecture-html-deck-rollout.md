@@ -1,29 +1,19 @@
 # Handoff: Lecture → HTML deck rollout ("Graph Canvas")
 
+**Status: DONE (2026-07-06).** All 19 lecture outlines now have decks — the last five (L1206,
+L1307, L2202, L2205, L2302) landed in `3b3b82c` ("build the last 5 lecture decks, closing the
+rollout"), each preceded by a diagram-coverage densify of its outline (see
+[2026-07-06-1853-diagram-review-remaining-outlines.md](../todos/2026-07-06-1853-diagram-review-remaining-outlines.md)).
+The tracking todo [2026-07-05-1538-lecture-html-decks.md](../todos/2026-07-05-1538-lecture-html-decks.md)
+has the full 19-row status table. **The per-lesson cycle below is kept as durable reference** — a
+future theme change (see "theme drift" in the tracking todo) would re-run it across every deck.
+The earlier `l01-deck` worktree loose-end is gone (no longer in `git worktree list`).
+
 Give every `L<NN><II>_lecture.md` slide-outline a themed HTML deck
-(`L<NN><II>_lecture_deck.html`) in the shared **"Graph Canvas"** system. The live tracking note is
-[todos/2026-07-05-1538-lecture-html-decks.md](../todos/2026-07-05-1538-lecture-html-decks.md)
-(status table + per-deck verify checklist); this handoff is the *how*, written so a cold session can
-run the next lesson end-to-end.
+(`L<NN><II>_lecture_deck.html`) in the shared **"Graph Canvas"** system. This handoff is the *how*,
+written so a cold session can run any lesson end-to-end.
 
-## State right now
-
-**Merged to main (15 decks):** L0102, L0202, L0305 (PR #113–#116), L0402 (#117), L0502 + L0505
-(#118, v0.20.0), L0602 (#119, v0.21.0), L0702 (#120, v0.22.0), L0802 (#121, v0.23.0),
-L0902 + L0905 (#125, v0.24.0), and L1102 + L1105 (the PR that carried this update).
-
-**Next action if resuming cold:** start the per-lesson cycle (below) at **L1206**, then **L1307**.
-
-**Loose ends outside this effort (do NOT bulldoze):**
-
-- Worktree `l01-deck` (branch `worktree-l01-deck`) predates this effort and has unrelated
-  uncommitted changes — leave it alone.
-
-## Remaining work (5 outlines + 1 rescale)
-
-Priority order: **L1206, L1307** (core arc), then **L2202, L2205, L2302** (mini/standalone).
-Plus the **L1002 rescale** — it was built pre-classroom-scale; the todo's "[known off]"
-item has the exact transform. L10's diagrams are hand-crafted: **hand-scale, don't regenerate.**
+## Process reference (how to build/rebuild a deck)
 
 One process note from the L11 run: the background deck-builder subagents repeatedly stalled trying
 to emit the whole deck in one giant Write — brief them to build the file **incrementally** (head/CSS

@@ -239,6 +239,15 @@ lessons last.
 > so the built L04 materials were sequential-only already and the coda was added manually like its 6
 > batch-2 siblings. Still open: **L22 §3 coda expansion** and the spun-off **L05 coda**
 > (`task_b39acfac`).
+>
+> **Groomed 2026-07-06 — both stragglers verified still open.** (a) **L22 §3 expansion**:
+> `L2205_lecture.md` §3 is still the single three-item slide 3.1 ("Three ways to put a capability
+> in the wrong home") — the four-item beat (pull #1/#2 up from `L2202` §4.2, add the skill→tool
+> direction) and the explicit L23 Demo 5 collision handoff have not landed (only the §5.2
+> what's-next L23 pointer from batch 2 exists). (b) **L05 coda**: no gotcha/anti-pattern/pitfall
+> section exists in `L0502`/`L0505` student materials (only PROCTOR_NOTES mentions gotchas), so
+> `task_b39acfac`'s work has not landed either. These two are the whole remaining scope of this
+> effort.
 
 Tags: `new-demo` (new material) > `add-coda`+flag (coda **and** a drift to reconcile) >
 `add-coda` (naming recap, no new fixture) > `add-coda (light)` / `covered` (near/already done).

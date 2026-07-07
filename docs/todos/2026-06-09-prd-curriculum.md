@@ -1,5 +1,14 @@
 # 2026-06-09 — Mini-cut roadmap open items
 
+**Status: CLOSED (groomed 2026-07-06).** Every curriculum-side item below is done: the four
+lessons' roadmaps (objectives + demos) exist, stage 2 generated their materials, and the decided
+schemas landed in `common/`. **Note the lesson numbers below are stale** — this file predates the
+2026-07-04 reorder (its "L11 tracing / L12 eval / L14 shallow agent" are now L12 / L13 / L11).
+The only still-open items are the ⚪ **classroom infra** ones (stand up the shared Langfuse
+instance, license re-check, budgets, key provisioning) — those are owned by
+[`docs/classroom-llm-management.md`](../classroom-llm-management.md), not this note. Kept as a
+decision-record snapshot; safe to delete once the infra doc absorbs the ⚪ checklist.
+
 Tracking list for the mini-cut roadmap authoring (L11 Tracing, L12 Evaluation,
 **L04 Explicit graphs & workflows / DAGs (NEW)**, L14 Shallow LangGraph agent). Each item notes the
 doc it lives in and the in-doc recommendation. Resolve items here or migrate them into the roadmap

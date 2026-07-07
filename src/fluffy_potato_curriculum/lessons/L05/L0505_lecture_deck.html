@@ -625,7 +625,7 @@ table.ledger td.warn-cell { color: var(--coral); }
             </defs>
         </svg>
     </div>
-    <div class="chrome-page">01 / 15</div>
+    <div class="chrome-page">01 / 16</div>
     <div class="chrome-nav">L05 &middot; workflow vs agent</div>
 </section>
 
@@ -638,7 +638,7 @@ table.ledger td.warn-cell { color: var(--coral); }
     <div class="chapter-eyebrow reveal">Section 1</div>
     <div class="chapter-title reveal">Recap &mdash; what a <span style="color:var(--cyan); font-style:normal;">workflow</span> is</div>
     <div class="chapter-sub reveal">Everything you built across L04 and L05 was a graph whose path you wired by hand. Name that shape precisely before we change it.</div>
-    <div class="chrome-page">02 / 15</div>
+    <div class="chrome-page">02 / 16</div>
 </section>
 
 <!-- ============================================================ -->
@@ -681,7 +681,7 @@ table.ledger td.warn-cell { color: var(--coral); }
         </div>
         <div class="diagram-caption reveal" style="text-align:center; max-width:100%;">L04's chain, exactly as that deck drew it &mdash; <span style="color:var(--cyan); font-style:normal;">forward only, always terminates</span>. Every finger-trace runs left to right off the end.</div>
     </div>
-    <div class="chrome-page">03 / 15</div>
+    <div class="chrome-page">03 / 16</div>
     <div class="chrome-nav">&larr; &rarr; navigate</div>
 </section>
 
@@ -709,7 +709,7 @@ table.ledger td.warn-cell { color: var(--coral); }
         </table>
         <div class="diagram-caption reveal" style="margin-top:22px;">L11 reuses <span style="color:var(--cyan); font-style:normal;">every one of these unchanged</span> &mdash; the whole column reads yes.</div>
     </div>
-    <div class="chrome-page">04 / 15</div>
+    <div class="chrome-page">04 / 16</div>
     <div class="chrome-nav">&larr; &rarr; navigate</div>
 </section>
 
@@ -721,8 +721,8 @@ table.ledger td.warn-cell { color: var(--coral); }
     <div class="chapter-ghost reveal">02</div>
     <div class="chapter-eyebrow reveal">Section 2</div>
     <div class="chapter-title reveal">The one change that makes an <span style="color:var(--cyan); font-style:normal;">agent</span></div>
-    <div class="chapter-sub reveal">L11 keeps all seven primitives and adds exactly one thing: a conditional edge that loops back to the model. That single back-edge is the whole story.</div>
-    <div class="chrome-page">05 / 15</div>
+    <div class="chapter-sub reveal">L11 keeps all seven primitives and adds exactly one thing: a conditional edge that loops back to the model. That back-edge &mdash; and who decides it &mdash; is the whole story.</div>
+    <div class="chrome-page">05 / 16</div>
 </section>
 
 <!-- ============================================================ -->
@@ -784,7 +784,7 @@ table.ledger td.warn-cell { color: var(--coral); }
         </div>
         <div class="diagram-caption reveal" style="text-align:center; max-width:100%; margin-top:6px;">Same nodes, same edges &mdash; one <span style="color:var(--cyan); font-style:normal;">dashed back-edge</span> curves from the model out to <code>tools</code> and back. That single edge hands the <b style="color:var(--ink);">model</b> control of the path: the acyclic workflow becomes a cyclic, model-driven agent.</div>
     </div>
-    <div class="chrome-page">06 / 15</div>
+    <div class="chrome-page">06 / 16</div>
     <div class="chrome-nav">&larr; &rarr; navigate</div>
 </section>
 
@@ -840,7 +840,7 @@ table.ledger td.warn-cell { color: var(--coral); }
         </div>
     </div>
     <div class="diagram-caption reveal" style="position:absolute; left:var(--edge-x); right:var(--edge-x); bottom:var(--edge-bottom); text-align:center; max-width:100%; margin-top:0;">Same loop, now expressed as a graph &mdash; L11 is <b style="color:var(--ink);">L04/L05's primitives + L10's loop</b>, written as one back-edge.</div>
-    <div class="chrome-page">07 / 15</div>
+    <div class="chrome-page">07 / 16</div>
     <div class="chrome-nav">&larr; &rarr; navigate</div>
 </section>
 
@@ -917,7 +917,69 @@ table.ledger td.warn-cell { color: var(--coral); }
         </div>
         <div class="diagram-caption reveal" style="text-align:center; max-width:100%; margin-top:6px;">&ldquo;But the classifier <i>was</i> the model deciding&rdquo; &mdash; it wasn't: it wrote a <i>label into state</i>; <b style="color:var(--ink);">your</b> function chose the edge, and nothing looped. A conditional edge alone isn't an agent &mdash; it takes <b style="color:var(--ink);">both</b>.</div>
     </div>
-    <div class="chrome-page">08 / 15</div>
+    <div class="chrome-page">08 / 16</div>
+    <div class="chrome-nav">&larr; &rarr; navigate</div>
+</section>
+
+<!-- ============================================================ -->
+<!-- 7b — CONTENT 2.4: Loops aren't only for agents               -->
+<!-- ============================================================ -->
+<section class="slide">
+    <div class="chrome-tag">L05 &middot; <b>WORKFLOW vs AGENT</b></div>
+    <div class="topbar reveal">
+        <div class="eyebrow">Slide 2.4</div>
+        <h2 class="headline">Loops aren't only for agents &mdash; three back-edges, <span class="it">one axis</span></h2>
+    </div>
+    <div class="body-area">
+        <ul class="points reveal" style="max-width:1660px;">
+            <li class="point">The agent's tool loop is the only cycle you'll <b>build</b> (L10/L11) &mdash; but not the only reason a graph loops back. <b>Retry / self-correction</b> and <b>evaluator&ndash;optimizer</b> are loops <b>you</b> wire into workflows.</li>
+            <li class="point">Ask the decider question for each back-edge: <i>who decides to go around again?</i> A <b>check you wrote</b> &mdash; a pass flag, an attempt counter, a score bar &mdash; is still a workflow. The back-edge is <span class="warn">necessary, not sufficient</span>.</li>
+        </ul>
+        <div class="diagram-frame reveal" style="width:100%; height:340px; margin-top:12px;">
+            <svg viewBox="0 0 1660 380" width="100%" height="100%">
+                <!-- ============ PANEL 1: retry / self-correction ============ -->
+                <text x="275" y="36" text-anchor="middle" class="edge-label" fill="var(--cyan)" font-size="22" font-weight="600" letter-spacing="2">RETRY / SELF-CORRECTION</text>
+                <path d="M 205 178 L 345 178" stroke="var(--cyan)" stroke-width="3" marker-end="url(#e24C)"/>
+                <path d="M 355 242 C 310 305, 240 305, 197 246" fill="none" stroke="var(--cyan)" stroke-width="4" marker-end="url(#e24C)"/>
+                <circle cx="150" cy="195" r="52" fill="#12181a" stroke="var(--cyan)" stroke-width="2.5"/>
+                <text x="150" y="203" text-anchor="middle" class="node-label" font-size="20">generate</text>
+                <circle cx="400" cy="195" r="52" fill="#12181a" stroke="var(--cyan)" stroke-width="2.5"/>
+                <text x="400" y="203" text-anchor="middle" class="node-label" font-size="20">validate</text>
+                <text x="275" y="345" text-anchor="middle" class="edge-label" fill="var(--cyan)" font-size="18" font-weight="600">&#9670; exit: your pass flag / attempt counter</text>
+
+                <!-- divider -->
+                <line x1="555" y1="55" x2="555" y2="340" stroke="var(--ink-faint)" stroke-width="1.5" stroke-dasharray="4 8"/>
+
+                <!-- ============ PANEL 2: evaluator–optimizer ============ -->
+                <text x="830" y="36" text-anchor="middle" class="edge-label" fill="var(--cyan)" font-size="22" font-weight="600" letter-spacing="2">EVALUATOR&ndash;OPTIMIZER</text>
+                <path d="M 760 178 L 900 178" stroke="var(--cyan)" stroke-width="3" marker-end="url(#e24C)"/>
+                <path d="M 910 242 C 865 305, 795 305, 752 246" fill="none" stroke="var(--cyan)" stroke-width="4" marker-end="url(#e24C)"/>
+                <circle cx="705" cy="195" r="52" fill="#12181a" stroke="var(--cyan)" stroke-width="2.5"/>
+                <text x="705" y="203" text-anchor="middle" class="node-label" font-size="20">draft</text>
+                <circle cx="955" cy="195" r="52" fill="#12181a" stroke="var(--cyan)" stroke-width="2.5"/>
+                <text x="955" y="203" text-anchor="middle" class="node-label" font-size="20">critique</text>
+                <text x="830" y="345" text-anchor="middle" class="edge-label" fill="var(--cyan)" font-size="18" font-weight="600">&#9670; exit: your score bar</text>
+
+                <!-- divider -->
+                <line x1="1110" y1="55" x2="1110" y2="340" stroke="var(--ink-faint)" stroke-width="1.5" stroke-dasharray="4 8"/>
+
+                <!-- ============ PANEL 3: the L11 agent loop (dashed — L11 draws it) ============ -->
+                <text x="1385" y="36" text-anchor="middle" class="edge-label" fill="var(--cyan)" font-size="22" font-weight="600" letter-spacing="2">L11 AGENT</text>
+                <path d="M 1315 178 L 1455 178" stroke="var(--cyan)" stroke-width="3" marker-end="url(#e24C)"/>
+                <path d="M 1465 242 C 1420 305, 1350 305, 1307 246" fill="none" stroke="var(--cyan)" stroke-width="4" stroke-dasharray="10 8" marker-end="url(#e24C)"/>
+                <circle cx="1260" cy="195" r="52" fill="#12181a" stroke="var(--cyan)" stroke-width="2.5"/>
+                <text x="1260" y="203" text-anchor="middle" class="node-label" font-size="20">model</text>
+                <circle cx="1510" cy="195" r="52" fill="#12181a" stroke="var(--ink-faint)" stroke-width="2.5"/>
+                <text x="1510" y="203" text-anchor="middle" class="node-label" font-size="20" fill="var(--ink-dim)">tools</text>
+                <text x="1385" y="345" text-anchor="middle" class="edge-label" fill="var(--cyan)" font-size="18" font-weight="600">&#9670; exit: the model stops asking for tools</text>
+                <defs>
+                    <marker id="e24C" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="var(--cyan)"/></marker>
+                </defs>
+            </svg>
+        </div>
+        <div class="diagram-caption reveal" style="text-align:center; max-width:100%; margin-top:6px;">Solid cyan = a loop <b style="color:var(--ink);">you</b> own today (still a workflow &mdash; you wrote the exit condition); dashed = the one L11 draws. Same edge three times, three deciders &mdash; only the third is an agent.</div>
+    </div>
+    <div class="chrome-page">09 / 16</div>
     <div class="chrome-nav">&larr; &rarr; navigate</div>
 </section>
 
@@ -930,7 +992,7 @@ table.ledger td.warn-cell { color: var(--coral); }
     <div class="chapter-eyebrow reveal">Section 3</div>
     <div class="chapter-title reveal">When to use <span style="color:var(--cyan); font-style:normal;">which</span></div>
     <div class="chapter-sub reveal">You can draw the back-edge &mdash; the skill is knowing when not to. Pick the simplest shape that solves the task.</div>
-    <div class="chrome-page">09 / 15</div>
+    <div class="chrome-page">10 / 16</div>
 </section>
 
 <!-- ============================================================ -->
@@ -954,7 +1016,7 @@ table.ledger td.warn-cell { color: var(--coral); }
         </table>
         <div class="callout reveal"><p><span style="color:var(--cyan); font-style:normal; font-weight:600;">Determinism is a feature, not a limitation.</span> Same input, same path: predictable, cheaper, lower-latency, trivially testable.</p></div>
     </div>
-    <div class="chrome-page">10 / 15</div>
+    <div class="chrome-page">11 / 16</div>
     <div class="chrome-nav">&larr; &rarr; navigate</div>
 </section>
 
@@ -974,7 +1036,7 @@ table.ledger td.warn-cell { color: var(--coral); }
         </ul>
         <div class="callout reveal"><p>This is the thesis of Anthropic's <i>Building Effective Agents</i>: don't build an agent because you can &mdash; build one only when the task's path genuinely can't be known ahead of time.</p></div>
     </div>
-    <div class="chrome-page">11 / 15</div>
+    <div class="chrome-page">12 / 16</div>
     <div class="chrome-nav">&larr; &rarr; navigate</div>
 </section>
 
@@ -987,7 +1049,7 @@ table.ledger td.warn-cell { color: var(--coral); }
     <div class="chapter-eyebrow reveal">Section 4</div>
     <div class="chapter-title reveal">Bridge to <span style="color:var(--cyan); font-style:normal;">L11</span></div>
     <div class="chapter-sub reveal">Next lesson you draw the back-edge. Everything else, you already built &mdash; here's exactly what carries forward.</div>
-    <div class="chrome-page">12 / 15</div>
+    <div class="chrome-page">13 / 16</div>
 </section>
 
 <!-- ============================================================ -->
@@ -1006,7 +1068,7 @@ table.ledger td.warn-cell { color: var(--coral); }
         </ul>
         <div class="callout reveal"><p>The vocabulary is <span style="color:var(--cyan); font-style:normal; font-weight:600;">identical on purpose.</span> You are not learning a new world in L11 &mdash; you are adding one edge to the one you already know.</p></div>
     </div>
-    <div class="chrome-page">13 / 15</div>
+    <div class="chrome-page">14 / 16</div>
     <div class="chrome-nav">&larr; &rarr; navigate</div>
 </section>
 
@@ -1061,7 +1123,7 @@ table.ledger td.warn-cell { color: var(--coral); }
         </div>
         <div class="diagram-caption reveal" style="text-align:center; max-width:100%; margin-top:4px;">Nothing else changes between the panels &mdash; that's the sentence, drawn. Next lesson, you draw that edge. Everything else, you already built.</div>
     </div>
-    <div class="chrome-page">14 / 15</div>
+    <div class="chrome-page">15 / 16</div>
     <div class="chrome-nav">&larr; &rarr; navigate</div>
 </section>
 
@@ -1085,7 +1147,7 @@ table.ledger td.warn-cell { color: var(--coral); }
             <div class="val">L04 <b>Demo 1</b> chain<br>L05 <b>Demo</b> routers<br>Anthropic <b>Building Effective Agents</b></div>
         </div>
     </div>
-    <div class="chrome-page">15 / 15</div>
+    <div class="chrome-page">16 / 16</div>
 </section>
 
 </main>

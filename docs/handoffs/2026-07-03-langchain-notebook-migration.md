@@ -3,9 +3,10 @@
 **Status: DONE (2026-07-04).** All batches (A/B/C) landed — the `common/` runtime, every tool/agent
 notebook (L07, L08, L10, L11, L12, L14, L22), and the L07/L08/L10 roadmaps are on LangChain. The final
 prose follow-up also landed (L09 MCP lectures + the L11 roadmap: `tool_use`/`tool_result` →
-`AIMessage.tool_calls`/`ToolMessage`). One *out-of-scope* straggler remains, tracked separately in
-`docs/todos/2026-07-04-1716-roadmap-tool-use-prose-drift.md` (L04/L05/L12 roadmap prose). The
-in-progress detail below is kept as the historical record of how the work was staged.
+`AIMessage.tool_calls`/`ToolMessage`). The one *out-of-scope* straggler (L04/L05/L12 roadmap prose,
+tracked in a separate todo) has since been resolved too — as of 2026-07-06 a repo-wide grep for
+`tool_use`/`tool_result` across `docs/origin/lesson_roadmaps/` returns zero hits, and that todo was
+deleted. The in-progress detail below is kept as the historical record of how the work was staged.
 **Date:** 2026-07-03 · **Slug owner:** curriculum LangChain migration
 
 ---

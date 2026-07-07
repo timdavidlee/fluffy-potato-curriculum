@@ -1,5 +1,16 @@
 # 2026-07-03 — `K<NN>` prework track: preflight requirements before `L01`
 
+**Status: DONE (groomed 2026-07-06).** The track is built end-to-end: K01–K06 roadmaps
+(`docs/origin/lesson_roadmaps/K01–K06/`) and guide materials (`lessons/K01–K06/`,
+`K<NN>01_guide.md`) exist, `compose.yaml` is committed (the **lean default** stack: `db` +
+agent service, tracing pointing at the shared instructor Langfuse — which also answers the
+open question at the bottom), `tracks.toml` has the gated `[prework]` section,
+`CURRICULUM_PRD.md` has the "Prework track" section (it links here for rationale — keep this
+file), and `classroom-llm-management.md` carries the Docker-baseline reframe. **One cosmetic
+straggler:** `tracks.toml` still carries the `<need input: does the mini track require the
+full K01–K06…>` comment that the "Decisions (resolved 2026-07-04)" section below already
+answered (full K01–K06 for both tracks) — retire the comment next time that file is touched.
+
 **Goal:** add a **prework track** students complete *before* the course proper — environment
 setup + the mental models the lessons assume. It's a new lesson series prefixed **`K`** (for
 "prework"), which also sorts *before* `L` alphabetically, so `K01…` precedes `L01` with **zero
