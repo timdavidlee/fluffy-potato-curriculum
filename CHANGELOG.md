@@ -1,3 +1,9 @@
+## v0.30.0 (2026-07-07)
+
+### Feat
+
+- **L05**: add developer-owned loop taxonomy to conditional-graph lecture
+
 ## v0.29.2 (2026-07-07)
 
 ### Refactor
