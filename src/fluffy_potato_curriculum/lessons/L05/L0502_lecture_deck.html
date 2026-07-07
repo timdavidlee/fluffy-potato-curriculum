@@ -562,6 +562,30 @@ pre.codeblock code {
 pre.codeblock code .cm { color: var(--ink-faint); }
 pre.codeblock code .kw { color: var(--ink); font-weight: 600; }
 pre.codeblock code .st { color: var(--ink-dim); }
+
+/* ===========================================
+   L0502 UPDATE HELPERS — router-vs-agent cost panels (slide 4.1)
+   appended per FRONTEND-STYLE §5 — shared rules above are untouched
+   =========================================== */
+.dg-panel {
+    border: 2px solid var(--cyan); border-radius: 10px; background: #12181a;
+    padding: 26px 34px; width: 560px;
+    display: flex; flex-direction: column; align-items: center; gap: 14px;
+}
+.dg-panel.bad { border-color: var(--coral); }
+.dg-panel .dg-panel-title {
+    font-size: 19px; letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--cyan); font-weight: 600;
+}
+.dg-panel.bad .dg-panel-title { color: var(--coral); }
+.panel-chart {
+    display: flex; align-items: flex-end; justify-content: center;
+    height: 200px; width: 100%;
+    border-bottom: 1.5px solid var(--cyan-rule);
+}
+.panel-chart .pbar { width: 96px; border-radius: 6px 6px 0 0; background: var(--ink-faint); }
+.panel-chart .pbar.hi { background: var(--cyan); }
+.panel-chart .pbar.bad { background: var(--coral); }
 </style>
 </head>
 <body>
@@ -742,8 +766,9 @@ builder.add_conditional_edges(<span class="st">"classify"</span>, route,
                 <!-- classify node, Haiku badge -->
                 <circle cx="120" cy="230" r="72" fill="#12181a" stroke="var(--cyan)" stroke-width="2.5"/>
                 <text x="120" y="228" text-anchor="middle" class="node-label" font-size="23">classify</text>
-                <text x="120" y="330" text-anchor="middle" class="edge-label" fill="var(--cyan)" font-size="17">Haiku 4.5</text>
-                <text x="120" y="352" text-anchor="middle" class="edge-label" fill="var(--ink-dim)" font-size="15">cheap: just a label</text>
+                <rect x="62" y="310" width="116" height="32" rx="16" fill="transparent" stroke="var(--ink-faint)" stroke-width="1.5"/>
+                <text x="120" y="332" text-anchor="middle" class="edge-label" fill="var(--ink-dim)" font-size="17">Haiku 4.5</text>
+                <text x="120" y="366" text-anchor="middle" class="edge-label" fill="var(--ink-dim)" font-size="15">cheap: just a label</text>
                 <!-- dashed conditional fan-out -->
                 <path d="M 194 195 C 300 100, 360 80, 430 80" fill="none" stroke="var(--cyan)" stroke-width="3" stroke-dasharray="9 8" marker-end="url(#s21c)"/>
                 <path d="M 196 230 L 430 230" fill="none" stroke="var(--cyan)" stroke-width="3" stroke-dasharray="9 8" marker-end="url(#s21c)"/>
@@ -788,10 +813,67 @@ builder.add_conditional_edges(<span class="st">"classify"</span>, route,
     </div>
     <div class="body-area">
         <ul class="points reveal">
-            <li class="point">Re-run the same ticket through your router and confirm the <b>same branch</b> executes every time.</li>
-            <li class="point">The branch <i>wording</i> may vary (the model is still non-deterministic inside a node); the <b>path</b> doesn't.</li>
+            <li class="point">Re-run the same ticket through your router and confirm the <b>same branch</b> executes every time. The branch <i>wording</i> may vary (the model is still non-deterministic inside a node); the <b>path</b> doesn't.</li>
         </ul>
-        <div class="callout reveal"><p>A conditional edge is &ldquo;runtime-chosen,&rdquo; but it's a <span class="k">deterministic function of state</span> &mdash; not a coin flip. That's what separates a workflow's routing from an agent's.</p></div>
+        <div class="diagram-frame reveal" style="gap:110px; margin-top:22px; align-items:flex-start;">
+            <!-- run 1: the 2.1 router, billing path lit -->
+            <svg viewBox="0 0 620 360" width="680" height="395">
+                <text x="10" y="26" class="edge-label" fill="var(--cyan)" style="text-transform:uppercase; letter-spacing:0.12em;">run 1 &middot; same ticket</text>
+                <circle cx="95" cy="160" r="50" fill="#12181a" stroke="var(--cyan)" stroke-width="2.5"/>
+                <text x="95" y="168" text-anchor="middle" class="node-label" font-size="19">classify</text>
+                <path d="M 141 136 C 240 70, 300 62, 375 62" fill="none" stroke="var(--cyan)" stroke-width="3.5" stroke-dasharray="9 8" marker-end="url(#r1c)"/>
+                <path d="M 145 160 L 375 160" fill="none" stroke="var(--ink-faint)" stroke-width="2.5" stroke-dasharray="8 7" marker-end="url(#r1n)"/>
+                <path d="M 141 184 C 240 250, 300 258, 375 258" fill="none" stroke="var(--ink-faint)" stroke-width="2.5" stroke-dasharray="8 7" marker-end="url(#r1n)"/>
+                <rect x="375" y="36" width="128" height="52" rx="9" fill="#12181a" stroke="var(--cyan)" stroke-width="2.5"/>
+                <text x="439" y="68" text-anchor="middle" class="node-label" font-size="19" fill="var(--cyan)">billing</text>
+                <rect x="375" y="134" width="128" height="52" rx="9" fill="#12181a" stroke="var(--ink-faint)" stroke-width="2"/>
+                <text x="439" y="166" text-anchor="middle" class="node-label" font-size="18" fill="var(--ink-dim)">technical</text>
+                <rect x="375" y="232" width="128" height="52" rx="9" fill="#12181a" stroke="var(--ink-faint)" stroke-width="2"/>
+                <text x="439" y="264" text-anchor="middle" class="node-label" font-size="18" fill="var(--ink-dim)">general</text>
+                <path d="M 503 62 C 542 70, 554 130, 558 148" fill="none" stroke="var(--cyan)" stroke-width="3" marker-end="url(#r1c)"/>
+                <path d="M 503 160 L 544 160" fill="none" stroke="var(--ink-faint)" stroke-width="2" marker-end="url(#r1n)"/>
+                <path d="M 503 258 C 542 250, 554 190, 558 172" fill="none" stroke="var(--ink-faint)" stroke-width="2" marker-end="url(#r1n)"/>
+                <text x="566" y="166" class="node-label" font-size="17" fill="var(--ink)">END</text>
+                <circle r="7" fill="var(--cyan)">
+                    <animateMotion dur="2.6s" repeatCount="indefinite" path="M 141 136 C 240 70, 300 62, 375 62"/>
+                </circle>
+                <rect x="30" y="304" width="540" height="42" rx="8" fill="transparent" stroke="var(--ink-faint)" stroke-width="1.5"/>
+                <text x="300" y="331" text-anchor="middle" class="edge-label" font-size="16" font-style="italic" fill="var(--ink-dim)">reply: &ldquo;I&rsquo;ve refunded the duplicate charge on your invoice.&rdquo;</text>
+                <defs>
+                    <marker id="r1c" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="var(--cyan)"/></marker>
+                    <marker id="r1n" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="var(--ink-faint)"/></marker>
+                </defs>
+            </svg>
+            <!-- run 2: identical router, identical path, different wording -->
+            <svg viewBox="0 0 620 360" width="680" height="395">
+                <text x="10" y="26" class="edge-label" fill="var(--cyan)" style="text-transform:uppercase; letter-spacing:0.12em;">run 2 &middot; same ticket</text>
+                <circle cx="95" cy="160" r="50" fill="#12181a" stroke="var(--cyan)" stroke-width="2.5"/>
+                <text x="95" y="168" text-anchor="middle" class="node-label" font-size="19">classify</text>
+                <path d="M 141 136 C 240 70, 300 62, 375 62" fill="none" stroke="var(--cyan)" stroke-width="3.5" stroke-dasharray="9 8" marker-end="url(#r2c)"/>
+                <path d="M 145 160 L 375 160" fill="none" stroke="var(--ink-faint)" stroke-width="2.5" stroke-dasharray="8 7" marker-end="url(#r2n)"/>
+                <path d="M 141 184 C 240 250, 300 258, 375 258" fill="none" stroke="var(--ink-faint)" stroke-width="2.5" stroke-dasharray="8 7" marker-end="url(#r2n)"/>
+                <rect x="375" y="36" width="128" height="52" rx="9" fill="#12181a" stroke="var(--cyan)" stroke-width="2.5"/>
+                <text x="439" y="68" text-anchor="middle" class="node-label" font-size="19" fill="var(--cyan)">billing</text>
+                <rect x="375" y="134" width="128" height="52" rx="9" fill="#12181a" stroke="var(--ink-faint)" stroke-width="2"/>
+                <text x="439" y="166" text-anchor="middle" class="node-label" font-size="18" fill="var(--ink-dim)">technical</text>
+                <rect x="375" y="232" width="128" height="52" rx="9" fill="#12181a" stroke="var(--ink-faint)" stroke-width="2"/>
+                <text x="439" y="264" text-anchor="middle" class="node-label" font-size="18" fill="var(--ink-dim)">general</text>
+                <path d="M 503 62 C 542 70, 554 130, 558 148" fill="none" stroke="var(--cyan)" stroke-width="3" marker-end="url(#r2c)"/>
+                <path d="M 503 160 L 544 160" fill="none" stroke="var(--ink-faint)" stroke-width="2" marker-end="url(#r2n)"/>
+                <path d="M 503 258 C 542 250, 554 190, 558 172" fill="none" stroke="var(--ink-faint)" stroke-width="2" marker-end="url(#r2n)"/>
+                <text x="566" y="166" class="node-label" font-size="17" fill="var(--ink)">END</text>
+                <circle r="7" fill="var(--cyan)">
+                    <animateMotion dur="2.6s" repeatCount="indefinite" path="M 141 136 C 240 70, 300 62, 375 62"/>
+                </circle>
+                <rect x="30" y="304" width="540" height="42" rx="8" fill="transparent" stroke="var(--ink-faint)" stroke-width="1.5"/>
+                <text x="300" y="331" text-anchor="middle" class="edge-label" font-size="16" font-style="italic" fill="var(--ink-dim)">reply: &ldquo;That duplicate charge has now been reversed.&rdquo;</text>
+                <defs>
+                    <marker id="r2c" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="var(--cyan)"/></marker>
+                    <marker id="r2n" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="var(--ink-faint)"/></marker>
+                </defs>
+            </svg>
+        </div>
+        <div class="diagram-caption reveal" style="margin-top:12px;">The 2.1 router, run twice: the wording varies, the <b>path doesn't</b>. A conditional edge is &ldquo;runtime-chosen,&rdquo; but it's a deterministic function of state &mdash; not a coin flip &mdash; and that's what separates a workflow's routing from an agent's.</div>
     </div>
     <div class="chrome-page">07 / 15</div>
     <div class="chrome-nav">&larr; &rarr; navigate</div>
@@ -806,12 +888,53 @@ builder.add_conditional_edges(<span class="st">"classify"</span>, route,
         <div class="eyebrow">Slide 2.3</div>
         <h2 class="headline">The fallback / <span class="it">default</span> branch</h2>
     </div>
-    <div class="body-area">
-        <ul class="points reveal">
+    <div class="body-area" style="display:flex; gap:48px; align-items:center;">
+        <ul class="points reveal" style="flex:0 0 700px;">
             <li class="point">Your router needs a <b>defined behavior for every possible label</b> &mdash; not just the expected ones.</li>
             <li class="point">When a classification doesn't cleanly match a branch, route it to a default <code>general</code> fallback rather than letting the routing function <span class="warn">raise</span>.</li>
-            <li class="point">Treat this as a <b>first-class design requirement</b>, not an afterthought &mdash; a habit worth having before messier real-world classifiers.</li>
+            <li class="point">A <b>first-class design requirement</b>, not an afterthought &mdash; a habit worth having before messier real-world classifiers.</li>
         </ul>
+        <div class="diagram-frame reveal" style="flex:1 1 0; min-width:0; flex-direction:column;">
+            <svg viewBox="0 0 720 470" width="100%" height="470">
+                <text x="10" y="26" class="edge-label" fill="var(--ink-dim)" style="text-transform:uppercase; letter-spacing:0.12em;">the 2.1 router &middot; a label you didn't expect</text>
+                <circle cx="105" cy="190" r="56" fill="#12181a" stroke="var(--cyan)" stroke-width="2.5"/>
+                <text x="105" y="198" text-anchor="middle" class="node-label" font-size="20">classify</text>
+                <!-- expected branches: neutral, not taken -->
+                <path d="M 152 162 C 260 84, 330 76, 420 76" fill="none" stroke="var(--ink-faint)" stroke-width="2.5" stroke-dasharray="8 7" marker-end="url(#s23n)"/>
+                <path d="M 160 182 C 270 170, 330 166, 420 166" fill="none" stroke="var(--ink-faint)" stroke-width="2.5" stroke-dasharray="8 7" marker-end="url(#s23n)"/>
+                <rect x="420" y="50" width="140" height="52" rx="9" fill="#12181a" stroke="var(--ink-faint)" stroke-width="2"/>
+                <text x="490" y="82" text-anchor="middle" class="node-label" font-size="18" fill="var(--ink-dim)">billing</text>
+                <rect x="420" y="140" width="140" height="52" rx="9" fill="#12181a" stroke="var(--ink-faint)" stroke-width="2"/>
+                <text x="490" y="172" text-anchor="middle" class="node-label" font-size="18" fill="var(--ink-dim)">technical</text>
+                <!-- the surprise label rides a coral dashed edge into the fallback -->
+                <path d="M 150 218 C 250 300, 320 297, 420 297" fill="none" stroke="var(--coral)" stroke-width="3.5" stroke-dasharray="9 8" marker-end="url(#s23r)"/>
+                <rect x="195" y="312" width="140" height="38" rx="8" fill="transparent" stroke="var(--coral)" stroke-width="2"/>
+                <text x="265" y="337" text-anchor="middle" class="edge-label" font-size="18" fill="var(--coral)">"refund??"</text>
+                <rect x="420" y="268" width="140" height="58" rx="9" fill="#12181a" stroke="var(--cyan)" stroke-width="2.5"/>
+                <text x="490" y="294" text-anchor="middle" class="node-label" font-size="19" fill="var(--cyan)">general</text>
+                <text x="490" y="316" text-anchor="middle" class="edge-label" font-size="14" fill="var(--ink-dim)">the fallback</text>
+                <!-- still converges to END -->
+                <path d="M 560 76 C 616 86, 636 156, 642 174" fill="none" stroke="var(--ink-faint)" stroke-width="2" marker-end="url(#s23n)"/>
+                <path d="M 560 166 C 600 170, 626 178, 640 182" fill="none" stroke="var(--ink-faint)" stroke-width="2" marker-end="url(#s23n)"/>
+                <path d="M 560 297 C 616 288, 636 218, 642 200" fill="none" stroke="var(--cyan)" stroke-width="3" marker-end="url(#s23c)"/>
+                <text x="650" y="196" class="node-label" font-size="17" fill="var(--ink)">END</text>
+                <circle r="7" fill="var(--coral)">
+                    <animateMotion dur="2.8s" repeatCount="indefinite" path="M 150 218 C 250 300, 320 297, 420 297"/>
+                </circle>
+                <!-- the crossed-out alternative: no default branch -->
+                <rect x="30" y="388" width="230" height="60" rx="10" fill="transparent" stroke="var(--coral)" stroke-width="2"/>
+                <text x="145" y="425" text-anchor="middle" class="node-label" font-size="21" fill="var(--coral)">KeyError</text>
+                <line x1="30" y1="388" x2="260" y2="448" stroke="var(--coral)" stroke-width="3"/>
+                <line x1="260" y1="388" x2="30" y2="448" stroke="var(--coral)" stroke-width="3"/>
+                <text x="285" y="425" class="edge-label" font-size="15" fill="var(--ink-dim)">the alternative, when no default branch exists</text>
+                <defs>
+                    <marker id="s23c" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="var(--cyan)"/></marker>
+                    <marker id="s23r" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="var(--coral)"/></marker>
+                    <marker id="s23n" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="var(--ink-faint)"/></marker>
+                </defs>
+            </svg>
+            <div class="diagram-caption reveal" style="font-size:22px; margin-top:8px;">Coral = the surprise and the crash you avoided; cyan = the fallback that handles it.</div>
+        </div>
     </div>
     <div class="chrome-page">08 / 15</div>
     <div class="chrome-nav">&larr; &rarr; navigate</div>
@@ -838,13 +961,39 @@ builder.add_conditional_edges(<span class="st">"classify"</span>, route,
         <div class="eyebrow">Slide 3.1</div>
         <h2 class="headline">The purest <span class="it">contrast</span> with an agent</h2>
     </div>
-    <div class="body-area">
-        <ul class="points reveal">
+    <div class="body-area" style="display:flex; gap:52px; align-items:flex-start;">
+        <ul class="points reveal" style="flex:0 0 830px;">
             <li class="point">A conditional edge can branch on a value the <b>user</b> supplied &mdash; a menu choice, a form field: <code>if state["user_choice"] == "escalate": return "human_review"</code>.</li>
             <li class="point"><b>No model is involved in the routing decision at all.</b> The user picked the path; you wired the options.</li>
             <li class="point">Here the input arrives <b>as part of the initial state</b>, then the graph runs straight through.</li>
             <li class="point">The <i>interactive</i> version &mdash; pause mid-run to ask, resume on the answer &mdash; needs <code>interrupt</code> + a checkpointer, in <b>L17</b>.</li>
         </ul>
+        <div class="diagram-frame reveal" style="flex:1 1 0; min-width:0; flex-direction:column;">
+            <svg viewBox="0 0 700 460" width="100%" height="460">
+                <text x="10" y="28" class="edge-label" fill="var(--ink-dim)" style="text-transform:uppercase; letter-spacing:0.12em;">initial state</text>
+                <rect x="10" y="46" width="320" height="66" rx="10" fill="#12181a" stroke="var(--cyan)" stroke-width="2.5"/>
+                <text x="170" y="86" text-anchor="middle" class="node-label" font-size="20" fill="var(--cyan)">user_choice: "escalate"</text>
+                <path d="M 330 66 C 395 52, 420 52, 468 60" fill="none" stroke="var(--cyan)" stroke-width="3.5" stroke-dasharray="9 8" marker-end="url(#s31c)"/>
+                <path d="M 330 96 C 395 140, 420 158, 468 176" fill="none" stroke="var(--ink-faint)" stroke-width="2.5" stroke-dasharray="8 7" marker-end="url(#s31n)"/>
+                <rect x="470" y="34" width="200" height="56" rx="9" fill="#12181a" stroke="var(--cyan)" stroke-width="2.5"/>
+                <text x="570" y="68" text-anchor="middle" class="node-label" font-size="19" fill="var(--cyan)">human_review</text>
+                <rect x="470" y="152" width="200" height="56" rx="9" fill="#12181a" stroke="var(--ink-faint)" stroke-width="2"/>
+                <text x="570" y="186" text-anchor="middle" class="node-label" font-size="18" fill="var(--ink-dim)">other branch</text>
+                <text x="340" y="252" text-anchor="middle" class="edge-label" fill="var(--ink-dim)" font-size="17">no model node in the decision path</text>
+                <circle r="7" fill="var(--cyan)">
+                    <animateMotion dur="2.4s" repeatCount="indefinite" path="M 330 66 C 395 52, 420 52, 468 60"/>
+                </circle>
+                <!-- deferred: the interactive version -->
+                <rect x="40" y="316" width="600" height="100" rx="10" fill="transparent" stroke="var(--ink-faint)" stroke-width="2" stroke-dasharray="9 8"/>
+                <text x="340" y="360" text-anchor="middle" class="edge-label" fill="var(--ink-dim)" font-size="18">pause mid-run and ask &rarr; interrupt + checkpointer</text>
+                <text x="340" y="392" text-anchor="middle" class="edge-label" fill="var(--ink-faint)" font-size="15" style="text-transform:uppercase; letter-spacing:0.1em;">lands in L17 &middot; human-in-the-loop</text>
+                <defs>
+                    <marker id="s31c" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="var(--cyan)"/></marker>
+                    <marker id="s31n" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="var(--ink-faint)"/></marker>
+                </defs>
+            </svg>
+            <div class="diagram-caption reveal" style="font-size:22px; margin-top:8px;">Cyan = the user's value driving the edge; dashed faint = deferred, not this lesson.</div>
+        </div>
     </div>
     <div class="chrome-page">10 / 15</div>
     <div class="chrome-nav">&larr; &rarr; navigate</div>
@@ -930,10 +1079,22 @@ builder.add_conditional_edges(<span class="st">"classify"</span>, route,
     </div>
     <div class="body-area">
         <ul class="points reveal">
-            <li class="point">A router/switch is right whenever the <b>set of possible paths is known in advance</b> and picking among them is a classification, lookup, or user choice &mdash; cheap, predictable, testable.</li>
+            <li class="point">A router/switch is right whenever the <b>set of possible paths is known in advance</b> and picking among them is a classification, lookup, or user choice.</li>
             <li class="point">Reach for an <b>agent</b> only when the model must decide <i>which and how many</i> steps to take, and that set isn't enumerable ahead of time.</li>
-            <li class="point">Watch the common failure mode: <span class="warn">building an agent to do what a two-branch router would do just as well</span> &mdash; at a fraction of the cost and unpredictability.</li>
+            <li class="point">Watch the common failure mode: <span class="warn">building an agent to do what a two-branch router would do just as well</span>.</li>
         </ul>
+        <div class="diagram-frame reveal" style="gap:64px; margin-top:24px; align-items:stretch;">
+            <div class="dg-panel">
+                <div class="dg-panel-title">router &middot; paths known</div>
+                <div class="panel-chart"><div class="pbar hi" style="height:24%"></div></div>
+                <div class="dg-tag cyan" style="margin-top:2px;">cost / run &mdash; cheap, predictable, testable</div>
+            </div>
+            <div class="dg-panel bad">
+                <div class="dg-panel-title">agent &middot; same two-branch job</div>
+                <div class="panel-chart"><div class="pbar bad" style="height:92%"></div></div>
+                <div class="dg-tag coral" style="margin-top:2px;">open-ended steps, priced every run</div>
+            </div>
+        </div>
     </div>
     <div class="chrome-page">13 / 15</div>
     <div class="chrome-nav">&larr; &rarr; navigate</div>
@@ -953,7 +1114,51 @@ builder.add_conditional_edges(<span class="st">"classify"</span>, route,
             <li class="point">You haven't built a <b>cycle</b> yet &mdash; every graph in this lesson is still a <b>DAG</b>, still a workflow, no matter how many branches it has.</li>
             <li class="point">The full <b>workflow-vs-agent</b> recap and close &mdash; what carries into <b>L11</b>, what precisely changes, and when to reach for which &mdash; is in <code>L0505_lecture.md</code>.</li>
         </ul>
-        <div class="callout reveal"><p>Many branches, one shape: <span class="k">a DAG is still a workflow</span>. The cycle is what makes it an agent &mdash; and that's next.</p></div>
+        <div class="diagram-frame reveal" style="margin-top:26px;">
+            <svg viewBox="0 0 1660 320" width="1660" height="320">
+                <!-- 1: L04's chain -->
+                <circle cx="70" cy="140" r="34" fill="#12181a" stroke="var(--cyan)" stroke-width="2.5"/>
+                <circle cx="200" cy="140" r="34" fill="#12181a" stroke="var(--cyan)" stroke-width="2.5"/>
+                <circle cx="330" cy="140" r="34" fill="#12181a" stroke="var(--cyan)" stroke-width="2.5"/>
+                <path d="M 104 140 L 158 140" fill="none" stroke="var(--cyan)" stroke-width="3" marker-end="url(#s42c)"/>
+                <path d="M 234 140 L 288 140" fill="none" stroke="var(--cyan)" stroke-width="3" marker-end="url(#s42c)"/>
+                <text x="200" y="272" text-anchor="middle" class="edge-label" fill="var(--ink-dim)" font-size="17" style="text-transform:uppercase; letter-spacing:0.1em;">L04 &middot; the chain</text>
+                <!-- 2: this lesson's model-classified router -->
+                <circle cx="500" cy="140" r="40" fill="#12181a" stroke="var(--cyan)" stroke-width="2.5"/>
+                <text x="500" y="146" text-anchor="middle" class="edge-label" font-size="15" fill="var(--ink)">classify</text>
+                <path d="M 534 116 C 580 80, 600 74, 634 70" fill="none" stroke="var(--cyan)" stroke-width="2.5" stroke-dasharray="8 7" marker-end="url(#s42c)"/>
+                <path d="M 542 140 L 634 140" fill="none" stroke="var(--cyan)" stroke-width="2.5" stroke-dasharray="8 7" marker-end="url(#s42c)"/>
+                <path d="M 534 164 C 580 200, 600 206, 634 210" fill="none" stroke="var(--cyan)" stroke-width="2.5" stroke-dasharray="8 7" marker-end="url(#s42c)"/>
+                <rect x="636" y="48" width="96" height="44" rx="8" fill="#12181a" stroke="var(--cyan)" stroke-width="2"/>
+                <rect x="636" y="118" width="96" height="44" rx="8" fill="#12181a" stroke="var(--cyan)" stroke-width="2"/>
+                <rect x="636" y="188" width="96" height="44" rx="8" fill="#12181a" stroke="var(--cyan)" stroke-width="2"/>
+                <path d="M 732 70 C 780 78, 796 124, 800 134" fill="none" stroke="var(--cyan)" stroke-width="2" marker-end="url(#s42c)"/>
+                <path d="M 732 140 L 796 140" fill="none" stroke="var(--cyan)" stroke-width="2" marker-end="url(#s42c)"/>
+                <path d="M 732 210 C 780 202, 796 156, 800 146" fill="none" stroke="var(--cyan)" stroke-width="2" marker-end="url(#s42c)"/>
+                <text x="806" y="147" class="edge-label" font-size="15" fill="var(--ink-dim)">END</text>
+                <text x="640" y="272" text-anchor="middle" class="edge-label" fill="var(--ink-dim)" font-size="17" style="text-transform:uppercase; letter-spacing:0.1em;">L05 &middot; model-classified router</text>
+                <!-- 3: the user-input router -->
+                <rect x="920" y="118" width="150" height="44" rx="8" fill="#12181a" stroke="var(--cyan)" stroke-width="2.5"/>
+                <text x="995" y="146" text-anchor="middle" class="edge-label" font-size="15" fill="var(--cyan)">user_choice</text>
+                <path d="M 1070 128 C 1110 106, 1126 100, 1156 96" fill="none" stroke="var(--cyan)" stroke-width="2.5" stroke-dasharray="8 7" marker-end="url(#s42c)"/>
+                <path d="M 1070 152 C 1110 174, 1126 180, 1156 184" fill="none" stroke="var(--cyan)" stroke-width="2.5" stroke-dasharray="8 7" marker-end="url(#s42c)"/>
+                <rect x="1158" y="74" width="96" height="44" rx="8" fill="#12181a" stroke="var(--cyan)" stroke-width="2"/>
+                <rect x="1158" y="162" width="96" height="44" rx="8" fill="#12181a" stroke="var(--cyan)" stroke-width="2"/>
+                <path d="M 1254 96 C 1300 104, 1314 128, 1318 136" fill="none" stroke="var(--cyan)" stroke-width="2" marker-end="url(#s42c)"/>
+                <path d="M 1254 184 C 1300 176, 1314 152, 1318 144" fill="none" stroke="var(--cyan)" stroke-width="2" marker-end="url(#s42c)"/>
+                <text x="1324" y="147" class="edge-label" font-size="15" fill="var(--ink-dim)">END</text>
+                <text x="1120" y="272" text-anchor="middle" class="edge-label" fill="var(--ink-dim)" font-size="17" style="text-transform:uppercase; letter-spacing:0.1em;">L05 &middot; user-input router</text>
+                <!-- the one piece not drawn yet: an unattached back-edge -->
+                <path d="M 1590 90 C 1656 130, 1646 210, 1500 216" fill="none" stroke="var(--ink-faint)" stroke-width="3" stroke-dasharray="10 9" marker-end="url(#s42n)"/>
+                <text x="1552" y="62" text-anchor="middle" class="edge-label" fill="var(--ink-faint)" font-size="16">the back-edge</text>
+                <text x="1552" y="272" text-anchor="middle" class="edge-label" fill="var(--ink-faint)" font-size="17" style="text-transform:uppercase; letter-spacing:0.1em;">&rarr; L0505 / L11</text>
+                <defs>
+                    <marker id="s42c" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="var(--cyan)"/></marker>
+                    <marker id="s42n" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="var(--ink-faint)"/></marker>
+                </defs>
+            </svg>
+        </div>
+        <div class="diagram-caption reveal" style="margin-top:10px;">All acyclic &mdash; still workflows, however many branches. The dashed back-edge is the one piece you haven't drawn yet: the cycle that makes an agent.</div>
     </div>
     <div class="chrome-page">14 / 15</div>
     <div class="chrome-nav">&larr; &rarr; navigate</div>

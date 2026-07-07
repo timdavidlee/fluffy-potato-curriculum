@@ -564,6 +564,26 @@ table.ledger td.warn-cell { color: var(--coral); }
 .dpre .kw { color: var(--cyan); font-weight: 600; }
 .dpre .cm { color: var(--ink-faint); font-style: italic; }
 .dpre .lp { color: var(--coral); font-weight: 600; }
+
+/* ===========================================
+   L04 CHAIN MOTIF — matches L0402's .gnode/.garrow
+   byte-for-byte so slide 1.1 re-shows the exact
+   graph students built in L04 (cross-lesson motif).
+   =========================================== */
+.gnode {
+    border: 2px solid var(--cyan);
+    border-radius: 10px;
+    background: #12181a;
+    padding: 18px 24px;
+    text-align: center;
+    font-family: var(--font-display);
+    font-size: 27px;
+    color: var(--ink);
+    line-height: 1.15;
+}
+.gnode.dim { border-color: var(--ink-faint); }        /* neutral plumbing node */
+.garrow { color: var(--ink-faint); font-size: 34px; line-height: 1; }
+.garrow.cyan { color: var(--cyan); }
 </style>
 </head>
 <body>
@@ -636,17 +656,30 @@ table.ledger td.warn-cell { color: var(--coral); }
             <li class="point">The model did real work <i>inside</i> the nodes (parse, classify, draft), but <b>you wired every edge.</b> That is the definition of a workflow.</li>
         </ul>
         <div class="diagram-frame reveal" style="margin-top:26px; gap:0;">
-            <div style="display:flex; align-items:center; gap:22px;">
-                <div class="dnode">parse</div>
-                <div class="darrow">&rarr;</div>
-                <div class="dnode">draft</div>
-                <div class="darrow">&rarr;</div>
-                <div class="dnode">policy_check</div>
-                <div class="darrow">&rarr;</div>
-                <div class="dnode terminal">END</div>
+            <div style="display:flex; flex-direction:column; align-items:center; gap:8px;">
+                <!-- L04's exact chain, rendered with L04's node style (cross-lesson motif) -->
+                <div style="display:flex; align-items:center; gap:16px;">
+                    <div class="gnode">parse</div>
+                    <div class="garrow cyan">&rarr;</div>
+                    <div class="gnode">draft</div>
+                    <div class="garrow cyan">&rarr;</div>
+                    <div class="gnode">policy_check</div>
+                    <div class="garrow cyan">&rarr;</div>
+                    <div class="gnode dim" style="font-size:22px;">END</div>
+                </div>
+                <!-- finger-trace arrow: forward only, always terminates -->
+                <svg viewBox="0 0 1000 44" width="1000" height="44">
+                    <path d="M 30 22 L 950 22" stroke="var(--cyan)" stroke-width="2.5" stroke-dasharray="2 11" opacity="0.7" marker-end="url(#ftArrow)"/>
+                    <circle r="7" fill="var(--cyan)">
+                        <animateMotion dur="3.4s" repeatCount="indefinite" path="M 30 22 L 950 22"/>
+                    </circle>
+                    <defs>
+                        <marker id="ftArrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="var(--cyan)"/></marker>
+                    </defs>
+                </svg>
             </div>
         </div>
-        <div class="diagram-caption reveal" style="text-align:center; max-width:100%;">L04's chain &mdash; <span style="color:var(--cyan); font-style:normal;">forward only, always terminates</span>. Acyclic: every finger-trace runs left to right off the end.</div>
+        <div class="diagram-caption reveal" style="text-align:center; max-width:100%;">L04's chain, exactly as that deck drew it &mdash; <span style="color:var(--cyan); font-style:normal;">forward only, always terminates</span>. Every finger-trace runs left to right off the end.</div>
     </div>
     <div class="chrome-page">03 / 15</div>
     <div class="chrome-nav">&larr; &rarr; navigate</div>
@@ -722,7 +755,7 @@ table.ledger td.warn-cell { color: var(--coral); }
                 <line x1="830" y1="70" x2="830" y2="410" stroke="var(--ink-faint)" stroke-width="1.5" stroke-dasharray="4 8"/>
 
                 <!-- ============ RIGHT: cyclic agent ============ -->
-                <text x="1160" y="52" text-anchor="middle" class="edge-label" fill="var(--coral)" font-size="24" font-weight="600" letter-spacing="2">AGENT &mdash; CYCLIC</text>
+                <text x="1160" y="52" text-anchor="middle" class="edge-label" fill="var(--cyan)" font-size="24" font-weight="600" letter-spacing="2">AGENT &mdash; CYCLIC</text>
                 <!-- forward edges (same shape) -->
                 <path d="M 1102 240 L 1218 240" stroke="var(--cyan)" stroke-width="3" marker-end="url(#mArrowC2)"/>
                 <path d="M 1362 240 L 1478 240" stroke="var(--cyan)" stroke-width="3" marker-end="url(#mArrowC2)"/>
@@ -736,11 +769,11 @@ table.ledger td.warn-cell { color: var(--coral); }
                 <!-- nodes -->
                 <circle cx="1040" cy="240" r="62" fill="#12181a" stroke="var(--cyan)" stroke-width="2.5"/>
                 <text x="1040" y="249" text-anchor="middle" class="node-label" font-size="24">model</text>
-                <circle cx="1290" cy="240" r="62" fill="#12181a" stroke="var(--coral)" stroke-width="2.5"/>
-                <text x="1290" y="249" text-anchor="middle" class="node-label" font-size="24">tools</text>
+                <circle cx="1290" cy="240" r="62" fill="#12181a" stroke="var(--ink-faint)" stroke-width="2.5"/>
+                <text x="1290" y="249" text-anchor="middle" class="node-label" font-size="24" fill="var(--ink-dim)">tools</text>
                 <circle cx="1540" cy="240" r="62" fill="#12181a" stroke="var(--ink-faint)" stroke-width="2.5"/>
                 <text x="1540" y="249" text-anchor="middle" class="node-label" font-size="23" fill="var(--ink-dim)">END</text>
-                <text x="1160" y="360" text-anchor="middle" class="edge-label" fill="var(--coral)">model decides: loop again, or stop</text>
+                <text x="1160" y="360" text-anchor="middle" class="edge-label" fill="var(--ink-dim)">model decides: loop again, or stop</text>
 
                 <defs>
                     <marker id="mArrowC" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="var(--cyan)"/></marker>
@@ -779,24 +812,24 @@ table.ledger td.warn-cell { color: var(--coral); }
         </div>
         <!-- RIGHT: L11 cyclic graph -->
         <div class="diagram-frame reveal" style="flex:1 1 auto; flex-direction:column; align-items:stretch;">
-            <div class="dcol-label cyclic">L11 &mdash; the same loop, as a graph</div>
+            <div class="dcol-label">L11 &mdash; the same loop, <code style="color:var(--cyan);">as a graph</code></div>
             <svg viewBox="0 0 640 360" width="100%" height="320">
                 <path d="M 150 165 L 358 165" stroke="var(--cyan)" stroke-width="3" marker-end="url(#l2ArrowC)"/>
                 <text x="254" y="150" text-anchor="middle" class="edge-label" fill="var(--cyan)">call?</text>
-                <!-- back-edge tools -> model -->
+                <!-- back-edge tools -> model: dashed cyan (deferred to L11, not a failure) -->
                 <path d="M 470 108 C 470 40, 200 30, 118 108"
-                      fill="none" stroke="var(--coral)" stroke-width="3.5" stroke-dasharray="9 7" marker-end="url(#l2ArrowR)"/>
-                <circle r="7" fill="var(--coral)">
+                      fill="none" stroke="var(--cyan)" stroke-width="3.5" stroke-dasharray="9 7" marker-end="url(#l2ArrowC)"/>
+                <circle r="7" fill="var(--cyan)">
                     <animateMotion dur="3s" repeatCount="indefinite" path="M 470 108 C 470 40, 200 30, 118 108"/>
                 </circle>
-                <text x="294" y="44" text-anchor="middle" class="edge-label" fill="var(--coral)">loop again</text>
+                <text x="294" y="44" text-anchor="middle" class="edge-label" fill="var(--cyan)">loop again</text>
                 <!-- END edge -->
                 <path d="M 90 227 L 90 300" stroke="var(--ink-faint)" stroke-width="3" marker-end="url(#l2ArrowN)"/>
                 <text x="118" y="272" class="edge-label" fill="var(--ink-dim)">stop</text>
                 <circle cx="90" cy="165" r="58" fill="#12181a" stroke="var(--cyan)" stroke-width="2.5"/>
                 <text x="90" y="174" text-anchor="middle" class="node-label" font-size="23">model</text>
-                <circle cx="470" cy="165" r="58" fill="#12181a" stroke="var(--coral)" stroke-width="2.5"/>
-                <text x="470" y="174" text-anchor="middle" class="node-label" font-size="23">tools</text>
+                <circle cx="470" cy="165" r="58" fill="#12181a" stroke="var(--ink-faint)" stroke-width="2.5"/>
+                <text x="470" y="174" text-anchor="middle" class="node-label" font-size="23" fill="var(--ink-dim)">tools</text>
                 <text x="90" y="332" text-anchor="middle" class="node-label" font-size="21" fill="var(--ink-dim)">END</text>
                 <defs>
                     <marker id="l2ArrowC" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="var(--cyan)"/></marker>
@@ -825,7 +858,64 @@ table.ledger td.warn-cell { color: var(--coral); }
             <li class="point">Be precise: every conditional edge so far branched on <b>state you set</b> &mdash; L05's classifier label, or direct user input. That is still a workflow.</li>
             <li class="point">It is an <b>agent</b> only when the edge branches on <b>the model's own decision to keep going</b> <i>and</i> that edge <span class="warn">loops</span>.</li>
         </ul>
-        <div class="callout reveal"><p>&ldquo;But the classifier was the model deciding&rdquo; &mdash; it wasn't. The model produced a <i>label in state</i>; your routing function read it and chose the edge. The model never chose the edge, and it never looped.</p></div>
+        <div class="diagram-frame reveal" style="width:100%; height:368px; margin-top:12px;">
+            <svg viewBox="0 0 1660 400" width="100%" height="100%">
+                <!-- ============ LEFT: the L05 router — still a workflow ============ -->
+                <text x="440" y="36" text-anchor="middle" class="edge-label" fill="var(--cyan)" font-size="23" font-weight="600" letter-spacing="2">L05 ROUTER &mdash; STILL A WORKFLOW</text>
+                <!-- classify -> state -->
+                <path d="M 162 185 L 224 185" stroke="var(--cyan)" stroke-width="3" marker-end="url(#e23C)"/>
+                <text x="193" y="162" text-anchor="middle" class="edge-label" fill="var(--cyan)" font-size="17">writes</text>
+                <!-- state box with the label chip the model wrote -->
+                <rect x="228" y="115" width="215" height="140" rx="12" fill="#10161a" stroke="var(--ink-faint)" stroke-width="2"/>
+                <text x="335" y="150" text-anchor="middle" class="edge-label" fill="var(--ink-dim)" font-size="18" letter-spacing="2">STATE</text>
+                <rect x="253" y="168" width="165" height="38" rx="19" fill="rgba(82,232,200,0.08)" stroke="var(--cyan-rule)"/>
+                <text x="335" y="193" text-anchor="middle" class="edge-label" fill="var(--cyan)" font-size="17">label: "billing"</text>
+                <!-- state -> route() -->
+                <path d="M 443 185 L 505 185" stroke="var(--cyan)" stroke-width="3" marker-end="url(#e23C)"/>
+                <text x="474" y="162" text-anchor="middle" class="edge-label" fill="var(--cyan)" font-size="17">reads</text>
+                <!-- route() -> branches (forward only, no cycle) -->
+                <path d="M 660 168 L 722 118" stroke="var(--cyan)" stroke-width="3" marker-end="url(#e23C)"/>
+                <path d="M 660 202 L 722 252" stroke="var(--cyan)" stroke-width="3" marker-end="url(#e23C)"/>
+                <!-- nodes -->
+                <circle cx="105" cy="185" r="55" fill="#12181a" stroke="var(--cyan)" stroke-width="2.5"/>
+                <text x="105" y="193" text-anchor="middle" class="node-label" font-size="20">classify</text>
+                <rect x="509" y="150" width="152" height="70" rx="12" fill="#12181a" stroke="var(--cyan)" stroke-width="2.5"/>
+                <text x="585" y="194" text-anchor="middle" class="node-label" font-size="22">route()</text>
+                <text x="585" y="256" text-anchor="middle" class="edge-label" fill="var(--cyan)" font-size="19" font-weight="600">&#9670; you own the edge</text>
+                <rect x="726" y="84" width="134" height="58" rx="10" fill="#12181a" stroke="var(--ink-faint)" stroke-width="2"/>
+                <text x="793" y="120" text-anchor="middle" class="edge-label" fill="var(--ink-dim)" font-size="19">billing</text>
+                <rect x="726" y="228" width="134" height="58" rx="10" fill="#12181a" stroke="var(--ink-faint)" stroke-width="2"/>
+                <text x="793" y="264" text-anchor="middle" class="edge-label" fill="var(--ink-dim)" font-size="19">general</text>
+                <text x="440" y="352" text-anchor="middle" class="edge-label" fill="var(--ink-dim)">the model never chose the edge &mdash; and nothing loops</text>
+
+                <!-- divider -->
+                <line x1="905" y1="55" x2="905" y2="360" stroke="var(--ink-faint)" stroke-width="1.5" stroke-dasharray="4 8"/>
+
+                <!-- ============ RIGHT: 2.1's agent shape ============ -->
+                <text x="1225" y="36" text-anchor="middle" class="edge-label" fill="var(--cyan)" font-size="23" font-weight="600" letter-spacing="2">L11 AGENT &mdash; CYCLIC</text>
+                <!-- forward edges -->
+                <path d="M 1063 185 L 1163 185" stroke="var(--cyan)" stroke-width="3" marker-end="url(#e23C)"/>
+                <path d="M 1283 185 L 1383 185" stroke="var(--cyan)" stroke-width="3" marker-end="url(#e23C)"/>
+                <!-- THE dashed cyan back-edge (deferred to L11, not a failure) -->
+                <path d="M 1225 128 C 1225 50, 1072 44, 1000 112 C 972 138, 975 158, 992 172"
+                      fill="none" stroke="var(--cyan)" stroke-width="4" stroke-dasharray="10 8" marker-end="url(#e23C)"/>
+                <circle r="8" fill="var(--cyan)">
+                    <animateMotion dur="3.2s" repeatCount="indefinite" path="M 1225 128 C 1225 50, 1072 44, 1000 112 C 972 138, 975 158, 992 172"/>
+                </circle>
+                <!-- nodes -->
+                <circle cx="1005" cy="185" r="55" fill="#12181a" stroke="var(--cyan)" stroke-width="2.5"/>
+                <text x="1005" y="193" text-anchor="middle" class="node-label" font-size="22">model</text>
+                <circle cx="1225" cy="185" r="55" fill="#12181a" stroke="var(--ink-faint)" stroke-width="2.5"/>
+                <text x="1225" y="193" text-anchor="middle" class="node-label" font-size="22" fill="var(--ink-dim)">tools</text>
+                <circle cx="1445" cy="185" r="55" fill="#12181a" stroke="var(--ink-faint)" stroke-width="2.5"/>
+                <text x="1445" y="193" text-anchor="middle" class="node-label" font-size="21" fill="var(--ink-dim)">END</text>
+                <text x="1225" y="352" text-anchor="middle" class="edge-label" fill="var(--cyan)" font-size="19" font-weight="600">&#9670; the model's own decision drives the edge &mdash; and it loops</text>
+                <defs>
+                    <marker id="e23C" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="var(--cyan)"/></marker>
+                </defs>
+            </svg>
+        </div>
+        <div class="diagram-caption reveal" style="text-align:center; max-width:100%; margin-top:6px;">&ldquo;But the classifier <i>was</i> the model deciding&rdquo; &mdash; it wasn't: it wrote a <i>label into state</i>; <b style="color:var(--ink);">your</b> function chose the edge, and nothing looped. A conditional edge alone isn't an agent &mdash; it takes <b style="color:var(--ink);">both</b>.</div>
     </div>
     <div class="chrome-page">08 / 15</div>
     <div class="chrome-nav">&larr; &rarr; navigate</div>
@@ -930,10 +1020,46 @@ table.ledger td.warn-cell { color: var(--coral); }
         <h2 class="headline">The one <span class="it">sentence</span> to leave with</h2>
     </div>
     <div class="body-area">
-        <div class="callout reveal" style="margin-top:34px; max-width:1560px;"><p>A workflow is a graph whose path <span style="color:var(--cyan); font-style:normal; font-weight:600;">you wire</span> (acyclic); an agent is a graph whose path <span style="color:var(--coral); font-style:normal; font-weight:600;">the model drives</span> (cyclic). The line between them is a single back-edge.</p></div>
-        <ul class="points reveal" style="max-width:1660px; margin-top:40px;">
-            <li class="point">Next lesson, you draw that edge. Everything else, you already built.</li>
-        </ul>
+        <div class="callout reveal" style="margin-top:0; max-width:1560px;"><p>A workflow is a graph whose path <span style="color:var(--cyan); font-style:normal; font-weight:600;">you wire</span> (acyclic); an agent is a graph whose path <span style="color:var(--cyan); font-style:normal; font-weight:600;">the model drives</span> (cyclic). The line between them is a single back-edge.</p></div>
+        <!-- motif bookend: 2.1's two shapes small — identical panels, only the back-edge differs -->
+        <div class="diagram-frame reveal" style="width:100%; height:296px; margin-top:24px;">
+            <svg viewBox="0 0 1520 330" width="100%" height="100%">
+                <!-- ============ LEFT: workflow — path you wire ============ -->
+                <text x="330" y="40" text-anchor="middle" class="edge-label" fill="var(--cyan)" font-size="21" font-weight="600" letter-spacing="2">WORKFLOW &mdash; PATH YOU WIRE</text>
+                <path d="M 178 210 L 278 210" stroke="var(--cyan)" stroke-width="3" marker-end="url(#e42C)"/>
+                <path d="M 378 210 L 478 210" stroke="var(--cyan)" stroke-width="3" marker-end="url(#e42C)"/>
+                <circle cx="130" cy="210" r="46" fill="#12181a" stroke="var(--cyan)" stroke-width="2.5"/>
+                <text x="130" y="218" text-anchor="middle" class="node-label" font-size="20">model</text>
+                <circle cx="330" cy="210" r="46" fill="#12181a" stroke="var(--ink-faint)" stroke-width="2.5"/>
+                <text x="330" y="218" text-anchor="middle" class="node-label" font-size="20" fill="var(--ink-dim)">tools</text>
+                <circle cx="530" cy="210" r="46" fill="#12181a" stroke="var(--ink-faint)" stroke-width="2.5"/>
+                <text x="530" y="218" text-anchor="middle" class="node-label" font-size="19" fill="var(--ink-dim)">END</text>
+
+                <!-- divider -->
+                <line x1="700" y1="60" x2="700" y2="290" stroke="var(--ink-faint)" stroke-width="1.5" stroke-dasharray="4 8"/>
+
+                <!-- ============ RIGHT: same shape + the one dashed cyan back-edge ============ -->
+                <text x="1190" y="40" text-anchor="middle" class="edge-label" fill="var(--cyan)" font-size="21" font-weight="600" letter-spacing="2">AGENT &mdash; PATH THE MODEL DRIVES</text>
+                <path d="M 1038 210 L 1138 210" stroke="var(--cyan)" stroke-width="3" marker-end="url(#e42C)"/>
+                <path d="M 1238 210 L 1338 210" stroke="var(--cyan)" stroke-width="3" marker-end="url(#e42C)"/>
+                <path d="M 1190 162 C 1190 96, 1052 90, 988 144 C 966 163, 968 180, 982 194"
+                      fill="none" stroke="var(--cyan)" stroke-width="3.5" stroke-dasharray="9 8" marker-end="url(#e42C)"/>
+                <circle r="7" fill="var(--cyan)">
+                    <animateMotion dur="3.2s" repeatCount="indefinite" path="M 1190 162 C 1190 96, 1052 90, 988 144 C 966 163, 968 180, 982 194"/>
+                </circle>
+                <text x="1105" y="76" text-anchor="middle" class="edge-label" fill="var(--cyan)" font-size="19" font-weight="600">&#9670; you draw this edge next lesson</text>
+                <circle cx="990" cy="210" r="46" fill="#12181a" stroke="var(--cyan)" stroke-width="2.5"/>
+                <text x="990" y="218" text-anchor="middle" class="node-label" font-size="20">model</text>
+                <circle cx="1190" cy="210" r="46" fill="#12181a" stroke="var(--ink-faint)" stroke-width="2.5"/>
+                <text x="1190" y="218" text-anchor="middle" class="node-label" font-size="20" fill="var(--ink-dim)">tools</text>
+                <circle cx="1390" cy="210" r="46" fill="#12181a" stroke="var(--ink-faint)" stroke-width="2.5"/>
+                <text x="1390" y="218" text-anchor="middle" class="node-label" font-size="19" fill="var(--ink-dim)">END</text>
+                <defs>
+                    <marker id="e42C" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="var(--cyan)"/></marker>
+                </defs>
+            </svg>
+        </div>
+        <div class="diagram-caption reveal" style="text-align:center; max-width:100%; margin-top:4px;">Nothing else changes between the panels &mdash; that's the sentence, drawn. Next lesson, you draw that edge. Everything else, you already built.</div>
     </div>
     <div class="chrome-page">14 / 15</div>
     <div class="chrome-nav">&larr; &rarr; navigate</div>

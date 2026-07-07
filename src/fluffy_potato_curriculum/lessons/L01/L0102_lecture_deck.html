@@ -565,6 +565,51 @@ table.ledger td.warn-cell { color: var(--coral); }
 .rung.top { border-color: var(--cyan); background: rgba(82,232,200,0.20); }
 .rung .big { font-size: 26px; color: var(--ink); font-weight: 600; }
 .rung .sm { font-size: 19px; color: var(--ink-dim); margin-top: 6px; }
+
+/* ===========================================
+   DECK-LOCAL HELPERS — r2 (2026-07 outline diagram revision)
+   appended per FRONTEND-STYLE.md §5 — do not edit rules above
+   =========================================== */
+/* bar variants usable outside .bar-col, + ink-faint context/tail bars */
+.bar.lead { background: rgba(82,232,200,0.24); border: 2px solid var(--cyan); border-radius: 6px 6px 0 0; }
+.bar.warncol { background: rgba(255,107,87,0.15); border: 2px solid var(--coral); border-radius: 6px 6px 0 0; }
+.bar.faint { background: rgba(76,86,82,0.22); border: 2px solid var(--ink-faint); border-radius: 6px 6px 0 0; }
+/* 2.2 — three-panel tokenization contrast */
+.panel3 { display: flex; flex-direction: column; gap: 12px; border: 2px solid var(--coral); border-radius: 10px; background: #12181a; padding: 18px 22px; width: 480px; }
+.panel3.good { border-color: var(--cyan); }
+.panel3 .ptitle { font-size: 20px; font-weight: 600; color: var(--coral); text-transform: uppercase; letter-spacing: 0.08em; }
+.panel3.good .ptitle { color: var(--cyan); }
+.panel3 .pnote { font-size: 18px; line-height: 1.4; margin-top: auto; }
+.mini-chip { font-family: var(--font-body); font-size: 19px; color: var(--ink-dim); background: #0d1417; border: 1px solid var(--ink-faint); border-radius: 5px; padding: 4px 9px; white-space: nowrap; }
+.mini-chip.sub { border-color: var(--cyan-dim); color: var(--ink); }
+/* 5.2 — run-to-run variance columns */
+.run-col { display: flex; flex-direction: column; gap: 10px; }
+.run-col .rtitle { font-size: 20px; color: var(--ink); font-weight: 600; margin-bottom: 4px; }
+.run-row { font-family: var(--font-body); font-size: 20px; color: var(--ink-dim); background: #0d1417; border: 1px solid var(--ink-faint); border-radius: 6px; padding: 8px 16px; white-space: nowrap; }
+.run-row.diff { color: var(--coral); border-color: var(--coral); }
+/* 6.2 — preamble chips riding the 1.3 two-call picture */
+.pill.pre { color: var(--cyan); border-color: var(--cyan); }
+.pill.overhead { color: var(--coral); border-color: var(--coral); }
+/* 7.x — window-bar (meter) variants */
+.seg.nf { background: rgba(76,86,82,0.22); color: var(--ink-dim); }
+.seg.outcyan { background: rgba(82,232,200,0.30); color: var(--ink); border-right: none; }
+.seg.tooldef { background: transparent; color: var(--ink-faint); border: 2px dashed var(--ink-faint); border-radius: 8px; margin: 7px 6px; }
+.meter.open { overflow: visible; }
+.seg.spill { background: rgba(255,107,87,0.20); color: var(--coral); border: 2px solid var(--coral); border-radius: 0 8px 8px 0; }
+.seg.cut { background: rgba(76,86,82,0.10); color: var(--coral); text-decoration: line-through; }
+.seg.haze { opacity: 0.38; font-style: italic; }
+.fail-lbl { font-size: 21px; color: var(--ink-dim); margin-bottom: 10px; }
+.fail-lbl b { color: var(--ink); }
+/* 8.1 — two-segment cost block */
+.cost-seg { display: flex; align-items: stretch; height: 120px; border: 2px solid var(--cyan-rule); border-radius: 10px; overflow: hidden; background: #0d1417; }
+.cost-sub { display: flex; align-items: center; justify-content: center; text-align: center; font-size: 19px; line-height: 1.35; padding: 0 14px; }
+/* 8.3 — cumulative-token staircase */
+.stair { display: flex; align-items: flex-end; gap: 34px; }
+.stair .scol { display: flex; flex-direction: column; align-items: center; }
+.stair .sval { font-size: 19px; color: var(--ink-dim); margin-bottom: 8px; }
+.stair .snew { width: 150px; height: 62px; background: rgba(82,232,200,0.28); border: 2px solid var(--cyan); border-bottom: none; border-radius: 6px 6px 0 0; }
+.stair .sold { width: 150px; background: rgba(255,107,87,0.16); border: 2px solid var(--coral); }
+.stair .slbl { font-size: 19px; color: var(--ink-dim); margin-top: 10px; }
 </style>
 </head>
 <body>
@@ -688,13 +733,13 @@ table.ledger td.warn-cell { color: var(--coral); }
         <div class="diagram-frame reveal" style="flex-direction:column; margin-top:20px;">
             <div class="bars" style="height:340px;">
                 <div class="bar-col"><div class="val">0.46</div><div class="bar lead" style="height:300px;"></div><div class="lbl">&nbsp;oxygen</div></div>
-                <div class="bar-col"><div class="val">0.28</div><div class="bar" style="height:183px;"></div><div class="lbl">&nbsp;helium</div></div>
-                <div class="bar-col"><div class="val">0.12</div><div class="bar" style="height:78px;"></div><div class="lbl">&nbsp;carbon</div></div>
-                <div class="bar-col"><div class="val">0.08</div><div class="bar" style="height:52px;"></div><div class="lbl">&nbsp;nitrogen</div></div>
-                <div class="bar-col"><div class="val">0.06</div><div class="bar" style="height:39px;"></div><div class="lbl">&hellip; tail</div></div>
+                <div class="bar-col"><div class="val">0.28</div><div class="bar faint" style="height:183px;"></div><div class="lbl">&nbsp;helium</div></div>
+                <div class="bar-col"><div class="val">0.12</div><div class="bar faint" style="height:78px;"></div><div class="lbl">&nbsp;carbon</div></div>
+                <div class="bar-col"><div class="val">0.08</div><div class="bar faint" style="height:52px;"></div><div class="lbl">&nbsp;nitrogen</div></div>
+                <div class="bar-col"><div class="val">0.06</div><div class="bar faint" style="height:39px;"></div><div class="lbl">&hellip; tail</div></div>
             </div>
         </div>
-        <div class="diagram-caption reveal" style="text-align:center; max-width:1620px;">After <code style="color:var(--cyan);">Water is made of hydrogen and</code> &mdash; the model <i>ranks</i>; the sampler <i>picks</i>.</div>
+        <div class="diagram-caption reveal" style="text-align:center; max-width:1620px;">After <code style="color:var(--cyan);">Water is made of hydrogen and</code> &mdash; the model <i>ranks</i>; the sampler <i>picks</i>. This chart is the lesson's recurring motif: &sect;4 and &sect;5 re-show it with one thing changed.</div>
     </div>
     <div class="chrome-page">04 / 36</div>
     <div class="chrome-nav">&larr; &rarr; navigate</div>
@@ -794,10 +839,31 @@ table.ledger td.warn-cell { color: var(--coral); }
     </div>
     <div class="body-area">
         <ul class="points reveal" style="max-width:1620px;">
-            <li class="point"><b>Not whole words?</b> An unbounded vocabulary &mdash; every name, typo, hashtag, and new word would need its own entry, and you'd still miss tomorrow's words.</li>
-            <li class="point"><b>Not single characters?</b> Sequences get very long and each step carries little signal &mdash; slow and wasteful.</li>
-            <li class="point"><b>Sub-word is the compromise:</b> a <i>fixed</i> vocabulary of common chunks that <b>compose</b> to spell anything. Most tokenizers use <b>BPE</b>, learned from data &mdash; so different vendors split the same string differently.</li>
+            <li class="point"><b>Not whole words</b> (unbounded &mdash; every name, typo, and new word needs its own entry, and you'd still miss tomorrow's) and <b>not single characters</b> (very long, low-signal sequences).</li>
+            <li class="point"><b>Sub-word is the compromise:</b> a <i>fixed</i> vocabulary of common chunks that <b>compose</b> to spell anything. Most tokenizers use <b>BPE</b>, <i>learned</i> from data &mdash; so different vendors split the same string differently.</li>
         </ul>
+        <div class="diagram-frame reveal" style="gap:36px; margin-top:26px; align-items:stretch;">
+            <div class="panel3">
+                <div class="ptitle">whole words</div>
+                <div style="display:flex; flex-wrap:wrap; gap:8px; max-height:96px; overflow:hidden;">
+                    <span class="mini-chip">water</span><span class="mini-chip">is</span><span class="mini-chip">made</span><span class="mini-chip">of</span><span class="mini-chip">hydrogen</span><span class="mini-chip">Nnamdi</span><span class="mini-chip">#tbt</span><span class="mini-chip">teh</span><span class="mini-chip">flibbertigibbeting</span><span class="mini-chip" style="color:var(--coral); border-color:var(--coral);">+ &infin; more&hellip;</span>
+                </div>
+                <div class="pnote" style="color:var(--coral);">the list never ends &mdash; no fixed list covers language</div>
+            </div>
+            <div class="panel3">
+                <div class="ptitle">single characters</div>
+                <div style="font-family:var(--font-body); font-size:20px; letter-spacing:0.22em; color:var(--ink-dim); word-break:break-all; line-height:1.7;">w&middot;a&middot;t&middot;e&middot;r&middot;&nbsp;&middot;i&middot;s&middot;&nbsp;&middot;m&middot;a&middot;d&middot;e&middot;&nbsp;&middot;o&middot;f&middot;&nbsp;&middot;h&middot;y&middot;d&middot;r&middot;o&middot;g&middot;e&middot;n&hellip;</div>
+                <div class="pnote" style="color:var(--coral);">long and low-signal &mdash; one tiny step per letter</div>
+            </div>
+            <div class="panel3 good">
+                <div class="ptitle">sub-word</div>
+                <div style="display:flex; flex-wrap:wrap; gap:8px;">
+                    <span class="mini-chip sub">water</span><span class="mini-chip sub">is</span><span class="mini-chip sub">made</span><span class="mini-chip sub">of</span><span class="mini-chip sub">hydro</span><span class="mini-chip sub">gen</span>
+                </div>
+                <div class="pnote" style="color:var(--cyan);">a fixed list whose pieces compose to spell anything</div>
+            </div>
+        </div>
+        <div class="diagram-caption reveal" style="text-align:center; max-width:1620px;">The same sentence three ways &mdash; the compromise is the only panel that stays fixed <i>and</i> spells anything.</div>
     </div>
     <div class="chrome-page">08 / 36</div>
     <div class="chrome-nav">&larr; &rarr; navigate</div>
@@ -944,24 +1010,24 @@ table.ledger td.warn-cell { color: var(--coral); }
             <div class="bar-group">
                 <div class="bars" style="height:300px; gap:16px;">
                     <div class="bar-col"><div class="bar lead" style="height:164px; width:70px;"></div><div class="lbl">oxygen</div></div>
-                    <div class="bar-col"><div class="bar" style="height:100px; width:70px;"></div><div class="lbl">helium</div></div>
-                    <div class="bar-col"><div class="bar" style="height:50px; width:70px;"></div><div class="lbl">carbon</div></div>
+                    <div class="bar-col"><div class="bar faint" style="height:100px; width:70px;"></div><div class="lbl">helium</div></div>
+                    <div class="bar-col"><div class="bar faint" style="height:50px; width:70px;"></div><div class="lbl">carbon</div></div>
                 </div>
                 <div class="gtitle">small &middot; 124M &middot; 0.46</div>
             </div>
             <div class="bar-group">
                 <div class="bars" style="height:300px; gap:16px;">
                     <div class="bar-col"><div class="bar lead" style="height:225px; width:70px;"></div><div class="lbl">oxygen</div></div>
-                    <div class="bar-col"><div class="bar" style="height:64px; width:70px;"></div><div class="lbl">helium</div></div>
-                    <div class="bar-col"><div class="bar" style="height:29px; width:70px;"></div><div class="lbl">carbon</div></div>
+                    <div class="bar-col"><div class="bar faint" style="height:64px; width:70px;"></div><div class="lbl">helium</div></div>
+                    <div class="bar-col"><div class="bar faint" style="height:29px; width:70px;"></div><div class="lbl">carbon</div></div>
                 </div>
                 <div class="gtitle">medium &middot; 355M &middot; 0.63</div>
             </div>
             <div class="bar-group">
                 <div class="bars" style="height:300px; gap:16px;">
                     <div class="bar-col"><div class="bar lead" style="height:300px; width:70px;"></div><div class="lbl">oxygen</div></div>
-                    <div class="bar-col"><div class="bar" style="height:25px; width:70px;"></div><div class="lbl">helium</div></div>
-                    <div class="bar-col"><div class="bar" style="height:11px; width:70px;"></div><div class="lbl">carbon</div></div>
+                    <div class="bar-col"><div class="bar faint" style="height:25px; width:70px;"></div><div class="lbl">helium</div></div>
+                    <div class="bar-col"><div class="bar faint" style="height:11px; width:70px;"></div><div class="lbl">carbon</div></div>
                 </div>
                 <div class="gtitle">large &middot; 774M &middot; 0.84</div>
             </div>
@@ -1018,24 +1084,24 @@ table.ledger td.warn-cell { color: var(--coral); }
             <div class="bar-group">
                 <div class="bars" style="height:300px; gap:14px;">
                     <div class="bar-col"><div class="bar lead" style="height:300px; width:64px;"></div></div>
-                    <div class="bar-col"><div class="bar" style="height:9px; width:64px;"></div></div>
-                    <div class="bar-col"><div class="bar" style="height:6px; width:64px;"></div></div>
+                    <div class="bar-col"><div class="bar faint" style="height:9px; width:64px;"></div></div>
+                    <div class="bar-col"><div class="bar faint" style="height:6px; width:64px;"></div></div>
                 </div>
                 <div class="gtitle">temp 0 &mdash; one tall bar</div>
             </div>
             <div class="bar-group">
                 <div class="bars" style="height:300px; gap:14px;">
                     <div class="bar-col"><div class="bar lead" style="height:174px; width:64px;"></div></div>
-                    <div class="bar-col"><div class="bar" style="height:88px; width:64px;"></div></div>
-                    <div class="bar-col"><div class="bar" style="height:54px; width:64px;"></div></div>
+                    <div class="bar-col"><div class="bar faint" style="height:88px; width:64px;"></div></div>
+                    <div class="bar-col"><div class="bar faint" style="height:54px; width:64px;"></div></div>
                 </div>
                 <div class="gtitle">temp &asymp; 0.7 &mdash; a few compete</div>
             </div>
             <div class="bar-group">
                 <div class="bars" style="height:300px; gap:14px;">
-                    <div class="bar-col"><div class="bar" style="height:120px; width:64px;"></div></div>
-                    <div class="bar-col"><div class="bar" style="height:107px; width:64px;"></div></div>
-                    <div class="bar-col"><div class="bar" style="height:88px; width:64px;"></div></div>
+                    <div class="bar-col"><div class="bar faint" style="height:120px; width:64px;"></div></div>
+                    <div class="bar-col"><div class="bar faint" style="height:107px; width:64px;"></div></div>
+                    <div class="bar-col"><div class="bar faint" style="height:88px; width:64px;"></div></div>
                 </div>
                 <div class="gtitle">temp &asymp; 1.0+ &mdash; many similar</div>
             </div>
@@ -1057,10 +1123,28 @@ table.ledger td.warn-cell { color: var(--coral); }
     </div>
     <div class="body-area">
         <ul class="points reveal" style="max-width:1620px;">
-            <li class="point">Predict the effect: temperature 0 &rarr; near-identical answers run to run; temperature 1 &rarr; varied, sometimes creative, sometimes off.</li>
-            <li class="point">But even at temp 0, output can differ: floating-point non-determinism, server-side batching, and tie-breaking between equally-likely tokens all leak through.</li>
+            <li class="point">Even at temp 0, output can differ run to run: floating-point non-determinism, server-side batching, and tie-breaking between equally-likely tokens all leak through.</li>
             <li class="point">Frame it as <b>low</b> variance from day one &mdash; or a future eval that flakes will look like a bug when it's <span class="warn">expected</span>.</li>
         </ul>
+        <div class="diagram-frame reveal" style="gap:130px; margin-top:28px; align-items:flex-start;">
+            <div class="run-col">
+                <div class="rtitle">temp 0 &mdash; five runs</div>
+                <div class="run-row">Water is made of hydrogen and oxygen.</div>
+                <div class="run-row">Water is made of hydrogen and oxygen.</div>
+                <div class="run-row diff">Water is composed of hydrogen and oxygen.</div>
+                <div class="run-row">Water is made of hydrogen and oxygen.</div>
+                <div class="run-row">Water is made of hydrogen and oxygen.</div>
+            </div>
+            <div class="run-col">
+                <div class="rtitle">temp 1 &mdash; five runs</div>
+                <div class="run-row">Water? Hydrogen plus oxygen.</div>
+                <div class="run-row">Mostly hydrogen, bonded to oxygen.</div>
+                <div class="run-row">Two hydrogens and one oxygen &mdash; H&#8322;O.</div>
+                <div class="run-row">It&rsquo;s made of hydrogen and oxygen.</div>
+                <div class="run-row">Hydrogen and oxygen, two to one.</div>
+            </div>
+        </div>
+        <div class="diagram-caption reveal" style="max-width:1620px;">The same prompt, five runs per column &mdash; the one coral row at temp 0 is the point: <i>low</i> variance, not <i>zero</i>.</div>
     </div>
     <div class="chrome-page">19 / 36</div>
     <div class="chrome-nav">&larr; &rarr; navigate</div>
@@ -1153,10 +1237,29 @@ table.ledger td.warn-cell { color: var(--coral); }
     </div>
     <div class="body-area">
         <ul class="points reveal" style="max-width:1620px;">
-            <li class="point">Once front-loading helps, you <b>reuse</b> the same block of instruction / persona / reference across many calls. That block is a <b>preamble</b> &mdash; the informal precursor to L02's system message.</li>
-            <li class="point">The sting: with <b>no server-side memory</b>, that preamble is <span class="warn">re-sent on every single call</span> &mdash; re-read, re-counted against the window, re-billed. The very thing that made the output good is now overhead you carry on every call.</li>
+            <li class="point">Once front-loading helps, you <b>reuse</b> the same instruction / persona / reference block across many calls. That block is a <b>preamble</b> &mdash; the informal precursor to L02's system message.</li>
+            <li class="point">The sting: with <b>no server-side memory</b>, the preamble is <span class="warn">re-sent on every single call</span> &mdash; re-read, re-counted against the window, re-billed. You just built up overhead on purpose; section 8 is the bill.</li>
         </ul>
-        <div class="callout reveal" style="max-width:1560px;"><p>You just built up overhead on purpose. Section 8 is the bill.</p></div>
+        <div class="diagram-frame reveal" style="flex-direction:column; align-items:stretch; gap:14px; margin-top:26px; max-width:1500px;">
+            <div style="display:flex; align-items:center; gap:22px;">
+                <span style="font-size:20px; color:var(--cyan); width:110px;">Call 1</span>
+                <div class="msgbox"><span class="pill pre">preamble</span><span class="pill">msg&nbsp;1</span></div>
+                <span class="flow-arrow" style="font-size:30px;">&rarr;</span>
+                <div class="model-chip" style="width:78px; height:78px; font-size:19px;">model</div>
+                <span class="flow-arrow" style="font-size:30px;">&rarr;</span>
+                <div class="reply-chip">good&nbsp;reply&nbsp;1</div>
+            </div>
+            <div style="font-size:20px; color:var(--coral); padding-left:132px;">&darr;&nbsp; the identical block rides along again &mdash; re-sent overhead</div>
+            <div style="display:flex; align-items:center; gap:22px;">
+                <span style="font-size:20px; color:var(--cyan); width:110px;">Call 2</span>
+                <div class="msgbox"><span class="pill overhead">preamble</span><span class="pill">msg&nbsp;1</span><span class="pill">reply&nbsp;1</span><span class="pill new">msg&nbsp;2</span></div>
+                <span class="flow-arrow" style="font-size:30px;">&rarr;</span>
+                <div class="model-chip" style="width:78px; height:78px; font-size:19px;">model</div>
+                <span class="flow-arrow" style="font-size:30px;">&rarr;</span>
+                <div class="reply-chip">reply&nbsp;2</div>
+            </div>
+        </div>
+        <div class="diagram-caption reveal" style="max-width:1620px;">Slide 1.3's two calls, one change: the preamble chip &mdash; <b style="color:var(--cyan);">cyan</b> when it made call 1 good, <b style="color:var(--coral);">coral</b> when call 2 carries and bills it again.</div>
     </div>
     <div class="chrome-page">23 / 36</div>
     <div class="chrome-nav">&larr; &rarr; navigate</div>
@@ -1185,10 +1288,20 @@ table.ledger td.warn-cell { color: var(--coral); }
     </div>
     <div class="body-area">
         <ul class="points reveal" style="max-width:1620px;">
-            <li class="point">The context window is a hard ceiling on how many tokens a single call can involve &mdash; <b>input and output combined</b>.</li>
-            <li class="point">Everything competes for it: the <b>preamble / system message</b>, every prior turn, tool definitions (L07 on), the current input, <b>and</b> the model's own response.</li>
+            <li class="point">The context window is a <b>hard ceiling</b> on how many tokens a single call can involve &mdash; <b>input and output combined</b>, everything competing for the same budget.</li>
             <li class="point">Anchor number: <b>Claude Sonnet 4.6 has a 200,000-token window.</b> (A 1M long-context variant exists; we use 200k as the course default.)</li>
         </ul>
+        <div class="diagram-frame reveal" style="flex-direction:column; align-items:flex-start; margin-top:40px;">
+            <div style="font-size:19px; color:var(--ink-dim); margin-bottom:12px;">one call &mdash; the 200,000-token window</div>
+            <div class="meter">
+                <div class="seg nf" style="flex:22;">preamble&nbsp;/&nbsp;system</div>
+                <div class="seg nf" style="flex:52;">conversation history</div>
+                <div class="seg tooldef" style="flex:24;">tool defs &mdash; L07</div>
+                <div class="seg nf" style="flex:20;">current&nbsp;input</div>
+                <div class="seg outcyan" style="flex:34;">model&rsquo;s output</div>
+            </div>
+        </div>
+        <div class="diagram-caption reveal" style="max-width:1620px;">Every competitor on the one budget &mdash; the <b style="color:var(--cyan);">output</b> is the segment people forget to leave room for. 7.2 zooms in on this bar; 7.3 breaks it.</div>
     </div>
     <div class="chrome-page">25 / 36</div>
     <div class="chrome-nav">&larr; &rarr; navigate</div>
@@ -1235,17 +1348,42 @@ table.ledger td.warn-cell { color: var(--coral); }
         <h2 class="headline">Three <span class="it">failure modes</span> when you run out</h2>
     </div>
     <div class="body-area">
-        <table class="ledger reveal">
-            <thead><tr><th>Failure mode</th><th>What happens</th><th>Danger level</th></tr></thead>
-            <tbody>
-                <tr><td class="tag">Hard rejection</td><td>the API refuses the request before running it</td><td>Loud &mdash; easy to notice and fix</td></tr>
-                <tr><td class="tag">Silent truncation</td><td>some clients / frameworks quietly drop the oldest turns</td><td class="warn-cell"><b>Quiet &mdash; the call succeeds but the model "forgot"</b></td></tr>
-                <tr><td class="tag">Quality degradation</td><td>even when it fits, models can lose track of material buried mid-context</td><td>Subtle &mdash; answers get vaguer, no error</td></tr>
-            </tbody>
-        </table>
-        <ul class="points reveal" style="max-width:1620px; margin-top:26px;">
+        <ul class="points reveal" style="max-width:1620px;">
             <li class="point">The dangerous one is <span class="warn">silent truncation</span>: no error, but the model no longer has info you assumed. It motivates context management (L19) and RAG (L21).</li>
         </ul>
+        <div class="diagram-frame reveal" style="flex-direction:column; align-items:stretch; gap:26px; margin-top:24px; max-width:1560px;">
+            <div>
+                <div class="fail-lbl"><b>1 &middot; Hard rejection</b> &mdash; loud: the request spills past the 200k ceiling and the API refuses it</div>
+                <div style="display:flex; align-items:stretch; height:58px;">
+                    <div class="meter" style="height:58px; width:78%;">
+                        <div class="seg nf" style="flex:20;">preamble</div>
+                        <div class="seg nf" style="flex:58;">conversation history</div>
+                        <div class="seg nf" style="flex:22;">current&nbsp;input</div>
+                    </div>
+                    <div class="seg spill" style="width:16%;">&#9888; over the ceiling</div>
+                </div>
+            </div>
+            <div>
+                <div class="fail-lbl"><b>2 &middot; Silent truncation</b> &mdash; quiet: the oldest turns are dropped and the call still &ldquo;succeeds&rdquo;</div>
+                <div class="meter" style="height:58px;">
+                    <div class="seg nf" style="flex:16;">preamble</div>
+                    <div class="seg cut" style="flex:26;">oldest turns</div>
+                    <div class="seg nf" style="flex:34;">recent history</div>
+                    <div class="seg nf" style="flex:16;">current&nbsp;input</div>
+                    <div class="seg outcyan" style="flex:20;">output</div>
+                </div>
+            </div>
+            <div>
+                <div class="fail-lbl"><b>3 &middot; Quality degradation</b> &mdash; subtle: it fits, but material buried mid-context fades; answers get vaguer, no error</div>
+                <div class="meter" style="height:58px;">
+                    <div class="seg nf" style="flex:16;">preamble</div>
+                    <div class="seg nf haze" style="flex:44;">mid-context &mdash; &ldquo;lost in the middle&rdquo;</div>
+                    <div class="seg nf" style="flex:20;">current&nbsp;input</div>
+                    <div class="seg outcyan" style="flex:20;">output</div>
+                </div>
+            </div>
+        </div>
+        <div class="diagram-caption reveal" style="max-width:1620px;">The same 200k bar from 7.1&ndash;7.2, three ways to lose &mdash; only the first one is loud.</div>
     </div>
     <div class="chrome-page">27 / 36</div>
     <div class="chrome-nav">&larr; &rarr; navigate</div>
@@ -1274,18 +1412,30 @@ table.ledger td.warn-cell { color: var(--coral); }
     </div>
     <div class="body-area">
         <div class="lede reveal" style="max-width:1620px; margin-top:0;">Billing is per token, with <b>separate input and output rates</b>, on <b>every</b> call. No free server-side memory: the re-sent preamble and history are re-billed each turn.</div>
-        <div class="diagram-frame reveal" style="gap:20px; margin-top:56px; flex-wrap:wrap;">
-            <div class="fbox">input_tokens<span class="sm">how much you sent</span></div>
-            <span class="fop">&times;</span>
-            <div class="fbox">input_rate<span class="sm">cheaper</span></div>
+        <div class="diagram-frame reveal" style="gap:24px; margin-top:56px;">
+            <div style="display:flex; flex-direction:column; gap:12px;">
+                <div class="cost-seg" style="width:790px;">
+                    <div class="cost-sub" style="flex:62; background:rgba(255,107,87,0.15); border-right:2px solid var(--coral); color:var(--ink);">re-sent preamble + history<br><span style="color:var(--coral);">re-billed every turn</span></div>
+                    <div class="cost-sub" style="flex:38; background:rgba(82,232,200,0.20); color:var(--ink);">fresh turn<br><span style="color:var(--cyan);">the new part</span></div>
+                </div>
+                <div style="font-size:20px; color:var(--ink-dim); text-align:center;">input &mdash; <code>input_tokens &times; input_rate</code></div>
+            </div>
             <span class="fop">+</span>
-            <div class="fbox">output_tokens<span class="sm">how much it wrote</span></div>
-            <span class="fop">&times;</span>
-            <div class="fbox" style="border-color:var(--coral);">output_rate<span class="sm" style="color:var(--coral);">pricier</span></div>
+            <div style="display:flex; flex-direction:column; gap:12px;">
+                <div class="cost-seg" style="width:320px;">
+                    <div class="cost-sub" style="flex:1;">model&rsquo;s response</div>
+                </div>
+                <div style="font-size:20px; color:var(--ink-dim); text-align:center;">output &mdash; <code>output_tokens &times; output_rate</code></div>
+            </div>
             <span class="fop">=</span>
-            <div class="fbox" style="background:rgba(82,232,200,0.16);"><b>call cost</b></div>
+            <div style="display:flex; flex-direction:column; gap:12px;">
+                <div class="cost-seg" style="width:230px; border-color:var(--cyan); background:rgba(82,232,200,0.10);">
+                    <div class="cost-sub" style="flex:1; font-size:24px; font-weight:600; color:var(--ink);">call cost</div>
+                </div>
+                <div style="font-size:20px; color:var(--ink-dim); text-align:center;">every call, no memory</div>
+            </div>
         </div>
-        <div class="diagram-caption reveal" style="text-align:center; max-width:1620px;">One call's bill &mdash; two rates, applied to the tokens in each direction.</div>
+        <div class="diagram-caption reveal" style="text-align:center; max-width:1620px;">One call as a two-segment cost block &mdash; the coral share of the input is the block you already paid for last turn.</div>
     </div>
     <div class="chrome-page">29 / 36</div>
     <div class="chrome-nav">&larr; &rarr; navigate</div>
@@ -1333,16 +1483,20 @@ table.ledger td.warn-cell { color: var(--coral); }
     </div>
     <div class="body-area">
         <div class="lede reveal" style="max-width:1620px; margin-top:0;">The client re-sends the whole history <b>plus the preamble</b> each turn, so input tokens climb every turn even when each new message is small.</div>
-        <table class="ledger reveal" style="margin-top:26px;">
-            <thead><tr><th>Turn</th><th>New tokens this turn</th><th>Cumulative input re-sent</th><th>Note</th></tr></thead>
-            <tbody>
-                <tr><td class="tag">1</td><td>~200</td><td>~200</td><td>baseline (preamble + first message)</td></tr>
-                <tr><td class="tag">2</td><td>~200</td><td>~400</td><td>turn 1 re-sent</td></tr>
-                <tr><td class="tag">3</td><td>~200</td><td>~600</td><td>turns 1&ndash;2 re-sent</td></tr>
-                <tr><td class="tag">4</td><td>~200</td><td>~800</td><td>turns 1&ndash;3 re-sent</td></tr>
-                <tr><td class="tag">5</td><td>~200</td><td class="warn-cell">~1000</td><td>the bill grows even though each message is small</td></tr>
-            </tbody>
-        </table>
+        <div class="diagram-frame reveal" style="gap:90px; margin-top:36px; align-items:flex-end;">
+            <div class="stair">
+                <div class="scol"><div class="sval">~200</div><div class="snew" style="border-bottom:2px solid var(--cyan); border-radius:6px;"></div><div class="slbl">turn 1</div></div>
+                <div class="scol"><div class="sval">~400</div><div class="snew"></div><div class="sold" style="height:52px;"></div><div class="slbl">turn 2</div></div>
+                <div class="scol"><div class="sval">~600</div><div class="snew"></div><div class="sold" style="height:104px;"></div><div class="slbl">turn 3</div></div>
+                <div class="scol"><div class="sval">~800</div><div class="snew"></div><div class="sold" style="height:156px;"></div><div class="slbl">turn 4</div></div>
+                <div class="scol"><div class="sval">~1000</div><div class="snew"></div><div class="sold" style="height:208px;"></div><div class="slbl">turn 5</div></div>
+            </div>
+            <div style="display:flex; flex-direction:column; gap:16px; padding-bottom:60px;">
+                <div style="display:flex; align-items:center; gap:14px; font-size:20px; color:var(--ink-dim);"><span style="width:34px; height:24px; background:rgba(82,232,200,0.28); border:2px solid var(--cyan); border-radius:5px;"></span>new ~200 tokens you typed this turn</div>
+                <div style="display:flex; align-items:center; gap:14px; font-size:20px; color:var(--ink-dim);"><span style="width:34px; height:24px; background:rgba(255,107,87,0.16); border:2px solid var(--coral); border-radius:5px;"></span>re-sent preamble + all prior turns</div>
+            </div>
+        </div>
+        <div class="diagram-caption reveal" style="max-width:1620px;">By turn 5 the coral you re-pay dwarfs the cyan you actually typed &mdash; the staircase that prompt caching, context management (L19), and RAG (L21) exist to fight.</div>
     </div>
     <div class="chrome-page">31 / 36</div>
     <div class="chrome-nav">&larr; &rarr; navigate</div>
@@ -1400,10 +1554,50 @@ table.ledger td.warn-cell { color: var(--coral); }
         <h2 class="headline">The whole chain in <span class="it">one breath</span></h2>
     </div>
     <div class="body-area">
-        <ul class="points reveal" style="max-width:1620px;">
-            <li class="point">Predict the next <b>token</b> &rarr; the pieces are <b>sub-word</b>, so real strings fragment &rarr; a bigger <b>model</b> and better front-loaded <b>context</b> sharpen the prediction &rarr; <b>temperature</b> reshapes it &rarr; you reuse a <b>preamble</b> &rarr; and with <b>no memory</b>, you re-send and re-pay it against both the <b>window</b> and the <b>bill</b>.</li>
-        </ul>
-        <div class="callout reveal" style="max-width:1620px;"><p>Everything you front-load to make the model predict better is overhead you re-send, re-count, and re-pay on every call &mdash; so every prompt is a budget decision in tokens, dollars, and window space at once.</p></div>
+        <div class="diagram-frame reveal" style="height:470px; margin-top:0;">
+            <svg viewBox="0 0 1560 540" width="100%" height="100%">
+                <defs>
+                    <marker id="l91-c" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="var(--cyan)"/></marker>
+                </defs>
+                <!-- §7–8: the re-sent ring around the whole loop -->
+                <rect x="16" y="14" width="1528" height="472" rx="26" fill="none" stroke="var(--coral)" stroke-width="3" stroke-dasharray="12 9"/>
+                <text x="780" y="526" text-anchor="middle" class="edge-label" fill="var(--coral)">&sect;7&ndash;8 &mdash; the re-sent preamble + history: counted against the 200k window and the bill, every call</text>
+                <!-- the slide-1.1 loop -->
+                <rect x="70" y="200" width="240" height="110" rx="12" fill="#12181a" stroke="var(--cyan)" stroke-width="2.5"/>
+                <text x="190" y="262" text-anchor="middle" class="node-label">text so far</text>
+                <rect x="440" y="200" width="190" height="110" rx="12" fill="#12181a" stroke="var(--cyan)" stroke-width="2.5"/>
+                <text x="535" y="262" text-anchor="middle" class="node-label">model</text>
+                <rect x="760" y="200" width="250" height="110" rx="12" fill="#12181a" stroke="var(--cyan)" stroke-width="2.5"/>
+                <text x="885" y="262" text-anchor="middle" class="node-label">distribution</text>
+                <rect x="1150" y="200" width="290" height="110" rx="12" fill="#12181a" stroke="var(--cyan)" stroke-width="2.5"/>
+                <text x="1295" y="262" text-anchor="middle" class="node-label">sampler picks</text>
+                <path d="M 310 255 L 430 255" stroke="var(--cyan-dim)" stroke-width="3" marker-end="url(#l91-c)"/>
+                <path d="M 630 255 L 750 255" stroke="var(--cyan-dim)" stroke-width="3" marker-end="url(#l91-c)"/>
+                <path d="M 1010 255 L 1140 255" stroke="var(--cyan-dim)" stroke-width="3" marker-end="url(#l91-c)"/>
+                <path d="M 1295 310 C 1295 448, 190 448, 190 312" fill="none" stroke="var(--cyan-dim)" stroke-width="3" marker-end="url(#l91-c)"/>
+                <text x="742" y="428" text-anchor="middle" class="edge-label" fill="var(--cyan)">append the token &rarr; loop back</text>
+                <circle r="8" fill="var(--cyan)"><animateMotion dur="2.6s" repeatCount="indefinite" path="M 310 255 L 430 255"/></circle>
+                <!-- §2–3: sub-word token chips on the input -->
+                <text x="190" y="74" text-anchor="middle" class="edge-label" fill="var(--ink-dim)">&sect;2&ndash;3 sub-word token pieces</text>
+                <rect x="98" y="92" width="94" height="42" rx="7" fill="#12181a" stroke="var(--cyan-dim)" stroke-width="2"/>
+                <text x="145" y="120" text-anchor="middle" class="edge-label" fill="var(--ink)">hydro</text>
+                <rect x="200" y="92" width="70" height="42" rx="7" fill="#12181a" stroke="var(--cyan-dim)" stroke-width="2"/>
+                <text x="235" y="120" text-anchor="middle" class="edge-label" fill="var(--ink)">gen</text>
+                <path d="M 190 134 L 190 196" stroke="var(--ink-faint)" stroke-width="2" stroke-dasharray="5 5"/>
+                <!-- §4 + §6: the sharpened distribution -->
+                <text x="885" y="74" text-anchor="middle" class="edge-label" fill="var(--ink-dim)">&sect;4 scale &middot; &sect;6 context sharpen it</text>
+                <rect x="842" y="88" width="24" height="56" rx="3" fill="var(--cyan)"/>
+                <rect x="874" y="122" width="24" height="22" rx="3" fill="var(--ink-faint)"/>
+                <rect x="906" y="132" width="24" height="12" rx="3" fill="var(--ink-faint)"/>
+                <path d="M 885 148 L 885 196" stroke="var(--ink-faint)" stroke-width="2" stroke-dasharray="5 5"/>
+                <!-- §5: the temperature dial on the sampler -->
+                <text x="1295" y="64" text-anchor="middle" class="edge-label" fill="var(--ink-dim)">&sect;5 temperature knob</text>
+                <circle cx="1295" cy="112" r="30" fill="#12181a" stroke="var(--cyan-dim)" stroke-width="2.5"/>
+                <line x1="1295" y1="112" x2="1314" y2="90" stroke="var(--cyan)" stroke-width="3.5" stroke-linecap="round"/>
+                <path d="M 1295 142 L 1295 196" stroke="var(--ink-faint)" stroke-width="2" stroke-dasharray="5 5"/>
+            </svg>
+        </div>
+        <div class="callout reveal" style="max-width:1620px; margin-top:10px;"><p>Everything you front-load to make the model predict better is overhead you re-send, re-count, and re-pay on every call &mdash; every prompt is a budget decision in tokens, dollars, and window space at once.</p></div>
     </div>
     <div class="chrome-page">34 / 36</div>
     <div class="chrome-nav">&larr; &rarr; navigate</div>

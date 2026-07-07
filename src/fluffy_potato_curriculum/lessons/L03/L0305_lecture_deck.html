@@ -556,6 +556,63 @@ table.ledger td.warn-cell { color: var(--coral); }
 .dg-arrow-faint { color: var(--ink-faint); font-size: 34px; line-height: 1; }
 .dg-label { font-size: 21px; color: var(--ink-dim); margin-top: 12px; line-height: 1.4; }
 .dg-coral-mark { color: var(--coral); font-weight: 700; }
+
+/* ===========================================
+   MOTIF HELPERS (L0305) — appended per FRONTEND-STYLE.md §5
+   The recurring extract_node box: slides 1.1 → 1.2 → 2.1 → 2.2 → 4.1
+   re-draw the SAME box (same markup, label, size) with one change each.
+   =========================================== */
+.mo-col { display: flex; flex-direction: column; align-items: center; }
+.mo-node {
+    width: 330px;
+    flex-shrink: 0;
+    border: 2px solid var(--cyan);
+    border-radius: 10px;
+    background: #12181a;
+    padding: 20px 24px;
+    text-align: center;
+}
+.mo-node .mo-name { font-family: var(--font-body); font-weight: 600; font-size: 24px; color: var(--cyan); }
+.mo-node .mo-sub { font-size: 18px; color: var(--ink-dim); margin-top: 8px; line-height: 1.35; }
+.mo-node.mo-ghost { border-style: dashed; border-color: var(--ink-faint); background: transparent; }
+.mo-node.mo-ghost .mo-name, .mo-node.mo-ghost .mo-sub { color: var(--ink-faint); }
+/* the coral fused inline block — the motif's foil in the two-up */
+.mo-fused {
+    width: 520px;
+    flex-shrink: 0;
+    border: 2px solid var(--coral);
+    border-radius: 10px;
+    background: rgba(255,107,87,0.05);
+    padding: 16px 22px;
+    text-align: center;
+}
+.mo-fused .mo-fused-name { font-family: var(--font-body); font-size: 19px; color: var(--coral); margin-bottom: 12px; }
+.mo-fused .mo-halves { display: flex; justify-content: center; align-items: baseline; }
+.mo-fused .mo-half { font-family: var(--font-display); font-size: 28px; color: var(--ink); padding: 4px 10px; }
+.mo-fused .mo-plus { color: var(--coral); font-size: 24px; }
+/* slide 1.2: the coral scissors failing to cut between the fused halves */
+.mo-pinwrap { position: relative; }
+.mo-cut {
+    position: absolute;
+    left: 50%;
+    top: 60%;
+    transform: translate(-50%, -50%) rotate(90deg);
+    color: var(--coral);
+    font-size: 52px;
+    line-height: 1;
+}
+/* slide 2.1: affordance labels pinned on (or struck off) the box's seams */
+.mo-pin {
+    position: absolute;
+    padding: 3px 14px;
+    border: 1.5px solid var(--cyan);
+    border-radius: 999px;
+    background: #0a0e13;
+    color: var(--cyan);
+    font-size: 17px;
+    white-space: nowrap;
+}
+.mo-pin.mo-pin-x { border-color: var(--coral-dim); color: var(--coral); text-decoration: line-through; }
 </style>
 </head>
 <body>
@@ -631,26 +688,27 @@ table.ledger td.warn-cell { color: var(--coral); }
             <li class="point">Right: the <b>inline</b> version &mdash; one long function that extracts <b>and</b> summarizes in the same body, no state schema, no graph. It <b>works</b>.</li>
             <li class="point">So why did we go to the trouble of a <code>StateGraph</code> for a single node?</li>
         </ul>
-        <div class="diagram-frame reveal" style="gap:70px; margin-top:34px; align-items:stretch;">
-            <div style="display:flex; flex-direction:column; align-items:center;">
-                <div class="dg-node" style="width:340px;">
-                    <div class="dg-name"><code style="font-family:var(--font-body);color:var(--cyan);font-size:0.82em;">extract_node</code></div>
-                    <div class="dg-sub">typed state in &rarr; state update out</div>
+        <div class="diagram-frame reveal" style="gap:100px; margin-top:34px; align-items:flex-start;">
+            <div class="mo-col">
+                <div class="mo-node">
+                    <div class="mo-name">extract_node</div>
+                    <div class="mo-sub">typed state in &rarr;<br>state update out</div>
                 </div>
-                <div class="dg-label">one narrow step</div>
+                <div class="dg-label" style="color:var(--cyan);">one narrow step &mdash; the cyan border <i>is</i> the seam</div>
             </div>
-            <div style="display:flex; flex-direction:column; align-items:center;">
-                <div class="dg-neutral" style="border:2px solid var(--ink-faint); border-radius:10px; background:rgba(76,86,82,0.10); padding:20px 26px; width:520px; text-align:center;">
-                    <div style="font-family:var(--font-body); color:var(--ink-dim); font-size:20px; margin-bottom:14px;">extract_and_summarize_inline</div>
-                    <div class="dg-fused" style="justify-content:center;">
-                        <div class="dg-half">extract</div>
-                        <div class="dg-half">summarize</div>
+            <div class="mo-col">
+                <div class="mo-fused">
+                    <div class="mo-fused-name">extract_and_summarize_inline</div>
+                    <div class="mo-halves">
+                        <div class="mo-half">extract</div>
+                        <div class="mo-plus">+</div>
+                        <div class="mo-half">summarize</div>
                     </div>
                 </div>
-                <div class="dg-label">two jobs fused &mdash; no seam</div>
+                <div class="dg-label"><span class="dg-coral-mark">two calls crammed in &mdash; no seam between them</span></div>
             </div>
         </div>
-        <div class="diagram-caption reveal">Same job, two shapes: one narrow node vs. two calls welded into one body.</div>
+        <div class="diagram-caption reveal">The deck's motif: slides 1.2, 2.1, 2.2, and 4.1 re-draw this same box with exactly one thing changed each time.</div>
     </div>
     <div class="chrome-page">03 / 12</div>
     <div class="chrome-nav">&larr; &rarr; navigate</div>
@@ -670,29 +728,30 @@ table.ledger td.warn-cell { color: var(--coral); }
             <li class="point">Tiny change &mdash; the extraction prompt <b>needs a fourth field</b>. In <code>extract_node</code> the edit is contained: prompt, parser, one state field, nothing about <i>what calls it</i> moves.</li>
             <li class="point">The inline version takes the edit too &mdash; but now <b>test extraction alone.</b> You can't run that half without also running (and paying for) summarize. The two jobs are <span class="warn">fused</span>.</li>
         </ul>
-        <div class="diagram-frame reveal" style="gap:110px; margin-top:40px; align-items:center;">
-            <div style="display:flex; flex-direction:column; align-items:center;">
-                <div style="display:flex; align-items:center; gap:0;">
-                    <div class="dg-fused">
-                        <div class="dg-half">extract</div>
-                        <div class="dg-half">summarize</div>
+        <div class="diagram-frame reveal" style="gap:100px; margin-top:40px; align-items:flex-start;">
+            <div class="mo-col">
+                <div class="dg-dashed-cyan" style="padding:22px 30px;">
+                    <div class="mo-node">
+                        <div class="mo-name">extract_node</div>
+                        <div class="mo-sub">typed state in &rarr;<br>state update out</div>
                     </div>
-                    <div class="dg-coral-mark" style="font-size:64px; margin-left:-4px; position:relative;">&#9986;</div>
+                </div>
+                <div class="dg-label" style="color:var(--cyan);">a clean, testable boundary around one step</div>
+            </div>
+            <div class="mo-col">
+                <div class="mo-fused mo-pinwrap" style="margin-top:36px;">
+                    <div class="mo-fused-name">extract_and_summarize_inline</div>
+                    <div class="mo-halves">
+                        <div class="mo-half">extract</div>
+                        <div class="mo-plus">+</div>
+                        <div class="mo-half">summarize</div>
+                    </div>
+                    <div class="mo-cut">&#9986;</div>
                 </div>
                 <div class="dg-label"><span class="dg-coral-mark">&#10007;</span> no seam to test one half</div>
             </div>
-            <div style="color:var(--ink-faint); font-size:30px; font-style:italic;">vs.</div>
-            <div style="display:flex; flex-direction:column; align-items:center;">
-                <div class="dg-dashed-cyan" style="padding:30px 40px;">
-                    <div class="dg-node" style="width:280px;">
-                        <div class="dg-name"><code style="font-family:var(--font-body);color:var(--cyan);font-size:0.82em;">extract_node</code></div>
-                        <div class="dg-sub">a single step</div>
-                    </div>
-                </div>
-                <div class="dg-label" style="color:var(--cyan);">clean, testable boundary</div>
-            </div>
         </div>
-        <div class="diagram-caption reveal">Fused inline block &mdash; nothing to cut between the halves &mdash; vs. a node you can invoke in isolation.</div>
+        <div class="diagram-caption reveal">The slide-1.1 pair again, one change: the scissors fail &mdash; there is nothing between the fused halves to cut.</div>
     </div>
     <div class="chrome-page">04 / 12</div>
     <div class="chrome-nav">&larr; &rarr; navigate</div>
@@ -719,8 +778,8 @@ table.ledger td.warn-cell { color: var(--coral); }
         <div class="eyebrow">Slide 2.1</div>
         <h2 class="headline">Four affordances of a <span class="it">narrow node</span></h2>
     </div>
-    <div class="body-area reveal">
-        <table class="ledger">
+    <div class="body-area">
+        <table class="ledger reveal">
             <thead><tr><th>Affordance</th><th>The node version</th><th>The inline function</th></tr></thead>
             <tbody>
                 <tr><td class="tag">Tested in isolation</td><td><code>invoke()</code> the one node, inspect its output</td><td class="warn-cell">no seam to test one step alone</td></tr>
@@ -729,6 +788,33 @@ table.ledger td.warn-cell { color: var(--coral); }
                 <tr><td class="tag">Seen at a glance</td><td>inspectable data (<code>draw_mermaid()</code>, nodes + edges)</td><td class="warn-cell">you must read the body to know its shape</td></tr>
             </tbody>
         </table>
+        <div class="diagram-frame reveal" style="gap:130px; margin-top:44px;">
+            <div class="mo-pinwrap">
+                <div class="mo-node">
+                    <div class="mo-name">extract_node</div>
+                    <div class="mo-sub">typed state in &rarr;<br>state update out</div>
+                </div>
+                <div class="mo-pin" style="top:-16px; left:-34px;">invoke alone</div>
+                <div class="mo-pin" style="top:-16px; right:-34px;">compose</div>
+                <div class="mo-pin" style="bottom:-16px; left:-34px;">swap</div>
+                <div class="mo-pin" style="bottom:-16px; right:-34px;">draw</div>
+            </div>
+            <div class="mo-pinwrap">
+                <div class="mo-fused">
+                    <div class="mo-fused-name">extract_and_summarize_inline</div>
+                    <div class="mo-halves">
+                        <div class="mo-half">extract</div>
+                        <div class="mo-plus">+</div>
+                        <div class="mo-half">summarize</div>
+                    </div>
+                </div>
+                <div class="mo-pin mo-pin-x" style="top:-16px; left:-34px;">invoke alone</div>
+                <div class="mo-pin mo-pin-x" style="top:-16px; right:-34px;">compose</div>
+                <div class="mo-pin mo-pin-x" style="bottom:-16px; left:-34px;">swap</div>
+                <div class="mo-pin mo-pin-x" style="bottom:-16px; right:-34px;">draw</div>
+            </div>
+        </div>
+        <div class="diagram-caption reveal">The same pair, one change: the four affordances pinned on the node's seams &mdash; and struck through on the fused block.</div>
     </div>
     <div class="chrome-page">06 / 12</div>
     <div class="chrome-nav">&larr; &rarr; navigate</div>
@@ -749,6 +835,33 @@ table.ledger td.warn-cell { color: var(--coral); }
             <li class="point">The ceremony exists to make one LLM call <b>reusable and inspectable</b> instead of a one-off.</li>
         </ul>
         <div class="callout reveal"><p>Naming the step plainly is what gives you a seam to test, compose, swap, and see.</p></div>
+        <div class="diagram-frame reveal" style="gap:16px; margin-top:52px;">
+            <div class="mo-node">
+                <div class="mo-name">extract_node</div>
+                <div class="mo-sub">typed state in &rarr;<br>state update out</div>
+            </div>
+            <div class="dg-arrow-faint">&rarr;</div>
+            <div class="mo-pinwrap">
+                <div style="display:flex; align-items:center; gap:16px;">
+                    <div class="mo-node mo-ghost">
+                        <div class="mo-name">extract</div>
+                        <div class="mo-sub">typed state in &rarr;<br>state update out</div>
+                    </div>
+                    <div class="dg-arrow-faint">&rarr;</div>
+                    <div class="mo-node mo-ghost">
+                        <div class="mo-name">summarize</div>
+                        <div class="mo-sub">typed state in &rarr;<br>state update out</div>
+                    </div>
+                    <div class="dg-arrow-faint">&rarr;</div>
+                    <div class="mo-node mo-ghost">
+                        <div class="mo-name">format</div>
+                        <div class="mo-sub">typed state in &rarr;<br>state update out</div>
+                    </div>
+                </div>
+                <div class="dg-label" style="position:absolute; bottom:-42px; left:50%; transform:translateX(-50%); color:var(--ink-faint); white-space:nowrap;">lands in L04</div>
+            </div>
+        </div>
+        <div class="diagram-caption reveal" style="margin-top:56px;">The same box, alone this time &mdash; one change: a ghost row of future nodes trails off to its right.</div>
     </div>
     <div class="chrome-page">07 / 12</div>
     <div class="chrome-nav">&larr; &rarr; navigate</div>
@@ -841,19 +954,28 @@ table.ledger td.warn-cell { color: var(--coral); }
             <li class="point"><b>L04</b> is this idea <b>multiplied</b> &mdash; the same typed-state-in, state-update-out node design, several of them, wired with fixed edges into a sequence.</li>
             <li class="point">If you understood today's one node, you already understand most of what L04 needs: it is mostly <b>wiring</b>, not new node design.</li>
         </ul>
-        <div class="diagram-frame reveal" style="gap:44px; margin-top:48px;">
-            <div class="dg-node" style="width:200px;">
-                <div class="dg-name">node</div>
-                <div class="dg-sub">one step now</div>
+        <div class="diagram-frame reveal" style="gap:16px; margin-top:48px;">
+            <div class="mo-node">
+                <div class="mo-name">extract_node</div>
+                <div class="mo-sub">typed state in &rarr;<br>state update out</div>
             </div>
-            <div class="dg-arrow-faint">&rarr;</div>
-            <div class="dg-node" style="width:200px;"><div class="dg-name">extract</div></div>
             <div class="dg-arrow">&rarr;</div>
-            <div class="dg-node" style="width:220px;"><div class="dg-name">summarize</div></div>
+            <div class="mo-node">
+                <div class="mo-name">extract</div>
+                <div class="mo-sub">typed state in &rarr;<br>state update out</div>
+            </div>
             <div class="dg-arrow">&rarr;</div>
-            <div class="dg-node" style="width:200px;"><div class="dg-name">format</div></div>
+            <div class="mo-node">
+                <div class="mo-name">summarize</div>
+                <div class="mo-sub">typed state in &rarr;<br>state update out</div>
+            </div>
+            <div class="dg-arrow">&rarr;</div>
+            <div class="mo-node">
+                <div class="mo-name">format</div>
+                <div class="mo-sub">typed state in &rarr;<br>state update out</div>
+            </div>
         </div>
-        <div class="diagram-caption reveal">One step now &rarr; several wired next, joined by fixed (solid cyan) edges &mdash; that's L04.</div>
+        <div class="diagram-caption reveal">One step now &rarr; several wired next: the slide-2.2 ghost row drawn solid, joined by fixed cyan edges.</div>
     </div>
     <div class="chrome-page">11 / 12</div>
     <div class="chrome-nav">&larr; &rarr; navigate</div>
