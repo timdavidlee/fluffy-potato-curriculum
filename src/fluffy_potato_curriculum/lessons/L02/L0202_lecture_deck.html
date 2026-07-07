@@ -599,6 +599,22 @@ table.ledger td.warn-cell { color: var(--coral); }
     padding: 1px 7px;
     border-radius: 3px;
 }
+
+/* ── outline-densify update helpers (appended) ── */
+.chart { display: flex; align-items: flex-end; gap: 30px; height: 250px; }
+.chart .bar-col { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 10px; height: 100%; }
+.chart .bar { width: 84px; background: var(--ink-faint); border-radius: 6px 6px 0 0; }
+.chart .bar.hi { background: var(--cyan); }
+.chart .bar.bad { background: var(--coral); }
+.chart .bar-label { font-size: 19px; color: var(--ink-dim); }
+.two-up { flex: 1; border-radius: 12px; padding: 16px 22px; }
+.two-up.bad { border: 2px solid var(--coral); background: rgba(255,107,87,0.04); }
+.two-up.good { border: 2px solid var(--cyan); background: rgba(82,232,200,0.04); }
+.two-up-title { font-size: 17px; letter-spacing: 0.12em; text-transform: uppercase; font-weight: 600; margin-bottom: 12px; }
+.two-up.bad .two-up-title { color: var(--coral); }
+.two-up.good .two-up-title { color: var(--cyan); }
+.pair-col { display: flex; flex-direction: column; align-items: center; gap: 8px; flex: 1; max-width: 330px; }
+.pair-col .chip { text-align: center; white-space: normal; line-height: 1.35; }
 </style>
 </head>
 <body>
@@ -684,7 +700,7 @@ table.ledger td.warn-cell { color: var(--coral); }
     </div>
     <div class="body-area" style="display:flex; gap:60px; align-items:center;">
         <div class="reveal" style="flex:1.1; max-width:760px;">
-            <div class="dbox neutral" style="padding:30px 34px;">
+            <div class="dbox neutral" style="padding:30px 34px; position:relative;">
                 <div class="dbox-label" style="color:var(--ink-dim);">L01 &middot; the container</div>
                 <div class="chips">
                     <span class="chip ghost">tokens</span>
@@ -692,6 +708,15 @@ table.ledger td.warn-cell { color: var(--coral); }
                     <span class="chip ghost">temperature</span>
                     <span class="chip ghost">cost</span>
                 </div>
+                <!-- cyan magnifier arrow: zoom from the L01 container into the L02 contents -->
+                <svg width="130" height="130" viewBox="0 0 130 130" style="position:absolute; top:64px; right:-34px; overflow:visible; z-index:2;">
+                    <defs>
+                        <marker id="s11zoom" markerWidth="11" markerHeight="11" refX="8" refY="3.5" orient="auto"><path d="M0,0 L0,7 L10,3.5 z" fill="var(--cyan)"/></marker>
+                    </defs>
+                    <circle cx="52" cy="42" r="30" fill="rgba(82,232,200,0.10)" stroke="var(--cyan)" stroke-width="4"/>
+                    <line x1="30" y1="64" x2="10" y2="84" stroke="var(--cyan)" stroke-width="6" stroke-linecap="round"/>
+                    <path d="M 52 76 C 52 100, 44 108, 34 122" fill="none" stroke="var(--cyan)" stroke-width="3" marker-end="url(#s11zoom)"/>
+                </svg>
                 <div class="dbox" style="margin-top:28px;">
                     <div class="dbox-label">L02 &middot; the contents = the prompt</div>
                     <div class="chips">
@@ -801,17 +826,24 @@ table.ledger td.warn-cell { color: var(--coral); }
             <li class="point">&ldquo;The conversation&rdquo; is a Python <code>list</code> of <code>{role, content}</code> messages your code assembles and re-sends every call &mdash; <b>no hidden server-side memory</b> (the L01 callback).</li>
             <li class="point">Three roles: <b>system</b> (out-of-band steering, always-true context), <b>user</b> (inputs from the caller), <b>assistant</b> (prior replies &mdash; or planted in-context examples, section 4).</li>
         </ul>
-        <div class="diagram-frame reveal" style="justify-content:flex-start; margin-top:44px; flex-direction:column; align-items:flex-start; gap:18px;">
+        <div class="diagram-frame reveal" style="justify-content:flex-start; margin-top:44px; flex-direction:column; align-items:flex-start; gap:0;">
+            <!-- pills stay neutral ink — nothing is failing; the cyan re-send loop is the point -->
             <div style="display:flex; align-items:center; gap:14px; flex-wrap:wrap;">
                 <span style="color:var(--ink-faint); font-size:24px;">messages = [</span>
-                <span class="pill system">system</span>
-                <span class="pill user">user</span>
-                <span class="pill assistant">assistant</span>
-                <span class="pill user">user</span>
-                <span class="pill assistant">assistant</span>
+                <span class="pill">system</span>
+                <span class="pill">user</span>
+                <span class="pill">assistant</span>
+                <span class="pill">user</span>
+                <span class="pill">assistant</span>
                 <span style="color:var(--ink-faint); font-size:24px;">… ]</span>
             </div>
-            <div class="diagram-caption" style="margin-top:6px;">The caller builds and re-sends this <b style="color:var(--ink); font-style:normal;">whole list</b> every turn.</div>
+            <svg width="780" height="120" viewBox="0 0 780 120" style="margin-top:2px;">
+                <defs>
+                    <marker id="s21resend" markerWidth="11" markerHeight="11" refX="8" refY="3.5" orient="auto"><path d="M0,0 L0,7 L10,3.5 z" fill="var(--cyan)"/></marker>
+                </defs>
+                <path d="M 730 8 C 730 66, 620 76, 390 76 C 160 76, 56 66, 56 16" fill="none" stroke="var(--cyan)" stroke-width="2.5" marker-end="url(#s21resend)"/>
+                <text x="390" y="110" text-anchor="middle" class="edge-label" fill="var(--cyan)" font-size="20">the caller builds and re-sends this whole list &mdash; every turn</text>
+            </svg>
         </div>
     </div>
     <div class="chrome-page">07 / 38</div>
@@ -833,12 +865,14 @@ table.ledger td.warn-cell { color: var(--coral); }
             <li class="point">Why it matters twice: <b>reuse</b> &mdash; a lean system message fronts many requests unchanged; and <b>cost</b> &mdash; system is re-sent every turn, so bloat is paid for forever (what prompt caching, L19, exists to fight).</li>
         </ul>
         <div class="reveal" style="flex:1; display:flex; flex-direction:column; gap:24px;">
+            <!-- both boxes cyan: durable vs per-call, not right vs wrong — the stamps carry the distinction.
+                 This two-box pair is a motif: slides 2.4 and 5.6 re-show it with one thing changed. -->
             <div class="dbox">
                 <div class="dbox-label">system <span style="color:var(--ink-faint);">&mdash; always true</span></div>
                 <div class="dbox-body">&ldquo;You are a triage assistant. Answer in two short paragraphs…&rdquo;</div>
             </div>
-            <div class="dbox neutral">
-                <div class="dbox-label" style="color:var(--ink-dim);">user <span style="color:var(--ink-faint);">&mdash; this call only</span></div>
+            <div class="dbox">
+                <div class="dbox-label">user <span style="color:var(--ink-faint);">&mdash; this call only</span></div>
                 <div class="dbox-body">&ldquo;My head has hurt for three days.&rdquo;</div>
             </div>
         </div>
@@ -889,11 +923,39 @@ table.ledger td.warn-cell { color: var(--coral); }
         <h2 class="headline">The two <span class="it">mis-attribution footguns</span></h2>
     </div>
     <div class="body-area">
-        <ul class="points reveal">
-            <li class="point"><span class="warn">Instructions buried in <code>user</code></span> get re-sent every turn &mdash; more tokens, and the policy now competes with the actual request for attention.</li>
-            <li class="point"><span class="warn">Per-call data crammed into <code>system</code></span> poisons reuse: the system message stops being always-true, so the next request inherits stale data.</li>
-        </ul>
-        <table class="ledger" style="margin-top:20px;">
+        <!-- the 2.2 system/user motif re-shown with one change: the placement -->
+        <div class="reveal" style="display:flex; gap:40px; align-items:stretch;">
+            <div class="two-up bad">
+                <div class="two-up-title">wrong homes</div>
+                <div style="display:flex; flex-direction:column; gap:12px;">
+                    <div class="dbox coral" style="padding:12px 18px;">
+                        <div class="dbox-label" style="margin-bottom:4px;">system <span style="color:var(--ink-faint); text-transform:none;">&mdash; per-call data pinned here</span></div>
+                        <div class="dbox-body" style="font-size:21px;">&ldquo;My head has hurt for three days.&rdquo;</div>
+                    </div>
+                    <div class="dbox coral" style="padding:12px 18px;">
+                        <div class="dbox-label" style="margin-bottom:4px;">user <span style="color:var(--ink-faint); text-transform:none;">&mdash; policy buried here, re-sent every turn</span></div>
+                        <div class="dbox-body" style="font-size:21px;">&ldquo;You are a triage assistant. Answer in two short paragraphs…&rdquo;</div>
+                    </div>
+                    <div style="color:var(--coral); font-size:19px;">&#10007; stale-data poison &mdash; the next caller inherits this</div>
+                </div>
+            </div>
+            <div class="two-up good">
+                <div class="two-up-title">right homes &mdash; slide 2.2</div>
+                <div style="display:flex; flex-direction:column; gap:12px;">
+                    <div class="dbox" style="padding:12px 18px;">
+                        <div class="dbox-label" style="margin-bottom:4px;">system <span style="color:var(--ink-faint); text-transform:none;">&mdash; always true</span></div>
+                        <div class="dbox-body" style="font-size:21px;">&ldquo;You are a triage assistant. Answer in two short paragraphs…&rdquo;</div>
+                    </div>
+                    <div class="dbox" style="padding:12px 18px;">
+                        <div class="dbox-label" style="margin-bottom:4px;">user <span style="color:var(--ink-faint); text-transform:none;">&mdash; this call only</span></div>
+                        <div class="dbox-body" style="font-size:21px;">&ldquo;My head has hurt for three days.&rdquo;</div>
+                    </div>
+                    <div style="color:var(--cyan); font-size:19px;">&#10003; durable persona in <b>system</b>, this call's question in <b>user</b></div>
+                </div>
+            </div>
+        </div>
+        <div class="diagram-caption reveal" style="margin-top:14px; font-size:20px;">Same content, wrong homes &mdash; the two footguns side by side.</div>
+        <table class="ledger reveal" style="margin-top:16px;">
             <thead><tr><th>Content</th><th>Belongs in</th><th>Why</th></tr></thead>
             <tbody>
                 <tr><td>Persona, tone, output format, standing policy</td><td class="tag"><code>system</code></td><td>true on every call; enables reuse</td></tr>
@@ -1061,14 +1123,16 @@ table.ledger td.warn-cell { color: var(--coral); }
             <li class="point">A look ahead you don't need yet: production reaches for Anthropic's <b>tool-use-as-schema</b> to force conformance &mdash; that's L07. The parsing discipline still applies, since tool-call arguments can be malformed too.</li>
         </ul>
         <div class="diagram-frame reveal" style="justify-content:flex-start; margin-top:40px; gap:20px;">
+            <!-- cyan = the path you control; the reply is a hope (coral, dashed), not a guarantee -->
             <div class="stack-node" style="max-width:320px;">prompt + explicit schema spec</div>
             <span class="flow-arrow">&rarr;</span>
-            <div class="stack-node" style="max-width:280px;">model reply <span style="color:var(--ink-dim); font-weight:400; font-size:17px;">(hopefully JSON)</span></div>
+            <div class="stack-node" style="max-width:280px; border-style:dashed; border-color:var(--coral); color:var(--coral);">model reply <span style="font-weight:400; font-size:17px;">(hopefully JSON)</span></div>
             <span class="flow-arrow">&rarr;</span>
-            <div class="stack-node" style="border-color:var(--ink-faint);"><span class="dcode">parse()</span></div>
+            <div class="stack-node"><span class="dcode">parse()</span></div>
             <span class="flow-arrow">&rarr;</span>
             <div class="stack-node">{ dict }</div>
         </div>
+        <div class="diagram-caption reveal" style="margin-top:18px; font-size:20px;">The reply is a <span style="color:var(--coral); font-style:normal;">hope, not a guarantee</span> &mdash; exactly the gap the defensive parser (slide 3.4) exists to close.</div>
     </div>
     <div class="chrome-page">15 / 38</div>
     <div class="chrome-nav">← → navigate</div>
@@ -1207,16 +1271,20 @@ table.ledger td.warn-cell { color: var(--coral); }
                 <text x="42" y="205" class="edge-label" fill="var(--cyan)" font-size="17">0</text>
                 <text x="205" y="205" class="edge-label" fill="var(--ink-faint)" font-size="17">1</text>
                 <text x="130" y="230" text-anchor="middle" class="edge-label" fill="var(--ink-dim)" font-size="17">pinned near 0</text>
-                <!-- token bars -->
-                <text x="410" y="40" text-anchor="middle" class="edge-label" fill="var(--cyan-dim)">OUTPUT TOKENS</text>
-                <rect x="300" y="80" width="120" height="34" rx="4" fill="var(--cyan)" opacity="0.85"/>
-                <text x="300" y="140" class="edge-label" fill="var(--cyan)" font-size="16">tight schema</text>
-                <rect x="300" y="180" width="240" height="34" rx="4" fill="var(--ink-faint)"/>
-                <text x="300" y="240" class="edge-label" fill="var(--ink-dim)" font-size="16">chatty answer</text>
+                <text x="130" y="256" text-anchor="middle" class="edge-label" fill="var(--ink-faint)" font-size="15">the single repeatable answer</text>
+                <!-- two-bar output-token comparison: short cyan vs tall coral -->
+                <text x="425" y="40" text-anchor="middle" class="edge-label" fill="var(--cyan-dim)">OUTPUT TOKENS</text>
+                <rect x="320" y="230" width="80" height="80" rx="4" fill="var(--cyan)"/>
+                <text x="360" y="336" text-anchor="middle" class="edge-label" fill="var(--cyan)" font-size="16">tight schema,</text>
+                <text x="360" y="356" text-anchor="middle" class="edge-label" fill="var(--cyan)" font-size="16">no prose</text>
+                <rect x="450" y="70" width="80" height="240" rx="4" fill="var(--coral)" opacity="0.9"/>
+                <text x="490" y="336" text-anchor="middle" class="edge-label" fill="var(--coral)" font-size="16">chatty prose</text>
+                <text x="490" y="356" text-anchor="middle" class="edge-label" fill="var(--coral)" font-size="16">answer</text>
+                <line x1="300" y1="310" x2="555" y2="310" stroke="var(--ink-faint)" stroke-width="1.5"/>
             </svg>
         </div>
     </div>
-    <div class="diagram-caption reveal" style="position:absolute; left:var(--edge-x); bottom:96px; font-size:20px;">Structured output is often a <b style="color:var(--ink); font-style:normal;">cost win</b> too.</div>
+    <div class="diagram-caption reveal" style="position:absolute; left:var(--edge-x); bottom:96px; font-size:20px;">Structured output is often a <b style="color:var(--ink); font-style:normal;">cost win</b> too &mdash; output is the pricey direction.</div>
     <div class="chrome-page">18 / 38</div>
     <div class="chrome-nav">← → navigate</div>
 </section>
@@ -1291,20 +1359,20 @@ table.ledger td.warn-cell { color: var(--coral); }
             <li class="point">It's <b>behavior conditioning, not teaching</b> &mdash; capabilities don't change; you shift the <i>in-context distribution</i>. Frame it as <span class="k">showing, not teaching.</span></li>
             <li class="point">Drop the misconception: <span class="warn">&ldquo;few-shot teaches the model new things.&rdquo;</span> Nothing about the model is updated.</li>
         </ul>
-        <div class="diagram-frame reveal" style="flex:1; width:520px; flex-direction:column; align-items:stretch; gap:14px;">
-            <div style="display:flex; gap:12px; align-items:center;">
-                <div class="stack-node dim" style="flex:1; font-size:18px;">in₁ &rarr; out₁</div>
-            </div>
-            <div style="display:flex; gap:12px; align-items:center;">
-                <div class="stack-node dim" style="flex:1; font-size:18px;">in₂ &rarr; out₂</div>
-            </div>
-            <div style="display:flex; gap:12px; align-items:center;">
-                <div class="stack-node dim" style="flex:1; font-size:18px;">in₃ &rarr; out₃</div>
-            </div>
-            <div class="stack-node" style="font-size:19px;">real input</div>
+        <div class="diagram-frame reveal" style="flex:1; width:560px; flex-direction:column; align-items:stretch; gap:12px;">
+            <!-- example stack + call arrow cyan (the lever at work); weights box dashed ink-faint, no arrow touching it -->
+            <div class="stack-node" style="font-size:18px; padding:12px 18px;">in₁ &rarr; out₁</div>
+            <div class="stack-node" style="font-size:18px; padding:12px 18px;">in₂ &rarr; out₂</div>
+            <div class="stack-node" style="font-size:18px; padding:12px 18px;">in₃ &rarr; out₃</div>
+            <div class="stack-node" style="font-size:19px; padding:12px 18px; background:rgba(82,232,200,0.10);">real input</div>
             <div style="display:flex; justify-content:center;"><span class="flow-arrow">&darr;</span></div>
-            <div class="stack-node coral" style="border-color:var(--cyan);">one model call</div>
-            <div class="diagram-caption" style="text-align:center; margin-top:6px; font-size:16px;">weights unchanged &mdash; conditioning (showing), not training (teaching)</div>
+            <div style="display:flex; gap:16px; align-items:stretch;">
+                <div class="stack-node" style="flex:1.1;">one model call</div>
+                <div class="dbox ghost" style="flex:1; padding:8px 14px; display:flex; align-items:center; justify-content:center;">
+                    <div class="dbox-body" style="font-size:17px; text-align:center; color:var(--ink-faint);">model weights<br>untouched, untrained</div>
+                </div>
+            </div>
+            <div class="diagram-caption" style="text-align:center; margin-top:6px; font-size:16px;">conditions <i>this call's</i> behavior (showing) &mdash; it does not train (teaching)</div>
         </div>
     </div>
     <div class="chrome-page">21 / 38</div>
@@ -1321,21 +1389,22 @@ table.ledger td.warn-cell { color: var(--coral); }
         <h2 class="headline">Two placements, <span class="it">one trade-off</span></h2>
     </div>
     <div class="body-area" style="display:flex; gap:48px; align-items:stretch;">
+        <!-- a two-up of equals: both panels cyan, no coral — the trade-off is preference, not failure -->
         <div class="reveal" style="flex:1; display:flex; flex-direction:column;">
             <div class="dbox" style="flex:1;">
                 <div class="dbox-label">alternating fake turns</div>
                 <div style="display:flex; flex-direction:column; gap:12px; margin-top:6px;">
                     <span class="pill user" style="width:fit-content;">user(ex1_in)</span>
-                    <span class="pill assistant" style="width:fit-content;">assistant(ex1_out)</span>
+                    <span class="pill" style="width:fit-content;">assistant(ex1_out)</span>
                     <span class="pill user" style="width:fit-content;">user(ex2_in)</span>
-                    <span class="pill assistant" style="width:fit-content;">assistant(ex2_out)</span>
+                    <span class="pill" style="width:fit-content;">assistant(ex2_out)</span>
                     <span class="pill user" style="width:fit-content; border-color:var(--cyan); color:var(--cyan);">user(real_in)</span>
                 </div>
             </div>
         </div>
         <div class="reveal" style="flex:1; display:flex; flex-direction:column;">
-            <div class="dbox neutral" style="flex:1;">
-                <div class="dbox-label" style="color:var(--ink-dim);">single user block</div>
+            <div class="dbox" style="flex:1;">
+                <div class="dbox-label">single user block</div>
                 <div style="margin-top:14px;">
                     <span class="pill user" style="display:block; text-align:left; white-space:normal; line-height:1.6; padding:18px 22px;">user("Examples:<br>ex1_in &rarr; ex1_out<br>ex2_in &rarr; ex2_out<br><br>Now classify: real_in")</span>
                 </div>
@@ -1403,19 +1472,31 @@ table.ledger td.warn-cell { color: var(--coral); }
         <h2 class="headline">Few-shot is priced <span class="it">on every call</span></h2>
     </div>
     <div class="body-area">
-        <ul class="points reveal">
+        <ul class="points reveal" style="max-width:1500px;">
             <li class="point">Each example costs <b>input tokens on every single call</b> (the L01 callback) &mdash; few-shot is a real <b>cost-vs-quality dial</b>, not a free win.</li>
             <li class="point">It's also <b>editable</b>: add an example that resembles each failing input. That's its power <i>and</i> its trap &mdash; the list grows and per-call cost grows.</li>
         </ul>
-        <table class="ledger" style="margin-top:18px;">
-            <thead><tr><th>Situation</th><th>Reach for…</th></tr></thead>
-            <tbody>
-                <tr><td>A single clear instruction already works</td><td class="tag">just the instruction &mdash; skip few-shot</td></tr>
-                <tr><td>The model needs the team's idiosyncratic format / labels</td><td class="tag">few-shot (for format)</td></tr>
-                <tr><td>The task needs <i>reasoning</i> steps, not pattern-matching</td><td class="tag">chain-of-thought &mdash; L06</td></tr>
-                <tr><td>The example set would dominate the context window</td><td class="tag">retrieval L21, model class L14, fine-tuning</td></tr>
-            </tbody>
-        </table>
+        <div style="display:flex; gap:64px; align-items:flex-start; margin-top:24px;">
+            <!-- per-call input tokens climbing with the example count -->
+            <div class="reveal" style="flex:0 0 auto;">
+                <div class="chart" style="height:230px;">
+                    <div class="bar-col"><div class="bar hi" style="height:14%"></div><div class="bar-label">0-shot</div></div>
+                    <div class="bar-col"><div class="bar bad" style="height:36%"></div><div class="bar-label">2-shot</div></div>
+                    <div class="bar-col"><div class="bar bad" style="height:57%"></div><div class="bar-label">4-shot</div></div>
+                    <div class="bar-col"><div class="bar bad" style="height:80%"></div><div class="bar-label">8-shot</div></div>
+                </div>
+                <div class="diagram-caption" style="margin-top:12px; font-size:18px; max-width:480px;">per-call input tokens &mdash; the same <span class="dcode" style="font-style:normal;">prefix_tokens</span> you'll measure live in L0207; every example is re-billed on every call.</div>
+            </div>
+            <table class="ledger reveal" style="max-width:880px;">
+                <thead><tr><th>Situation</th><th>Reach for…</th></tr></thead>
+                <tbody>
+                    <tr><td>A single clear instruction already works</td><td class="tag">just the instruction &mdash; skip few-shot</td></tr>
+                    <tr><td>The model needs the team's idiosyncratic format / labels</td><td class="tag">few-shot (for format)</td></tr>
+                    <tr><td>The task needs <i>reasoning</i> steps, not pattern-matching</td><td class="tag">chain-of-thought &mdash; L06</td></tr>
+                    <tr><td>The example set would dominate the context window</td><td class="tag">retrieval L21, model class L14, fine-tuning</td></tr>
+                </tbody>
+            </table>
+        </div>
     </div>
     <div class="chrome-page">24 / 38</div>
     <div class="chrome-nav">← → navigate</div>
@@ -1442,15 +1523,43 @@ table.ledger td.warn-cell { color: var(--coral); }
         <div class="eyebrow">Slide 5.1</div>
         <h2 class="headline">One call, <span class="it">many shapes</span></h2>
     </div>
-    <div class="body-area reveal">
-        <table class="ledger">
-            <thead><tr><th>Shape</th><th>Leans on</th><th>Output contract</th><th>Watch-for failure</th></tr></thead>
+    <div class="body-area">
+        <!-- light cyan fan-out: one call, five output-contract chips — the menu, not a failure map -->
+        <div class="diagram-frame reveal" style="justify-content:flex-start;">
+            <svg viewBox="0 0 1660 240" width="1660" height="240">
+                <defs>
+                    <marker id="s51m" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="var(--cyan)"/></marker>
+                </defs>
+                <rect x="60" y="80" width="300" height="84" rx="12" fill="#12181a" stroke="var(--cyan)" stroke-width="2.5"/>
+                <text x="210" y="131" text-anchor="middle" class="node-label" font-size="26">single LLM call</text>
+                <path d="M 360 118 C 560 110, 580 27, 754 27" fill="none" stroke="var(--cyan)" stroke-width="2" opacity="0.65" marker-end="url(#s51m)"/>
+                <path d="M 360 120 C 560 114, 580 75, 754 75" fill="none" stroke="var(--cyan)" stroke-width="2" opacity="0.65" marker-end="url(#s51m)"/>
+                <path d="M 360 122 L 754 123" fill="none" stroke="var(--cyan)" stroke-width="2" opacity="0.65" marker-end="url(#s51m)"/>
+                <path d="M 360 124 C 560 130, 580 171, 754 171" fill="none" stroke="var(--cyan)" stroke-width="2" opacity="0.65" marker-end="url(#s51m)"/>
+                <path d="M 360 126 C 560 134, 580 219, 754 219" fill="none" stroke="var(--cyan)" stroke-width="2" opacity="0.65" marker-end="url(#s51m)"/>
+                <g>
+                    <rect x="760" y="6" width="640" height="42" rx="21" fill="rgba(82,232,200,0.05)" stroke="var(--cyan)" stroke-width="2"/>
+                    <text x="790" y="34" font-family="IBM Plex Mono" font-size="21"><tspan fill="var(--cyan)" font-weight="600">extraction</tspan><tspan fill="var(--ink-dim)" font-size="19"> &middot; JSON fields</tspan></text>
+                    <rect x="760" y="54" width="640" height="42" rx="21" fill="rgba(82,232,200,0.05)" stroke="var(--cyan)" stroke-width="2"/>
+                    <text x="790" y="82" font-family="IBM Plex Mono" font-size="21"><tspan fill="var(--cyan)" font-weight="600">classification</tspan><tspan fill="var(--ink-dim)" font-size="19"> &middot; label from a set</tspan></text>
+                    <rect x="760" y="102" width="640" height="42" rx="21" fill="rgba(82,232,200,0.05)" stroke="var(--cyan)" stroke-width="2"/>
+                    <text x="790" y="130" font-family="IBM Plex Mono" font-size="21"><tspan fill="var(--cyan)" font-weight="600">ranking</tspan><tspan fill="var(--ink-dim)" font-size="19"> &middot; ids reordered</tspan></text>
+                    <rect x="760" y="150" width="640" height="42" rx="21" fill="rgba(82,232,200,0.05)" stroke="var(--cyan)" stroke-width="2"/>
+                    <text x="790" y="178" font-family="IBM Plex Mono" font-size="21"><tspan fill="var(--cyan)" font-weight="600">constrained gen</tspan><tspan fill="var(--ink-dim)" font-size="19"> &middot; exactly N</tspan></text>
+                    <rect x="760" y="198" width="640" height="42" rx="21" fill="rgba(82,232,200,0.05)" stroke="var(--cyan)" stroke-width="2"/>
+                    <text x="790" y="226" font-family="IBM Plex Mono" font-size="21"><tspan fill="var(--cyan)" font-weight="600">summarization</tspan><tspan fill="var(--ink-dim)" font-size="19"> &middot; transformed text</tspan></text>
+                </g>
+            </svg>
+        </div>
+        <div class="diagram-caption reveal" style="margin-top:10px; font-size:20px;">Same toolkit, five <b style="color:var(--ink); font-style:normal;">output contracts</b> &mdash; the menu, not a failure map.</div>
+        <table class="ledger reveal" style="margin-top:22px;">
+            <thead><tr><th>Shape</th><th>Leans on</th><th>Watch-for failure</th></tr></thead>
             <tbody>
-                <tr><td class="tag">Extraction</td><td>structured output</td><td>JSON with the required fields</td><td class="warn-cell">dropped / hallucinated fields</td></tr>
-                <tr><td class="tag">Classification</td><td>structured output (+ few-shot)</td><td>a value from a fixed label set</td><td class="warn-cell">invented, out-of-set label</td></tr>
-                <tr><td class="tag">Ranking / rec</td><td>structured output</td><td>the candidate ids, reordered</td><td class="warn-cell">dropped, duplicated, rewritten</td></tr>
-                <tr><td class="tag">Constrained gen</td><td>structured output + explicit rule</td><td>exactly N items / within a bound</td><td class="warn-cell">wrong count, over-length</td></tr>
-                <tr><td class="tag">Summarization</td><td>system message (role)</td><td>shorter / restyled, meaning kept</td><td class="warn-cell">added facts, length drift</td></tr>
+                <tr><td class="tag">Extraction</td><td>structured output</td><td class="warn-cell">dropped / hallucinated fields</td></tr>
+                <tr><td class="tag">Classification</td><td>structured output (+ few-shot)</td><td class="warn-cell">invented, out-of-set label</td></tr>
+                <tr><td class="tag">Ranking / rec</td><td>structured output</td><td class="warn-cell">dropped, duplicated, rewritten</td></tr>
+                <tr><td class="tag">Constrained gen</td><td>structured output + explicit rule</td><td class="warn-cell">wrong count, over-length</td></tr>
+                <tr><td class="tag">Summarization</td><td>system message (role)</td><td class="warn-cell">added facts, length drift</td></tr>
             </tbody>
         </table>
     </div>
@@ -1554,12 +1663,60 @@ table.ledger td.warn-cell { color: var(--coral); }
         <h2 class="headline">Ranking / recommendation &mdash; <span class="it">order a candidate list</span></h2>
     </div>
     <div class="body-area">
-        <ul class="points reveal">
-            <li class="point"><b>Give the candidates ids and ask for the ids in order</b> &mdash; never ask it to rewrite the candidates. Referencing by id keeps output tiny and the contract checkable.</li>
-            <li class="point">Validate: every candidate id appears <b>exactly once</b> &mdash; no drops, dups, or inventions. The classic <span class="warn">silent failure</span> is one item quietly vanishing.</li>
-            <li class="point">Optionally ask for a one-line justification per rank &mdash; useful, but it costs tokens and isn't what you validate.</li>
-        </ul>
-        <table class="ledger" style="margin-top:20px;">
+        <div style="display:flex; gap:52px; align-items:center;">
+            <ul class="points reveal" style="flex:1; max-width:560px;">
+                <li class="point"><b>Give the candidates ids; ask for the ids back in order</b> &mdash; never a rewrite. Ids keep output tiny and the contract checkable.</li>
+                <li class="point">Validate: every id appears <b>exactly once</b> &mdash; no drops, dups, or inventions.</li>
+                <li class="point">A per-rank justification is optional &mdash; useful, costs output tokens, and isn't the thing you validate.</li>
+            </ul>
+            <!-- the section-5 validator-gate motif, pointed at ranking; coral lane = the silent drop -->
+            <div class="diagram-frame reveal" style="flex:1.2; flex-direction:column; width:720px;">
+                <svg viewBox="0 0 720 340" width="100%" height="100%">
+                    <defs>
+                        <marker id="s54" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="var(--cyan)"/></marker>
+                        <marker id="s54c" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="var(--coral)"/></marker>
+                    </defs>
+                    <!-- candidates in -->
+                    <text x="94" y="40" text-anchor="middle" class="edge-label" fill="var(--ink-faint)" font-size="16">candidates</text>
+                    <rect x="14" y="60" width="48" height="48" rx="8" fill="#0f1519" stroke="var(--ink-faint)" stroke-width="1.5"/>
+                    <text x="38" y="91" text-anchor="middle" class="edge-label" fill="var(--ink-dim)">1</text>
+                    <rect x="70" y="60" width="48" height="48" rx="8" fill="#0f1519" stroke="var(--ink-faint)" stroke-width="1.5"/>
+                    <text x="94" y="91" text-anchor="middle" class="edge-label" fill="var(--ink-dim)">2</text>
+                    <rect x="126" y="60" width="48" height="48" rx="8" fill="#0f1519" stroke="var(--ink-faint)" stroke-width="1.5"/>
+                    <text x="150" y="91" text-anchor="middle" class="edge-label" fill="var(--ink-dim)">3</text>
+                    <path d="M 178 84 L 216 84" stroke="var(--cyan)" stroke-width="2.5" marker-end="url(#s54)"/>
+                    <circle cx="262" cy="84" r="40" fill="#12181a" stroke="var(--ink)" stroke-width="2"/>
+                    <text x="262" y="91" text-anchor="middle" class="edge-label" fill="var(--ink)">model</text>
+                    <path d="M 302 84 L 342 84" stroke="var(--cyan)" stroke-width="2.5" marker-end="url(#s54)"/>
+                    <!-- cyan validator gate -->
+                    <rect x="348" y="28" width="24" height="112" rx="6" fill="rgba(82,232,200,0.10)" stroke="var(--cyan)" stroke-width="2.5"/>
+                    <text x="360" y="166" text-anchor="middle" class="edge-label" fill="var(--cyan)" font-size="16">each id exactly once</text>
+                    <path d="M 372 84 L 406 84" stroke="var(--cyan)" stroke-width="2.5" marker-end="url(#s54)"/>
+                    <!-- reordered out -->
+                    <text x="484" y="40" text-anchor="middle" class="edge-label" fill="var(--cyan)" font-size="16">reordered</text>
+                    <rect x="414" y="60" width="48" height="48" rx="8" fill="#12181a" stroke="var(--cyan)" stroke-width="2"/>
+                    <text x="438" y="91" text-anchor="middle" class="edge-label" fill="var(--cyan)">3</text>
+                    <rect x="470" y="60" width="48" height="48" rx="8" fill="#12181a" stroke="var(--cyan)" stroke-width="2"/>
+                    <text x="494" y="91" text-anchor="middle" class="edge-label" fill="var(--cyan)">1</text>
+                    <rect x="526" y="60" width="48" height="48" rx="8" fill="#12181a" stroke="var(--cyan)" stroke-width="2"/>
+                    <text x="550" y="91" text-anchor="middle" class="edge-label" fill="var(--cyan)">2</text>
+                    <text x="600" y="91" class="edge-label" fill="var(--cyan)">pass ✓</text>
+                    <!-- coral failure lane: unvalidated output skips the gate -->
+                    <path d="M 278 122 C 300 210, 330 262, 402 262" fill="none" stroke="var(--coral)" stroke-width="2.5" stroke-dasharray="7 5" marker-end="url(#s54c)"/>
+                    <text x="288" y="242" class="edge-label" fill="var(--coral)" font-size="16">skips the gate</text>
+                    <text x="484" y="226" text-anchor="middle" class="edge-label" fill="var(--coral)" font-size="16">output: [3, 1]</text>
+                    <rect x="414" y="238" width="48" height="48" rx="8" fill="rgba(255,107,87,0.05)" stroke="var(--coral)" stroke-width="2"/>
+                    <text x="438" y="269" text-anchor="middle" class="edge-label" fill="var(--coral)">3</text>
+                    <rect x="470" y="238" width="48" height="48" rx="8" fill="rgba(255,107,87,0.05)" stroke="var(--coral)" stroke-width="2"/>
+                    <text x="494" y="269" text-anchor="middle" class="edge-label" fill="var(--coral)">1</text>
+                    <rect x="526" y="238" width="48" height="48" rx="8" fill="transparent" stroke="var(--ink-faint)" stroke-width="2" stroke-dasharray="6 5"/>
+                    <text x="550" y="269" text-anchor="middle" class="edge-label" fill="var(--ink-faint)">2</text>
+                    <text x="550" y="322" text-anchor="middle" class="edge-label" fill="var(--coral)" font-size="16">✗ id 2 silently vanished</text>
+                </svg>
+                <div class="diagram-caption" style="font-size:18px; margin-top:6px;">The classic silent failure &mdash; the ranking looks fine until you notice an item is gone.</div>
+            </div>
+        </div>
+        <table class="ledger reveal" style="margin-top:18px;">
             <thead><tr><th>Prompt gives</th><th>Model returns</th><th>Validator checks</th></tr></thead>
             <tbody>
                 <tr><td><code>[{id:1,…},{id:2,…},{id:3,…}]</code> + a criterion</td><td><code>[3, 1, 2]</code></td><td>each id present exactly once</td></tr>
@@ -1630,12 +1787,13 @@ table.ledger td.warn-cell { color: var(--coral); }
             <li class="point">Low temperature still helps for faithful summaries; lift it only for deliberately creative rewrites.</li>
         </ul>
         <div class="diagram-frame reveal" style="flex:1; width:560px; flex-direction:column; align-items:stretch; gap:16px;">
+            <!-- the 2.2 system/user box motif reused with one change: the content -->
             <div class="dbox">
-                <div class="dbox-label">system</div>
+                <div class="dbox-label">system <span style="color:var(--ink-faint);">&mdash; always true</span></div>
                 <div class="dbox-body">&ldquo;Summarize for a non-technical exec in one sentence.&rdquo;</div>
             </div>
-            <div class="dbox neutral">
-                <div class="dbox-label" style="color:var(--ink-dim);">user</div>
+            <div class="dbox">
+                <div class="dbox-label">user <span style="color:var(--ink-faint);">&mdash; this call only</span></div>
                 <div class="dbox-body">&lt;the document&gt;</div>
             </div>
             <div style="display:flex; justify-content:center;"><span class="flow-arrow">&darr;</span></div>
@@ -1744,17 +1902,50 @@ table.ledger td.warn-cell { color: var(--coral); }
         <div class="eyebrow">Slide 6.2</div>
         <h2 class="headline">Four prompting <span class="it">anti-patterns</span></h2>
     </div>
-    <div class="body-area reveal">
-        <table class="ledger">
-            <thead><tr><th>Anti-pattern</th><th>Cure</th><th>Where you saw it</th></tr></thead>
+    <div class="body-area">
+        <!-- one coral root fanning to four anti-pattern chips, each paired with its cyan cure -->
+        <div class="reveal" style="display:flex; justify-content:center;">
+            <div class="dbox coral" style="padding:14px 34px;">
+                <div class="dbox-body" style="color:var(--coral); font-weight:600; font-size:24px;">one root: a strong nudge treated as a <i>hard guarantee</i></div>
+            </div>
+        </div>
+        <svg class="reveal" width="1660" height="46" viewBox="0 0 1660 46" style="display:block;">
+            <path d="M 830 0 C 830 28, 197 14, 197 46" fill="none" stroke="var(--coral)" stroke-width="2" opacity="0.7"/>
+            <path d="M 830 0 C 830 28, 619 14, 619 46" fill="none" stroke="var(--coral)" stroke-width="2" opacity="0.7"/>
+            <path d="M 830 0 C 830 28, 1041 14, 1041 46" fill="none" stroke="var(--coral)" stroke-width="2" opacity="0.7"/>
+            <path d="M 830 0 C 830 28, 1463 14, 1463 46" fill="none" stroke="var(--coral)" stroke-width="2" opacity="0.7"/>
+        </svg>
+        <div class="reveal" style="display:flex; gap:28px; align-items:stretch;">
+            <div class="pair-col" style="max-width:none;">
+                <span class="chip coral">instructions in the wrong role</span>
+                <span class="flow-arrow" style="font-size:24px;">&darr;</span>
+                <span class="chip cyan">system = always-true &middot; user = per-call</span>
+            </div>
+            <div class="pair-col" style="max-width:none;">
+                <span class="chip coral">structured output trusted blind</span>
+                <span class="flow-arrow" style="font-size:24px;">&darr;</span>
+                <span class="chip cyan">parse defensively, fail loudly</span>
+            </div>
+            <div class="pair-col" style="max-width:none;">
+                <span class="chip coral">leaky, under-diverse few-shot</span>
+                <span class="flow-arrow" style="font-size:24px;">&darr;</span>
+                <span class="chip cyan">diversity over volume</span>
+            </div>
+            <div class="pair-col" style="max-width:none;">
+                <span class="chip coral">bloated always-on system prompt</span>
+                <span class="flow-arrow" style="font-size:24px;">&darr;</span>
+                <span class="chip cyan">keep system lean &amp; durable</span>
+            </div>
+        </div>
+        <table class="ledger reveal" style="margin-top:26px;">
+            <thead><tr><th>Anti-pattern</th><th>Where you saw it</th></tr></thead>
             <tbody>
-                <tr><td class="warn-cell"><b>Instructions in the wrong role</b> &mdash; policy in <code>user</code>, or per-call data in <code>system</code></td><td>system = always-true, user = per-call</td><td class="tag">slide 2.4</td></tr>
-                <tr><td class="warn-cell"><b>Trusting structured output</b> &mdash; <code>json.loads</code> on the raw reply, assuming it holds</td><td>the parser <i>is</i> the enforcement &mdash; try / validate / fail loudly</td><td class="tag">slides 3.3&ndash;3.4</td></tr>
-                <tr><td class="warn-cell"><b>Few-shot that leaks format or biases</b> &mdash; under-diverse examples</td><td>diversity over volume; cover the label set</td><td class="tag">slide 4.3</td></tr>
-                <tr><td class="warn-cell"><b>Bloated always-on system prompt</b> &mdash; every rule crammed in, re-sent each call</td><td>keep <code>system</code> lean and durable</td><td class="tag">slides 2.2 / 2.6 / 4.4</td></tr>
+                <tr><td class="warn-cell"><b>Instructions in the wrong role</b> &mdash; policy in <code>user</code>, or per-call data in <code>system</code></td><td class="tag">slide 2.4</td></tr>
+                <tr><td class="warn-cell"><b>Trusting structured output</b> &mdash; <code>json.loads</code> on the raw reply, assuming it holds</td><td class="tag">slides 3.3&ndash;3.4</td></tr>
+                <tr><td class="warn-cell"><b>Few-shot that leaks format or biases</b> &mdash; under-diverse examples</td><td class="tag">slide 4.3</td></tr>
+                <tr><td class="warn-cell"><b>Bloated always-on system prompt</b> &mdash; every rule crammed in, re-sent each call</td><td class="tag">slides 2.2 / 2.6 / 4.4</td></tr>
             </tbody>
         </table>
-        <div class="callout reveal" style="margin-top:28px;"><p style="font-size:25px;">All four share one root: <b style="font-style:normal;">treating a strong nudge as a hard guarantee.</b></p></div>
     </div>
     <div class="chrome-page">35 / 38</div>
     <div class="chrome-nav">← → navigate</div>
@@ -1779,9 +1970,9 @@ table.ledger td.warn-cell { color: var(--coral); }
             <span class="flow-arrow">&rarr;</span>
             <div class="stack-node" style="border-color:var(--cyan); box-shadow:0 0 24px rgba(82,232,200,0.25);">L03 <span style="color:var(--cyan); font-weight:400; font-size:16px;">extraction as a node</span></div>
             <span class="flow-arrow">&rarr;</span>
-            <div class="stack-node dim">L04&ndash;L05 <span style="font-weight:400; font-size:16px;">chain nodes</span></div>
+            <div class="stack-node dim" style="border-style:dashed; background:transparent;">L04&ndash;L05 <span style="font-weight:400; font-size:16px;">chain nodes</span></div>
             <span class="flow-arrow">&rarr;</span>
-            <div class="stack-node dim">L06 <span style="font-weight:400; font-size:16px;">reasoning</span></div>
+            <div class="stack-node dim" style="border-style:dashed; background:transparent;">L06 <span style="font-weight:400; font-size:16px;">reasoning</span></div>
         </div>
         <div class="diagram-caption reveal" style="margin-top:16px; font-size:19px;">L03 is the immediate next step &mdash; the same discipline, now inside a graph node.</div>
     </div>
@@ -1800,20 +1991,21 @@ table.ledger td.warn-cell { color: var(--coral); }
     </div>
     <div class="body-area" style="display:flex; gap:56px; align-items:center;">
         <div class="diagram-frame reveal" style="flex:1.2; flex-direction:column; align-items:stretch; gap:20px; width:760px;">
+            <!-- cyan levers + hand-off edges feed dashed ink-faint L06 use-boxes (next lesson's territory) -->
             <div style="display:flex; align-items:center; gap:20px;">
                 <div class="stack-node" style="width:230px;">roles</div>
                 <span class="flow-arrow">&rarr;</span>
-                <div class="dbox" style="flex:1; padding:16px 22px;"><div class="dbox-body" style="font-size:19px;">a <code>system</code> message that licenses reasoning</div></div>
+                <div class="dbox ghost" style="flex:1; padding:16px 22px;"><div class="dbox-body" style="font-size:19px;">a <code>system</code> message that licenses reasoning</div></div>
             </div>
             <div style="display:flex; align-items:center; gap:20px;">
                 <div class="stack-node" style="width:230px; font-size:19px;">structured output</div>
                 <span class="flow-arrow">&rarr;</span>
-                <div class="dbox" style="flex:1; padding:16px 22px;"><div class="dbox-body" style="font-size:19px;">the <code>&lt;thinking&gt;</code>/<code>&lt;answer&gt;</code> split</div></div>
+                <div class="dbox ghost" style="flex:1; padding:16px 22px;"><div class="dbox-body" style="font-size:19px;">the <code>&lt;thinking&gt;</code>/<code>&lt;answer&gt;</code> split</div></div>
             </div>
             <div style="display:flex; align-items:center; gap:20px;">
                 <div class="stack-node" style="width:230px;">few-shot</div>
                 <span class="flow-arrow">&rarr;</span>
-                <div class="dbox" style="flex:1; padding:16px 22px;"><div class="dbox-body" style="font-size:19px;">worked-example chains-of-thought</div></div>
+                <div class="dbox ghost" style="flex:1; padding:16px 22px;"><div class="dbox-body" style="font-size:19px;">worked-example chains-of-thought</div></div>
             </div>
         </div>
         <ul class="points reveal" style="flex:1; max-width:520px;">

@@ -563,18 +563,50 @@ table.ledger td.warn-cell { color: var(--coral); }
 }
 .dtag.fail { color: var(--coral); }
 .dtag.faint { color: var(--ink-faint); }
-/* horizontal dial / gradient bar */
-.dial-track {
-    position: relative;
-    height: 26px;
-    border-radius: 13px;
-    margin: 30px 40px 60px 40px;
-    background: linear-gradient(90deg, var(--cyan-dim) 0%, var(--cyan) 100%);
+
+/* ===========================================
+   PER-DECK HELPERS — 2026-07 outline update
+   appended per FRONTEND-STYLE.md §5 — shared rules above untouched
+   =========================================== */
+/* three-step ladder of CoT triggers (slide 2.2) */
+.ladder { display: flex; align-items: flex-end; justify-content: center; gap: 44px; width: 100%; }
+.lstep {
+    width: 480px;
+    border: 2px solid var(--ink-faint);
+    border-radius: 10px;
+    background: #12181a;
+    padding: 22px 26px;
 }
-.dial-stop { position: absolute; top: -18px; transform: translateX(-50%); text-align: center; width: 340px; }
-.dial-dot { width: 20px; height: 20px; border-radius: 50%; background: var(--ink); border: 3px solid var(--slide-bg); margin: 0 auto 14px auto; box-shadow: 0 0 0 2px var(--cyan); }
-.dial-label { font-family: var(--font-display); font-size: 25px; color: var(--ink); }
-.dial-sub { font-size: 19px; color: var(--ink-dim); margin-top: 4px; line-height: 1.4; }
+.lstep.hi { border-color: var(--cyan); background: rgba(82,232,200,0.05); }
+/* CSS bar chart (slide 5.1) — the spec §5 recipe */
+.chart { display: flex; align-items: flex-end; gap: 26px; height: 280px; }
+.chart .bar { width: 120px; background: var(--ink-faint); border-radius: 6px 6px 0 0; position: relative; }
+.chart .bar.hi { background: var(--cyan); }
+.chart .bar.bad { background: var(--coral); }
+.chart .bar .val {
+    position: absolute;
+    top: -38px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--ink);
+    white-space: nowrap;
+}
+.chart-xrow { display: flex; gap: 26px; margin-top: 10px; }
+.chart-xrow .xlabel { width: 120px; text-align: center; font-size: 19px; color: var(--ink-dim); }
+/* small per-panel annotation chips (slide 2.4) */
+.dstats { display: flex; gap: 14px; justify-content: center; margin-top: 16px; flex-wrap: wrap; }
+.dstat {
+    font-size: 18px;
+    color: var(--ink-dim);
+    border: 1px solid rgba(82,232,200,0.14);
+    border-radius: 6px;
+    padding: 6px 12px;
+    white-space: nowrap;
+}
+.dstat b { color: var(--ink); }
+.dstat.faint { color: var(--ink-faint); border-color: rgba(76,86,82,0.5); }
 </style>
 </head>
 <body>
@@ -699,7 +731,7 @@ table.ledger td.warn-cell { color: var(--coral); }
                 </div>
             </div>
         </div>
-        <div class="diagram-caption reveal">The reasoning text isn't a window into a hidden thought process &mdash; it <i>is</i> the process. Predicting "the answer is 0.32" after "step 1&hellip;step 2&hellip;step 3" draws from a different distribution than predicting it cold.</div>
+        <div class="diagram-caption reveal">The reasoning text isn't a window into a hidden thought process &mdash; it <i>is</i> the process: A is conditioned on the cyan step-tokens. This two-prompt contrast is the lesson's reusable motif &mdash; slide 2.4 re-shows it with results attached.</div>
     </div>
     <div class="chrome-page">04 / 28</div>
     <div class="chrome-nav">&larr; &rarr; navigate</div>
@@ -762,7 +794,7 @@ table.ledger td.warn-cell { color: var(--coral); }
 </section>
 
 <!-- ============================================================ -->
-<!-- 08 — SLIDE 2.2 (DIAGRAM: dial of CoT triggers)               -->
+<!-- 08 — SLIDE 2.2 (DIAGRAM: ladder of CoT triggers)             -->
 <!-- ============================================================ -->
 <section class="slide">
     <div class="chrome-tag">L06 &middot; <b>REASONING</b></div>
@@ -771,30 +803,23 @@ table.ledger td.warn-cell { color: var(--coral); }
         <h2 class="headline">Three CoT triggers, <span class="it">cheapest to most controlled</span></h2>
     </div>
     <div class="body-area">
-        <div class="diagram-frame reveal" style="flex-direction:column; align-items:stretch; margin-top:30px;">
-            <div style="display:flex; justify-content:space-between; padding:0 40px; font-size:18px; letter-spacing:0.08em; text-transform:uppercase;">
-                <span style="color:var(--cyan-dim);">&larr; cheaper, looser</span>
-                <span style="color:var(--cyan);">more guided, more tokens &rarr;</span>
-            </div>
-            <div class="dial-track">
-                <div class="dial-stop" style="left:14%;">
-                    <div class="dial-dot"></div>
-                    <div class="dial-label">Free-form</div>
-                    <div class="dial-sub">"Let's think step by step." One appended line; model picks its own structure.</div>
+        <div class="diagram-frame reveal" style="margin-top:14px;">
+            <div class="ladder">
+                <div class="lstep" style="height:180px;">
+                    <div class="dtag faint">1 &middot; Free-form &mdash; cheap, loose</div>
+                    <div class="dbox-note">"Let's think step by step." One appended line; the model picks its own structure.</div>
                 </div>
-                <div class="dial-stop" style="left:50%;">
-                    <div class="dial-dot"></div>
-                    <div class="dial-label">Numbered scaffold</div>
-                    <div class="dial-sub">You name the steps: (1) count total ways (2) count favorable (3) divide. Consistent, more brittle.</div>
+                <div class="lstep hi" style="height:270px;">
+                    <div class="dtag">2 &middot; Numbered scaffold &mdash; structured</div>
+                    <div class="dbox-note">You name the steps: <b>(1)</b> count total ways <b>(2)</b> count favorable <b>(3)</b> divide. Far more consistent; more brittle if the input drifts off the template. <b>The production step.</b></div>
                 </div>
-                <div class="dial-stop" style="left:86%;">
-                    <div class="dial-dot"></div>
-                    <div class="dial-label">Worked-example</div>
-                    <div class="dial-sub">L02 few-shot: one or two fully-worked problem&rarr;reasoning&rarr;answer examples. Imitates the reasoning style.</div>
+                <div class="lstep" style="height:350px;">
+                    <div class="dtag faint">3 &middot; Worked-example &mdash; most guided, most tokens</div>
+                    <div class="dbox-note">L02's few-shot lever: one or two fully-worked problem&rarr;reasoning&rarr;answer examples. It imitates the <b>reasoning style</b>, not just the answer format.</div>
                 </div>
             </div>
         </div>
-        <div class="diagram-caption reveal" style="margin-top:64px;">One dial, three settings: you trade tokens for structure. Free-form is cheapest and loosest; a worked example is the most guided and the most expensive.</div>
+        <div class="diagram-caption reveal">Each step up the ladder is taller: more tokens, more control. The numbered scaffold (cyan) is the production step &mdash; and nothing on this ladder is a failure, just a trade.</div>
     </div>
     <div class="chrome-page">08 / 28</div>
     <div class="chrome-nav">&larr; &rarr; navigate</div>
@@ -834,7 +859,43 @@ table.ledger td.warn-cell { color: var(--coral); }
             <li class="point">Build the discipline: run the <b>same input</b> with and without the CoT scaffold, and read off what changed &mdash; accuracy, structure, latency, token count. The contrast is your evidence.</li>
             <li class="point">This with/against comparison is exactly what the <b>L0604 lab</b> has you build, and what <b>Demo 1 (L0603)</b> shows you live.</li>
         </ul>
-        <div class="callout reveal"><p>Never claim CoT helped &mdash; measure the same input with and against it, and let the contrast prove it.</p></div>
+        <div class="diagram-frame reveal" style="flex-direction:column; align-items:stretch; margin-top:10px;">
+            <div class="dgrid" style="align-items:stretch; margin-top:0;">
+                <div class="dbox neutral" style="flex:1; max-width:560px;">
+                    <div class="dtag faint">Same input &mdash; run cold</div>
+                    <div style="display:flex; align-items:center; gap:18px; justify-content:center; margin-top:10px;">
+                        <span class="dchip faint" style="display:inline-block;">Q</span>
+                        <span class="darrow" style="font-size:28px;">&rarr;</span>
+                        <span class="dchip faint" style="display:inline-block;">A</span>
+                    </div>
+                    <div class="dstats">
+                        <span class="dstat faint">result: wrong more often</span>
+                        <span class="dstat faint">output: ~1&times;</span>
+                        <span class="dstat faint">latency: fast</span>
+                    </div>
+                </div>
+                <div class="dbox" style="flex:1.35; max-width:760px;">
+                    <div class="dtag">Same input &mdash; with the CoT scaffold</div>
+                    <div style="display:flex; align-items:center; gap:12px; justify-content:center; margin-top:10px; flex-wrap:wrap;">
+                        <span class="dchip cyan" style="display:inline-block;">Q</span>
+                        <span class="darrow" style="font-size:24px;">&rarr;</span>
+                        <span class="dchip cyan" style="display:inline-block;">step 1</span>
+                        <span class="darrow" style="font-size:24px;">&rarr;</span>
+                        <span class="dchip cyan" style="display:inline-block;">step 2</span>
+                        <span class="darrow" style="font-size:24px;">&rarr;</span>
+                        <span class="dchip cyan" style="display:inline-block;">step 3</span>
+                        <span class="darrow" style="font-size:24px;">&rarr;</span>
+                        <span class="dchip cyan" style="display:inline-block;">A</span>
+                    </div>
+                    <div class="dstats">
+                        <span class="dstat">result: <b>accurate</b></span>
+                        <span class="dstat">output: <b>3&ndash;10&times;</b></span>
+                        <span class="dstat">latency: slower</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="diagram-caption reveal">Slide 1.2's two-prompt contrast, one change: each panel now carries its results. The cyan step-tokens are what bought the accuracy delta the annotations show.</div>
     </div>
     <div class="chrome-page">10 / 28</div>
     <div class="chrome-nav">&larr; &rarr; navigate</div>
@@ -866,6 +927,27 @@ table.ledger td.warn-cell { color: var(--coral); }
             <li class="point">CoT is great for <b>accuracy</b> and terrible for <span class="warn">parsing</span>: the answer is now buried at the end of a paragraph of reasoning. Your downstream code, eval harness, and UI all want just the answer.</li>
             <li class="point">The fix is a <b>scratchpad</b>: ask the model to reason inside <code>&lt;thinking&gt;&hellip;&lt;/thinking&gt;</code> and put only the final answer inside <code>&lt;answer&gt;&hellip;&lt;/answer&gt;</code>.</li>
         </ul>
+        <div class="diagram-frame reveal" style="margin-top:12px;">
+            <div class="dgrid" style="align-items:center; gap:30px; margin-top:0;">
+                <div class="dbox neutral" style="flex:1.4; max-width:840px;">
+                    <div class="dtag faint">One CoT response &mdash; no tags</div>
+                    <div style="font-size:20px; color:var(--ink-faint); line-height:1.55;">count the total ways&hellip; 5 &times; 5 = 25&hellip; now the favorable outcomes&hellip; check the edge case&hellip; that gives 8&hellip; divide 8 by 25&hellip; so the probability comes out to&hellip;</div>
+                    <div style="font-size:17px; color:var(--ink-dim); margin-top:12px; border-top:1px dashed var(--ink-faint); padding-top:8px;">the answer is 0.32</div>
+                </div>
+                <div style="display:flex; flex-direction:column; align-items:center; gap:2px;">
+                    <span style="font-size:32px; color:var(--coral); font-weight:600;">?</span>
+                    <span class="darrow" style="color:var(--coral);">&larr;</span>
+                </div>
+                <div class="dbox neutral" style="flex:1; max-width:420px;">
+                    <div class="dtag faint">Downstream</div>
+                    <span class="dchip faint">parsing code</span>
+                    <span class="dchip faint">eval harness</span>
+                    <span class="dchip faint">UI</span>
+                    <div class="dbox-note" style="margin-top:10px;"><span class="warn">"where's the answer?"</span></div>
+                </div>
+            </div>
+        </div>
+        <div class="diagram-caption reveal">The answer is a tiny line buried under the reasoning blob &mdash; downstream code pokes at it and can't find it. Slides 3.2&ndash;3.4 re-show this same response block, fixed.</div>
     </div>
     <div class="chrome-page">12 / 28</div>
     <div class="chrome-nav">&larr; &rarr; navigate</div>
@@ -956,11 +1038,47 @@ table.ledger td.warn-cell { color: var(--coral); }
         <h2 class="headline">Why the separation matters <span class="it">downstream</span></h2>
     </div>
     <div class="body-area">
-        <ul class="points reveal">
-            <li class="point"><b>Parseability</b> &mdash; your code reads a field, not a paragraph.</li>
-            <li class="point"><b>UX</b> &mdash; you can show the user the answer and hide (or collapse) the reasoning.</li>
-            <li class="point"><b>Evals &amp; tracing</b> &mdash; a clean answer field is what L12 (tracing) and L13 (evaluation) score against; reasoning logged separately is debugging gold without polluting the metric.</li>
-        </ul>
+        <div class="diagram-frame reveal" style="margin-top:6px;">
+            <div style="display:flex; align-items:center; justify-content:center;">
+                <!-- slide 3.2's response block, re-shown -->
+                <div style="border:2px solid var(--cyan-rule); border-radius:12px; background:rgba(255,255,255,0.01); padding:24px 28px; width:700px;">
+                    <div style="font-size:17px; letter-spacing:0.1em; text-transform:uppercase; color:var(--ink-faint); margin-bottom:16px;">One model response &mdash; slide 3.2's block</div>
+                    <div style="border:2px dashed var(--ink-faint); border-radius:10px; background:transparent; padding:16px 20px; margin-bottom:16px;">
+                        <div class="dtag faint">&lt;thinking&gt; &mdash; nothing leaves it</div>
+                        <div style="font-size:20px; color:var(--ink-faint); line-height:1.5;">count the total ways&hellip; count the favorable outcomes&hellip; divide 8 / 25 = 0.32&hellip;</div>
+                    </div>
+                    <div style="border:2px solid var(--cyan); border-radius:10px; background:rgba(82,232,200,0.07); padding:16px 20px;">
+                        <div class="dtag">&lt;answer&gt;</div>
+                        <div style="font-size:23px; color:var(--ink); font-weight:600;">0.32</div>
+                    </div>
+                </div>
+                <!-- three cyan arrows fanning out of <answer> -->
+                <svg width="170" height="360" viewBox="0 0 170 360" style="flex:none;">
+                    <defs>
+                        <marker id="fanC" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="var(--cyan)"/></marker>
+                    </defs>
+                    <path d="M 6 285 C 70 285, 90 55, 158 55" stroke="var(--cyan)" stroke-width="3" fill="none" marker-end="url(#fanC)"/>
+                    <path d="M 6 285 C 70 285, 90 180, 158 180" stroke="var(--cyan)" stroke-width="3" fill="none" marker-end="url(#fanC)"/>
+                    <path d="M 6 285 C 70 285, 90 302, 158 302" stroke="var(--cyan)" stroke-width="3" fill="none" marker-end="url(#fanC)"/>
+                </svg>
+                <!-- the three consumers -->
+                <div style="display:flex; flex-direction:column; gap:22px;">
+                    <div class="dbox" style="width:600px; padding:14px 22px;">
+                        <div class="dtag" style="margin-bottom:4px;">Parsing code</div>
+                        <div class="dbox-note">your code reads a <b>field</b>, not a paragraph</div>
+                    </div>
+                    <div class="dbox" style="width:600px; padding:14px 22px;">
+                        <div class="dtag" style="margin-bottom:4px;">User-facing UI</div>
+                        <div class="dbox-note">show the answer; hide (or collapse) the reasoning</div>
+                    </div>
+                    <div class="dbox" style="width:600px; padding:14px 22px;">
+                        <div class="dtag" style="margin-bottom:4px;">Evals &amp; tracing (L12/L13)</div>
+                        <div class="dbox-note">a clean answer field to <b>score against</b></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="diagram-caption reveal" style="margin-top:24px;">Same block as slide 3.2, one change: three cyan arrows now fan out of &lt;answer&gt;. The greyed &lt;thinking&gt; has no arrows leaving it &mdash; logged separately, it's debugging gold that never pollutes the metric.</div>
     </div>
     <div class="chrome-page">15 / 28</div>
     <div class="chrome-nav">&larr; &rarr; navigate</div>
@@ -1018,7 +1136,7 @@ table.ledger td.warn-cell { color: var(--coral); }
                 </div>
             </div>
         </div>
-        <div class="diagram-caption reveal">Self-critique takes the first answer as input and asks for a critique <i>plus</i> a revised answer &mdash; a second sampling pass, not a verification oracle.</div>
+        <div class="diagram-caption reveal">Self-critique takes the first answer as input and asks for a critique <i>plus</i> a revised answer &mdash; a second sampling pass, not a verification oracle. Both shapes stay neutral here (no failure yet); this answer&rarr;critic flow is the section's motif: slide 4.2 re-shows it failing, 4.3 re-shows it fixed.</div>
     </div>
     <div class="chrome-page">17 / 28</div>
     <div class="chrome-nav">&larr; &rarr; navigate</div>
@@ -1037,8 +1155,28 @@ table.ledger td.warn-cell { color: var(--coral); }
         <ul class="points reveal">
             <li class="point">The dominant failure: the critic <span class="warn">agrees with the original answer regardless of correctness</span> &mdash; "yes, that looks right" &mdash; especially when it's the <b>same model, same prompt, seeing its own answer</b>.</li>
             <li class="point">A critic with <b>no new information</b> is a weak critic. It has nothing to disagree <i>with</i>.</li>
-            <li class="point">Watch for this every time you reach for self-critique &mdash; that's sycophancy, and it's the failure mode to keep in mind.</li>
         </ul>
+        <div class="diagram-frame reveal" style="margin-top:6px;">
+            <svg viewBox="0 0 1500 330" width="1400" height="308">
+                <defs>
+                    <marker id="scF" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="var(--ink-faint)"/></marker>
+                    <marker id="scR" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="var(--coral)"/></marker>
+                </defs>
+                <text x="750" y="42" text-anchor="middle" class="edge-label" fill="var(--ink-faint)">no new-information arrow enters the picture anywhere</text>
+                <!-- slide 4.1's flow: answer -> critic -->
+                <rect x="140" y="100" width="320" height="100" rx="10" fill="#12181a" stroke="var(--ink-faint)" stroke-width="2.5"/>
+                <text x="300" y="158" text-anchor="middle" class="node-label" font-size="25">first answer</text>
+                <path d="M 460 150 L 790 150" stroke="var(--ink-faint)" stroke-width="3" marker-end="url(#scF)"/>
+                <text x="625" y="128" text-anchor="middle" class="edge-label" fill="var(--ink-dim)">reads its own answer</text>
+                <rect x="795" y="90" width="560" height="120" rx="10" fill="#12181a" stroke="var(--ink-faint)" stroke-width="2.5"/>
+                <text x="1075" y="140" text-anchor="middle" class="node-label" font-size="25">critic</text>
+                <text x="1075" y="180" text-anchor="middle" class="edge-label" fill="var(--ink-dim)">same model &middot; same prompt</text>
+                <!-- the coral rubber-stamp loop -->
+                <path d="M 1000 210 C 900 320, 450 320, 310 208" stroke="var(--coral)" stroke-width="3.5" fill="none" marker-end="url(#scR)"/>
+                <text x="660" y="300" text-anchor="middle" class="edge-label" fill="var(--coral)" font-weight="600">"yes, looks right" &mdash; stamped straight back</text>
+            </svg>
+        </div>
+        <div class="diagram-caption reveal">Slide 4.1's flow, one change: the critic rubber-stamps its own answer. Watch for this every time you reach for self-critique &mdash; that's sycophancy, the failure mode to keep in mind.</div>
     </div>
     <div class="chrome-page">18 / 28</div>
     <div class="chrome-nav">&larr; &rarr; navigate</div>
@@ -1053,17 +1191,41 @@ table.ledger td.warn-cell { color: var(--coral); }
         <div class="eyebrow">Slide 4.3</div>
         <h2 class="headline">Mitigations &mdash; inject <span class="it">new information</span></h2>
     </div>
-    <div class="body-area reveal">
-        <table class="ledger">
+    <div class="body-area">
+        <table class="ledger reveal">
             <thead><tr><th style="width:34%;">Mitigation</th><th>What new information it injects</th></tr></thead>
             <tbody>
-                <tr><td class="tag">Different <b>framing</b></td><td>"You are a skeptical reviewer; find the flaw." shifts the prior toward disagreement</td></tr>
-                <tr><td class="tag">Different <b>model</b></td><td>a second model has different failure modes (revisited rigorously in L13)</td></tr>
-                <tr><td class="tag"><b>Adversarial</b> role</td><td>force the critic to argue the answer is wrong before deciding</td></tr>
-                <tr><td class="tag"><b>Ground-truth</b> check</td><td>compare against a known answer, a tool result, or retrieved evidence</td></tr>
+                <tr><td class="tag">Different <b>framing</b></td><td>"find the flaw" &mdash; a skeptical prior instead of an agreeable one</td></tr>
+                <tr><td class="tag">Different <b>model</b></td><td>a second model has different failure modes (revisited in L13)</td></tr>
+                <tr><td class="tag"><b>Adversarial</b> role</td><td>argue the answer is <b>wrong</b> before deciding</td></tr>
+                <tr><td class="tag"><b>Ground-truth</b> check</td><td>a known answer, a tool result, or retrieved evidence</td></tr>
             </tbody>
         </table>
-        <div class="callout reveal" style="margin-top:34px;"><p>Your critique is only as good as the new information it brings. Re-asking the same model the same way is theatre.</p></div>
+        <div class="diagram-frame reveal" style="margin-top:10px;">
+            <svg viewBox="0 0 1500 350" width="1350" height="315">
+                <defs>
+                    <marker id="miF" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="var(--ink-faint)"/></marker>
+                    <marker id="miC" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="var(--cyan)"/></marker>
+                </defs>
+                <!-- the one added arrow: new information feeding the critic -->
+                <rect x="680" y="12" width="680" height="76" rx="10" fill="rgba(82,232,200,0.05)" stroke="var(--cyan)" stroke-width="2.5"/>
+                <text x="1020" y="44" text-anchor="middle" class="node-label" font-size="23" fill="var(--cyan)">new information</text>
+                <text x="1020" y="72" text-anchor="middle" class="edge-label" fill="var(--ink-dim)">skeptical framing &middot; second model &middot; adversarial role &middot; ground truth</text>
+                <path d="M 1020 88 L 1020 126" stroke="var(--cyan)" stroke-width="3.5" marker-end="url(#miC)"/>
+                <!-- slide 4.1's flow: answer -> critic -->
+                <rect x="140" y="140" width="320" height="100" rx="10" fill="#12181a" stroke="var(--ink-faint)" stroke-width="2.5"/>
+                <text x="300" y="198" text-anchor="middle" class="node-label" font-size="25">first answer</text>
+                <path d="M 460 190 L 790 190" stroke="var(--ink-faint)" stroke-width="3" marker-end="url(#miF)"/>
+                <text x="625" y="168" text-anchor="middle" class="edge-label" fill="var(--ink-dim)">reads the answer</text>
+                <rect x="795" y="130" width="560" height="120" rx="10" fill="#12181a" stroke="var(--ink-faint)" stroke-width="2.5"/>
+                <text x="1075" y="180" text-anchor="middle" class="node-label" font-size="25">critic</text>
+                <text x="1075" y="218" text-anchor="middle" class="edge-label" fill="var(--ink-dim)">now has something to disagree with</text>
+                <!-- the loop back is a real critique now -->
+                <path d="M 1000 250 C 900 350, 450 350, 310 248" stroke="var(--cyan)" stroke-width="3.5" fill="none" marker-end="url(#miC)"/>
+                <text x="660" y="337" text-anchor="middle" class="edge-label" fill="var(--cyan)" font-weight="600">"here's the flaw" &mdash; a real critique, then a revision</text>
+            </svg>
+        </div>
+        <div class="diagram-caption reveal" style="margin-top:8px;">The third beat of slide 4.1's motif: one added cyan arrow of new information turns 4.2's rubber-stamp into a real critique. Re-asking the same model the same way is theatre.</div>
     </div>
     <div class="chrome-page">19 / 28</div>
     <div class="chrome-nav">&larr; &rarr; navigate</div>
@@ -1112,9 +1274,36 @@ table.ledger td.warn-cell { color: var(--coral); }
     </div>
     <div class="body-area">
         <ul class="points reveal">
-            <li class="point">Every CoT, scratchpad, or critique token is <b>paid for</b> (L01's per-token cost), <b>adds latency</b>, and <b>competes for the context window</b>. None of that is hypothetical &mdash; the demos print the numbers for you.</li>
+            <li class="point">Every CoT, scratchpad, or critique token is <b>paid for</b> (L01's per-token cost), <b>adds latency</b>, and <b>competes for the context window</b> &mdash; the demos print the numbers for you.</li>
             <li class="point">This is the first lesson where you must consciously weigh reasoning <b>quality</b> against <b>cost</b>. That trade-off returns in L13 (model power) and L16 (context management).</li>
         </ul>
+        <div class="diagram-frame reveal" style="margin-top:46px;">
+            <div style="display:flex; align-items:flex-end; gap:110px;">
+                <div>
+                    <div class="chart" style="height:230px;">
+                        <div class="bar" style="height:16%;"><span class="val">1&times;</span></div>
+                        <div class="bar bad" style="height:96%;"><span class="val">3&ndash;10&times;</span></div>
+                    </div>
+                    <div class="chart-xrow">
+                        <div class="xlabel">zero-shot</div>
+                        <div class="xlabel">CoT</div>
+                    </div>
+                    <div style="font-size:19px; color:var(--ink-dim); text-align:center; margin-top:12px; letter-spacing:0.08em; text-transform:uppercase;">output tokens</div>
+                </div>
+                <div>
+                    <div class="chart" style="height:230px; gap:20px;">
+                        <div class="bar" style="height:20%; width:84px;"><span class="val">1&times;</span></div>
+                        <div class="bar bad" style="height:62%; width:84px;"><span class="val">2&ndash;4&times;</span></div>
+                    </div>
+                    <div class="chart-xrow" style="gap:20px;">
+                        <div class="xlabel" style="width:84px;">zero-shot</div>
+                        <div class="xlabel" style="width:84px;">CoT</div>
+                    </div>
+                    <div style="font-size:19px; color:var(--ink-dim); text-align:center; margin-top:12px; letter-spacing:0.08em; text-transform:uppercase;">latency</div>
+                </div>
+            </div>
+        </div>
+        <div class="diagram-caption reveal" style="margin-top:14px;">Every one of those tokens is paid for &mdash; the coral bar is the 3&ndash;10&times; output balloon, and the smaller pair beside it is the second price: latency.</div>
     </div>
     <div class="chrome-page">22 / 28</div>
     <div class="chrome-nav">&larr; &rarr; navigate</div>
@@ -1179,9 +1368,43 @@ table.ledger td.warn-cell { color: var(--coral); }
     </div>
     <div class="body-area">
         <ul class="points reveal">
-            <li class="point">Given a task, an accuracy requirement, and a latency/cost budget, <b>decide and defend</b>: reason, or answer cold? That decision is the skill you're building &mdash; the <b>L0610 lab</b> has you make it on a table of tasks.</li>
-            <li class="point"><b>Heuristic:</b> reach for reasoning when the task is in the help-class from section 2 <b>and</b> the budget allows; skip it when the task is easy, latency-bound, or prone to talked-into-it errors.</li>
+            <li class="point">Given a task, an accuracy requirement, and a latency/cost budget, <b>decide and defend</b>: reason, or answer cold? That decision is the skill &mdash; the <b>L0610 lab</b> has you make it on a table of tasks.</li>
         </ul>
+        <div class="diagram-frame reveal" style="margin-top:14px;">
+            <svg viewBox="0 0 1500 440" width="1320" height="387">
+                <defs>
+                    <marker id="dtF" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="var(--ink-faint)"/></marker>
+                    <marker id="dtC" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="var(--cyan)"/></marker>
+                </defs>
+                <!-- task -->
+                <rect x="50" y="120" width="190" height="90" rx="10" fill="#12181a" stroke="var(--ink-faint)" stroke-width="2.5"/>
+                <text x="145" y="174" text-anchor="middle" class="node-label" font-size="24">task</text>
+                <path d="M 240 165 L 322 165" stroke="var(--ink-faint)" stroke-width="3" marker-end="url(#dtF)"/>
+                <!-- gate 1: help-class -->
+                <polygon points="510,80 690,165 510,250 330,165" fill="#12181a" stroke="var(--ink-faint)" stroke-width="2.5"/>
+                <text x="510" y="156" text-anchor="middle" class="node-label" font-size="21">in section 2's</text>
+                <text x="510" y="186" text-anchor="middle" class="node-label" font-size="21">help-class?</text>
+                <!-- yes -> gate 2: budget -->
+                <path d="M 690 165 L 802 165" stroke="var(--cyan)" stroke-width="3.5" marker-end="url(#dtC)"/>
+                <text x="748" y="143" text-anchor="middle" class="edge-label" fill="var(--cyan)" font-weight="600">yes</text>
+                <polygon points="990,80 1170,165 990,250 810,165" fill="#12181a" stroke="var(--ink-faint)" stroke-width="2.5"/>
+                <text x="990" y="156" text-anchor="middle" class="node-label" font-size="21">latency / cost</text>
+                <text x="990" y="186" text-anchor="middle" class="node-label" font-size="21">budget allows?</text>
+                <!-- yes -> reason (cyan branch) -->
+                <path d="M 1170 165 L 1262 165" stroke="var(--cyan)" stroke-width="3.5" marker-end="url(#dtC)"/>
+                <text x="1218" y="143" text-anchor="middle" class="edge-label" fill="var(--cyan)" font-weight="600">yes</text>
+                <rect x="1270" y="120" width="200" height="90" rx="10" fill="rgba(82,232,200,0.06)" stroke="var(--cyan)" stroke-width="2.5"/>
+                <text x="1370" y="174" text-anchor="middle" class="node-label" font-size="24" fill="var(--cyan)">reason</text>
+                <!-- no + no -> answer cold (neutral, not a failure) -->
+                <path d="M 510 250 L 510 360 L 608 360" stroke="var(--ink-faint)" stroke-width="3" fill="none" marker-end="url(#dtF)"/>
+                <text x="536" y="308" text-anchor="middle" class="edge-label" fill="var(--ink-faint)">no</text>
+                <path d="M 990 250 L 990 360 L 912 360" stroke="var(--ink-faint)" stroke-width="3" fill="none" marker-end="url(#dtF)"/>
+                <text x="1016" y="308" text-anchor="middle" class="edge-label" fill="var(--ink-faint)">no</text>
+                <rect x="620" y="320" width="280" height="80" rx="10" fill="#12181a" stroke="var(--ink-faint)" stroke-width="2.5"/>
+                <text x="760" y="368" text-anchor="middle" class="node-label" font-size="24" fill="var(--ink-dim)">answer cold</text>
+            </svg>
+        </div>
+        <div class="diagram-caption reveal" style="margin-top:6px;">Reason only when both gates say yes. Answering cold is a legitimate outcome, not a failure &mdash; skip reasoning when the task is easy, latency-bound, or prone to talked-into-it errors.</div>
     </div>
     <div class="chrome-page">24 / 28</div>
     <div class="chrome-nav">&larr; &rarr; navigate</div>
@@ -1211,8 +1434,41 @@ table.ledger td.warn-cell { color: var(--coral); }
     <div class="body-area">
         <ul class="points reveal">
             <li class="point">L07 introduces <b>tool calling</b>, which adds an outer loop: the model decides whether to answer directly or call a tool. <b>That decision is itself a reasoning step.</b></li>
-            <li class="point">Everything you learned in L06 applies inside that loop &mdash; eliciting reasoning about <b>which</b> tool to call, separating that reasoning from the tool-call output, and recognizing when reasoning about the tool is wasted.</li>
+            <li class="point">Everything from L06 applies inside that loop &mdash; eliciting reasoning about <b>which</b> tool to call, separating it from the tool-call output, and knowing when it's wasted.</li>
         </ul>
+        <div class="diagram-frame reveal" style="margin-top:12px;">
+            <svg viewBox="0 0 1500 430" width="1300" height="373">
+                <defs>
+                    <marker id="alF" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="var(--ink-faint)"/></marker>
+                    <marker id="alC" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="var(--cyan)"/></marker>
+                </defs>
+                <!-- model -->
+                <rect x="80" y="115" width="230" height="100" rx="10" fill="#12181a" stroke="var(--ink-faint)" stroke-width="2.5"/>
+                <text x="195" y="174" text-anchor="middle" class="node-label" font-size="24">model</text>
+                <!-- the cyan reason step: the piece you own -->
+                <path d="M 310 165 L 392 165" stroke="var(--cyan)" stroke-width="3.5" marker-end="url(#alC)"/>
+                <rect x="400" y="115" width="300" height="100" rx="10" fill="rgba(82,232,200,0.06)" stroke="var(--cyan)" stroke-width="2.5"/>
+                <text x="550" y="160" text-anchor="middle" class="node-label" font-size="24" fill="var(--cyan)">reason</text>
+                <text x="550" y="196" text-anchor="middle" class="edge-label" fill="var(--ink-dim)">the piece you own from L06</text>
+                <!-- decision -->
+                <path d="M 700 165 L 772 165" stroke="var(--cyan)" stroke-width="3.5" marker-end="url(#alC)"/>
+                <polygon points="960,80 1140,165 960,250 780,165" fill="#12181a" stroke="var(--ink-faint)" stroke-width="2.5"/>
+                <text x="960" y="156" text-anchor="middle" class="node-label" font-size="21">answer, or</text>
+                <text x="960" y="186" text-anchor="middle" class="node-label" font-size="21">call a tool?</text>
+                <!-- answer branch: solid cyan, available today -->
+                <path d="M 1140 165 C 1185 165, 1200 112, 1242 112" stroke="var(--cyan)" stroke-width="3.5" fill="none" marker-end="url(#alC)"/>
+                <rect x="1250" y="70" width="200" height="85" rx="10" fill="rgba(82,232,200,0.06)" stroke="var(--cyan)" stroke-width="2.5"/>
+                <text x="1350" y="122" text-anchor="middle" class="node-label" font-size="24" fill="var(--cyan)">answer</text>
+                <!-- tool branch: dashed, deferred to L07 -->
+                <path d="M 1140 165 C 1185 165, 1200 312, 1242 312" stroke="var(--ink-faint)" stroke-width="3" fill="none" stroke-dasharray="10 8" marker-end="url(#alF)"/>
+                <rect x="1250" y="270" width="200" height="85" rx="10" fill="transparent" stroke="var(--ink-faint)" stroke-width="2.5" stroke-dasharray="10 8"/>
+                <text x="1350" y="322" text-anchor="middle" class="node-label" font-size="24" fill="var(--ink-faint)">tool</text>
+                <!-- dashed back-edge into the model: the outer loop, lands in L07 -->
+                <path d="M 1330 355 C 1300 425, 350 430, 197 222" stroke="var(--ink-faint)" stroke-width="3" fill="none" stroke-dasharray="10 8" marker-end="url(#alF)"/>
+                <text x="760" y="410" text-anchor="middle" class="edge-label" fill="var(--ink-faint)">tool result feeds back into the model &mdash; lands in L07</text>
+            </svg>
+        </div>
+        <div class="diagram-caption reveal" style="margin-top:6px;">Your first look at the agent loop: the cyan reason step decides answer-vs-tool. The dashed tool node and back-edge are deferred, not failing &mdash; L07 makes them real.</div>
     </div>
     <div class="chrome-page">26 / 28</div>
     <div class="chrome-nav">&larr; &rarr; navigate</div>

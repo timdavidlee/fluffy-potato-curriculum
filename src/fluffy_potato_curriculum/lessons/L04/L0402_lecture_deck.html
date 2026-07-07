@@ -611,6 +611,36 @@ pre.code code .kw { color: var(--ink); font-weight: 600; }  /* keyword-ish empha
     padding: 2px 9px;
     margin-left: 10px;
 }
+
+/* ===========================================
+   L0402 MOTIF HELPERS (appended — outline densify pass)
+   The parse → draft → policy_check chain recurs across the
+   deck; these small classes support its per-slide variants.
+   =========================================== */
+/* emphasized build-flow pill — the one new piece of wiring vs. L03 */
+.pill.hi { border-color: var(--cyan); background: rgba(82,232,200,0.14); }
+/* a coral (wrong-choice) model chip — a mistake, not a neutral pick */
+.mchip.bad { border-color: var(--coral); color: var(--coral); background: rgba(255,107,87,0.07); }
+/* imperative-code panel rendered faint: control flow buried in code */
+pre.code.faint { border-color: var(--ink-faint); }
+pre.code.faint code, pre.code.faint code .kw { color: var(--ink-dim); font-weight: 400; }
+/* two-up contrast row + per-panel note */
+.two-up { display: flex; gap: 56px; align-items: flex-start; justify-content: center; }
+.two-up .panel { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 10px; }
+.panel-note { font-family: var(--font-body); font-size: 20px; letter-spacing: 0.04em; text-align: center; }
+.panel-note.good { color: var(--cyan); }
+.panel-note.bad { color: var(--coral); }
+/* mini state-snapshot box (slide 2.3): faint fields overwrite, cyan steps appends */
+.sbox { border: 2px solid var(--ink-faint); border-radius: 10px; background: #12181a; padding: 12px 20px 8px; width: 470px; }
+.sbox .stitle { font-family: var(--font-body); font-size: 17px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-dim); margin-bottom: 6px; }
+.sbox .stitle .n { color: var(--cyan); }
+.sbox .srow { font-family: var(--font-body); font-size: 19px; color: var(--ink-faint); padding: 6px 0; border-bottom: 1px solid rgba(82,232,200,0.08); white-space: nowrap; }
+.sbox .srow:last-child { border-bottom: none; }
+.sbox .srow.grow { color: var(--cyan); font-weight: 600; }
+.sbox .srow .over { font-size: 15px; color: var(--ink-dim); margin-left: 8px; }
+/* small ink-dim wording chip beside a node (slide 5.3) */
+.wchip { display: inline-block; font-family: var(--font-body); font-size: 16px; color: var(--ink-dim); border: 1px dashed var(--ink-faint); border-radius: 16px; padding: 3px 12px; margin-top: 8px; white-space: nowrap; }
+.run-label { font-family: var(--font-body); font-size: 19px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-dim); width: 110px; text-align: right; margin-top: 18px; }
 </style>
 </head>
 <body>
@@ -709,7 +739,7 @@ pre.code code .kw { color: var(--ink); font-weight: 600; }  /* keyword-ish empha
                 <div class="gnode dim" style="font-size:22px;">END</div>
             </div>
         </div>
-        <div class="diagram-caption reveal">One node (L03) &rarr; several wired in order (L04).</div>
+        <div class="diagram-caption reveal">One node (L03) &rarr; several wired in order (L04). This chain is the lesson's <b>motif</b> &mdash; every diagram from here re-draws it with one thing changed.</div>
     </div>
     <div class="chrome-page">03 / 26</div>
     <div class="chrome-nav">&larr; &rarr; navigate</div>
@@ -724,8 +754,8 @@ pre.code code .kw { color: var(--ink); font-weight: 600; }  /* keyword-ish empha
         <div class="eyebrow">Slide 1.2</div>
         <h2 class="headline">Workflow vs. agent &mdash; <span class="it">the headline distinction</span></h2>
     </div>
-    <div class="body-area reveal">
-        <table class="ledger">
+    <div class="body-area">
+        <table class="ledger reveal">
             <thead><tr><th></th><th>Workflow (L04&ndash;L05)</th><th>Agent (L11)</th></tr></thead>
             <tbody>
                 <tr><td class="tag">Who owns the path?</td><td>the <b>developer</b> &mdash; fixed logic</td><td class="warn-cell">the <b>model</b> decides</td></tr>
@@ -734,7 +764,47 @@ pre.code code .kw { color: var(--ink); font-weight: 600; }  /* keyword-ish empha
                 <tr><td class="tag">Predictability</td><td>same input &rarr; same path</td><td class="warn-cell">varies; the model may loop</td></tr>
             </tbody>
         </table>
-        <div class="diagram-caption reveal" style="margin-top:22px;">The model is involved in <b>both</b>. Agency is about who controls the <i>path</i> &mdash; not whether a model is called. You're building the <b>simplest</b> workflow: no branches yet.</div>
+        <div class="two-up reveal" style="margin-top:24px;">
+            <div class="panel">
+                <svg viewBox="0 0 800 200" width="740" height="185">
+                    <path d="M 166 57 L 222 57" stroke="var(--cyan)" stroke-width="3" marker-end="url(#s12a)"/>
+                    <path d="M 378 57 L 434 57" stroke="var(--cyan)" stroke-width="3" marker-end="url(#s12a)"/>
+                    <path d="M 620 57 L 676 57" stroke="var(--cyan)" stroke-width="3" marker-end="url(#s12a)"/>
+                    <rect x="16" y="28" width="150" height="58" rx="10" fill="#12181a" stroke="var(--cyan)" stroke-width="2.5"/>
+                    <text x="91" y="64" text-anchor="middle" class="node-label" font-size="21">parse</text>
+                    <rect x="228" y="28" width="150" height="58" rx="10" fill="#12181a" stroke="var(--cyan)" stroke-width="2.5"/>
+                    <text x="303" y="64" text-anchor="middle" class="node-label" font-size="21">draft</text>
+                    <rect x="440" y="28" width="178" height="58" rx="10" fill="#12181a" stroke="var(--cyan)" stroke-width="2.5"/>
+                    <text x="529" y="64" text-anchor="middle" class="node-label" font-size="18">policy_check</text>
+                    <text x="722" y="64" text-anchor="middle" class="node-label" font-size="19" fill="var(--ink-dim)">END</text>
+                    <text x="400" y="160" text-anchor="middle" class="edge-label" fill="var(--cyan)">acyclic &mdash; every edge forward, always reaches END</text>
+                    <defs><marker id="s12a" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="var(--cyan)"/></marker></defs>
+                </svg>
+                <div class="panel-note good">developer owns the path (workflow)</div>
+            </div>
+            <div class="panel">
+                <svg viewBox="0 0 800 200" width="740" height="185">
+                    <path d="M 166 57 L 222 57" stroke="var(--cyan)" stroke-width="3" marker-end="url(#s12b)"/>
+                    <path d="M 378 57 L 434 57" stroke="var(--cyan)" stroke-width="3" marker-end="url(#s12b)"/>
+                    <path d="M 620 57 L 676 57" stroke="var(--cyan)" stroke-width="3" marker-end="url(#s12b)"/>
+                    <path d="M 529 90 C 470 180, 150 180, 95 92" fill="none" stroke="var(--coral)" stroke-width="3" marker-end="url(#s12c)"/>
+                    <rect x="16" y="28" width="150" height="58" rx="10" fill="#12181a" stroke="var(--cyan)" stroke-width="2.5"/>
+                    <text x="91" y="64" text-anchor="middle" class="node-label" font-size="21">parse</text>
+                    <rect x="228" y="28" width="150" height="58" rx="10" fill="#12181a" stroke="var(--cyan)" stroke-width="2.5"/>
+                    <text x="303" y="64" text-anchor="middle" class="node-label" font-size="21">draft</text>
+                    <rect x="440" y="28" width="178" height="58" rx="10" fill="#12181a" stroke="var(--cyan)" stroke-width="2.5"/>
+                    <text x="529" y="64" text-anchor="middle" class="node-label" font-size="18">policy_check</text>
+                    <text x="722" y="64" text-anchor="middle" class="node-label" font-size="19" fill="var(--ink-dim)">END</text>
+                    <text x="315" y="160" text-anchor="middle" class="edge-label" fill="var(--coral)">one back-edge &mdash; a cycle: the model loops</text>
+                    <defs>
+                        <marker id="s12b" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="var(--cyan)"/></marker>
+                        <marker id="s12c" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="var(--coral)"/></marker>
+                    </defs>
+                </svg>
+                <div class="panel-note bad">model owns the path (agent &mdash; L11)</div>
+            </div>
+        </div>
+        <div class="diagram-caption reveal" style="margin-top:14px;">The model is involved in <b>both</b> &mdash; agency is who controls the <i>path</i>. Same motif, one edge changed; that one edge is the whole table.</div>
     </div>
     <div class="chrome-page">04 / 26</div>
     <div class="chrome-nav">&larr; &rarr; navigate</div>
@@ -826,7 +896,7 @@ pre.code code .kw { color: var(--ink); font-weight: 600; }  /* keyword-ish empha
             <div class="garrow">&rarr;</div>
             <div class="pill"><span class="n">3</span> set_entry_point</div>
             <div class="garrow">&rarr;</div>
-            <div class="pill"><span class="n">4</span> add_edge</div>
+            <div class="pill hi"><span class="n">4</span> add_edge</div>
             <div class="garrow">&rarr;</div>
             <div class="pill"><span class="n">5</span> compile()</div>
             <div class="garrow">&rarr;</div>
@@ -862,10 +932,35 @@ result = app.invoke({<span class="p">"ticket"</span>: <span class="p">"..."</spa
             <li class="point">A <b>node</b> is a plain function: it reads state and returns a <b>partial update</b> &mdash; a dict of just the fields it changed, <i>not</i> the whole state. LangGraph merges it for you.</li>
             <li class="point">A node does <b>one unit of work</b> and hands back an update &mdash; nothing more. What's new here: <i>several</i> nodes now share one state object.</li>
         </ul>
-        <pre class="code reveal" style="margin-top:24px;"><code><span class="kw">def</span> parse(state: TicketState) -> dict[str, object]:
+        <div class="reveal" style="display:flex; align-items:center; gap:44px; margin-top:24px;">
+            <pre class="code" style="margin:0; flex:1;"><code><span class="kw">def</span> parse(state: TicketState) -> dict[str, object]:
     <span class="c"># Extract structured fields (a light step &rarr; Haiku)</span>
-    reply = haiku.invoke(<span class="p">f"Extract the issue from: {state['ticket']}"</span>)
-    <span class="kw">return</span> {<span class="p">"parsed"</span>: reply.content}   <span class="c"># only the field it changed</span></code></pre>
+    reply = haiku.invoke(<span class="p">f"Extract: {state['ticket']}"</span>)
+    <span class="kw">return</span> {<span class="p">"parsed"</span>: reply.content}   <span class="c"># only what changed</span></code></pre>
+            <div class="diagram-frame" style="width:640px; flex-shrink:0;">
+                <svg viewBox="0 0 640 300" width="640" height="300">
+                    <!-- state feeds the node; a single cyan partial update rides back -->
+                    <path d="M 276 110 L 432 110" stroke="var(--ink-faint)" stroke-width="2.5" marker-end="url(#s22f)"/>
+                    <text x="352" y="94" text-anchor="middle" class="edge-label" font-size="15" fill="var(--ink-dim)">state in</text>
+                    <path d="M 520 147 C 520 250, 370 268, 284 226" fill="none" stroke="var(--cyan)" stroke-width="3" marker-end="url(#s22a)"/>
+                    <rect x="16" y="50" width="260" height="190" rx="12" fill="#12181a" stroke="var(--ink-faint)" stroke-width="2"/>
+                    <text x="146" y="82" text-anchor="middle" class="edge-label" font-size="16" fill="var(--ink-dim)" style="text-transform:uppercase; letter-spacing:0.08em;">TicketState</text>
+                    <text x="40" y="118" class="edge-label" font-size="17" fill="var(--ink-faint)">ticket: str</text>
+                    <text x="40" y="148" class="edge-label" font-size="17" fill="var(--cyan)" font-weight="600">parsed: str</text>
+                    <text x="40" y="178" class="edge-label" font-size="17" fill="var(--ink-faint)">draft: str</text>
+                    <text x="40" y="208" class="edge-label" font-size="17" fill="var(--ink-faint)">steps: [&hellip;]</text>
+                    <rect x="440" y="75" width="160" height="72" rx="10" fill="#12181a" stroke="var(--cyan)" stroke-width="2.5"/>
+                    <text x="520" y="119" text-anchor="middle" class="node-label" font-size="22">parse</text>
+                    <rect x="336" y="238" width="180" height="36" rx="18" fill="rgba(82,232,200,0.08)" stroke="var(--cyan)" stroke-width="1.5"/>
+                    <text x="426" y="262" text-anchor="middle" class="edge-label" font-size="16" fill="var(--cyan)">{"parsed": &hellip;}</text>
+                    <defs>
+                        <marker id="s22f" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="var(--ink-faint)"/></marker>
+                        <marker id="s22a" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="var(--cyan)"/></marker>
+                    </defs>
+                </svg>
+            </div>
+        </div>
+        <div class="diagram-caption reveal">Cyan is the one field the node changed, merged back into state &mdash; a partial update, never the whole state.</div>
     </div>
     <div class="chrome-page">08 / 26</div>
     <div class="chrome-nav">&larr; &rarr; navigate</div>
@@ -880,21 +975,38 @@ result = app.invoke({<span class="p">"ticket"</span>: <span class="p">"..."</spa
         <div class="eyebrow">Slide 2.3</div>
         <h2 class="headline">State &amp; reducer &mdash; <span class="it">the data that flows</span></h2>
     </div>
-    <div class="body-area" style="display:flex; align-items:flex-start; gap:64px;">
-        <ul class="points reveal" style="flex:1; max-width:none;">
-            <li class="point"><b>State</b> is a typed object (a <code>TypedDict</code>) threaded through every node &mdash; here through <b>several</b> nodes in turn.</li>
-            <li class="point">A <b>reducer</b> is the rule that merges an update into state, <i>per field</i>. The default <b>overwrites</b>; an <code>Annotated[list, add]</code> field <b>appends</b>. Your first genuinely new primitive in L04.</li>
-            <li class="point">Same machinery you'll reuse in <b>L11</b> for an agent's <i>message history</i> &mdash; met here first, on a simpler acyclic graph.</li>
+    <div class="body-area">
+        <ul class="points reveal">
+            <li class="point"><b>State</b> is a typed object (a <code>TypedDict</code>) threaded through every node in turn.</li>
+            <li class="point">A <b>reducer</b> merges each update into state, <i>per field</i>: the default <b>overwrites</b>; an <code>Annotated[list, add]</code> field <b>appends</b> &mdash; your first genuinely new primitive in L04.</li>
+            <li class="point">Same machinery <b>L11</b> reuses for an agent's <i>message history</i> &mdash; met here first.</li>
         </ul>
-        <div class="diagram-frame reveal" style="flex-direction:column; align-items:stretch; width:600px; flex-shrink:0;">
-            <div style="border:2px solid var(--cyan); border-radius:12px; background:#12181a; padding:8px 30px 14px;">
-                <div style="font-family:var(--font-body); font-size:19px; color:var(--cyan); letter-spacing:0.08em; text-transform:uppercase; padding:14px 0 4px;">TicketState</div>
-                <div class="field-row"><span class="fname">ticket</span>: <span class="ftype">str</span></div>
-                <div class="field-row"><span class="fname">parsed</span>: <span class="ftype">str</span></div>
-                <div class="field-row"><span class="fname">draft</span>: <span class="ftype">str</span></div>
-                <div class="field-row reducer"><span class="fname">steps</span>: <span class="ftype">Annotated[list[str], add]</span><span class="reducer-tag">append reducer</span></div>
+        <div class="diagram-frame reveal" style="gap:10px; margin-top:26px; justify-content:flex-start;">
+            <div class="sbox" style="width:500px;">
+                <div class="stitle">after <span class="n">parse</span></div>
+                <div class="srow">ticket: "Where is my refund?"</div>
+                <div class="srow">parsed: "billing / refund"<span class="over">&larr; written</span></div>
+                <div class="srow">draft: &mdash;</div>
+                <div class="srow grow">steps:["parse"]<span class="reducer-tag">append reducer</span></div>
+            </div>
+            <div class="garrow">&rarr;</div>
+            <div class="sbox" style="width:500px;">
+                <div class="stitle">after <span class="n">draft</span></div>
+                <div class="srow">ticket: "Where is my refund?"</div>
+                <div class="srow">parsed: "billing / refund"</div>
+                <div class="srow">draft: "Happy to help&hellip;"<span class="over">&larr; written</span></div>
+                <div class="srow grow">steps:["parse","draft"]</div>
+            </div>
+            <div class="garrow">&rarr;</div>
+            <div class="sbox" style="width:500px;">
+                <div class="stitle">after <span class="n">policy_check</span></div>
+                <div class="srow">ticket: "Where is my refund?"</div>
+                <div class="srow">parsed: "billing / refund"</div>
+                <div class="srow">draft: "Glad to assist&hellip;"<span class="over">&larr; overwrote</span></div>
+                <div class="srow grow">steps:["parse","draft","policy_check"]</div>
             </div>
         </div>
+        <div class="diagram-caption reveal">Faint fields hold <b>one</b> value, overwritten in place (default reducer); the cyan <code>steps</code> list <b>grows</b> by one entry per node.</div>
     </div>
     <div class="chrome-page">09 / 26</div>
     <div class="chrome-nav">&larr; &rarr; navigate</div>
@@ -931,11 +1043,41 @@ result = app.invoke({<span class="p">"ticket"</span>: <span class="p">"..."</spa
     </div>
     <div class="body-area">
         <ul class="points reveal">
-            <li class="point"><b>Edge</b> &mdash; a fixed transition <code>A &rarr; B</code>, taken every time: <code>add_edge("parse", "draft")</code>. L05 adds a second kind (the conditional edge).</li>
+            <li class="point"><b>Edge</b> &mdash; a fixed transition <code>A &rarr; B</code>, taken every time; L05 adds the conditional kind.</li>
             <li class="point"><b>Entry point</b> &mdash; where execution starts (<code>set_entry_point</code>).</li>
-            <li class="point"><b>END</b> &mdash; the sentinel where execution stops; every path in a workflow reaches it.</li>
-            <li class="point"><b>DAG</b> (directed acyclic graph) &mdash; <b>no back-edges</b>: every edge moves forward. That absence is exactly what makes this a <i>workflow</i>, not an agent.</li>
+            <li class="point"><b>END</b> &mdash; the sentinel where every path stops.</li>
+            <li class="point"><b>DAG</b> &mdash; <b>no back-edges</b>; that absence makes it a <i>workflow</i>, not an agent.</li>
         </ul>
+        <div class="diagram-frame reveal" style="width:1560px; height:320px; margin-top:14px;">
+            <svg viewBox="0 0 1560 320" width="100%" height="100%">
+                <!-- cyan callouts pin the vocabulary onto the motif -->
+                <text x="204" y="34" text-anchor="middle" class="edge-label" font-size="21" fill="var(--cyan)">entry point</text>
+                <line x1="204" y1="44" x2="204" y2="64" stroke="var(--cyan)" stroke-width="1.5"/>
+                <text x="720" y="34" text-anchor="middle" class="edge-label" font-size="21" fill="var(--cyan)">edge (fixed)</text>
+                <line x1="720" y1="44" x2="720" y2="98" stroke="var(--cyan)" stroke-width="1.5"/>
+                <text x="1200" y="34" text-anchor="middle" class="edge-label" font-size="21" fill="var(--cyan)">END sentinel</text>
+                <line x1="1200" y1="44" x2="1200" y2="86" stroke="var(--cyan)" stroke-width="1.5"/>
+                <!-- the fixed forward chain -->
+                <path d="M 288 110 L 384 110" stroke="var(--cyan)" stroke-width="3" marker-end="url(#s25a)"/>
+                <path d="M 672 110 L 768 110" stroke="var(--cyan)" stroke-width="3" marker-end="url(#s25a)"/>
+                <path d="M 1056 110 L 1152 110" stroke="var(--cyan)" stroke-width="3" marker-end="url(#s25a)"/>
+                <rect x="120" y="70" width="168" height="80" rx="12" fill="#12181a" stroke="var(--cyan)" stroke-width="2.5"/>
+                <text x="204" y="120" text-anchor="middle" class="node-label" font-size="24">parse</text>
+                <rect x="504" y="70" width="168" height="80" rx="12" fill="#12181a" stroke="var(--cyan)" stroke-width="2.5"/>
+                <text x="588" y="120" text-anchor="middle" class="node-label" font-size="24">draft</text>
+                <rect x="888" y="70" width="168" height="80" rx="12" fill="#12181a" stroke="var(--cyan)" stroke-width="2.5"/>
+                <text x="972" y="120" text-anchor="middle" class="node-label" font-size="21">policy_check</text>
+                <text x="1200" y="118" text-anchor="middle" class="node-label" font-size="22" fill="var(--ink-dim)">END</text>
+                <!-- the one edge that would break the DAG -->
+                <path d="M 972 165 C 700 300, 480 300, 230 162" fill="none" stroke="var(--coral)" stroke-width="2.5" stroke-dasharray="10 8" opacity="0.75" marker-end="url(#s25c)"/>
+                <text x="594" y="234" text-anchor="middle" class="edge-label" font-size="21" fill="var(--coral)">this one edge would un-DAG it</text>
+                <defs>
+                    <marker id="s25a" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="var(--cyan)"/></marker>
+                    <marker id="s25c" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="var(--coral)"/></marker>
+                </defs>
+            </svg>
+        </div>
+        <div class="diagram-caption reveal" style="margin-top:0;">Same motif, this time annotated &mdash; the vocabulary pinned onto the chain.</div>
     </div>
     <div class="chrome-page">11 / 26</div>
     <div class="chrome-nav">&larr; &rarr; navigate</div>
@@ -1000,7 +1142,23 @@ result = app.invoke({<span class="p">"ticket"</span>: <span class="p">"..."</spa
                 <tr><td>failures are localized to one node</td><td>&nbsp;</td></tr>
             </tbody>
         </table>
-        <div class="diagram-caption reveal" style="margin-top:24px;">For a <i>strictly linear</i> three-step task the graph is near break-even. The real payoff shows up once you add <b>branching</b> (L05), shared state, and tracing (L12).</div>
+        <div class="two-up reveal" style="margin-top:30px;">
+            <div class="panel">
+                <div class="gnode" style="border-color:var(--coral); padding:30px 48px;">parse + draft + police<div class="sub">one mega-prompt</div></div>
+                <div class="panel-note bad">the monolith &mdash; unreliable, untestable as a lump</div>
+            </div>
+            <div class="panel">
+                <div style="display:flex; align-items:center; gap:12px; min-height:118px;">
+                    <div class="gnode" style="padding:14px 22px; font-size:22px;">parse</div>
+                    <div class="garrow cyan">&rarr;</div>
+                    <div class="gnode" style="padding:14px 22px; font-size:22px;">draft</div>
+                    <div class="garrow cyan">&rarr;</div>
+                    <div class="gnode" style="padding:14px 22px; font-size:22px;">policy_check</div>
+                </div>
+                <div class="panel-note good">the decomposition &mdash; three small focused calls</div>
+            </div>
+        </div>
+        <div class="diagram-caption reveal" style="margin-top:18px;">For a <i>strictly linear</i> three-step task the graph is near break-even. The real payoff shows up once you add <b>branching</b> (L05), shared state, and tracing (L12).</div>
     </div>
     <div class="chrome-page">14 / 26</div>
     <div class="chrome-nav">&larr; &rarr; navigate</div>
@@ -1034,7 +1192,7 @@ result = app.invoke({<span class="p">"ticket"</span>: <span class="p">"..."</spa
         </ul>
         <div class="diagram-frame reveal" style="gap:18px; margin-top:40px;">
             <div style="text-align:center;">
-                <div class="gnode dim" style="padding:22px 34px;">parse</div>
+                <div class="gnode" style="padding:22px 34px;">parse</div>
                 <div class="mchip haiku">Haiku 4.5 &middot; cheap</div>
             </div>
             <div class="garrow cyan" style="margin-top:-30px;">&rarr;</div>
@@ -1108,7 +1266,7 @@ result = app.invoke({<span class="p">"ticket"</span>: <span class="p">"..."</spa
         </div>
         <div class="diagram-frame reveal" style="flex-direction:column; align-items:stretch; width:760px; flex-shrink:0; gap:0;">
             <div style="display:flex; align-items:stretch; gap:26px;">
-                <pre class="code" style="margin:0; flex:1; padding:16px 20px;"><code style="font-size:17px;">reply = parse(ticket)
+                <pre class="code faint" style="margin:0; flex:1; padding:16px 20px;"><code style="font-size:17px;">reply = parse(ticket)
 draft = write(reply)
 ok = policy(draft)
 <span class="kw">return</span> draft</code></pre>
@@ -1168,10 +1326,38 @@ ok = policy(draft)
     </div>
     <div class="body-area">
         <ul class="points reveal">
-            <li class="point">Your workflow takes the <b>same path</b> on the same input: predictable, cheaper, lower-latency, and <b>trivially testable</b>.</li>
-            <li class="point">That testability is half the reason to prefer workflows: a tiny eval set (the L13 discipline) is cheap and honest.</li>
+            <li class="point">Same input &rarr; <b>same path</b>: predictable, cheaper, lower-latency, <b>trivially testable</b>. A tiny eval set (the L13 discipline) is cheap and honest.</li>
             <li class="point">The model <i>inside</i> a node is still non-deterministic &mdash; a draft's wording varies. The <b>path</b> is what's stable, and that's the whole lesson.</li>
         </ul>
+        <div class="diagram-frame reveal" style="flex-direction:column; align-items:flex-start; gap:32px; margin-top:34px; margin-left:10px;">
+            <div style="display:flex; align-items:flex-start; gap:18px;">
+                <div class="run-label">run 1</div>
+                <div class="gnode" style="padding:14px 24px;">parse</div>
+                <div class="garrow cyan" style="margin-top:16px;">&rarr;</div>
+                <div style="text-align:center;">
+                    <div class="gnode" style="padding:14px 24px;">draft</div>
+                    <div class="wchip">"Happy to help&hellip;"</div>
+                </div>
+                <div class="garrow cyan" style="margin-top:16px;">&rarr;</div>
+                <div class="gnode" style="padding:14px 24px;">policy_check</div>
+                <div class="garrow cyan" style="margin-top:16px;">&rarr;</div>
+                <div class="gnode dim" style="padding:14px 20px; font-size:22px;">END</div>
+            </div>
+            <div style="display:flex; align-items:flex-start; gap:18px;">
+                <div class="run-label">run 2</div>
+                <div class="gnode" style="padding:14px 24px;">parse</div>
+                <div class="garrow cyan" style="margin-top:16px;">&rarr;</div>
+                <div style="text-align:center;">
+                    <div class="gnode" style="padding:14px 24px;">draft</div>
+                    <div class="wchip">"Glad to assist&hellip;"</div>
+                </div>
+                <div class="garrow cyan" style="margin-top:16px;">&rarr;</div>
+                <div class="gnode" style="padding:14px 24px;">policy_check</div>
+                <div class="garrow cyan" style="margin-top:16px;">&rarr;</div>
+                <div class="gnode dim" style="padding:14px 20px; font-size:22px;">END</div>
+            </div>
+        </div>
+        <div class="diagram-caption reveal">The same picture twice, on the same input &mdash; the <b>path</b> is stable; the wording inside a node isn't.</div>
     </div>
     <div class="chrome-page">21 / 26</div>
     <div class="chrome-nav">&larr; &rarr; navigate</div>
@@ -1204,17 +1390,59 @@ ok = policy(draft)
             <tbody>
                 <tr>
                     <td class="tag warn-cell">"My DAG is deterministic"</td>
-                    <td>the <b>path</b> is fixed; the model's output <i>inside</i> a node still varies. Keep the graph acyclic <b>on purpose</b> &mdash; loop on the model's own output and you've built an agent. Name the crossing, don't slide into it.</td>
-                    <td>&sect;5.3 + &sect;2.5 (a DAG is "no back-edge") + slide 1.2</td>
+                    <td>the <b>path</b> is fixed; output <i>inside</i> a node still varies. Keep the graph acyclic <b>on purpose</b> &mdash; name the crossing, don't slide into it.</td>
+                    <td>&sect;5.3 + &sect;2.5 + slide 1.2</td>
                 </tr>
                 <tr>
                     <td class="tag warn-cell">Wrong model per node</td>
-                    <td>cheap model for parse / extract, capable for reasoning. The <i>mechanism</i> is per-node <code>ChatAnthropic(model=...)</code> (&sect;4); the <i>which-model</i> framework is L14.</td>
-                    <td>&sect;4 + the <code>parse</code>=Haiku / <code>draft</code>=Sonnet chain in the L0403 demo</td>
+                    <td>cheap model to parse / extract, capable for reasoning &mdash; per-node <code>ChatAnthropic(model=...)</code> (&sect;4); the <i>which-model</i> framework is L14.</td>
+                    <td>&sect;4 + the L0403 demo</td>
                 </tr>
             </tbody>
         </table>
-        <div class="diagram-caption reveal" style="margin-top:22px;">The first is where the spine blurs: a model <i>inside</i> a node isn't agency &mdash; agency is the model choosing the <b>path</b>, the back-edge L11 adds.</div>
+        <div class="two-up reveal" style="margin-top:24px;">
+            <div class="panel">
+                <svg viewBox="0 0 800 190" width="720" height="171">
+                    <path d="M 166 57 L 222 57" stroke="var(--cyan)" stroke-width="3" marker-end="url(#s61a)"/>
+                    <path d="M 378 57 L 434 57" stroke="var(--cyan)" stroke-width="3" marker-end="url(#s61a)"/>
+                    <path d="M 620 57 L 676 57" stroke="var(--cyan)" stroke-width="3" marker-end="url(#s61a)"/>
+                    <path d="M 529 90 C 470 172, 150 172, 95 92" fill="none" stroke="var(--coral)" stroke-width="3" marker-end="url(#s61b)"/>
+                    <rect x="16" y="28" width="150" height="58" rx="10" fill="#12181a" stroke="var(--cyan)" stroke-width="2.5"/>
+                    <text x="91" y="64" text-anchor="middle" class="node-label" font-size="21">parse</text>
+                    <rect x="228" y="28" width="150" height="58" rx="10" fill="#12181a" stroke="var(--cyan)" stroke-width="2.5"/>
+                    <text x="303" y="64" text-anchor="middle" class="node-label" font-size="21">draft</text>
+                    <rect x="440" y="28" width="178" height="58" rx="10" fill="#12181a" stroke="var(--cyan)" stroke-width="2.5"/>
+                    <text x="529" y="64" text-anchor="middle" class="node-label" font-size="18">policy_check</text>
+                    <text x="722" y="64" text-anchor="middle" class="node-label" font-size="19" fill="var(--ink-dim)">END</text>
+                    <text x="315" y="168" text-anchor="middle" class="edge-label" fill="var(--coral)">an uninvited back-edge &mdash; a loop on the model's own output</text>
+                    <defs>
+                        <marker id="s61a" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="var(--cyan)"/></marker>
+                        <marker id="s61b" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="var(--coral)"/></marker>
+                    </defs>
+                </svg>
+                <div class="panel-note bad">you slid into an agent without deciding to</div>
+            </div>
+            <div class="panel">
+                <div style="display:flex; align-items:flex-start; gap:12px; min-height:141px; padding-top:18px;">
+                    <div style="text-align:center;">
+                        <div class="gnode" style="padding:12px 20px; font-size:21px;">parse</div>
+                        <div class="mchip bad">Sonnet 4.6 &middot; overpaying</div>
+                    </div>
+                    <div class="garrow cyan" style="margin-top:12px;">&rarr;</div>
+                    <div style="text-align:center;">
+                        <div class="gnode" style="padding:12px 20px; font-size:21px;">draft</div>
+                        <div class="mchip bad">Haiku 4.5 &middot; underpowering</div>
+                    </div>
+                    <div class="garrow cyan" style="margin-top:12px;">&rarr;</div>
+                    <div style="text-align:center;">
+                        <div class="gnode" style="padding:12px 20px; font-size:21px;">policy_check</div>
+                        <div class="mchip sonnet">Sonnet 4.6</div>
+                    </div>
+                </div>
+                <div class="panel-note bad">the chips swapped &mdash; wrong model per node</div>
+            </div>
+        </div>
+        <div class="diagram-caption reveal" style="margin-top:16px;">The healthy cyan versions live on slides 1.3 and 4.1 &mdash; these are the same pictures, broken. A model <i>inside</i> a node isn't agency; agency is choosing the <b>path</b>.</div>
     </div>
     <div class="chrome-page">23 / 26</div>
     <div class="chrome-nav">&larr; &rarr; navigate</div>
@@ -1243,10 +1471,37 @@ ok = policy(draft)
     </div>
     <div class="body-area">
         <ul class="points reveal">
-            <li class="point">Everything here &mdash; <code>StateGraph</code>, nodes, fixed edges, typed state, reducers, compile/invoke &mdash; carries into <b>L05 unchanged</b>.</li>
+            <li class="point">Everything here &mdash; <code>StateGraph</code>, nodes, fixed edges, typed state, reducers &mdash; carries into <b>L05 unchanged</b>.</li>
             <li class="point">L05 adds exactly one new primitive: the <b>conditional edge</b> &mdash; a routing function chosen at runtime instead of a fixed <code>A &rarr; B</code>.</li>
-            <li class="point">L05 is also where the full <b>workflow vs. agent</b> contrast closes out &mdash; once you've seen both a fixed chain (here) and a routed branch (L05), before L11 hands the model that control.</li>
+            <li class="point">L05 also closes the full <b>workflow vs. agent</b> contrast &mdash; a fixed chain (here) plus a routed branch, before L11 hands the model that control.</li>
         </ul>
+        <div class="diagram-frame reveal" style="width:1560px; height:300px; margin-top:12px;">
+            <svg viewBox="0 0 1560 300" width="100%" height="100%">
+                <!-- the solid chain, unchanged -->
+                <path d="M 288 80 L 384 80" stroke="var(--cyan)" stroke-width="3" marker-end="url(#s71a)"/>
+                <path d="M 672 80 L 768 80" stroke="var(--cyan)" stroke-width="3" marker-end="url(#s71a)"/>
+                <path d="M 1056 80 L 1152 80" stroke="var(--cyan)" stroke-width="3" marker-end="url(#s71a)"/>
+                <rect x="120" y="40" width="168" height="80" rx="12" fill="#12181a" stroke="var(--cyan)" stroke-width="2.5"/>
+                <text x="204" y="90" text-anchor="middle" class="node-label" font-size="24">parse</text>
+                <rect x="504" y="40" width="168" height="80" rx="12" fill="#12181a" stroke="var(--cyan)" stroke-width="2.5"/>
+                <text x="588" y="90" text-anchor="middle" class="node-label" font-size="24">draft</text>
+                <rect x="888" y="40" width="168" height="80" rx="12" fill="#12181a" stroke="var(--cyan)" stroke-width="2.5"/>
+                <text x="972" y="90" text-anchor="middle" class="node-label" font-size="21">policy_check</text>
+                <text x="1200" y="88" text-anchor="middle" class="node-label" font-size="22" fill="var(--ink-dim)">END</text>
+                <!-- ghosted routing diamond after parse: what L05 adds -->
+                <path d="M 204 124 C 204 195, 270 212, 330 214" fill="none" stroke="var(--ink-faint)" stroke-width="2.5" stroke-dasharray="8 8" marker-end="url(#s71f)"/>
+                <polygon points="400,166 462,214 400,262 338,214" fill="none" stroke="var(--ink-faint)" stroke-width="2.5" stroke-dasharray="8 8"/>
+                <text x="400" y="221" text-anchor="middle" class="edge-label" font-size="17" fill="var(--ink-dim)">route?</text>
+                <path d="M 466 200 L 620 176" stroke="var(--ink-faint)" stroke-width="2.5" stroke-dasharray="8 8" opacity="0.55" marker-end="url(#s71f)"/>
+                <path d="M 466 228 L 620 252" stroke="var(--ink-faint)" stroke-width="2.5" stroke-dasharray="8 8" opacity="0.3" marker-end="url(#s71f)"/>
+                <text x="668" y="222" class="edge-label" font-size="21" fill="var(--ink-dim)">conditional edge &mdash; lands in L05</text>
+                <defs>
+                    <marker id="s71a" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="var(--cyan)"/></marker>
+                    <marker id="s71f" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="var(--ink-faint)"/></marker>
+                </defs>
+            </svg>
+        </div>
+        <div class="diagram-caption reveal" style="margin-top:0;">Everything solid carries forward unchanged; the one dashed shape is all L05 adds.</div>
     </div>
     <div class="chrome-page">25 / 26</div>
     <div class="chrome-nav">&larr; &rarr; navigate</div>

@@ -548,6 +548,62 @@ table.ledger td.warn-cell { color: var(--coral); }
     font-size: 17px; letter-spacing: 0.12em; text-transform: uppercase;
     color: var(--cyan); font-weight: 600; width: 130px; flex-shrink: 0;
 }
+
+/* --- update helpers (motif chains + contrasts + staircase) — appended, shared rules above untouched --- */
+.dgm-box.model { border-color: var(--ink-dim); }
+.dgm-box.model .t { color: var(--ink); }
+.actor-label {
+    font-size: 16px; letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--ink-dim); font-weight: 600; margin-bottom: 10px; text-align: center;
+}
+/* the four-message strip — section-3 motif (slides 3.1 / 3.2 / 3.4) */
+.msg-strip { display: grid; grid-template-columns: 1fr 36px 1fr 36px 1fr 36px 1fr; align-items: stretch; width: 100%; }
+.msg-strip .dgm-arrow { display: flex; align-items: center; justify-content: center; font-size: 26px; }
+.msg-strip .dgm-box { text-align: left; padding: 14px 18px; }
+/* the id-thread arc drawn under the strip (slide 3.2) */
+.id-arc { position: relative; height: 66px; margin-top: 4px; }
+.id-arc .arc {
+    position: absolute; top: 0; height: 44px;
+    border-left: 2.5px solid var(--cyan); border-right: 2.5px solid var(--cyan);
+    border-bottom: 2.5px solid var(--cyan); border-radius: 0 0 26px 26px;
+}
+.id-arc .arc-head {
+    position: absolute; width: 0; height: 0;
+    border-left: 8px solid transparent; border-right: 8px solid transparent;
+    border-bottom: 11px solid var(--cyan);
+}
+.id-arc .arc-label { position: absolute; font-size: 17px; color: var(--cyan); letter-spacing: 0.04em; }
+/* two-up contrast panels (slides 2.3 / 3.3) */
+.two-up { display: flex; gap: 28px; align-items: stretch; }
+.panel { flex: 1; border: 2px solid var(--cyan); border-radius: 12px; background: #0d1418; padding: 20px 26px; }
+.panel.bad { border-color: var(--coral); }
+.panel .p-label {
+    font-size: 16px; letter-spacing: 0.11em; text-transform: uppercase;
+    color: var(--cyan); font-weight: 600; margin-bottom: 12px;
+}
+.panel.bad .p-label { color: var(--coral); }
+.panel .p-row { font-size: 20px; color: var(--ink-dim); padding: 7px 0; border-bottom: 1px solid rgba(82,232,200,0.10); }
+.panel .p-row:last-child { border-bottom: none; }
+.panel .p-row b { color: var(--ink); }
+.panel.bad .p-row { border-bottom-color: rgba(255,107,87,0.12); }
+.strike { text-decoration: line-through; text-decoration-color: var(--coral); text-decoration-thickness: 2.5px; }
+/* pills + chips */
+.chip-cyan {
+    display: inline-block; border: 2px solid var(--cyan); color: var(--cyan);
+    background: rgba(82,232,200,0.08); border-radius: 999px; padding: 7px 18px;
+    font-size: 19px; font-weight: 600; white-space: nowrap;
+}
+.tag-coral {
+    display: inline-block; border: 1.5px solid var(--coral); color: var(--coral);
+    background: rgba(255,107,87,0.07); border-radius: 7px; padding: 7px 14px; font-size: 17px;
+}
+/* the definition-tax staircase (slide 4.2) */
+.tax-chart { display: flex; align-items: flex-end; gap: 20px; }
+.tax-col { display: flex; flex-direction: column; align-items: center; gap: 7px; }
+.tax-stack { display: flex; flex-direction: column; gap: 3px; width: 96px; }
+.tax-block { height: 25px; background: rgba(255,107,87,0.5); border: 1px solid var(--coral-dim); border-radius: 3px; }
+.tax-val { font-size: 16px; color: var(--ink-dim); }
+.tax-axis { font-size: 16px; color: var(--ink-faint); }
 </style>
 </head>
 <body>
@@ -714,7 +770,23 @@ table.ledger td.warn-cell { color: var(--coral); }
                 </tr>
             </tbody>
         </table>
-        <div class="callout reveal" style="margin-top:34px;"><p>The model <span style="color:var(--cyan); font-style:normal; font-weight:600;">proposes</span>; the application <span style="color:var(--cyan); font-style:normal; font-weight:600;">disposes</span>; the tool <span style="color:var(--cyan); font-style:normal; font-weight:600;">computes</span>. Say it as a chant.</p></div>
+        <div class="diagram-frame reveal" style="gap:24px; margin-top:30px; justify-content:flex-start; align-items:stretch;">
+            <div style="flex:1; max-width:480px;">
+                <div class="actor-label">model <span style="color:var(--cyan);">proposes</span></div>
+                <div class="dgm-box" style="text-align:left;"><div class="t" style="font-size:20px;">tool call</div><div class="s">name + args + id &mdash; just emitted tokens</div></div>
+            </div>
+            <div class="dgm-arrow cyan" style="margin-top:26px;">&rarr;</div>
+            <div style="flex:1; max-width:480px;">
+                <div class="actor-label">application <span style="color:var(--cyan);">disposes</span></div>
+                <div class="dgm-box" style="text-align:left;"><div class="t" style="font-size:20px;">the gate</div><div class="s">reads &middot; validates &middot; runs &mdash; your code owns this step</div></div>
+            </div>
+            <div class="dgm-arrow" style="margin-top:26px;">&rarr;</div>
+            <div style="flex:1; max-width:480px;">
+                <div class="actor-label">tool <span style="color:var(--cyan);">computes</span></div>
+                <div class="dgm-box neutral" style="text-align:left;"><div class="t" style="font-size:20px;">the function</div><div class="s">only ever sees what the gate passes it</div></div>
+            </div>
+        </div>
+        <div class="diagram-caption reveal">The model <span style="color:var(--cyan); font-style:normal; font-weight:600;">proposes</span>; the application <span style="color:var(--cyan); font-style:normal; font-weight:600;">disposes</span>; the tool <span style="color:var(--cyan); font-style:normal; font-weight:600;">computes</span> &mdash; say it as a chant.</div>
     </div>
     <div class="chrome-page">05 / 30</div>
     <div class="chrome-nav">&larr; &rarr; navigate</div>
@@ -793,15 +865,15 @@ table.ledger td.warn-cell { color: var(--coral); }
             </tbody>
         </table>
         <div class="diagram-frame reveal" style="gap:12px; margin-top:26px; justify-content:flex-start;">
-            <div class="dgm-box" style="padding:12px 18px; border-color:var(--cyan-dim);"><div class="t" style="font-size:18px; color:var(--cyan);">1 name</div><div class="s" style="font-size:14px;">application</div></div>
+            <div class="dgm-box" style="padding:12px 18px;"><div class="t" style="font-size:18px; color:var(--cyan);">1 name</div><div class="s" style="font-size:14px;">application</div></div>
             <div class="dgm-arrow cyan" style="font-size:24px;">&rarr;</div>
-            <div class="dgm-box" style="padding:12px 18px; border-color:var(--cyan-dim);"><div class="t" style="font-size:18px; color:var(--cyan);">2 describe</div><div class="s" style="font-size:14px;">application</div></div>
+            <div class="dgm-box" style="padding:12px 18px;"><div class="t" style="font-size:18px; color:var(--cyan);">2 describe</div><div class="s" style="font-size:14px;">application</div></div>
             <div class="dgm-arrow cyan" style="font-size:24px;">&rarr;</div>
             <div class="dgm-box neutral" style="padding:12px 18px;"><div class="t" style="font-size:18px;">3 decide + emit</div><div class="s" style="font-size:14px;">model</div></div>
             <div class="dgm-arrow cyan" style="font-size:24px;">&rarr;</div>
-            <div class="dgm-box" style="padding:12px 18px; border-color:var(--cyan-dim);"><div class="t" style="font-size:18px; color:var(--cyan);">4 dispatch</div><div class="s" style="font-size:14px;">application</div></div>
+            <div class="dgm-box" style="padding:12px 18px;"><div class="t" style="font-size:18px; color:var(--cyan);">4 dispatch</div><div class="s" style="font-size:14px;">application</div></div>
             <div class="dgm-arrow cyan" style="font-size:24px;">&rarr;</div>
-            <div class="dgm-box" style="padding:12px 18px; border-color:var(--cyan-dim);"><div class="t" style="font-size:18px; color:var(--cyan);">5 continue</div><div class="s" style="font-size:14px;">application</div></div>
+            <div class="dgm-box" style="padding:12px 18px;"><div class="t" style="font-size:18px; color:var(--cyan);">5 continue</div><div class="s" style="font-size:14px;">application</div></div>
         </div>
         <div class="diagram-caption reveal" style="margin-top:12px;">Steps 1&ndash;2 and 4&ndash;5 are the <span style="color:var(--cyan); font-style:normal;">application</span>; step 3 is the <span style="font-style:normal;">model</span>.</div>
     </div>
@@ -821,11 +893,23 @@ table.ledger td.warn-cell { color: var(--coral); }
     <div class="body-area">
         <ul class="points reveal" style="max-width:1600px;">
             <li class="point">A tool definition tells the model "tools of <i>this shape</i> exist." Mirroring L06's <code>&lt;thinking&gt;</code> tags, it adds <b>zero capability</b> and makes <b>zero guarantees about behavior</b>.</li>
-            <li class="point">The definition does <span class="warn">not</span> force the model to call the tool — it may answer directly instead.</li>
-            <li class="point">It does <span class="warn">not</span> validate the arguments at generation time — the model can pass nonsense.</li>
-            <li class="point">It does <span class="warn">not</span> stop the model from inventing a tool name that doesn't exist.</li>
         </ul>
-        <div class="callout reveal"><p>The application <span class="k">validates</span>; the model <span class="k">proposes</span>. Return here any time you expect the schema to <i>enforce</i> something.</p></div>
+        <div class="two-up reveal" style="margin-top:24px; max-width:1600px;">
+            <div class="panel">
+                <div class="p-label">What the definition gives</div>
+                <div class="p-row">a <b>name</b> the model will echo back</div>
+                <div class="p-row">a natural-language <b>description</b></div>
+                <div class="p-row">an <b>argument schema</b> &mdash; tools of <i>this shape</i> exist</div>
+            </div>
+            <div class="panel bad">
+                <div class="p-label">What it does <b style="color:var(--coral);">not</b> give</div>
+                <div class="p-row"><span class="strike">force the model to call the tool</span> &mdash; it may answer directly</div>
+                <div class="p-row"><span class="strike">validate arguments at generation time</span> &mdash; nonsense can pass</div>
+                <div class="p-row"><span class="strike">block invented tool names</span></div>
+            </div>
+        </div>
+        <div class="diagram-caption reveal">A contract about shape, not a guarantee about behavior.</div>
+        <div class="callout reveal" style="margin-top:22px;"><p>The application <span class="k">validates</span>; the model <span class="k">proposes</span>. Return here any time you expect the schema to <i>enforce</i> something.</p></div>
     </div>
     <div class="chrome-page">09 / 30</div>
     <div class="chrome-nav">&larr; &rarr; navigate</div>
@@ -840,12 +924,32 @@ table.ledger td.warn-cell { color: var(--coral); }
         <div class="eyebrow">Slide 2.4</div>
         <h2 class="headline">Deciding to call <span class="it">is a reasoning step</span></h2>
     </div>
-    <div class="body-area">
-        <ul class="points reveal" style="max-width:1600px;">
-            <li class="point">Handing the model a tool is an <b>offer</b>, never a <b>command</b>. Whether it reaches for the tool is a sampling decision conditioned on the prompt, the conversation, and the tool's description.</li>
-            <li class="point">That decision is itself a <b>reasoning step</b> — exactly what L06 was about. A vague tool the model can't tell when to use is a tool it will skip. Same skill, aimed at a new choice.</li>
-            <li class="point">A look ahead you won't need yet: "what makes a tool worth adding, well-named, well-described?" is <b>L08</b>'s whole job. For now, just notice the description visibly moves behavior.</li>
+    <div class="body-area" style="display:flex; align-items:center; gap:52px;">
+        <ul class="points reveal" style="max-width:880px;">
+            <li class="point">Handing the model a tool is an <b>offer</b>, never a <b>command</b>. Whether it reaches for the tool is a sampling decision conditioned on the prompt, the conversation, and the description.</li>
+            <li class="point">That decision is itself a <b>reasoning step</b> — exactly what L06 was about. A vague tool the model can't tell when to use is a tool it will skip.</li>
+            <li class="point">A look ahead you won't need yet: "what makes a tool worth adding, well-named, well-described?" is <b>L08</b>'s whole job. For now, notice the description visibly moves behavior.</li>
         </ul>
+        <div class="diagram-frame reveal" style="flex-direction:column; width:660px; flex-shrink:0;">
+            <svg viewBox="0 0 620 360" width="620" height="360">
+                <path d="M 165 180 C 250 85, 300 80, 350 74" fill="none" stroke="var(--cyan)" stroke-width="3.5" marker-end="url(#fk-c)"/>
+                <path d="M 165 180 C 250 275, 300 280, 350 286" fill="none" stroke="var(--ink-faint)" stroke-width="3" marker-end="url(#fk-n)"/>
+                <circle cx="98" cy="180" r="66" fill="#12181a" stroke="var(--cyan)" stroke-width="2.5"/>
+                <text x="98" y="174" text-anchor="middle" class="node-label" font-size="21">prompt</text>
+                <text x="98" y="200" text-anchor="middle" class="edge-label" fill="var(--ink-dim)">+ bound tool</text>
+                <rect x="362" y="36" width="248" height="76" rx="10" fill="#12181a" stroke="var(--cyan)" stroke-width="2.5"/>
+                <text x="486" y="68" text-anchor="middle" class="node-label" font-size="22">emits a tool call</text>
+                <text x="486" y="94" text-anchor="middle" class="edge-label" fill="var(--cyan)">in .tool_calls</text>
+                <rect x="362" y="248" width="248" height="76" rx="10" fill="#12181a" stroke="var(--ink-faint)" stroke-width="2.5"/>
+                <text x="486" y="280" text-anchor="middle" class="node-label" font-size="22" fill="var(--ink-dim)">answers directly</text>
+                <text x="486" y="306" text-anchor="middle" class="edge-label" fill="var(--ink-dim)">legitimate &mdash; not a failure</text>
+                <defs>
+                    <marker id="fk-c" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="var(--cyan)"/></marker>
+                    <marker id="fk-n" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="var(--ink-faint)"/></marker>
+                </defs>
+            </svg>
+            <div class="diagram-caption reveal" style="text-align:center; margin-top:8px; font-size:22px;">An offer, never a command &mdash; slide 5.1 adds the failure branch to this fork.</div>
+        </div>
     </div>
     <div class="chrome-page">10 / 30</div>
     <div class="chrome-nav">&larr; &rarr; navigate</div>
@@ -873,16 +977,17 @@ table.ledger td.warn-cell { color: var(--coral); }
         <h2 class="headline">A round-trip is <span class="it">four messages</span></h2>
     </div>
     <div class="body-area">
-        <div class="diagram-frame reveal" style="gap:14px; margin-top:6px; justify-content:flex-start;">
-            <div class="dgm-box" style="text-align:left; padding:16px 20px;"><div class="t" style="font-size:19px;">HumanMessage</div><div class="s">the question &middot; <i>human</i></div></div>
-            <div class="dgm-arrow cyan" style="font-size:26px;">&rarr;</div>
-            <div class="dgm-box" style="text-align:left; padding:16px 20px;"><div class="t" style="font-size:19px;">AIMessage</div><div class="s"><code style="color:var(--cyan);">.tool_calls</code> &middot; <i>model</i></div></div>
-            <div class="dgm-arrow cyan" style="font-size:26px;">&rarr;</div>
-            <div class="dgm-box" style="text-align:left; padding:16px 20px;"><div class="t" style="font-size:19px;">ToolMessage</div><div class="s">result &middot; <i>application</i></div></div>
-            <div class="dgm-arrow cyan" style="font-size:26px;">&rarr;</div>
-            <div class="dgm-box" style="text-align:left; padding:16px 20px;"><div class="t" style="font-size:19px;">AIMessage</div><div class="s">final text &middot; <i>model</i></div></div>
+        <div class="msg-strip reveal" style="margin-top:6px;">
+            <div class="dgm-box neutral"><div class="t" style="font-size:19px;">HumanMessage</div><div class="s">the question &middot; <i>human</i></div></div>
+            <div class="dgm-arrow">&rarr;</div>
+            <div class="dgm-box model"><div class="t" style="font-size:19px;">AIMessage</div><div class="s"><code style="color:var(--cyan);">.tool_calls</code> &middot; <i>model</i></div></div>
+            <div class="dgm-arrow">&rarr;</div>
+            <div class="dgm-box"><div class="t" style="font-size:19px;">ToolMessage</div><div class="s">result &middot; <b style="color:var(--cyan);">application</b></div></div>
+            <div class="dgm-arrow">&rarr;</div>
+            <div class="dgm-box model"><div class="t" style="font-size:19px;">AIMessage</div><div class="s">final text &middot; <i>model</i></div></div>
         </div>
-        <table class="ledger reveal" style="margin-top:30px; max-width:1660px;">
+        <div class="diagram-caption reveal" style="margin-top:12px; font-size:21px;">Colour = producer: human faint, model ink, application <span style="color:var(--cyan); font-style:normal;">cyan</span> &mdash; the message <i>your code</i> writes is the point.</div>
+        <table class="ledger reveal" style="margin-top:20px; max-width:1660px;">
             <thead><tr><th style="width:56px;">#</th><th style="width:320px;">Message type</th><th>Carries</th><th style="width:230px;">Produced by</th></tr></thead>
             <tbody>
                 <tr><td class="tag">1</td><td><code>HumanMessage</code></td><td>the original question</td><td>the human</td></tr>
@@ -905,26 +1010,28 @@ table.ledger td.warn-cell { color: var(--coral); }
         <div class="eyebrow">Slide 3.2</div>
         <h2 class="headline">The id ties <span class="it">request to result</span></h2>
     </div>
-    <div class="body-area" style="display:flex; align-items:center; gap:56px;">
-        <ul class="points reveal" style="max-width:900px;">
-            <li class="point">The tool call in message 2 carries a unique <b>id</b>. The <code>ToolMessage</code> in message 3 sets its <code>tool_call_id</code> to that <i>same</i> id — that's how your app says "this result answers <i>that</i> request."</li>
+    <div class="body-area">
+        <ul class="points reveal" style="max-width:1600px;">
+            <li class="point">The tool call in message 2 carries a unique <b>id</b>. The <code>ToolMessage</code> in message 3 sets its <code>tool_call_id</code> to that <i>same</i> id.</li>
             <li class="point">With a single call the id feels redundant. It stops being redundant the moment more than one call is in flight (a forward-link to <b>L10</b>'s agent loop). Build the habit now.</li>
         </ul>
-        <div class="diagram-frame reveal" style="width:660px; height:420px; flex-shrink:0;">
-            <svg viewBox="0 0 660 420" width="100%" height="100%">
-                <path d="M 380 145 C 510 100, 510 300, 380 262" fill="none" stroke="var(--cyan)" stroke-width="3" marker-end="url(#id-c)"/>
-                <text x="550" y="205" text-anchor="middle" class="edge-label" fill="var(--cyan)">same id</text>
-                <rect x="60" y="90" width="320" height="90" rx="10" fill="#12181a" stroke="var(--cyan)" stroke-width="2.5"/>
-                <text x="80" y="126" class="edge-label" fill="var(--ink-dim)">msg 2 &middot; AIMessage</text>
-                <text x="80" y="158" class="node-label" font-size="22">tool_call id=<tspan fill="var(--cyan)">c_42</tspan></text>
-                <rect x="60" y="240" width="320" height="90" rx="10" fill="#12181a" stroke="var(--cyan)" stroke-width="2.5"/>
-                <text x="80" y="276" class="edge-label" fill="var(--ink-dim)">msg 3 &middot; ToolMessage</text>
-                <text x="80" y="308" class="node-label" font-size="22">tool_call_id=<tspan fill="var(--cyan)">c_42</tspan></text>
-                <defs>
-                    <marker id="id-c" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="var(--cyan)"/></marker>
-                </defs>
-            </svg>
+        <div class="reveal" style="margin-top:30px;">
+            <div class="msg-strip">
+                <div class="dgm-box neutral"><div class="t" style="font-size:19px;">HumanMessage</div><div class="s">the question &middot; <i>human</i></div></div>
+                <div class="dgm-arrow">&rarr;</div>
+                <div class="dgm-box model"><div class="t" style="font-size:19px;">AIMessage</div><div class="s">tool call &middot; id=<b style="color:var(--cyan);">c_42</b></div></div>
+                <div class="dgm-arrow">&rarr;</div>
+                <div class="dgm-box"><div class="t" style="font-size:19px;">ToolMessage</div><div class="s">tool_call_id=<b style="color:var(--cyan);">c_42</b></div></div>
+                <div class="dgm-arrow">&rarr;</div>
+                <div class="dgm-box model"><div class="t" style="font-size:19px;">AIMessage</div><div class="s">final text &middot; <i>model</i></div></div>
+            </div>
+            <div class="id-arc">
+                <div class="arc" style="left:37.2%; width:25.6%;"></div>
+                <div class="arc-head" style="left:calc(37.2% - 8px); top:-5px;"></div>
+                <div class="arc-label" style="left:50%; transform:translateX(-50%); top:16px;">same id &middot; c_42</div>
+            </div>
         </div>
+        <div class="diagram-caption reveal">The same strip as 3.1 &mdash; the only new ink is the thread: the id is how your application says <i>this result answers that request</i>.</div>
     </div>
     <div class="chrome-page">13 / 30</div>
     <div class="chrome-nav">&larr; &rarr; navigate</div>
@@ -942,9 +1049,25 @@ table.ledger td.warn-cell { color: var(--coral); }
     <div class="body-area">
         <ul class="points reveal" style="max-width:1600px;">
             <li class="point">This surprises everyone: the tool result does <span class="warn">not</span> go in an <code>AIMessage</code>, and it is not the human speaking either. It rides in a dedicated <code>ToolMessage</code> — a distinct <i>tool</i> role, your code speaking on the tool's behalf.</li>
-            <li class="point">So the history carries <b>three</b> message types — human, ai, and tool — not just a human&harr;assistant back-and-forth.</li>
+            <li class="point">So the history carries <b>three</b> message types — human, ai, and tool. The role a message carries marks its <b>protocol position</b>, not who is a person.</li>
         </ul>
-        <div class="callout reveal"><p>The role a message carries marks its <span class="k">protocol position</span>, not who is a person.</p></div>
+        <div class="two-up reveal" style="margin-top:26px; max-width:1600px;">
+            <div class="panel bad">
+                <div class="p-label">The wrong mental model</div>
+                <div class="dgm-box model" style="text-align:left; border-color:var(--coral);">
+                    <div class="t" style="font-size:19px;">AIMessage</div>
+                    <div class="s" style="margin-top:8px;"><span class="tag-coral strike">tool result stuffed in .content</span></div>
+                </div>
+            </div>
+            <div class="panel">
+                <div class="p-label">What actually happens</div>
+                <div class="dgm-box" style="text-align:left;">
+                    <div class="t" style="font-size:19px;">ToolMessage <span style="color:var(--cyan); font-size:15px;">&middot; role: tool</span></div>
+                    <div class="s" style="margin-top:8px;">the result in its own message &mdash; a third, distinct role</div>
+                </div>
+            </div>
+        </div>
+        <div class="diagram-caption reveal">A third role in the history &mdash; your code speaking for the tool, not the assistant speaking.</div>
     </div>
     <div class="chrome-page">14 / 30</div>
     <div class="chrome-nav">&larr; &rarr; navigate</div>
@@ -961,10 +1084,37 @@ table.ledger td.warn-cell { color: var(--coral); }
     </div>
     <div class="body-area">
         <ul class="points reveal" style="max-width:1600px;">
-            <li class="point">To produce message 4, the model was sent messages 1&ndash;3 <b>and</b> the full tool-definition list, <i>again</i>. It did not "remember" the tool from message 2.</li>
-            <li class="point">The most common student misconception: <span class="warn">"I told the model about the tool last turn, so it remembers."</span> It does not. <b>The schema is in the prompt every single time</b> — and because you kept the same <code>bind_tools</code> handle, it was re-attached automatically.</li>
+            <li class="point">The most common misconception: <span class="warn">"I told the model about the tool last turn, so it remembers."</span> It does not. <b>The schema is in the prompt every single time</b> — the same <code>bind_tools</code> handle re-attached it automatically.</li>
             <li class="point">Statelessness is why the next section is about cost — re-sending everything on every call is not free.</li>
         </ul>
+        <div class="reveal" style="margin-top:20px;">
+            <div class="msg-strip">
+                <div class="dgm-box neutral" style="padding:10px 16px;"><div class="t" style="font-size:17px;">HumanMessage</div><div class="s" style="font-size:14px;">msg 1 &middot; <i>human</i></div></div>
+                <div class="dgm-arrow">&rarr;</div>
+                <div class="dgm-box model" style="padding:10px 16px;"><div class="t" style="font-size:17px;">AIMessage</div><div class="s" style="font-size:14px;">msg 2 &middot; <code style="color:var(--cyan); font-size:1em;">.tool_calls</code></div></div>
+                <div class="dgm-arrow">&rarr;</div>
+                <div class="dgm-box" style="padding:10px 16px;"><div class="t" style="font-size:17px;">ToolMessage</div><div class="s" style="font-size:14px;">msg 3 &middot; result</div></div>
+                <div class="dgm-arrow">&rarr;</div>
+                <div class="dgm-box model" style="padding:10px 16px;"><div class="t" style="font-size:17px;">AIMessage</div><div class="s" style="font-size:14px;">msg 4 &middot; final text</div></div>
+            </div>
+            <div style="display:flex; align-items:center; gap:22px; margin-top:18px;">
+                <div style="flex:1; border:2px solid var(--ink-faint); border-radius:12px; padding:14px 20px;">
+                    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px;">
+                        <div style="font-size:16px; letter-spacing:0.1em; text-transform:uppercase; color:var(--ink-dim);">the request that produces message 4</div>
+                        <span class="chip-cyan">re-sent, not remembered</span>
+                    </div>
+                    <div style="display:flex; gap:12px; align-items:stretch;">
+                        <div class="dgm-box neutral" style="padding:9px 14px; text-align:left;"><div class="t" style="font-size:15px;">msg 1 &middot; HumanMessage</div></div>
+                        <div class="dgm-box model" style="padding:9px 14px; text-align:left;"><div class="t" style="font-size:15px;">msg 2 &middot; AIMessage</div></div>
+                        <div class="dgm-box" style="padding:9px 14px; text-align:left;"><div class="t" style="font-size:15px;">msg 3 &middot; ToolMessage</div></div>
+                        <div class="dgm-box" style="padding:9px 14px; text-align:left;"><div class="t" style="font-size:15px;">tool definition</div><div class="s" style="font-size:12px;">name &middot; description &middot; schema &mdash; again</div></div>
+                    </div>
+                </div>
+                <div class="dgm-arrow cyan">&rarr;</div>
+                <div class="dgm-box model" style="padding:12px 18px; text-align:left; flex-shrink:0;"><div class="t" style="font-size:17px;">msg 4 &middot; AIMessage</div><div class="s" style="font-size:14px;">final text</div></div>
+            </div>
+        </div>
+        <div class="diagram-caption reveal" style="margin-top:14px;">The 3.1 strip, one level down: producing message 4 re-sends messages 1&ndash;3 <b>and</b> the definition &mdash; 4.1 puts a price on this.</div>
     </div>
     <div class="chrome-page">15 / 30</div>
     <div class="chrome-nav">&larr; &rarr; navigate</div>
@@ -1024,16 +1174,26 @@ table.ledger td.warn-cell { color: var(--coral); }
         <div class="eyebrow">Slide 4.2</div>
         <h2 class="headline">A worked <span class="it">cost example</span></h2>
     </div>
-    <div class="body-area reveal">
-        <table class="ledger" style="max-width:1400px;">
-            <thead><tr><th>Quantity</th><th>Value</th></tr></thead>
-            <tbody>
-                <tr><td class="tag">Tool definition size</td><td>~500 tokens</td></tr>
-                <tr><td class="tag">Conversation length</td><td>10 turns</td></tr>
-                <tr><td class="tag">Input tokens on the definition alone</td><td><b>~5,000 tokens</b></td></tr>
-                <tr><td class="tag">Tool calls required for that cost</td><td class="warn-cell"><b>zero</b> — it's the definition, re-sent every turn</td></tr>
-            </tbody>
-        </table>
+    <div class="body-area">
+        <div class="diagram-frame reveal" style="flex-direction:column; align-items:center; margin-top:6px;">
+            <div class="tax-chart">
+                <div class="tax-col"><div class="tax-val">500</div><div class="tax-stack"><div class="tax-block"></div></div><div class="tax-axis">turn 1</div></div>
+                <div class="tax-col"><div class="tax-val">1,000</div><div class="tax-stack"><div class="tax-block"></div><div class="tax-block"></div></div><div class="tax-axis">turn 2</div></div>
+                <div class="tax-col"><div class="tax-val">1,500</div><div class="tax-stack"><div class="tax-block"></div><div class="tax-block"></div><div class="tax-block"></div></div><div class="tax-axis">turn 3</div></div>
+                <div class="tax-col"><div class="tax-val">2,000</div><div class="tax-stack"><div class="tax-block"></div><div class="tax-block"></div><div class="tax-block"></div><div class="tax-block"></div></div><div class="tax-axis">turn 4</div></div>
+                <div class="tax-col"><div class="tax-val">2,500</div><div class="tax-stack"><div class="tax-block"></div><div class="tax-block"></div><div class="tax-block"></div><div class="tax-block"></div><div class="tax-block"></div></div><div class="tax-axis">turn 5</div></div>
+                <div class="tax-col"><div class="tax-val">3,000</div><div class="tax-stack"><div class="tax-block"></div><div class="tax-block"></div><div class="tax-block"></div><div class="tax-block"></div><div class="tax-block"></div><div class="tax-block"></div></div><div class="tax-axis">turn 6</div></div>
+                <div class="tax-col"><div class="tax-val">3,500</div><div class="tax-stack"><div class="tax-block"></div><div class="tax-block"></div><div class="tax-block"></div><div class="tax-block"></div><div class="tax-block"></div><div class="tax-block"></div><div class="tax-block"></div></div><div class="tax-axis">turn 7</div></div>
+                <div class="tax-col"><div class="tax-val">4,000</div><div class="tax-stack"><div class="tax-block"></div><div class="tax-block"></div><div class="tax-block"></div><div class="tax-block"></div><div class="tax-block"></div><div class="tax-block"></div><div class="tax-block"></div><div class="tax-block"></div></div><div class="tax-axis">turn 8</div></div>
+                <div class="tax-col"><div class="tax-val">4,500</div><div class="tax-stack"><div class="tax-block"></div><div class="tax-block"></div><div class="tax-block"></div><div class="tax-block"></div><div class="tax-block"></div><div class="tax-block"></div><div class="tax-block"></div><div class="tax-block"></div><div class="tax-block"></div></div><div class="tax-axis">turn 9</div></div>
+                <div class="tax-col"><div class="tax-val" style="color:var(--coral); font-weight:700; font-size:19px;">~5,000</div><div class="tax-stack"><div class="tax-block"></div><div class="tax-block"></div><div class="tax-block"></div><div class="tax-block"></div><div class="tax-block"></div><div class="tax-block"></div><div class="tax-block"></div><div class="tax-block"></div><div class="tax-block"></div><div class="tax-block"></div></div><div class="tax-axis">turn 10</div></div>
+                <div style="align-self:center; margin-left:30px; display:flex; flex-direction:column; gap:12px; align-items:flex-start;">
+                    <span class="chip-cyan" style="font-size:22px; padding:10px 22px;">tool calls made: <b>0</b></span>
+                    <div style="font-size:17px; color:var(--ink-dim); max-width:280px; line-height:1.5;">each <span style="color:var(--coral);">block</span> = the ~500-token definition, re-sent that turn</div>
+                </div>
+            </div>
+            <div class="diagram-caption" style="margin-top:20px;">The definition is a standing tax, billed every turn before the tool ever runs.</div>
+        </div>
         <div class="callout reveal"><p>Every tool you add is a standing tax on every request — paid whether or not the model uses it. This is why <span class="k">L08</span> asks "should this be a tool at all?"</p></div>
     </div>
     <div class="chrome-page">18 / 30</div>
@@ -1136,6 +1296,24 @@ table.ledger td.warn-cell { color: var(--coral); }
             <li class="point">This is the L07 analogue of L06's tag-violation moment: <b>one hallucinated call teaches you more than ten clean runs</b>, because it proves the contract is best-effort.</li>
             <li class="point">The remedy is not a better schema (that's an L08 conversation) — it is that <b>the application validates; the model proposes.</b> Validation is not optional.</li>
         </ul>
+        <div class="diagram-frame reveal" style="flex-direction:column; margin-top:22px;">
+            <div class="dgm-box model" style="text-align:left; padding:14px 26px;">
+                <div class="t" style="font-size:20px;">tool call</div>
+                <div class="s">name &middot; args &middot; id &mdash; proposed by the model</div>
+            </div>
+            <div style="display:flex; gap:16px; margin-top:14px; align-items:center;">
+                <span class="tag-coral">wrong argument <b>types</b></span>
+                <span class="tag-coral"><b>missing</b> required argument</span>
+                <span class="tag-coral"><b>extra invented</b> argument</span>
+                <span class="tag-coral">a tool <b>name that doesn't exist</b></span>
+            </div>
+            <div class="dgm-arrow cyan" style="margin:6px 0; font-size:26px;">&darr;</div>
+            <div class="dgm-box" style="padding:14px 56px;">
+                <div class="t" style="font-size:20px; color:var(--cyan);">application validates</div>
+                <div class="s">one gate catches all four &mdash; before anything runs</div>
+            </div>
+            <div class="diagram-caption" style="margin-top:16px;">The schema stopped none of these at generation time; your gate is the remedy.</div>
+        </div>
     </div>
     <div class="chrome-page">22 / 30</div>
     <div class="chrome-nav">&larr; &rarr; navigate</div>
@@ -1155,7 +1333,72 @@ table.ledger td.warn-cell { color: var(--coral); }
             <li class="point">The same prompt and the same schema can produce a call on one run and a skip on the next, with slightly different arguments each time.</li>
             <li class="point">This is <i>why</i> you validate every call rather than trusting a clean dry-run. A round-trip that worked at your desk can fumble in class.</li>
         </ul>
-        <div class="callout reveal"><p>That variance is the <span class="k">point</span>, not a bug.</p></div>
+        <div class="diagram-frame reveal" style="flex-direction:column; margin-top:16px;">
+            <div style="display:flex; gap:40px; justify-content:center;">
+                <div>
+                    <div class="actor-label">run 1</div>
+                    <svg viewBox="0 0 500 260" width="500" height="260">
+                        <defs><marker id="m53c" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="var(--cyan)"/></marker></defs>
+                        <path d="M 106 130 C 165 70, 195 48, 240 43" fill="none" stroke="var(--cyan)" stroke-width="3.5" marker-end="url(#m53c)"/>
+                        <g opacity="0.32">
+                            <path d="M 106 130 L 240 130" stroke="var(--ink-faint)" stroke-width="2.5"/>
+                            <path d="M 106 130 C 165 190, 195 212, 240 217" fill="none" stroke="var(--ink-faint)" stroke-width="2.5"/>
+                            <rect x="246" y="104" width="216" height="52" rx="9" fill="#12181a" stroke="var(--ink-faint)" stroke-width="2"/>
+                            <text x="354" y="136" text-anchor="middle" class="node-label" font-size="19" fill="var(--ink-faint)">answers directly</text>
+                            <rect x="246" y="192" width="216" height="52" rx="9" fill="#12181a" stroke="var(--ink-faint)" stroke-width="2"/>
+                            <text x="354" y="224" text-anchor="middle" class="node-label" font-size="19" fill="var(--ink-faint)">bad arguments</text>
+                        </g>
+                        <rect x="246" y="16" width="216" height="52" rx="9" fill="#12181a" stroke="var(--cyan)" stroke-width="2.5"/>
+                        <text x="354" y="48" text-anchor="middle" class="node-label" font-size="19">calls the tool</text>
+                        <circle cx="60" cy="130" r="46" fill="#12181a" stroke="var(--cyan)" stroke-width="2.5"/>
+                        <text x="60" y="126" text-anchor="middle" class="node-label" font-size="18">prompt</text>
+                        <text x="60" y="147" text-anchor="middle" class="edge-label" font-size="15" fill="var(--ink-dim)">+ tool</text>
+                    </svg>
+                </div>
+                <div>
+                    <div class="actor-label">run 2</div>
+                    <svg viewBox="0 0 500 260" width="500" height="260">
+                        <defs><marker id="m53n" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="var(--ink-faint)"/></marker></defs>
+                        <path d="M 106 130 L 240 130" stroke="var(--ink-faint)" stroke-width="3.5" marker-end="url(#m53n)"/>
+                        <g opacity="0.32">
+                            <path d="M 106 130 C 165 70, 195 48, 240 43" fill="none" stroke="var(--ink-faint)" stroke-width="2.5"/>
+                            <path d="M 106 130 C 165 190, 195 212, 240 217" fill="none" stroke="var(--ink-faint)" stroke-width="2.5"/>
+                            <rect x="246" y="16" width="216" height="52" rx="9" fill="#12181a" stroke="var(--ink-faint)" stroke-width="2"/>
+                            <text x="354" y="48" text-anchor="middle" class="node-label" font-size="19" fill="var(--ink-faint)">calls the tool</text>
+                            <rect x="246" y="192" width="216" height="52" rx="9" fill="#12181a" stroke="var(--ink-faint)" stroke-width="2"/>
+                            <text x="354" y="224" text-anchor="middle" class="node-label" font-size="19" fill="var(--ink-faint)">bad arguments</text>
+                        </g>
+                        <rect x="246" y="104" width="216" height="52" rx="9" fill="#12181a" stroke="var(--ink-faint)" stroke-width="2.5"/>
+                        <text x="354" y="136" text-anchor="middle" class="node-label" font-size="19" fill="var(--ink-dim)">answers directly</text>
+                        <circle cx="60" cy="130" r="46" fill="#12181a" stroke="var(--cyan)" stroke-width="2.5"/>
+                        <text x="60" y="126" text-anchor="middle" class="node-label" font-size="18">prompt</text>
+                        <text x="60" y="147" text-anchor="middle" class="edge-label" font-size="15" fill="var(--ink-dim)">+ tool</text>
+                    </svg>
+                </div>
+                <div>
+                    <div class="actor-label">run 3</div>
+                    <svg viewBox="0 0 500 260" width="500" height="260">
+                        <defs><marker id="m53r" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="var(--coral)"/></marker></defs>
+                        <path d="M 106 130 C 165 190, 195 212, 240 217" fill="none" stroke="var(--coral)" stroke-width="3.5" marker-end="url(#m53r)"/>
+                        <g opacity="0.32">
+                            <path d="M 106 130 C 165 70, 195 48, 240 43" fill="none" stroke="var(--ink-faint)" stroke-width="2.5"/>
+                            <path d="M 106 130 L 240 130" stroke="var(--ink-faint)" stroke-width="2.5"/>
+                            <rect x="246" y="16" width="216" height="52" rx="9" fill="#12181a" stroke="var(--ink-faint)" stroke-width="2"/>
+                            <text x="354" y="48" text-anchor="middle" class="node-label" font-size="19" fill="var(--ink-faint)">calls the tool</text>
+                            <rect x="246" y="104" width="216" height="52" rx="9" fill="#12181a" stroke="var(--ink-faint)" stroke-width="2"/>
+                            <text x="354" y="136" text-anchor="middle" class="node-label" font-size="19" fill="var(--ink-faint)">answers directly</text>
+                        </g>
+                        <rect x="246" y="192" width="216" height="52" rx="9" fill="#12181a" stroke="var(--coral)" stroke-width="2.5"/>
+                        <text x="354" y="224" text-anchor="middle" class="node-label" font-size="19">bad arguments</text>
+                        <circle cx="60" cy="130" r="46" fill="#12181a" stroke="var(--cyan)" stroke-width="2.5"/>
+                        <text x="60" y="126" text-anchor="middle" class="node-label" font-size="18">prompt</text>
+                        <text x="60" y="147" text-anchor="middle" class="edge-label" font-size="15" fill="var(--ink-dim)">+ tool</text>
+                    </svg>
+                </div>
+            </div>
+            <div class="diagram-caption" style="margin-top:10px;">Same prompt, same schema, three runs, three outcomes &mdash; this is why every call gets validated.</div>
+        </div>
+        <div class="callout reveal" style="margin-top:18px;"><p>That variance is the <span class="k">point</span>, not a bug.</p></div>
     </div>
     <div class="chrome-page">23 / 30</div>
     <div class="chrome-nav">&larr; &rarr; navigate</div>
