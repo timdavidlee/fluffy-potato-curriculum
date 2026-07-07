@@ -15,7 +15,7 @@ recurring drift risk below.
 
 ## Status (19 lecture outlines)
 
-**Progress: 14 built (L0102, L0202, L0305, L0402, L0502, L0505, L0602, L0702, L0802, L0902, L0905, L1002, L1102, L1105) · 5 pending.**
+**Progress: 19 built — all outlines have decks as of 2026-07-06.**
 
 | Lesson item | Deck? | Scale | Note |
 | --- | --- | --- | --- |
@@ -33,7 +33,11 @@ recurring drift risk below.
 | L1002 | ✅ | classroom | done 2026-07-06 — rescaled to classroom type-scale (hand-scaled, art preserved) + rebuilt to the densified outline (+9 visuals incl. the cyan back-edge fixes; 30 slides) |
 | L1102 | ✅ | classroom | done (loop→graph; 6 diagrams — 4 added: L10 loop recap, back-edge-on-the-DAG, numbered run trace, step-cap-at-25; 1 mapping table, 16 slides) |
 | L1105 | ✅ | classroom | done (config surface + ceiling; 5 diagrams — 3 added: managed-by-create_agent bracket, outgrow break-out arrows, L10→L15 ladder; 3 tables, 14 slides) |
-| L1206, L1307, L2202, L2205, L2302 | ❌ | — | no deck yet (5 outlines) |
+| L1206 | ✅ | classroom | done 2026-07-06 (Langfuse export + data-plane close; outline densified 4→12 diagrams first — see the [remaining-outlines review](2026-07-06-1853-diagram-review-remaining-outlines.md); pipe + fan motifs; 21 slides) |
+| L1307 | ✅ | classroom | done 2026-07-06 (eval-ratchet closer; densified 2→7; cribs L04 chain / L10 cycle / L11 bracket; outline 4.1 split into two slides at build (flagged, content intact); 14 slides) |
+| L2202 | ✅ | classroom | done 2026-07-06 (skills/progressive disclosure; densified 4→11; window-column + SKILL.md-card motifs, 3.2 money chart; 19 slides) |
+| L2205 | ✅ | classroom | done 2026-07-06 (placement capstone; densified 2→9; three-homes motif, cribs L2202 card + L11 bracket; 16 slides) |
+| L2302 | ✅ | classroom | done 2026-07-06 (skill archetypes; densified 3→12; center-of-gravity triangle spine, cribs L22 strip + L01 window bar; 21 slides) |
 
 ## Open items
 
@@ -49,14 +53,14 @@ recurring drift risk below.
 - ~~**[known off] Rescale L1002 deck to the classroom type-scale.**~~ **Done 2026-07-06** in the
   L08–L11 rebuild: same transform as L02 (`--edge-bottom` 90→64, type bump, spacing reclaim),
   diagrams hand-scaled (art preserved), no slide overflows the stage.
-- **Build decks for the 5 remaining outlines.** Each via the `build-lecture-deck` skill (copy the
-  sample, map the outline, build diagrams, verify). Rough priority: the rest of the core arc first
-  (L12–L13), then the mini/standalone items (L22, L23). No hard dependency between
-  them — can be done incrementally, one lesson at a time.
-  - **First, review the outline's `diagram:` coverage** — an outline may under-specify diagrams on
-    visual slides, and the deck is only as good as its directives. L01 needed 4 added (slides 1.3,
-    2.1, 2.3, 6.1) before building; expect similar gaps elsewhere. Enhance the `.md` outline first
-    (a normal materials edit), then build.
+- ~~**Build decks for the 5 remaining outlines.**~~ **Done 2026-07-06** — all five (L1206, L1307,
+  L2202, L2205, L2302) built via `build-lecture-deck` in one pass, core arc first, each preceded by
+  a diagram-coverage densify of its outline (36 directives added, 15 reworded; see
+  [2026-07-06-1853-diagram-review-remaining-outlines.md](2026-07-06-1853-diagram-review-remaining-outlines.md)).
+  Browser-verified per the checklist below (per-slide stage-overflow sweep clean, nav OK, sequential
+  numbering, classroom type-scale spot-checked, no directive text printed). One structural flag:
+  L1307's outline slide 4.1 (table + multi-part diagram) required a two-slide split at build
+  ("Slide 4.1" / "Slide 4.1 · continued") — content intact.
 
 ## Verify (per deck, before committing)
 

@@ -22,9 +22,10 @@ estimated duration: 25
 - Every **system-prompt instruction** is paid for on *every* call, relevant or not.
 - Ten tools the agent uses occasionally = ten schemas in the window on the call that needed none of
   them. This is the tax skills exist to remove.
-- diagram: a fat context window stuffed with 10 tool schemas + a long system prompt, with a single
-  user question at the bottom that only needed one of them — the rest greyed out as "paid for,
-  unused."
+- diagram: the lesson's window motif, beat one — a tall context-window column stuffed with 10 tool
+  schema blocks + a long system-prompt block, a single user question at the bottom. The one schema
+  the question actually needed is cyan; the nine unused schemas and the irrelevant prompt sections
+  are coral ("paid for, unused" — the always-on tax). Re-shown slimmed in 1.2 and priced in 3.2/3.3.
 
 ### slide 1.2 The relief valve: load it *just in time*
 
@@ -35,6 +36,11 @@ estimated duration: 25
 - The full instructions load **when the model decides they're needed** — not before.
 - This is the first time in the course a capability is *not* always-on. That difference is the whole
   lesson.
+- diagram: window motif, beat two — the same column re-drawn after the relief valve: the ten fat
+  schema blocks replaced by ten one-line catalog entries (cyan), one full skill body arriving via a
+  cyan arrow from a shelf of markdown files on disk, the other nine bodies dashed ink-faint on the
+  shelf (dormant, not failed), the freed space in the column left visibly empty. No coral — this is
+  the fix, not the failure.
 
 ## section 2. The core taxonomy
 
@@ -50,6 +56,11 @@ estimated duration: 25
 
 - Say it out loud until you can classify on sight: **a tool is *called*, a skill is *read*, the
   system prompt is *always seen*.**
+- diagram: the taxonomy as three verbs around one context-window column — a tool schema chip welded
+  inside the window with a call→result arrow pair ("called"), a system-prompt block welded in
+  ("always seen"), and a skill card sitting *outside* on the disk shelf with a dashed arrow into the
+  window ("read on demand"). Skill lane cyan (the lesson's contribution); tool and system-prompt
+  lanes ink-faint neutral — established homes, not failures. No coral anywhere.
 
 ### slide 2.2 What a skill actually is
 
@@ -62,9 +73,11 @@ estimated duration: 25
   - **body** — imperative instructions written *for an agent to follow*, not prose for a human.
   - **optional scripts/resources** — deterministic steps the skill tells the agent to *run* rather
     than reason through.
-- diagram: a `SKILL.md` file split into four labeled bands (name, description, body, scripts) with a
-  bracket showing "name + description = always in context; body loads on selection; scripts run on
-  invocation."
+- diagram: the skill-card motif, debut — a `SKILL.md` file split into four labeled bands: name +
+  description bands cyan (the always-in-context catalog line), body band ink/neutral, scripts band
+  dashed ink-faint ("not loaded yet"), with a bracket mapping each band to when it's paid for
+  ("always / on selection / on invocation"). Re-shown as the disclosure ladder in 3.1 and echoed by
+  L2205's real-`SKILL.md` reveal.
 
 ### slide 2.3 Where MCP fits (a one-line aside — full treatment is L09)
 
@@ -74,6 +87,10 @@ estimated duration: 25
   schema, always in context).
 - We name it and move on; the full treatment is **L09 (MCP), full course**. In the mini cut we
   reason about **skill vs. tool vs. system prompt** only.
+- diagram: re-draw L08's bridge picture — a tool spec card unchanged inside a dashed ink-faint MCP
+  envelope ("packaging/transport — full treatment L09, full course"), its schema still welded into
+  the always-on window; beside it, 2.2's cyan skill card untouched by the envelope (orthogonal
+  axes). Dashed = deferred, not broken; no coral — MCP is an aside, not a failure.
 
 ## section 3. Progressive disclosure — the mechanism
 
@@ -83,8 +100,11 @@ estimated duration: 25
   - **name + description** — *always* in context (cheap, one line each).
   - **body** — loads *only when the model selects the skill*.
   - **scripts/resources** — load/run *only when actually invoked*.
-- diagram: three concentric rings — outer "name+description (always)", middle "body (on selection)",
-  inner "scripts (on run)" — with a token cost meter rising as you move inward.
+- diagram: skill-card motif, beat two — 2.2's four-band card re-drawn as a three-step disclosure
+  ladder: "name+description (always)" the small first step in cyan, "body (on selection)" a taller
+  ink/neutral step, "scripts (on run)" the tallest step dashed ink-faint — a token-cost meter
+  rising with each step. Cyan marks the only part that's always paid for; no coral — the deeper
+  levels are deferred cost, not failure.
 
 ### slide 3.2 The payoff, in tokens
 
@@ -99,6 +119,11 @@ estimated duration: 25
 
 - This is L07's "tools cost tokens twice over" problem, directly attacked. You'll read the real token
   deltas off a trace in the demo notebook.
+- diagram: the money slide — the window motif priced as a bar chart: left bar "10 tools" a stack of
+  ten fat schema segments in coral (the always-on tax, paid on every call); right bar "10 skills"
+  ten thin cyan description slivers plus one cyan body segment that appears only on the call that
+  loaded it — bar heights making the delta obvious. This is the chart the demo notebook's
+  `rough_tokens` numbers land on.
 
 ### slide 3.3 Skills are cheap, not free
 
@@ -108,6 +133,10 @@ estimated duration: 25
 - And you pay two real costs when a skill *does* load: an **extra model turn** to load it, and the
   **risk the model fails to load** a skill it actually needed.
 - **Curate.** Skills are a shelf you keep tidy, not a junk drawer.
+- diagram: third beat of 3.2's chart — the skills bar re-drawn at 30 skills: the description-sliver
+  stack now visibly tall, its top slivers turning coral (the catalog itself becoming always-on
+  bloat), with two coral cost chips pinned beside the bar ("extra turn to load", "needed skill
+  never fired"). Caption: cheap, not free — curate the shelf.
 
 ## section 4. The description is the skill
 
@@ -117,9 +146,11 @@ estimated duration: 25
   naming/schema design.
 - It must be **discriminating**: fire on the right inputs, stay quiet otherwise, all decided from the
   description *alone* (the body isn't loaded yet).
-- diagram: two copies of one skill — a tight description ("Apply when the user asks to process a
-  refund or return") that fires correctly, and a vague one ("helps with customer stuff") that either
-  never loads or loads on everything — with a check and an X.
+- diagram: contrast two-up of one skill card — left panel cyan: a tight description ("Apply when
+  the user asks to process a refund or return") firing on the right request, cyan check; right
+  panel coral: a vague description ("helps with customer stuff") that either never loads or loads
+  on everything, coral X. Cyan = the description that discriminates; coral = the one that can't.
+  Seeds 4.2's failure strips.
 
 ### slide 4.2 The failure modes of just-in-time loading
 
@@ -129,6 +160,12 @@ estimated duration: 25
   skill loads mid-run.
 - Each is a *design* failure in the skill, not a model failure — which is why authoring the
   description is the craft.
+- diagram: three failure strips under one cyan reference strip (4.1's healthy fire: request →
+  description matches → body loads). Strip one: vague description, the body dashed and never
+  arriving, coral tag "needed, never fired". Strip two: broad description, a coral body loading on
+  *every* turn, the token savings struck through. Strip three: body loaded mid-run with a coral "?"
+  pointing at context the agent no longer has. Coral marks each design fault; the mechanism itself
+  stays cyan.
 
 ## section 5. Vocabulary to carry into the labs
 
@@ -153,3 +190,8 @@ estimated duration: 25
   fires.
 - Then you'll decide **where a capability belongs** and meet the **real** Agent Skills format
   ([L2205_lecture.md](L2205_lecture.md)) — the production version of what you built.
+- diagram: bridge — re-draw the L11 `create_agent(...)` bracket (the picture L11 closed on): the
+  loop inside unchanged, now with a cyan `load_skill` tool chip and a cyan skill-catalog chip wired
+  in as the system prompt — the only two new parts you add in the demo. A dashed ink-faint arrow
+  points from the loaded body to a small `SKILL.md` card labeled "the real thing — L2205". Cyan =
+  what you build next; dashed = the reveal ahead.
