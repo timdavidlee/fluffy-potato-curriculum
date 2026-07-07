@@ -1,0 +1,1317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>L22 — Where does a capability live? And the real thing: Agent Skills</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500;1,9..144,600&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+/* ===========================================
+   THEME — Graph Canvas system
+   Fraunces (display serif) + IBM Plex Mono (everything else)
+   =========================================== */
+:root {
+    --stage-bg: #05070a;
+    --slide-bg: #0a0e13;
+    --cyan: #52e8c8;
+    --cyan-dim: #1f6f60;
+    --cyan-faint: rgba(82, 232, 200, 0.16);
+    --cyan-rule: rgba(82, 232, 200, 0.22);
+    --coral: #ff6b57;
+    --coral-dim: #7a3229;
+    --ink: #eef2f0;
+    --ink-dim: #8a9490;
+    --ink-faint: #4c5652;
+
+    --font-display: 'Fraunces', Georgia, serif;
+    --font-body: 'IBM Plex Mono', ui-monospace, monospace;
+
+    --edge-x: 130px;
+    --edge-top: 96px;
+    --edge-bottom: 64px;
+
+    --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+    --duration-normal: 0.7s;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body { font-family: var(--font-body); }
+
+/* ===========================================
+   FIXED 16:9 STAGE: MANDATORY BASE STYLES
+   (viewport-base.css, included in full)
+   =========================================== */
+html, body { width: 100%; height: 100%; margin: 0; overflow: hidden; background: var(--stage-bg, #000); }
+.deck-viewport { position: fixed; inset: 0; overflow: hidden; background: var(--stage-bg, #000); }
+.deck-stage { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; overflow: hidden; transform-origin: 0 0; background: var(--slide-bg, #fff); }
+.slide { position: absolute; inset: 0; width: 1920px; height: 1080px; overflow: hidden; display: block; visibility: hidden; opacity: 0; pointer-events: none; background: var(--slide-bg, #fff); }
+.slide.active, .slide.visible { visibility: visible; opacity: 1; pointer-events: auto; z-index: 1; }
+img, video, canvas, svg { max-width: 100%; max-height: 100%; }
+.deck-controls { position: fixed; left: 50%; bottom: 22px; transform: translateX(-50%); z-index: 1000; }
+@media print {
+    html, body { width: 1920px; height: auto; overflow: visible; background: #fff; }
+    .deck-viewport { position: static; overflow: visible; background: #fff; }
+    .deck-stage { position: static; width: auto; height: auto; transform: none !important; background: none; }
+    .slide { position: relative; display: block !important; visibility: visible !important; opacity: 1 !important; pointer-events: auto !important; width: 1920px; height: 1080px; break-after: page; page-break-after: always; }
+    .slide:last-child { break-after: auto; page-break-after: auto; }
+    .deck-controls { display: none !important; }
+}
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.2s !important; }
+}
+
+/* ===========================================
+   PERMANENT CANVAS TREATMENT
+   Dot-grid + corner glows live on the stage itself so every
+   slide (transparent bg) shows the same atmosphere underneath.
+   =========================================== */
+.deck-stage {
+    background:
+        radial-gradient(ellipse 900px 700px at 82% 12%, rgba(82,232,200,0.10) 0%, transparent 60%),
+        radial-gradient(ellipse 900px 700px at 10% 92%, rgba(255,107,87,0.07) 0%, transparent 60%),
+        var(--slide-bg);
+}
+.deck-stage::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(rgba(82,232,200,0.14) 1.4px, transparent 1.4px);
+    background-size: 64px 64px;
+    z-index: 0;
+}
+.slide { background: transparent; z-index: 1; }
+.slide.active, .slide.visible { z-index: 2; }
+
+/* ===========================================
+   REVEAL ANIMATION — staggered fade + rise
+   =========================================== */
+.reveal {
+    opacity: 0;
+    transform: translateY(22px);
+    transition: opacity var(--duration-normal) var(--ease-out-expo),
+                transform var(--duration-normal) var(--ease-out-expo);
+}
+.slide.visible .reveal { opacity: 1; transform: translateY(0); }
+.slide.visible .reveal:nth-child(1) { transition-delay: 0.05s; }
+.slide.visible .reveal:nth-child(2) { transition-delay: 0.15s; }
+.slide.visible .reveal:nth-child(3) { transition-delay: 0.25s; }
+.slide.visible .reveal:nth-child(4) { transition-delay: 0.35s; }
+.slide.visible .points.reveal .point:nth-child(1) { transition-delay: 0.30s; }
+.slide.visible .points.reveal .point:nth-child(2) { transition-delay: 0.38s; }
+.slide.visible .points.reveal .point:nth-child(3) { transition-delay: 0.46s; }
+.slide.visible .points.reveal .point:nth-child(4) { transition-delay: 0.54s; }
+.slide.visible .points.reveal .point:nth-child(5) { transition-delay: 0.62s; }
+.slide.visible .points .point {
+    opacity: 0;
+    transform: translateY(14px);
+    transition: opacity 0.5s var(--ease-out-expo), transform 0.5s var(--ease-out-expo);
+}
+.slide.visible .points.reveal .point { opacity: 1; transform: translateY(0); }
+
+/* ===========================================
+   CHROME — applies inside every slide
+   =========================================== */
+.chrome-tag {
+    position: absolute;
+    top: 52px;
+    left: var(--edge-x);
+    font-size: 16px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--cyan-dim);
+}
+.chrome-tag b { color: var(--cyan); font-weight: 500; }
+.chrome-page {
+    position: absolute;
+    bottom: 48px;
+    right: var(--edge-x);
+    font-size: 16px;
+    color: var(--ink-faint);
+    letter-spacing: 0.05em;
+}
+.chrome-nav {
+    position: absolute;
+    bottom: 48px;
+    left: var(--edge-x);
+    font-size: 15px;
+    color: var(--ink-faint);
+    letter-spacing: 0.06em;
+    opacity: 0.55;
+}
+
+/* ===========================================
+   TYPOGRAPHY PRIMITIVES
+   =========================================== */
+.eyebrow {
+    font-size: 22px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--cyan);
+    font-weight: 500;
+}
+.eyebrow::before { content: "◆ "; }
+
+.slide-index {
+    position: absolute;
+    top: var(--edge-top);
+    right: var(--edge-x);
+    font-size: 18px;
+    color: var(--ink-faint);
+    letter-spacing: 0.05em;
+}
+
+.topbar {
+    position: absolute;
+    top: var(--edge-top);
+    left: var(--edge-x);
+    right: var(--edge-x);
+    padding-bottom: 26px;
+    border-bottom: 1px solid var(--cyan-rule);
+}
+
+h2.headline {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 62px;
+    line-height: 1.1;
+    color: var(--ink);
+    letter-spacing: -0.005em;
+    margin-top: 18px;
+}
+h2.headline .it { font-style: italic; font-weight: 500; color: var(--cyan); }
+
+.lede {
+    font-size: 29px;
+    line-height: 1.5;
+    color: var(--ink-dim);
+    max-width: 1200px;
+    margin-top: 22px;
+}
+.lede b { color: var(--ink); font-weight: 500; }
+
+.body-area {
+    position: absolute;
+    top: 312px;
+    left: var(--edge-x);
+    right: var(--edge-x);
+    bottom: var(--edge-bottom);
+}
+
+.points { list-style: none; max-width: 1420px; }
+.points .point {
+    position: relative;
+    padding-left: 40px;
+    font-size: 29px;
+    line-height: 1.5;
+    color: var(--ink-dim);
+    margin-bottom: 15px;
+}
+.points .point::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 9px;
+    width: 12px;
+    height: 12px;
+    border: 2px solid var(--cyan);
+    border-radius: 50%;
+}
+.points .point b, .points .point .k { color: var(--ink); font-weight: 600; }
+.points .point code {
+    font-family: var(--font-body);
+    color: var(--cyan);
+    background: rgba(82,232,200,0.08);
+    padding: 1px 8px;
+    border-radius: 3px;
+    font-size: 0.9em;
+}
+.points .point .warn { color: var(--coral); font-weight: 600; }
+
+/* callout — emphasis statement */
+.callout {
+    margin-top: 28px;
+    padding: 28px 36px;
+    border-left: 3px solid var(--cyan);
+    background: rgba(82,232,200,0.05);
+    max-width: 1200px;
+}
+.callout p {
+    font-family: var(--font-display);
+    font-style: italic;
+    font-size: 38px;
+    line-height: 1.32;
+    color: var(--ink);
+}
+
+/* ===========================================
+   TABLE — ledger style
+   =========================================== */
+table.ledger { width: 100%; border-collapse: collapse; max-width: 1660px; }
+table.ledger th {
+    font-size: 19px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--cyan);
+    text-align: left;
+    padding: 0 22px 16px 0;
+    border-bottom: 1.5px solid var(--cyan-rule);
+    font-weight: 600;
+}
+table.ledger td {
+    font-size: 24px;
+    line-height: 1.38;
+    color: var(--ink-dim);
+    padding: 11px 20px 11px 0;
+    border-bottom: 1px solid rgba(82,232,200,0.10);
+    vertical-align: top;
+}
+table.ledger tr:last-child td { border-bottom: none; }
+table.ledger td.tag {
+    font-size: 23px;
+    color: var(--cyan);
+    font-weight: 500;
+    white-space: nowrap;
+}
+table.ledger td b { color: var(--ink); font-weight: 600; }
+table.ledger td code {
+    color: var(--cyan);
+    background: rgba(82,232,200,0.08);
+    padding: 1px 7px;
+    border-radius: 3px;
+    font-size: 0.92em;
+}
+table.ledger td.warn-cell { color: var(--coral); }
+
+/* ===========================================
+   DIAGRAM CONTAINERS
+   =========================================== */
+.diagram-frame {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.diagram-caption {
+    font-size: 25px;
+    line-height: 1.6;
+    color: var(--ink-dim);
+    font-style: italic;
+    max-width: 1300px;
+    margin-top: 18px;
+}
+.node-label { font-family: var(--font-body); font-weight: 600; font-size: 27px; fill: var(--ink); }
+.edge-label { font-family: var(--font-body); font-size: 20px; }
+
+/* ===========================================
+   CHAPTER (section divider) SLIDES — sparse
+   =========================================== */
+.slide-chapter { display: flex; flex-direction: column; justify-content: center; }
+.chapter-ghost {
+    position: absolute;
+    top: -40px;
+    right: 90px;
+    font-family: var(--font-display);
+    font-size: 480px;
+    font-weight: 600;
+    color: var(--cyan);
+    opacity: 0.07;
+    line-height: 1;
+    user-select: none;
+}
+.chapter-eyebrow {
+    position: absolute;
+    left: var(--edge-x);
+    top: 420px;
+    font-size: 20px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--cyan);
+}
+.chapter-eyebrow::before { content: "◆ "; }
+.chapter-title {
+    position: absolute;
+    left: var(--edge-x);
+    top: 468px;
+    right: 260px;
+    font-family: var(--font-display);
+    font-style: italic;
+    font-weight: 500;
+    font-size: 96px;
+    line-height: 1.08;
+    color: var(--ink);
+}
+.chapter-sub {
+    position: absolute;
+    left: var(--edge-x);
+    top: 690px;
+    font-size: 29px;
+    color: var(--ink-dim);
+    max-width: 1100px;
+    line-height: 1.6;
+    border-left: 2px solid var(--cyan-dim);
+    padding-left: 28px;
+}
+
+/* ===========================================
+   COVER SLIDE
+   =========================================== */
+.slide-cover .eyebrow { position: absolute; top: 108px; left: var(--edge-x); }
+.slide-cover h1 {
+    position: absolute;
+    top: 190px;
+    left: var(--edge-x);
+    width: 980px;
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 116px;
+    line-height: 1.05;
+    color: var(--ink);
+}
+.slide-cover h1 .it { font-style: italic; font-weight: 500; color: var(--cyan); }
+.slide-cover .claim {
+    position: absolute;
+    top: 636px;
+    left: var(--edge-x);
+    width: 920px;
+    font-size: 29px;
+    line-height: 1.6;
+    color: var(--ink-dim);
+}
+.slide-cover .claim b { color: var(--ink); font-weight: 600; }
+.slide-cover .meta-row {
+    position: absolute;
+    bottom: 100px;
+    left: var(--edge-x);
+    display: flex;
+    gap: 44px;
+    font-size: 21px;
+    color: var(--ink-dim);
+}
+.slide-cover .meta-row span b { color: var(--cyan); }
+.cover-diagram { position: absolute; right: 90px; top: 280px; width: 740px; height: 540px; }
+
+/* ===========================================
+   CLOSING SLIDE
+   =========================================== */
+.slide-closing { display: flex; flex-direction: column; justify-content: center; }
+.closing-statement {
+    position: absolute;
+    left: var(--edge-x);
+    top: 300px;
+    right: 260px;
+    font-family: var(--font-display);
+    font-style: italic;
+    font-weight: 500;
+    font-size: 56px;
+    line-height: 1.35;
+    color: var(--ink);
+}
+.closing-statement .k { color: var(--cyan); font-style: normal; font-weight: 600; }
+.closing-grid {
+    position: absolute;
+    left: var(--edge-x);
+    right: var(--edge-x);
+    bottom: 190px;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 40px;
+    border-top: 1px solid var(--cyan-rule);
+    padding-top: 30px;
+}
+.closing-grid .col .label {
+    font-size: 18px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--cyan);
+    margin-bottom: 10px;
+}
+.closing-grid .col .val {
+    font-size: 24px;
+    color: var(--ink-dim);
+    line-height: 1.5;
+}
+.closing-grid .col .val b { color: var(--ink); }
+
+/* ===========================================
+   OUTSIDE-STAGE UI: progress + nav buttons
+   (kept outside .deck-stage per skill rules)
+   =========================================== */
+.deck-progress {
+    position: fixed;
+    left: 0; right: 0; bottom: 0;
+    height: 3px;
+    background: rgba(82,232,200,0.08);
+    z-index: 500;
+}
+.deck-progress-bar {
+    height: 100%;
+    background: var(--cyan);
+    width: 0%;
+    transition: width 0.35s var(--ease-out-expo);
+}
+.deck-arrow {
+    position: fixed;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 52px; height: 52px;
+    border-radius: 50%;
+    border: 1px solid var(--cyan-rule);
+    background: rgba(10,14,19,0.6);
+    color: var(--cyan);
+    font-size: 20px;
+    cursor: pointer;
+    z-index: 500;
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.2s, border-color 0.2s;
+}
+.deck-arrow:hover { background: rgba(82,232,200,0.12); border-color: var(--cyan); }
+.deck-arrow.prev { left: 22px; }
+.deck-arrow.next { right: 22px; }
+
+/* Mobile/portrait: arrows can collide with the letterboxed stage; swipe covers nav there. */
+@media (max-width: 600px), (orientation: portrait) {
+    .deck-arrow { display: none; }
+}
+
+/* ===========================================
+   INLINE EDITING
+   =========================================== */
+.edit-hotzone { position: fixed; top: 0; left: 0; width: 80px; height: 80px; z-index: 10000; cursor: pointer; }
+.edit-toggle {
+    position: fixed; top: 14px; left: 14px;
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    border: 1px solid var(--cyan-rule);
+    background: rgba(10,14,19,0.85);
+    font-size: 17px;
+    cursor: pointer;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+    z-index: 10001;
+}
+.edit-toggle.show, .edit-toggle.active { opacity: 1; pointer-events: auto; }
+.edit-toggle.active { background: var(--cyan); }
+[contenteditable="true"] {
+    outline: 1px dashed var(--cyan-rule);
+    outline-offset: 4px;
+    cursor: text;
+}
+.save-toast {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--cyan);
+    color: #05070a;
+    font-family: var(--font-body);
+    font-size: 14px;
+    font-weight: 600;
+    padding: 10px 20px;
+    border-radius: 4px;
+    opacity: 0;
+    transition: opacity 0.3s, transform 0.3s;
+    z-index: 10002;
+    pointer-events: none;
+}
+.save-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* ===========================================
+   PER-DECK HELPERS (appended per FRONTEND-STYLE §5)
+   =========================================== */
+/* three-homes row motif (cover / 1.1 / 1.2 / 3.1 / 5.1) — all homes stay cyan on every beat */
+.homes-row { display: flex; gap: 24px; align-items: stretch; }
+.home { border: 2px solid var(--cyan); border-radius: 12px; background: #12181a; width: 345px; display: flex; flex-direction: column; overflow: hidden; flex-shrink: 0; }
+.home-head { font-size: 17px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--cyan); padding: 9px 16px; border-bottom: 1.5px solid var(--cyan-rule); white-space: nowrap; }
+.home-head .verb { color: var(--ink-dim); text-transform: none; letter-spacing: 0; font-style: italic; }
+.home-body { flex: 1; padding: 12px 14px; display: flex; flex-direction: column; gap: 9px; justify-content: center; align-items: center; }
+.home-body .hint { font-size: 17px; color: var(--ink-dim); text-align: center; line-height: 1.4; }
+.cap-chip { border: 2px solid var(--cyan); color: var(--cyan); background: rgba(82,232,200,0.07); border-radius: 999px; padding: 5px 16px; font-size: 18px; text-align: center; white-space: nowrap; }
+.cap-chip.bad { border-color: var(--coral); color: var(--coral); background: rgba(255,107,87,0.06); }
+/* context-cost track under each home (5.1 bookend) */
+.cost-track { position: relative; height: 46px; border: 1.5px solid rgba(76,86,82,0.5); border-radius: 6px; overflow: hidden; background: transparent; }
+.cost-fill { position: absolute; inset: 0; background: rgba(76,86,82,0.4); display: flex; align-items: center; justify-content: center; color: var(--ink-dim); font-size: 16px; }
+.cost-sliver { position: absolute; left: 0; right: 0; top: 0; height: 8px; background: var(--cyan); opacity: 0.85; }
+.cost-body-block { position: absolute; left: 55%; top: 15px; bottom: 5px; width: 40%; border: 2px dashed var(--cyan); border-radius: 5px; color: var(--cyan); font-size: 14px; display: flex; align-items: center; justify-content: center; }
+/* four-band SKILL.md card (2.1 / 4.1 — cribbed from the L2202 deck) */
+.skill-card { border: 2px solid var(--ink-faint); border-radius: 12px; background: #12181a; overflow: hidden; flex-shrink: 0; }
+.skill-head { font-size: 17px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-dim); padding: 12px 22px; border-bottom: 1.5px solid rgba(76,86,82,0.5); }
+.skill-band { padding: 13px 22px; font-size: 19px; line-height: 1.4; color: var(--ink-dim); border-bottom: 1.5px solid rgba(76,86,82,0.5); }
+.skill-band:last-child { border-bottom: none; }
+.skill-band.hot { background: rgba(82,232,200,0.07); color: var(--ink); box-shadow: inset 5px 0 0 var(--cyan); }
+.skill-band.hot b { color: var(--cyan); }
+.skill-band.ghost { color: var(--ink-faint); background: transparent; border-top: 1.5px dashed var(--ink-faint); }
+.skill-band b { color: var(--ink); font-weight: 600; }
+.step-row { font-size: 19px; color: var(--ink); line-height: 1.5; }
+.step-row .n { color: var(--cyan); font-weight: 700; }
+.step-row .tool-ref { color: var(--cyan); }
+/* neutral operation box (2.1 / 2.2 — L07/L08 material, not the new idea) */
+.op-box { border: 2px solid var(--ink-faint); border-radius: 10px; background: #12181a; padding: 14px 20px; text-align: center; }
+.op-box .op-name { font-size: 21px; color: var(--ink); font-weight: 600; }
+.op-box .op-sub { font-size: 16px; color: var(--ink-faint); margin-top: 4px; }
+/* course-spine ladder (4.2) */
+.rung { display: flex; align-items: center; gap: 22px; padding: 13px 26px; border: 1.5px solid rgba(76,86,82,0.45); border-radius: 12px; }
+.rung .r-chip { font-size: 21px; padding: 7px 18px; border-radius: 8px; border: 1.5px solid var(--ink-faint); color: var(--ink-dim); background: #12181a; white-space: nowrap; }
+.rung .r-arrow { font-size: 19px; color: var(--ink-faint); }
+.rung .r-tag { margin-left: auto; font-size: 17px; color: var(--ink-faint); white-space: nowrap; }
+.rung.now { border-color: var(--cyan-rule); background: rgba(82,232,200,0.04); }
+.rung.now .r-chip { border-color: var(--cyan); color: var(--cyan); background: rgba(82,232,200,0.07); }
+.rung.now .r-arrow { color: var(--cyan); font-weight: 600; }
+.rung.now .r-tag { color: var(--cyan); }
+</style>
+</head>
+<body>
+
+<div class="deck-viewport">
+<main class="deck-stage" id="deckStage">
+
+<!-- ============================================================ -->
+<!-- 01 — COVER                                                   -->
+<!-- ============================================================ -->
+<section class="slide slide-cover active">
+    <div class="eyebrow reveal">L22 &middot; closing lecture &middot; decision + reveal</div>
+    <h1 class="reveal">Where does a capability <span class="it">live?</span></h1>
+    <div class="claim reveal"><b>A tool is called, the system prompt is always seen, a skill is read &mdash; and &ldquo;where should this capability live?&rdquo; is answered by <i>when</i> it needs to be in context.</b> Then the reveal: the loader you built in L2203 is Agent Skills, productized. Diagram and discussion &mdash; no live build.</div>
+    <div class="meta-row reveal">
+        <span>lesson &mdash; <b>L22</b></span>
+        <span>duration &mdash; <b>22 min</b></span>
+        <span>anchor &mdash; <b>Claude Sonnet 4.6</b></span>
+    </div>
+    <div class="cover-diagram reveal">
+        <svg viewBox="0 0 760 560" width="100%" height="100%">
+            <defs>
+                <marker id="cvC" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="var(--cyan)"/></marker>
+            </defs>
+            <rect x="20" y="248" width="220" height="64" rx="32" fill="rgba(82,232,200,0.07)" stroke="var(--cyan)" stroke-width="2.5"/>
+            <text x="130" y="288" text-anchor="middle" style="font-family:var(--font-body); font-weight:600; font-size:24px; fill:var(--cyan);">capability</text>
+            <path d="M 245 262 C 330 200, 350 140, 424 116" fill="none" stroke="var(--cyan)" stroke-width="3" marker-end="url(#cvC)"/>
+            <path d="M 245 280 L 424 280" fill="none" stroke="var(--cyan)" stroke-width="3" marker-end="url(#cvC)"/>
+            <path d="M 245 298 C 330 360, 350 420, 424 444" fill="none" stroke="var(--cyan)" stroke-width="3" marker-end="url(#cvC)"/>
+            <circle r="8" fill="var(--cyan)">
+                <animateMotion dur="3s" repeatCount="indefinite" path="M 245 298 C 330 360, 350 420, 424 444"/>
+            </circle>
+            <rect x="430" y="60" width="300" height="112" rx="12" fill="#12181a" stroke="var(--cyan)" stroke-width="2.5"/>
+            <text x="580" y="110" text-anchor="middle" class="node-label" style="font-size:25px;">tool</text>
+            <text x="580" y="146" text-anchor="middle" class="edge-label" fill="var(--ink-dim)" font-style="italic">called</text>
+            <rect x="430" y="224" width="300" height="112" rx="12" fill="#12181a" stroke="var(--cyan)" stroke-width="2.5"/>
+            <text x="580" y="274" text-anchor="middle" class="node-label" style="font-size:25px;">system prompt</text>
+            <text x="580" y="310" text-anchor="middle" class="edge-label" fill="var(--ink-dim)" font-style="italic">always seen</text>
+            <rect x="430" y="388" width="300" height="112" rx="12" fill="#12181a" stroke="var(--cyan)" stroke-width="2.5"/>
+            <text x="580" y="438" text-anchor="middle" class="node-label" style="font-size:25px;">skill</text>
+            <text x="580" y="474" text-anchor="middle" class="edge-label" fill="var(--ink-dim)" font-style="italic">read on demand</text>
+        </svg>
+    </div>
+    <div class="chrome-page">01 / 16</div>
+    <div class="chrome-nav">L22 &middot; where a capability lives</div>
+</section>
+
+<!-- ============================================================ -->
+<!-- 02 — SECTION 1 DIVIDER                                       -->
+<!-- ============================================================ -->
+<section class="slide slide-chapter">
+    <div class="chrome-tag reveal">L22 &middot; <b>PLACEMENT</b></div>
+    <div class="chapter-ghost reveal">01</div>
+    <div class="chapter-eyebrow reveal">Section 1</div>
+    <div class="chapter-title reveal">The decision: <span style="color:var(--cyan); font-style:normal;">where should it live?</span></div>
+    <div class="chapter-sub reveal">Match a capability to its home by its shape &mdash; the heuristic first, then four concrete calls.</div>
+    <div class="chrome-page">02 / 16</div>
+</section>
+
+<!-- 03 — slide 1.1 The heuristic -->
+<section class="slide">
+    <div class="chrome-tag">L22 &middot; <b>PLACEMENT</b></div>
+    <div class="topbar reveal">
+        <div class="eyebrow">Slide 1.1</div>
+        <h2 class="headline">Match a capability to its home <span class="it">by its shape</span></h2>
+    </div>
+    <div class="body-area">
+        <table class="ledger reveal">
+            <thead><tr><th style="width:44%;">If the capability is&hellip;</th><th style="width:22%;">It belongs as&hellip;</th><th>Because&hellip;</th></tr></thead>
+            <tbody>
+                <tr><td>a deterministic operation with structured input/output, called mid-reasoning</td><td class="tag">a tool</td><td>the model <i>calls</i> it and gets a structured result</td></tr>
+                <tr><td>always-true behavior, persona, or a rule that must hold on <b>every</b> call</td><td class="tag">system prompt</td><td>it must <i>always</i> be seen</td></tr>
+                <tr><td>a multi-step procedure used only <b>sometimes</b>, maybe bundling scripts</td><td class="tag">a skill</td><td>it can be <i>read</i> just in time, out of context otherwise</td></tr>
+            </tbody>
+        </table>
+        <div class="diagram-frame reveal" style="position:relative; display:block; width:1660px; height:340px; margin-top:14px;">
+            <svg viewBox="0 0 1660 340" width="1660" height="340" style="position:absolute; inset:0;">
+                <defs>
+                    <marker id="m11c" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="var(--cyan)"/></marker>
+                </defs>
+                <path d="M 275 220 L 548 220" fill="none" stroke="var(--cyan)" stroke-width="3" marker-end="url(#m11c)"/>
+                <text x="405" y="196" text-anchor="middle" class="edge-label" fill="var(--cyan)">deterministic &middot; structured I/O</text>
+                <path d="M 275 204 C 560 104, 850 82, 1096 106" fill="none" stroke="var(--cyan)" stroke-width="3" marker-end="url(#m11c)"/>
+                <text x="680" y="76" text-anchor="middle" class="edge-label" fill="var(--cyan)">always-true &middot; every call</text>
+                <path d="M 275 190 C 620 10, 1150 6, 1465 104" fill="none" stroke="var(--cyan)" stroke-width="3" marker-end="url(#m11c)"/>
+                <text x="1130" y="34" text-anchor="middle" class="edge-label" fill="var(--cyan)">sometimes &middot; multi-step</text>
+            </svg>
+            <div style="position:absolute; left:10px; top:192px; width:260px; border:2px solid var(--cyan); border-radius:28px; background:rgba(82,232,200,0.07); padding:12px 0; text-align:center; font-size:21px; font-weight:600; color:var(--cyan);">one capability</div>
+            <div class="homes-row" style="position:absolute; left:560px; top:110px;">
+                <div class="home" style="height:220px;">
+                    <div class="home-head">tool &mdash; <span class="verb">called</span></div>
+                    <div class="home-body"><div class="hint">the model <b style="color:var(--ink);">calls</b> it and gets a structured result back</div></div>
+                </div>
+                <div class="home" style="height:220px;">
+                    <div class="home-head">system prompt &mdash; <span class="verb">always seen</span></div>
+                    <div class="home-body"><div class="hint">it must <b style="color:var(--ink);">always</b> be seen &mdash; on every single call</div></div>
+                </div>
+                <div class="home" style="height:220px;">
+                    <div class="home-head">skill &mdash; <span class="verb">read on demand</span></div>
+                    <div class="home-body"><div class="hint"><b style="color:var(--ink);">read</b> just in time, kept out of context otherwise</div></div>
+                </div>
+            </div>
+        </div>
+        <div class="diagram-caption reveal" style="max-width:1660px;">never &ldquo;skill or tool?&rdquo; in the abstract &mdash; <b style="color:var(--ink);">where does <i>this particular</i> capability belong?</b> This exact row recurs in 1.2, 3.1 and 5.1.</div>
+    </div>
+    <div class="chrome-page">03 / 16</div>
+    <div class="chrome-nav">&larr; &rarr; navigate</div>
+</section>
+
+<!-- 04 — slide 1.2 Four capabilities, classified -->
+<section class="slide">
+    <div class="chrome-tag">L22 &middot; <b>PLACEMENT</b></div>
+    <div class="topbar reveal">
+        <div class="eyebrow">Slide 1.2</div>
+        <h2 class="headline">Four capabilities, <span class="it">classified</span></h2>
+    </div>
+    <div class="body-area">
+        <table class="ledger reveal">
+            <thead><tr><th style="width:38%;">Capability (Demo 4&rsquo;s set)</th><th style="width:22%;">Home</th><th>Why</th></tr></thead>
+            <tbody>
+                <tr><td>compute sales tax</td><td class="tag">tool</td><td>deterministic math, structured I/O</td></tr>
+                <tr><td>our brand voice / tone rules</td><td class="tag">system prompt</td><td>always-true, applies to every reply</td></tr>
+                <tr><td>the multi-step refund-handling procedure</td><td class="tag">skill</td><td>procedural, needed only on refunds</td></tr>
+                <tr><td>look up an order by id</td><td class="tag">tool</td><td>deterministic lookup, structured I/O</td></tr>
+            </tbody>
+        </table>
+        <ul class="points reveal" style="margin-top:16px;">
+            <li class="point"><b>Defend each out loud.</b> Disagreement is healthy &mdash; the edges are where the judgment lives.</li>
+        </ul>
+        <div class="diagram-frame reveal" style="margin-top:10px;">
+            <div class="homes-row">
+                <div class="home" style="height:200px;">
+                    <div class="home-head">tool &mdash; <span class="verb">called</span></div>
+                    <div class="home-body">
+                        <div class="cap-chip">sales_tax</div>
+                        <div class="cap-chip">lookup_order</div>
+                    </div>
+                </div>
+                <div class="home" style="height:200px;">
+                    <div class="home-head">system prompt &mdash; <span class="verb">always seen</span></div>
+                    <div class="home-body"><div class="cap-chip">brand voice</div></div>
+                </div>
+                <div class="home" style="height:200px;">
+                    <div class="home-head">skill &mdash; <span class="verb">read on demand</span></div>
+                    <div class="home-body"><div class="cap-chip" style="white-space:normal;">refund procedure</div></div>
+                </div>
+            </div>
+        </div>
+        <div class="diagram-caption reveal" style="max-width:1660px; text-align:center; margin-top:14px;">second beat of the row &mdash; every chip lands in its right home, all cyan; coral is reserved for &sect;3&rsquo;s mis-placements.</div>
+    </div>
+    <div class="chrome-page">04 / 16</div>
+    <div class="chrome-nav">&larr; &rarr; navigate</div>
+</section>
+
+<!-- ============================================================ -->
+<!-- 05 — SECTION 2 DIVIDER                                       -->
+<!-- ============================================================ -->
+<section class="slide slide-chapter">
+    <div class="chrome-tag reveal">L22 &middot; <b>PLACEMENT</b></div>
+    <div class="chapter-ghost reveal">02</div>
+    <div class="chapter-eyebrow reveal">Section 2</div>
+    <div class="chapter-title reveal">Skills compose with tools &mdash; <span style="color:var(--cyan); font-style:normal;">they don&rsquo;t replace them</span></div>
+    <div class="chapter-sub reveal">The skill is the procedure; the tools are the operations it orchestrates.</div>
+    <div class="chrome-page">05 / 16</div>
+</section>
+
+<!-- 06 — slide 2.1 A skill orchestrates tools -->
+<section class="slide">
+    <div class="chrome-tag">L22 &middot; <b>PLACEMENT</b></div>
+    <div class="topbar reveal">
+        <div class="eyebrow">Slide 2.1</div>
+        <h2 class="headline">A skill <span class="it">orchestrates</span> tools</h2>
+    </div>
+    <div class="body-area" style="display:flex; align-items:center; gap:60px;">
+        <ul class="points reveal" style="max-width:680px;">
+            <li class="point">A skill often <b>describes how to use</b> one or more tools: the refund <b>skill</b> (the procedure) tells the agent to call the order-lookup <b>tool</b> and the sales-tax <b>tool</b> in the right order.</li>
+            <li class="point">Skills are the natural home for <b>orchestration</b> know-how: <i>&ldquo;to handle a refund, first look up the order, then compute the refund, then reply.&rdquo;</i></li>
+        </ul>
+        <div style="flex-shrink:0;">
+            <div class="diagram-frame reveal" style="position:relative; display:block; width:880px; height:500px;">
+                <svg viewBox="0 0 880 500" width="880" height="500" style="position:absolute; inset:0;">
+                    <defs>
+                        <marker id="m21c" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="var(--cyan)"/></marker>
+                    </defs>
+                    <path d="M 300 218 C 260 280, 235 320, 222 382" fill="none" stroke="var(--cyan)" stroke-width="3" marker-end="url(#m21c)"/>
+                    <text x="230" y="300" text-anchor="middle" class="edge-label" fill="var(--cyan)" font-weight="600">1</text>
+                    <path d="M 580 218 C 620 280, 645 320, 658 382" fill="none" stroke="var(--cyan)" stroke-width="3" marker-end="url(#m21c)"/>
+                    <text x="655" y="300" text-anchor="middle" class="edge-label" fill="var(--cyan)" font-weight="600">2</text>
+                </svg>
+                <div class="skill-card" style="position:absolute; left:140px; top:0; width:600px; border-color:var(--cyan);">
+                    <div class="skill-head" style="color:var(--cyan);">refund-policy &mdash; the skill (the procedure)</div>
+                    <div class="skill-band" style="color:var(--ink-dim);">
+                        <div class="step-row"><span class="n">1.</span> look up the order &mdash; call <span class="tool-ref">lookup_order</span></div>
+                        <div class="step-row"><span class="n">2.</span> compute the refund &mdash; call <span class="tool-ref">sales_tax</span></div>
+                        <div class="step-row"><span class="n">3.</span> reply with the outcome</div>
+                    </div>
+                </div>
+                <div class="op-box" style="position:absolute; left:60px; top:388px; width:320px;">
+                    <div class="op-name">lookup_order</div>
+                    <div class="op-sub">the operation &mdash; L07/L08 material</div>
+                </div>
+                <div class="op-box" style="position:absolute; left:500px; top:388px; width:320px;">
+                    <div class="op-name">sales_tax</div>
+                    <div class="op-sub">the operation &mdash; L07/L08 material</div>
+                </div>
+            </div>
+            <div class="diagram-caption reveal" style="max-width:880px; text-align:center; margin-top:10px;">the skill is the <i>procedure</i>; the tools are the <i>operations</i> &mdash; no coral: nothing here fails.</div>
+        </div>
+    </div>
+    <div class="chrome-page">06 / 16</div>
+    <div class="chrome-nav">&larr; &rarr; navigate</div>
+</section>
+
+<!-- 07 — slide 2.2 A skill can push work into a script -->
+<section class="slide">
+    <div class="chrome-tag">L22 &middot; <b>PLACEMENT</b></div>
+    <div class="topbar reveal">
+        <div class="eyebrow">Slide 2.2</div>
+        <h2 class="headline">Push deterministic work <span class="it">into a script</span></h2>
+    </div>
+    <div class="body-area" style="display:flex; align-items:center; gap:60px;">
+        <ul class="points reveal" style="max-width:700px;">
+            <li class="point">Deterministic steps don&rsquo;t belong in prose reasoning &mdash; a skill can tell the agent to <b>run a script</b> (<code>refund_amount.py</code>) instead of doing arithmetic in its head. <b>Cheaper, and reliable.</b></li>
+            <li class="point">This is the third layer of <b>progressive disclosure</b>: scripts load <b>only when actually invoked</b>.</li>
+            <li class="point">So a skill has two ways to stay lean: it&rsquo;s <i>read</i> only when relevant, and its deterministic parts <i>run</i> as code rather than as tokens.</li>
+        </ul>
+        <div style="flex-shrink:0;">
+            <div class="diagram-frame reveal" style="position:relative; display:block; width:880px; height:400px;">
+                <svg viewBox="0 0 880 400" width="880" height="400" style="position:absolute; inset:0;">
+                    <defs>
+                        <marker id="m22c" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="var(--cyan)"/></marker>
+                        <marker id="m22r" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="var(--coral)"/></marker>
+                    </defs>
+                    <path d="M 360 66 C 280 120, 230 160, 208 224" fill="none" stroke="var(--coral)" stroke-width="3" marker-end="url(#m22r)"/>
+                    <text x="262" y="150" text-anchor="middle" style="font-family:var(--font-body); font-size:38px; font-weight:700; fill:var(--coral);">&#10005;</text>
+                    <path d="M 520 66 C 600 120, 650 160, 672 224" fill="none" stroke="var(--cyan)" stroke-width="3" marker-end="url(#m22c)"/>
+                    <circle r="7" fill="var(--cyan)">
+                        <animateMotion dur="2.8s" repeatCount="indefinite" path="M 520 66 C 600 120, 650 160, 672 224"/>
+                    </circle>
+                </svg>
+                <div style="position:absolute; left:240px; top:0; width:400px; border:2px solid var(--cyan); border-radius:10px; background:rgba(82,232,200,0.07); padding:12px 20px; text-align:center; font-size:20px; color:var(--ink);"><b style="color:var(--cyan);">step 2</b> &mdash; compute the refund</div>
+                <div style="position:absolute; left:30px; top:230px; width:370px; border:2px solid var(--coral); border-radius:10px; background:#12181a; padding:16px 20px; text-align:center;">
+                    <div style="font-size:21px; color:var(--coral); font-weight:600;">reasoned in its head</div>
+                    <div style="font-size:17px; color:var(--ink-dim); margin-top:6px;">prose-token arithmetic &mdash; expensive, unreliable</div>
+                </div>
+                <div style="position:absolute; left:490px; top:230px; width:370px; border:2px dashed var(--cyan); border-radius:10px; background:transparent; padding:16px 20px; text-align:center;">
+                    <div style="font-size:22px; color:var(--cyan); font-weight:600;">refund_amount.py</div>
+                    <div style="font-size:17px; color:var(--ink-dim); margin-top:6px;">run, not reasoned</div>
+                    <div style="font-size:16px; color:var(--cyan); margin-top:10px;">dashed until invoked &mdash; loads only on run</div>
+                </div>
+            </div>
+            <div class="diagram-caption reveal" style="max-width:880px; text-align:center; margin-top:12px;">2.1&rsquo;s picture, one step further &mdash; disclosure&rsquo;s third layer, echoing L2202&rsquo;s rings.</div>
+        </div>
+    </div>
+    <div class="chrome-page">07 / 16</div>
+    <div class="chrome-nav">&larr; &rarr; navigate</div>
+</section>
+
+<!-- ============================================================ -->
+<!-- 08 — SECTION 3 DIVIDER                                       -->
+<!-- ============================================================ -->
+<section class="slide slide-chapter">
+    <div class="chrome-tag reveal">L22 &middot; <b>PLACEMENT</b></div>
+    <div class="chapter-ghost reveal">03</div>
+    <div class="chapter-eyebrow reveal">Section 3</div>
+    <div class="chapter-title reveal">The <span style="color:var(--cyan); font-style:normal;">anti-patterns</span></div>
+    <div class="chapter-sub reveal">Three ways to put a capability in the wrong home &mdash; and what each mistake costs.</div>
+    <div class="chrome-page">08 / 16</div>
+</section>
+
+<!-- 09 — slide 3.1 Three ways to put a capability in the wrong home -->
+<section class="slide">
+    <div class="chrome-tag">L22 &middot; <b>PLACEMENT</b></div>
+    <div class="topbar reveal">
+        <div class="eyebrow">Slide 3.1</div>
+        <h2 class="headline">Three ways to pick <span class="it">the wrong home</span></h2>
+    </div>
+    <div class="body-area">
+        <table class="ledger reveal">
+            <thead><tr><th style="width:36%;">Anti-pattern</th><th style="width:40%;">Why it hurts</th><th>Fix</th></tr></thead>
+            <tbody>
+                <tr><td class="warn-cell">occasionally-needed instructions crammed into the <b style="color:var(--coral);">system prompt</b></td><td>always-on cost for sometimes-needed content; crowds the window</td><td class="tag">make it a skill</td></tr>
+                <tr><td class="warn-cell">a <b style="color:var(--coral);">tool</b> built for procedural know-how</td><td>rigid &mdash; multi-step &ldquo;how to phrase a refusal&rdquo; doesn&rsquo;t fit a schema</td><td class="tag">make it a skill</td></tr>
+                <tr><td class="warn-cell">a <b style="color:var(--coral);">skill</b> made for a one-line always-true rule</td><td>an extra load turn + a miss risk for something that should just always apply</td><td class="tag">put it in the system prompt</td></tr>
+            </tbody>
+        </table>
+        <div class="diagram-frame reveal" style="position:relative; display:block; width:1660px; height:348px; margin-top:12px;">
+            <svg viewBox="0 0 1660 348" width="1660" height="348" style="position:absolute; inset:0;">
+                <defs>
+                    <marker id="m31c" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="var(--cyan)"/></marker>
+                </defs>
+                <path d="M 470 66 C 620 4, 1040 4, 1188 66" fill="none" stroke="var(--cyan)" stroke-width="3" marker-end="url(#m31c)"/>
+                <path d="M 839 66 C 930 22, 1160 22, 1250 66" fill="none" stroke="var(--cyan)" stroke-width="3" marker-end="url(#m31c)"/>
+                <path d="M 1198 274 C 1100 334, 940 334, 845 274" fill="none" stroke="var(--cyan)" stroke-width="3" marker-end="url(#m31c)"/>
+            </svg>
+            <div class="homes-row" style="position:absolute; left:288px; top:70px;">
+                <div class="home" style="height:200px;">
+                    <div class="home-head">tool &mdash; <span class="verb">called</span></div>
+                    <div class="home-body"><div class="cap-chip bad" style="white-space:normal;">multi-step procedure</div></div>
+                </div>
+                <div class="home" style="height:200px;">
+                    <div class="home-head">system prompt &mdash; <span class="verb">always seen</span></div>
+                    <div class="home-body"><div class="cap-chip bad" style="white-space:normal;">sometimes-needed instructions</div></div>
+                </div>
+                <div class="home" style="height:200px;">
+                    <div class="home-head">skill &mdash; <span class="verb">read on demand</span></div>
+                    <div class="home-body"><div class="cap-chip bad" style="white-space:normal;">one-line always-true rule</div></div>
+                </div>
+            </div>
+        </div>
+        <div class="diagram-caption reveal" style="max-width:1660px;"><b style="color:var(--ink);">cost follows placement</b> &mdash; put a capability where its <b style="color:var(--ink);">usage pattern</b> says it belongs, not where it&rsquo;s convenient to drop. Coral marks the mis-placed chip only; the homes stay cyan, and the cyan arrows carry each chip to its right one.</div>
+    </div>
+    <div class="chrome-page">09 / 16</div>
+    <div class="chrome-nav">&larr; &rarr; navigate</div>
+</section>
+
+<!-- ============================================================ -->
+<!-- 10 — SECTION 4 DIVIDER                                       -->
+<!-- ============================================================ -->
+<section class="slide slide-chapter">
+    <div class="chrome-tag reveal">L22 &middot; <b>PLACEMENT</b></div>
+    <div class="chapter-ghost reveal">04</div>
+    <div class="chapter-eyebrow reveal">Section 4</div>
+    <div class="chapter-title reveal">The reveal: <span style="color:var(--cyan); font-style:normal;">you already built Agent Skills</span></div>
+    <div class="chapter-sub reveal">Open a real SKILL.md from this repo &mdash; it is the loader from L2203, productized.</div>
+    <div class="chrome-page">10 / 16</div>
+</section>
+
+<!-- 11 — slide 4.1 The loader you built, productized -->
+<section class="slide">
+    <div class="chrome-tag">L22 &middot; <b>PLACEMENT</b></div>
+    <div class="topbar reveal">
+        <div class="eyebrow">Slide 4.1</div>
+        <h2 class="headline">The loader you built, <span class="it">productized</span></h2>
+    </div>
+    <div class="body-area" style="display:flex; align-items:center; gap:44px;">
+        <ul class="points reveal" style="max-width:520px;">
+            <li class="point">Open a real skill from this repo: <code>.claude/skills/author-lesson-roadmap/SKILL.md</code> &mdash; the <b>same shape</b> you built in Demo 3.</li>
+            <li class="point">YAML <b>frontmatter</b> (<code>name</code> + <code>description</code>) &mdash; the always-on catalog entry. A markdown <b>body</b> of imperative instructions &mdash; loaded on demand.</li>
+            <li class="point">Supporting structure and scripts in the skill&rsquo;s folder &mdash; run when invoked.</li>
+        </ul>
+        <div style="flex-shrink:0;">
+            <div class="diagram-frame reveal" style="gap:26px;">
+                <div style="flex-shrink:0;">
+                    <svg viewBox="0 0 640 500" width="520" height="406">
+                        <defs>
+                            <marker id="m41f" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="var(--ink-faint)"/></marker>
+                            <marker id="m41c" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="var(--cyan)"/></marker>
+                        </defs>
+                        <text x="18" y="28" style="font-family:var(--font-body); font-size:17px; font-weight:600; fill:var(--cyan);">create_agent(model, [load_skill], system_prompt=catalog)</text>
+                        <rect x="15" y="46" width="610" height="380" rx="14" fill="rgba(82,232,200,0.04)" stroke="var(--cyan)" stroke-width="3"/>
+                        <text x="46" y="166" class="edge-label" fill="var(--ink-dim)" font-size="16">__start__</text>
+                        <path d="M 52 190 L 128 190" stroke="var(--ink-faint)" stroke-width="3" marker-end="url(#m41f)"/>
+                        <path d="M 223 152 C 270 84, 360 84, 407 154" fill="none" stroke="var(--ink-faint)" stroke-width="3" marker-end="url(#m41f)"/>
+                        <text x="315" y="74" text-anchor="middle" class="edge-label" fill="var(--ink-dim)" font-size="16">tool call? &mdash; yes</text>
+                        <path d="M 407 226 C 360 296, 270 296, 223 228" fill="none" stroke="var(--cyan)" stroke-width="4" marker-end="url(#m41c)"/>
+                        <circle r="7" fill="var(--cyan)">
+                            <animateMotion dur="3s" repeatCount="indefinite" path="M 407 226 C 360 296, 270 296, 223 228"/>
+                        </circle>
+                        <text x="315" y="322" text-anchor="middle" class="edge-label" fill="var(--cyan)" font-size="16">the back-edge</text>
+                        <circle cx="185" cy="190" r="50" fill="#12181a" stroke="var(--cyan)" stroke-width="2.5"/>
+                        <text x="185" y="197" text-anchor="middle" class="node-label" style="font-size:21px;">agent</text>
+                        <circle cx="445" cy="190" r="50" fill="#12181a" stroke="var(--cyan)" stroke-width="2.5"/>
+                        <text x="445" y="197" text-anchor="middle" class="node-label" style="font-size:21px;">tools</text>
+                        <rect x="45" y="350" width="280" height="44" rx="9" fill="rgba(82,232,200,0.08)" stroke="var(--cyan)" stroke-width="2"/>
+                        <text x="185" y="378" text-anchor="middle" class="edge-label" fill="var(--cyan)" font-size="16">Skill catalog &rarr; system prompt</text>
+                        <rect x="360" y="350" width="170" height="44" rx="9" fill="rgba(82,232,200,0.08)" stroke="var(--cyan)" stroke-width="2"/>
+                        <text x="445" y="378" text-anchor="middle" class="edge-label" fill="var(--cyan)" font-size="16">load_skill</text>
+                        <text x="320" y="466" text-anchor="middle" class="edge-label" fill="var(--ink-dim)" font-size="17">your Demo 3 loader &mdash; L2203, unchanged</text>
+                    </svg>
+                </div>
+                <div style="font-family:var(--font-display); font-size:110px; font-weight:600; color:var(--cyan); flex-shrink:0;">=</div>
+                <div style="flex-shrink:0; display:flex; flex-direction:column; gap:8px;">
+                    <div style="font-size:17px; color:var(--cyan); text-align:center;">loaded just in time by Claude Code</div>
+                    <div class="skill-card" style="width:430px; border-color:var(--cyan);">
+                        <div class="skill-head" style="font-size:14px; letter-spacing:0.06em; color:var(--cyan);">.claude/skills/author-lesson-roadmap/SKILL.md</div>
+                        <div class="skill-band hot"><b>name:</b> author-lesson-roadmap &mdash; your <b>Skill.name</b></div>
+                        <div class="skill-band hot"><b>description:</b> use when drafting a lesson&rsquo;s roadmap &mdash; your <b>Skill.description</b></div>
+                        <div class="skill-band"><b>body</b> &mdash; imperative instructions, loaded on demand &mdash; your <b>Skill.body</b></div>
+                        <div class="skill-band ghost">supporting files / scripts &mdash; run when invoked</div>
+                    </div>
+                </div>
+            </div>
+            <div class="diagram-caption reveal" style="max-width:1080px; text-align:center; margin-top:14px;">the same shape, side by side &mdash; both sides fully cyan, no coral anywhere: this slide is an equality.</div>
+        </div>
+    </div>
+    <div class="chrome-page">11 / 16</div>
+    <div class="chrome-nav">&larr; &rarr; navigate</div>
+</section>
+
+<!-- 12 — slide 4.2 The meta-punchline -->
+<section class="slide">
+    <div class="chrome-tag">L22 &middot; <b>PLACEMENT</b></div>
+    <div class="topbar reveal">
+        <div class="eyebrow">Slide 4.2</div>
+        <h2 class="headline">The <span class="it">meta-punchline</span></h2>
+    </div>
+    <div class="body-area">
+        <ul class="points reveal">
+            <li class="point"><b>The curriculum you are taking is itself built from skills.</b> These lessons were generated by <code>generate-materials-from-roadmap</code> &mdash; a skill &mdash; loaded just in time by Claude Code, exactly like the loader you built.</li>
+            <li class="point">Same payoff as the rest of the course&rsquo;s spine: <b>you met the mechanism before the product</b>, so the product reads as familiar, not magic.</li>
+            <li class="point">You&rsquo;re not learning the Agent SDK&rsquo;s mechanics here &mdash; just landing that <b>the concept and the product are the same idea</b>.</li>
+        </ul>
+        <div class="reveal" style="display:flex; flex-direction:column; gap:14px; max-width:1400px; margin:28px auto 0;">
+            <div class="rung">
+                <span class="r-chip">L12 &mdash; hand-rolled trace</span>
+                <span class="r-arrow">&mdash;&mdash; became &rarr;</span>
+                <span class="r-chip">Langfuse</span>
+                <span class="r-tag">already landed</span>
+            </div>
+            <div class="rung">
+                <span class="r-chip">L11 &mdash; hand-rolled loop</span>
+                <span class="r-arrow">&mdash;&mdash; became &rarr;</span>
+                <span class="r-chip">LangGraph create_agent</span>
+                <span class="r-tag">already landed</span>
+            </div>
+            <div class="rung now">
+                <span class="r-chip">this lesson &mdash; load_skill + catalog</span>
+                <span class="r-arrow">&mdash;&mdash; became &rarr;</span>
+                <span class="r-chip">Agent Skills</span>
+                <span class="r-tag">today&rsquo;s punchline</span>
+            </div>
+        </div>
+        <div class="diagram-caption reveal" style="max-width:1400px; margin:16px auto 0; text-align:center;">the course-spine ladder &mdash; you met the mechanism before the product.</div>
+    </div>
+    <div class="chrome-page">12 / 16</div>
+    <div class="chrome-nav">&larr; &rarr; navigate</div>
+</section>
+
+<!-- ============================================================ -->
+<!-- 13 — SECTION 5 DIVIDER                                       -->
+<!-- ============================================================ -->
+<section class="slide slide-chapter">
+    <div class="chrome-tag reveal">L22 &middot; <b>PLACEMENT</b></div>
+    <div class="chapter-ghost reveal">05</div>
+    <div class="chapter-eyebrow reveal">Section 5</div>
+    <div class="chapter-title reveal">Capstone &mdash; <span style="color:var(--cyan); font-style:normal;">and where you go next</span></div>
+    <div class="chapter-sub reveal">One sentence to leave with, and the road on from here.</div>
+    <div class="chrome-page">13 / 16</div>
+</section>
+
+<!-- 14 — slide 5.1 The one sentence to leave with -->
+<section class="slide">
+    <div class="chrome-tag">L22 &middot; <b>PLACEMENT</b></div>
+    <div class="topbar reveal">
+        <div class="eyebrow">Slide 5.1</div>
+        <h2 class="headline">The one sentence <span class="it">to leave with</span></h2>
+    </div>
+    <div class="body-area">
+        <div class="callout reveal" style="margin-top:0; max-width:1500px;"><p>A tool is <b style="font-style:normal; color:var(--cyan);">called</b>, a skill is <b style="font-style:normal; color:var(--cyan);">read</b>, the system prompt is <b style="font-style:normal; color:var(--cyan);">always seen</b> &mdash; and &ldquo;where should this capability live?&rdquo; is answered by <b style="font-style:normal; color:var(--cyan);">when</b> it needs to be in context.</p></div>
+        <ul class="points reveal" style="margin-top:18px;">
+            <li class="point">That single question ties together everything you built this course: prompts (<b>L02</b>), tools (<b>L07/L08</b>), the agent loop (<b>L10</b>), and its LangGraph form (<b>L04/L11</b>).</li>
+        </ul>
+        <div class="diagram-frame reveal" style="gap:26px; margin-top:14px;">
+            <div style="width:400px; display:flex; flex-direction:column; gap:10px;">
+                <div class="home" style="width:400px; height:118px;">
+                    <div class="home-head">tool &mdash; <span class="verb">called</span></div>
+                    <div class="home-body"><div class="hint">full schema in every request</div></div>
+                </div>
+                <div class="cost-track"><div class="cost-fill">schema every call</div></div>
+            </div>
+            <div style="width:400px; display:flex; flex-direction:column; gap:10px;">
+                <div class="home" style="width:400px; height:118px;">
+                    <div class="home-head">system prompt &mdash; <span class="verb">always seen</span></div>
+                    <div class="home-body"><div class="hint">every rule, in every call</div></div>
+                </div>
+                <div class="cost-track"><div class="cost-fill">always seen</div></div>
+            </div>
+            <div style="width:400px; display:flex; flex-direction:column; gap:10px;">
+                <div class="home" style="width:400px; height:118px;">
+                    <div class="home-head">skill &mdash; <span class="verb">read on demand</span></div>
+                    <div class="home-body"><div class="hint">a thin sliver &mdash; until it&rsquo;s read</div></div>
+                </div>
+                <div class="cost-track" style="border-color:var(--cyan-rule);">
+                    <div class="cost-sliver"></div>
+                    <span style="position:absolute; left:10px; bottom:5px; font-size:14px; color:var(--cyan);">description &mdash; always</span>
+                    <div class="cost-body-block">body &mdash; on load</div>
+                </div>
+            </div>
+        </div>
+        <div class="diagram-caption reveal" style="max-width:1660px; text-align:center; margin-top:16px;">the motif&rsquo;s bookend &mdash; L2202&rsquo;s stuffed always-on window, now solved: only the skill&rsquo;s cost pops in just in time.</div>
+    </div>
+    <div class="chrome-page">14 / 16</div>
+    <div class="chrome-nav">&larr; &rarr; navigate</div>
+</section>
+
+<!-- 15 — slide 5.2 What's next -->
+<section class="slide">
+    <div class="chrome-tag">L22 &middot; <b>PLACEMENT</b></div>
+    <div class="topbar reveal">
+        <div class="eyebrow">Slide 5.2</div>
+        <h2 class="headline">What&rsquo;s <span class="it">next</span></h2>
+    </div>
+    <div class="body-area" style="display:flex; align-items:center; gap:50px;">
+        <ul class="points reveal" style="max-width:760px;">
+            <li class="point"><b>Next &mdash; L23: skill patterns &amp; composition</b> (both tracks). You authored <i>one</i> skill well; L23 composes <i>many</i> into a <b>system</b>: archetypes, the two composition moves, the dependency graph, and the composition anti-patterns &mdash; the system-scale sequel to &sect;3.</li>
+            <li class="point"><b>Then the mini cut closes with L50</b> &mdash; the agent mini-project walkthrough (tool &rarr; loop &rarr; trace &rarr; eval). So L22 is a capstone of <i>&ldquo;where does a single capability live?&rdquo;</i>, <b>not</b> the last mini lesson (recap: MINI_WRAPUP).</li>
+            <li class="point"><b>Full-course-only &mdash; named, not taught here:</b> <b>L24</b> subagents (a subagent is capability-as-a-whole-agent &mdash; the same lens, scaled up), <b>L19</b> context management, <b>L09</b> the fuller packaging taxonomy with MCP.</li>
+        </ul>
+        <div style="flex-shrink:0;">
+            <div class="diagram-frame reveal" style="width:840px; height:560px;">
+                <svg viewBox="0 0 840 560" width="100%" height="100%">
+                    <defs>
+                        <marker id="m52c" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="var(--cyan)"/></marker>
+                        <marker id="m52f" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="var(--ink-faint)"/></marker>
+                    </defs>
+                    <rect x="30" y="26" width="360" height="88" rx="12" fill="#12181a" stroke="var(--cyan)" stroke-width="3"/>
+                    <text x="210" y="64" text-anchor="middle" style="font-family:var(--font-body); font-size:19px; font-weight:600; fill:var(--ink);">L22 &mdash; one capability, one home</text>
+                    <text x="210" y="94" text-anchor="middle" style="font-family:var(--font-body); font-size:16px; fill:var(--cyan);">you are here</text>
+                    <path d="M 210 118 L 210 176" stroke="var(--cyan)" stroke-width="3" marker-end="url(#m52c)"/>
+                    <rect x="55" y="182" width="430" height="170" rx="12" fill="none" stroke="var(--ink-dim)" stroke-width="2.5" stroke-dasharray="9 7"/>
+                    <text x="270" y="212" text-anchor="middle" style="font-family:var(--font-body); font-size:19px; font-weight:600; fill:var(--ink);">L23 &mdash; skill patterns &amp; composition</text>
+                    <line x1="140" y1="268" x2="260" y2="300" stroke="var(--ink-faint)" stroke-width="1.5"/>
+                    <line x1="260" y1="300" x2="380" y2="258" stroke="var(--ink-faint)" stroke-width="1.5"/>
+                    <rect x="95" y="240" width="90" height="56" rx="6" fill="#12181a" stroke="var(--ink-dim)" stroke-width="1.5"/>
+                    <line x1="95" y1="254" x2="185" y2="254" stroke="var(--cyan)" stroke-width="1.5" opacity="0.7"/>
+                    <rect x="215" y="272" width="90" height="56" rx="6" fill="#12181a" stroke="var(--ink-dim)" stroke-width="1.5"/>
+                    <line x1="215" y1="286" x2="305" y2="286" stroke="var(--cyan)" stroke-width="1.5" opacity="0.7"/>
+                    <rect x="335" y="230" width="90" height="56" rx="6" fill="#12181a" stroke="var(--ink-dim)" stroke-width="1.5"/>
+                    <line x1="335" y1="244" x2="425" y2="244" stroke="var(--cyan)" stroke-width="1.5" opacity="0.7"/>
+                    <text x="270" y="342" text-anchor="middle" style="font-family:var(--font-body); font-size:16px; fill:var(--ink-dim);">many skills &rarr; a system</text>
+                    <path d="M 270 356 L 270 408" stroke="var(--ink-faint)" stroke-width="3" stroke-dasharray="8 7" marker-end="url(#m52f)"/>
+                    <rect x="55" y="414" width="480" height="108" rx="12" fill="none" stroke="var(--ink-dim)" stroke-width="2.5" stroke-dasharray="9 7"/>
+                    <text x="295" y="444" text-anchor="middle" style="font-family:var(--font-body); font-size:19px; font-weight:600; fill:var(--ink);">L50 &mdash; the agent mini-project</text>
+                    <rect x="85" y="458" width="90" height="44" rx="6" fill="#12181a" stroke="var(--ink-dim)" stroke-width="1.5"/>
+                    <text x="130" y="486" text-anchor="middle" style="font-family:var(--font-body); font-size:16px; fill:var(--ink-dim);">tool</text>
+                    <path d="M 178 480 L 197 480" stroke="var(--ink-faint)" stroke-width="2" marker-end="url(#m52f)"/>
+                    <rect x="200" y="458" width="90" height="44" rx="6" fill="#12181a" stroke="var(--ink-dim)" stroke-width="1.5"/>
+                    <text x="245" y="486" text-anchor="middle" style="font-family:var(--font-body); font-size:16px; fill:var(--ink-dim);">loop</text>
+                    <path d="M 293 480 L 312 480" stroke="var(--ink-faint)" stroke-width="2" marker-end="url(#m52f)"/>
+                    <rect x="315" y="458" width="90" height="44" rx="6" fill="#12181a" stroke="var(--ink-dim)" stroke-width="1.5"/>
+                    <text x="360" y="486" text-anchor="middle" style="font-family:var(--font-body); font-size:16px; fill:var(--ink-dim);">trace</text>
+                    <path d="M 408 480 L 427 480" stroke="var(--ink-faint)" stroke-width="2" marker-end="url(#m52f)"/>
+                    <rect x="430" y="458" width="80" height="44" rx="6" fill="#12181a" stroke="var(--ink-dim)" stroke-width="1.5"/>
+                    <text x="470" y="486" text-anchor="middle" style="font-family:var(--font-body); font-size:16px; fill:var(--ink-dim);">eval</text>
+                    <text x="700" y="172" text-anchor="middle" style="font-family:var(--font-body); font-size:15px; letter-spacing:0.1em; fill:var(--ink-faint);">FULL COURSE ONLY</text>
+                    <line x1="488" y1="250" x2="574" y2="226" stroke="var(--ink-faint)" stroke-width="1.5" stroke-dasharray="6 6"/>
+                    <rect x="580" y="190" width="240" height="72" rx="10" fill="none" stroke="var(--ink-faint)" stroke-width="2" stroke-dasharray="8 7"/>
+                    <text x="700" y="220" text-anchor="middle" style="font-family:var(--font-body); font-size:17px; fill:var(--ink-faint);">L24 &mdash; subagents</text>
+                    <text x="700" y="246" text-anchor="middle" style="font-family:var(--font-body); font-size:15px; fill:var(--ink-faint);">capability as an agent</text>
+                    <rect x="580" y="282" width="240" height="72" rx="10" fill="none" stroke="var(--ink-faint)" stroke-width="2" stroke-dasharray="8 7"/>
+                    <text x="700" y="312" text-anchor="middle" style="font-family:var(--font-body); font-size:17px; fill:var(--ink-faint);">L19 &mdash; context</text>
+                    <text x="700" y="338" text-anchor="middle" style="font-family:var(--font-body); font-size:15px; fill:var(--ink-faint);">management</text>
+                    <rect x="580" y="374" width="240" height="72" rx="10" fill="none" stroke="var(--ink-faint)" stroke-width="2" stroke-dasharray="8 7"/>
+                    <text x="700" y="404" text-anchor="middle" style="font-family:var(--font-body); font-size:17px; fill:var(--ink-faint);">L09 &mdash; MCP</text>
+                    <text x="700" y="430" text-anchor="middle" style="font-family:var(--font-body); font-size:15px; fill:var(--ink-faint);">packaging taxonomy</text>
+                </svg>
+            </div>
+            <div class="diagram-caption reveal" style="max-width:840px; text-align:center; margin-top:4px;">dashed ink-faint = deferred, not failure &mdash; nothing on this slide is coral.</div>
+        </div>
+    </div>
+    <div class="chrome-page">15 / 16</div>
+    <div class="chrome-nav">&larr; &rarr; navigate</div>
+</section>
+
+<!-- ============================================================ -->
+<!-- 16 — CLOSING                                                 -->
+<!-- ============================================================ -->
+<section class="slide slide-closing">
+    <div class="chrome-tag reveal">L22 &middot; <b>PLACEMENT</b></div>
+    <div class="closing-statement reveal">A tool is <span class="k">called</span>. A skill is <span class="k">read</span>. The system prompt is <span class="k">always seen</span>. Where a capability lives is answered by <span class="k">when</span> it needs to be in context.</div>
+    <div class="closing-grid reveal">
+        <div class="col">
+            <div class="label">Next</div>
+            <div class="val"><b>L23 &mdash; skill patterns &amp; composition</b><br>one skill done well &rarr; many skills as a system</div>
+        </div>
+        <div class="col">
+            <div class="label">Then</div>
+            <div class="val"><b>L50 &mdash; the mini-project walkthrough</b><br>tool &rarr; loop &rarr; trace &rarr; eval &middot; recap in MINI_WRAPUP</div>
+        </div>
+        <div class="col">
+            <div class="label">Companions</div>
+            <div class="val">your loader &mdash; <b>L2203_lecture.ipynb</b><br>the real thing &mdash; <b>author-lesson-roadmap/SKILL.md</b></div>
+        </div>
+    </div>
+    <div class="chrome-page">16 / 16</div>
+</section>
+
+</main>
+</div>
+
+<!-- Outside-stage UI: progress bar + arrow nav + editing controls -->
+<div class="deck-progress"><div class="deck-progress-bar" id="progressBar"></div></div>
+<button class="deck-arrow prev" id="prevBtn" aria-label="Previous slide">&#8592;</button>
+<button class="deck-arrow next" id="nextBtn" aria-label="Next slide">&#8594;</button>
+<div class="edit-hotzone" id="editHotzone"></div>
+<button class="edit-toggle" id="editToggle" title="Edit mode (E)">&#9998;</button>
+<div class="save-toast" id="saveToast">Saved</div>
+
+<script>
+/* ===========================================
+   SLIDE PRESENTATION CONTROLLER
+   =========================================== */
+class SlidePresentation {
+    constructor() {
+        this.slides = Array.from(document.querySelectorAll('.slide'));
+        this.currentSlide = 0;
+        this.stage = document.getElementById('deckStage');
+        this.progressBar = document.getElementById('progressBar');
+        this.setupStageScale();
+        this.setupKeyboardNav();
+        this.setupTouchNav();
+        this.setupWheelNav();
+        this.setupArrowButtons();
+        this.showSlide(0);
+    }
+
+    setupStageScale() {
+        const scale = () => {
+            const factor = Math.min(window.innerWidth / 1920, window.innerHeight / 1080);
+            const x = (window.innerWidth - 1920 * factor) / 2;
+            const y = (window.innerHeight - 1080 * factor) / 2;
+            this.stage.style.transform = `translate(${x}px, ${y}px) scale(${factor})`;
+        };
+        scale();
+        window.addEventListener('resize', scale);
+    }
+
+    setupKeyboardNav() {
+        document.addEventListener('keydown', (e) => {
+            if (e.target.getAttribute('contenteditable') === 'true') return;
+            if (['ArrowRight', 'ArrowDown', ' ', 'PageDown'].includes(e.key)) {
+                e.preventDefault();
+                this.next();
+            } else if (['ArrowLeft', 'ArrowUp', 'PageUp'].includes(e.key)) {
+                e.preventDefault();
+                this.prev();
+            } else if (e.key === 'Home') {
+                this.showSlide(0);
+            } else if (e.key === 'End') {
+                this.showSlide(this.slides.length - 1);
+            }
+        });
+    }
+
+    setupTouchNav() {
+        let startX = 0;
+        this.stage.addEventListener('touchstart', (e) => { startX = e.touches[0].clientX; }, { passive: true });
+        this.stage.addEventListener('touchend', (e) => {
+            const dx = e.changedTouches[0].clientX - startX;
+            if (Math.abs(dx) > 60) { dx < 0 ? this.next() : this.prev(); }
+        }, { passive: true });
+    }
+
+    setupWheelNav() {
+        let locked = false;
+        window.addEventListener('wheel', (e) => {
+            if (locked) return;
+            if (Math.abs(e.deltaY) < 24) return;
+            locked = true;
+            e.deltaY > 0 ? this.next() : this.prev();
+            setTimeout(() => { locked = false; }, 500);
+        }, { passive: true });
+    }
+
+    setupArrowButtons() {
+        document.getElementById('nextBtn').addEventListener('click', () => this.next());
+        document.getElementById('prevBtn').addEventListener('click', () => this.prev());
+    }
+
+    next() { this.showSlide(this.currentSlide + 1); }
+    prev() { this.showSlide(this.currentSlide - 1); }
+
+    showSlide(index) {
+        this.currentSlide = Math.max(0, Math.min(index, this.slides.length - 1));
+        this.slides.forEach((slide, i) => {
+            slide.classList.toggle('active', i === this.currentSlide);
+            slide.classList.toggle('visible', i === this.currentSlide);
+        });
+        this.progressBar.style.width = `${((this.currentSlide + 1) / this.slides.length) * 100}%`;
+    }
+}
+
+/* ===========================================
+   INLINE EDITING — hover hotzone + E key
+   =========================================== */
+class InlineEditor {
+    constructor() {
+        this.isActive = false;
+        this.toggle = document.getElementById('editToggle');
+        this.hotzone = document.getElementById('editHotzone');
+        this.toast = document.getElementById('saveToast');
+        this.editableSelector = 'h1, h2, h3, p, li, span, td, th, div.claim, div.lede, div.chapter-sub, div.diagram-caption';
+        this.hideTimeout = null;
+        this.bindEvents();
+        this.restore();
+    }
+
+    bindEvents() {
+        this.toggle.addEventListener('click', () => this.toggleEditMode());
+        this.hotzone.addEventListener('click', () => this.toggleEditMode());
+        this.hotzone.addEventListener('mouseenter', () => { clearTimeout(this.hideTimeout); this.toggle.classList.add('show'); });
+        this.hotzone.addEventListener('mouseleave', () => this.scheduleHide());
+        this.toggle.addEventListener('mouseenter', () => clearTimeout(this.hideTimeout));
+        this.toggle.addEventListener('mouseleave', () => this.scheduleHide());
+        document.addEventListener('keydown', (e) => {
+            if ((e.key === 'e' || e.key === 'E') && e.target.getAttribute('contenteditable') !== 'true') {
+                this.toggleEditMode();
+            }
+            if (e.key === 's' && (e.metaKey || e.ctrlKey) && this.isActive) {
+                e.preventDefault();
+                this.save();
+            }
+        });
+    }
+
+    scheduleHide() {
+        this.hideTimeout = setTimeout(() => {
+            if (!this.isActive) this.toggle.classList.remove('show');
+        }, 400);
+    }
+
+    toggleEditMode() {
+        this.isActive = !this.isActive;
+        this.toggle.classList.toggle('active', this.isActive);
+        const stage = document.getElementById('deckStage');
+        const editableEls = stage.querySelectorAll(this.editableSelector);
+        editableEls.forEach((el) => {
+            if (el.closest('svg')) return;
+            el.setAttribute('contenteditable', this.isActive ? 'true' : 'false');
+        });
+        if (!this.isActive) this.save();
+    }
+
+    save() {
+        try {
+            const html = document.getElementById('deckStage').innerHTML;
+            localStorage.setItem('l2205-deck-content', html);
+            this.showToast();
+        } catch (err) {
+            console.warn('Could not save deck content', err);
+        }
+    }
+
+    restore() {
+        try {
+            const saved = localStorage.getItem('l2205-deck-content');
+            if (saved) document.getElementById('deckStage').innerHTML = saved;
+        } catch (err) {
+            console.warn('Could not restore deck content', err);
+        }
+    }
+
+    showToast() {
+        this.toast.classList.add('show');
+        setTimeout(() => this.toast.classList.remove('show'), 1400);
+    }
+}
+
+new SlidePresentation();
+new InlineEditor();
+</script>
+</body>
+</html>
