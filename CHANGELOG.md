@@ -1,3 +1,9 @@
+## v0.32.0 (2026-07-07)
+
+### Feat
+
+- **L50**: add agent mini-project walkthrough capstone
+
 ## v0.31.0 (2026-07-07)
 
 ### Feat
