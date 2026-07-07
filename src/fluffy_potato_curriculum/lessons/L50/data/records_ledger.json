@@ -1,0 +1,30 @@
+[
+  {
+    "record_id": "EXP-1001",
+    "vendor": "blue bottle coffee",
+    "amount": 12.75,
+    "date": "2026-06-03",
+    "category": "meals"
+  },
+  {
+    "record_id": "EXP-1002",
+    "vendor": "citywide taxi",
+    "amount": 41.20,
+    "date": "2026-06-05",
+    "category": "travel"
+  },
+  {
+    "record_id": "EXP-1003",
+    "vendor": "harbor grand hotel",
+    "amount": 268.40,
+    "date": "2026-06-07",
+    "category": "lodging"
+  },
+  {
+    "record_id": "EXP-1004",
+    "vendor": "office supply co",
+    "amount": 58.00,
+    "date": "2026-06-08",
+    "category": "supplies"
+  }
+]

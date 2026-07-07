@@ -1,0 +1,54 @@
+[
+  {
+    "id": "R-coffee",
+    "source": "cafe_pos_json",
+    "note": "A cafe point-of-sale receipt: a tidy JSON object with line items and a total.",
+    "raw": {
+      "merchant": "Blue Bottle Coffee",
+      "date": "2026-06-03",
+      "line_items": [
+        {"name": "Latte", "price": 5.50},
+        {"name": "Drip coffee", "price": 3.25},
+        {"name": "Almond croissant", "price": 4.00}
+      ],
+      "total": 12.75
+    }
+  },
+  {
+    "id": "R-ride",
+    "source": "rideshare_api_json",
+    "note": "A rideshare receipt: also JSON, but every field is named differently (company/amount_charged/trip_date).",
+    "raw": {
+      "company": "Citywide Taxi",
+      "trip_date": "2026-06-05",
+      "amount_charged": 41.20,
+      "distance_mi": 8.3
+    }
+  },
+  {
+    "id": "R-hotel",
+    "source": "hotel_folio_text",
+    "note": "A hotel folio: not JSON at all, just the raw printed lines as one text blob.",
+    "raw": "Harbor Grand Hotel\nFolio #88231\nCheck-in: 2026-06-06   Check-out: 2026-06-07\nRoom charge: 240.00\nCity tax: 28.40\nAmount due: 268.40"
+  },
+  {
+    "id": "R-unknown-vendor",
+    "source": "cafe_pos_json",
+    "note": "Well-formed, but the vendor is not in the ledger -- a clean 'no match', not a parse failure.",
+    "raw": {
+      "merchant": "Roadside Diner",
+      "date": "2026-06-09",
+      "total": 22.10
+    }
+  },
+  {
+    "id": "R-mystery",
+    "source": "unknown_scan",
+    "note": "The malformed case: no recoverable vendor, an unparseable amount. The tool must give up gracefully.",
+    "raw": {
+      "note": "scanned blob -- OCR failed",
+      "amt": "??",
+      "lines": ["illegible"]
+    }
+  }
+]
