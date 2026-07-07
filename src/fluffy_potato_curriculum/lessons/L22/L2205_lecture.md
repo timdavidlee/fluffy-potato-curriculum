@@ -32,7 +32,7 @@ estimated duration: 22
   feeding a three-way fork into three home boxes side by side — a **tool** box ("called"), a
   **system-prompt** band ("always seen"), a **skill** card ("read on demand") — each fork edge
   labeled with its discriminator from the table. All three homes and edges cyan (none is a failure
-  — the point is *placement*, not avoidance); this exact row recurs in 1.2, 3.1, and 5.1.
+  — the point is *placement*, not avoidance); this exact row recurs in 1.2, 3.2, and 5.1.
 
 ### slide 1.2 Four capabilities, classified
 
@@ -81,24 +81,55 @@ estimated duration: 22
 
 ## section 3. The anti-patterns
 
-### slide 3.1 Three ways to put a capability in the wrong home
+- Four anti-patterns on two axes — the mirror image of §1's heuristic. The **description** decides
+  *whether the skill loads* (§3.1); the **container** decides *whether it should be a skill at all*
+  (§3.2). Both are the same placement craft, run in reverse to catch the mistake.
 
-- table: the smell, and the fix.
+### slide 3.1 The description decides whether the skill loads
 
-| Anti-pattern | Why it hurts | Fix |
+- Two of the four are **description** faults — promoted here from
+  [L2202](L2202_lecture.md) §4.2, where they were the failure modes of just-in-time loading. The
+  description is the trigger, so it alone decides *whether* a skill loads at all:
+  - **Too vague → never fires.** ❌ "helps with customer stuff" — the model silently fails to load
+    the skill when it was needed. **Fix:** the description states *when* it applies; it's a design
+    artifact (the skill analogue of L08's tool-naming craft), not a label.
+  - **Too broad / colliding → fires wrongly.** ❌ a description that triggers on the wrong inputs,
+    or overlaps a neighbor's so selection degrades across the whole shelf. **Fix:** discriminating,
+    mutually-distinct descriptions — each says what it's for *and implicitly what it's not*. This
+    is exactly the collision **[L23](../L23/L2301_intro.md) Demo 5** scales to a skill *system*
+    (§3.2).
+- diagram: two coral failure strips under one cyan healthy fire — re-showing L2202 slide 4.2's
+  strips as the recap. Top (cyan): request → a tight description matches → body loads. Strip one
+  (coral): a vague description, the body dashed and never arriving, tagged "needed, never fired".
+  Strip two (coral): a broad description, a body loading on *every* turn, the token savings struck
+  through. Cyan = the description that discriminates; coral = the two that can't.
+
+### slide 3.2 The container decides whether it should be a skill at all
+
+- The other two are **container** faults: the description decides *whether it loads*; the container
+  decides *whether it should be a skill in the first place*. This is §1's three-homes heuristic run
+  in reverse — you're catching a capability that landed in the wrong home.
+- table: the blurred boundary, why it hurts, and where the capability belongs.
+
+| Mis-placement | Why it hurts | Fix |
 | --- | --- | --- |
-| occasionally-needed instructions crammed into the **system prompt** | always-on cost for sometimes-needed content; crowds the window | make it a **skill** |
-| a **tool** built for procedural know-how | rigid; multi-step "how to phrase a refusal" doesn't fit a schema | make it a **skill** |
-| a **skill** made for a one-line always-true rule | pays an extra load turn + a miss risk for something that should just always apply | put it in the **system prompt** |
+| the **tool ↔ skill** line blurred — a deterministic op with structured I/O wrapped in a **skill** the model *reads*, or multi-step procedural know-how forced into a **tool** schema | the op pays a read turn + a miss risk (and reasons in prose where a schema would be exact); the procedure is too rigid for a schema | match the shape: deterministic + structured I/O → **tool**; procedural know-how the model follows → **skill** |
+| the **skill ↔ system-prompt** line blurred — a one-line always-true rule made into a **skill**, or occasionally-needed instructions crammed into the **system prompt** | the always-true rule pays an extra load turn + a miss risk; the sometimes-needed prompt content is always-on cost that crowds every call | match the cadence: always-true → **system prompt**; sometimes-needed → **skill** |
 
-- The recurring lesson: **cost follows placement.** Put a capability where its *usage pattern*
-  says it belongs, not where it's convenient to drop.
-- diagram: third beat of the three-homes row — the same three boxes, with the table's three
-  mis-placed capabilities drawn as coral chips sitting in the wrong home (sometimes-needed
-  instructions jammed into the system-prompt band; a procedure forced into a tool schema; a
-  one-line always-true rule wrapped in a skill card), each with a cyan relocation arrow carrying
-  it to its correct home. Coral marks the wrong *placement* only — the homes themselves stay
-  cyan; caption "cost follows placement."
+- The recurring lesson, one line: **cost follows placement.** Put a capability where its *usage
+  pattern* says it belongs — called-deterministically → tool, always-true → system prompt,
+  sometimes-needed-and-procedural → skill — not where it's convenient to drop.
+- **Hand off to [L23](../L23/L2301_intro.md) Demo 5.** These four are *single-skill* faults; L23
+  extends the same rogues' gallery to a skill **system** — over-chaining, a shared "skill" that's
+  really a tool (§3.2's tool↔skill blur at composition scale), and **description collisions**
+  (§3.1's "too broad" when many skills' descriptions overlap). Name the link here; L23 shows each
+  one break live.
+- diagram: third beat of the three-homes row (the motif from 1.1/1.2) — the same three home boxes,
+  now with the container faults drawn as coral chips in the wrong home (a deterministic-op chip
+  stuck in a skill card; a one-line always-true rule in a skill card; a sometimes-needed procedure
+  jammed into the system-prompt band), each with a cyan relocation arrow to its correct home (→
+  tool, → system prompt, → skill). Coral marks the wrong *placement* only — the homes themselves
+  stay cyan; caption "cost follows placement."
 
 ## section 4. The reveal: you already built Agent Skills
 

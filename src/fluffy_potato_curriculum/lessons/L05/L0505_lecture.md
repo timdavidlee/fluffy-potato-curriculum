@@ -53,7 +53,7 @@ estimated duration: 12
   back-edge** curving from the model node to `tools` and back — labeled "the only thing L11 adds."
   The back-edge is **cyan, not coral**: it's the point of the slide — the one addition — not a
   failure; dashed says "you draw it in L11." These two shapes plus the back-edge are the deck's
-  motif — 2.3 and 4.2 re-show them.
+  motif — 2.3 and 5.2 re-show them.
 - That single back-edge hands the **model** control of the path: *it* decides whether to call a
   tool and go again, or stop. The acyclic **workflow** becomes a cyclic, model-driven **agent**.
 
@@ -104,16 +104,46 @@ estimated duration: 12
 - The engineering skill is choosing the **simplest shape that solves the task** — and that's
   usually a workflow. (This is the thesis of Anthropic's *Building Effective Agents*.)
 
-## section 4. Bridge to L11
+## section 4. Three routing gotchas, named
 
-### slide 4.1 What carries forward
+### slide 4.1 The pitfalls to catch when you wire your own conditional edge
+
+- This lesson showed all three of these in passing — Demo 4's workflow-vs-agent line, Demo 2's
+  ambiguous-ticket fallback, and Demo 1's five-hop trace. Here they are again as portable gotchas
+  you can catch yourself committing the first time you wire a router. Two of them (#1 and #3) are
+  the workflow-vs-agent line at **two altitudes**: #1 is choosing the wrong *shape* on purpose; #3
+  is the mechanism *slipping* — the model taking the wheel by accident. #2 is a different axis
+  entirely: routing *robustness*, not who decides.
+- table: the gotcha, the one-line cure, and where you saw it.
+
+| Gotcha | Cure | Where you saw it |
+| --- | --- | --- |
+| **Wrong shape** — reaching for an agent when the task has a known shape (more cost, less predictability, harder to debug), or forcing a rigid routed DAG when the steps genuinely can't be known ahead | default to the **simplest shape that fits**: a router is right whenever the set of paths is known ahead and picking among them is a classification, lookup, or user choice; a model-driven loop (agency) is a deliberate choice, not a nicety | §3 (when to use which) + slide 2.1 (the back-edge is the whole difference) |
+| **Brittle branch conditions** — a routing function that assumes the classifier returns one of the expected labels and `KeyError`s (or silently mis-routes) on anything off-menu | validate the label is in the allowed set ([L02](../L02/objectives.md)'s enum-as-contract) and always wire a **default / `END`** branch — a router that only knows how to succeed isn't done | [L0502](L0502_lecture.md) §2.3 (the fallback branch) + Demo 2's ambiguous ticket |
+| **The model owning the branch by accident** — routing on a *raw model output* (the free-form reply used as the destination) instead of on a small **validated label** your plain-Python code branches on — quietly handing the model the choice of path | the classifier writes a *constrained label* (again L02's enum-as-contract); your routing function reads *that* and owns the branch. If you actually want the model to choose the path, build an agent ([L11](../L11/objectives.md)) **on purpose** — don't back into one | [L0502](L0502_lecture.md) §1.2 (the decider reads state *you* control) + slide 2.3 (a label in state, not the model choosing) |
+
+- #3 points straight forward to [L11](../L11/objectives.md), where reading the model's own decision
+  is the whole point — on purpose. Keeping #1 and #3 sharp is exactly this lesson's spine (the
+  back-edge in slide 2.1): a model *inside a node* is fine; the model *owning the edge* is the line.
+- diagram: three coral vignettes in a row, each a broken version of a picture from this deck — (1)
+  **wrong shape**: the §3 router in coral carrying an unnecessary dashed back-edge, tagged "a
+  model-driven loop where a router would do"; (2) **brittle branch**: an off-menu label
+  (`"refund??"`) in coral hitting a crossed-out `KeyError` box with no default branch (the L0502
+  §2.3 picture, broken); (3) **accidental agency**: the routing function reading the model's raw
+  reply directly (a coral arrow from the model's free-form output straight into the edge) instead
+  of a cyan validated-label chip. Each vignette pairs with its cyan cure from the sections above;
+  coral marks the mistake, the fix is the healthy version you already drew.
+
+## section 5. Bridge to L11
+
+### slide 5.1 What carries forward
 
 - Everything. `StateGraph`, nodes, edges, typed state, reducers, `compile`/`invoke`, and the
   Langfuse hookup all reappear in L11 **unchanged**.
 - L11 also re-teaches the primitives from scratch so that lesson stands alone — take the overlap
   as deliberate **reinforcement**, not repetition. The vocabulary is identical on purpose.
 
-### slide 4.2 The one sentence to leave with
+### slide 5.2 The one sentence to leave with
 
 - **A workflow is a graph whose path you wire (acyclic); an agent is a graph whose path the model
   drives (cyclic). The line between them is a single back-edge.**
