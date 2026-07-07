@@ -1,0 +1,23 @@
+[
+  {
+    "txn_id": "BANK-501",
+    "date": "2026-06-10",
+    "description": "REIMBURSEMENT - HARBOR GRAND HOTEL",
+    "amount": 268.40,
+    "type": "credit"
+  },
+  {
+    "txn_id": "BANK-502",
+    "date": "2026-06-04",
+    "description": "BLUE BOTTLE COFFEE",
+    "amount": -12.75,
+    "type": "debit"
+  },
+  {
+    "txn_id": "BANK-503",
+    "date": "2026-06-06",
+    "description": "CITYWIDE TAXI",
+    "amount": -41.20,
+    "type": "debit"
+  }
+]
