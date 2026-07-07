@@ -19,9 +19,10 @@ stays offline so `create_agent` is the only variable.
 
 - **`create_agent` needs a `FakeModel` that tolerates extra kwargs.** The shared
   `common/fake_model.py` `FakeModel` was extended so `bind_tools(tools, **kwargs)` and
-  `invoke(messages, *args, **kwargs)` accept the arguments `create_agent` passes (it binds tools
-  with `tool_choice=...`). Students don't touch this — it's already handled in `common` — but if a
-  student pastes an *older* `FakeModel` they hand-wrote, they'll hit
+  `invoke`/`ainvoke` (`(messages, *args, **kwargs)`) accept the arguments `create_agent` passes (it
+  binds tools with `tool_choice=...`; the async run path calls the model's `ainvoke`). Students
+  don't touch this — it's already handled in `common` — but if a student pastes an *older*
+  `FakeModel` they hand-wrote, they'll hit
   `TypeError: bind_tools() got an unexpected keyword argument 'tool_choice'`. Redirect them to import
   `FakeModel` from `common`, not reuse an L10 copy.
 - **`create_agent` re-raises uncaught tool exceptions by default.** Unlike the L10 graph's
@@ -33,9 +34,11 @@ stays offline so `create_agent` is the only variable.
   handling lives *below* the one-liner (L15). Name it as a real boundary difference, not a bug.
 - **The `tqdm`/`IProgress` warning on the first cell is harmless** — it's a Jupyter widget notice,
   not an error. Ignore it.
-- Invoking the agent takes a **dict**: `agent.invoke({"messages": [HumanMessage(...)]})`. The most
-  common beginner error is passing the string or the list directly. The result is also a dict — read
-  `result["messages"]`, not `result` itself.
+- Running the agent is **async and takes a dict**:
+  `await agent.ainvoke({"messages": [HumanMessage(...)]})`. The most common beginner errors are
+  passing the string or the list directly, and forgetting to `await` (`ainvoke` returns a
+  coroutine, not a result dict). The result is also a dict — read `result["messages"]`, not
+  `result` itself.
 
 ---
 
@@ -65,8 +68,11 @@ back-edge in the output — the same graph from the L1102 outline.
 ## L1104_lab problem 2 — Run it and read the tool sequence
 
 COMMON GOTCHAS:
-- `agent.invoke(chaining_task)` — passing the raw string. It must be
-  `agent.invoke({"messages": [HumanMessage(content=chaining_task)]})`.
+- `await agent.ainvoke(chaining_task)` — passing the raw string. It must be
+  `await agent.ainvoke({"messages": [HumanMessage(content=chaining_task)]})`.
+- Forgetting the `await` — `agent.ainvoke(...)` alone returns a coroutine, and the subscript
+  below fails with `TypeError: 'coroutine' object is not subscriptable`. A notebook cell can
+  `await` at top level.
 - Building `tool_sequence` off `ToolMessage`s instead of `AIMessage`s. The **tool calls** live on the
   assistant turn (`AIMessage.tool_calls`); the `ToolMessage` is the *result*, not the request.
 - Reading `msg.tool_calls["name"]` — `tool_calls` is a **list** of calls; iterate it and read

@@ -28,11 +28,15 @@ teaching payoff only lands with a **live instance**. Dry-run all of it before cl
 
 General setup gotchas:
 
-- Everything imports from `fluffy_potato_curriculum.common` — the graph (`agent_graph.run` → `RunResult`),
-  the tools (`common.tools.TOOLS`), and the new eval harness (`common.evals`). If imports fail, the
-  student's environment isn't synced: `uv sync` from the repo root.
+- Everything imports from `fluffy_potato_curriculum.common` — the graph (`await agent_graph.arun` →
+  `RunResult`), the tools (`common.tools.TOOLS`), and the new eval harness (`common.evals`). If imports
+  fail, the student's environment isn't synced: `uv sync` from the repo root.
 - The harness is ~30 lines in `common/evals.py`. Encourage a student who is stuck on *what a scorer
-  returns* to open that file and read `EvalResult` and `evaluate` — it is meant to be read.
+  returns* to open that file and read `EvalResult` and `aevaluate` (the sync twin `evaluate` sits right
+  above it) — it is meant to be read.
+- The labs are async-first: `run_case` is `async def` and the runner is `await aevaluate(...)`
+  (both the K05 default). Forgetting the `await` returns a coroutine, not a report — the giveaway is
+  `AttributeError: 'coroutine' object has no attribute 'table'`.
 - A **scorer** is keyword-only: `def my_scorer(*, run, example) -> EvalResult`. Forgetting the `*`
   (or calling it positionally) is the most common signature error.
 
@@ -157,8 +161,8 @@ COMMON GOTCHAS:
   whole reason to sample.
 
 UNBLOCKERS:
-- "One run is a coin flip. Run it 5 times and report how often it passed — that's `evaluate(...,
-  samples=5)` and then `report.pass_rate(...)`."
+- "One run is a coin flip. Run it 5 times and report how often it passed — that's `await
+  aevaluate(..., samples=5)` and then `report.pass_rate(...)`."
 
 TIME: ~5 min. STRETCH: re-run with `samples=20` and watch the rate stabilize; discuss the
 cost/confidence trade (the lead-in to `L1306`).

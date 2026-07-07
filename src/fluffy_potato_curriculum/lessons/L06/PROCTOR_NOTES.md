@@ -102,10 +102,12 @@ Times are rough and assume a semi-technical student with basic Python who comple
 
 - **Common gotchas:** building the critique as a single user message instead of the three-turn
   `user(question) → assistant(answer) → user(framing)` shape; forgetting that the *first answer* must
-  be captured before it can be critiqued.
-- **Unblockers:** "The critique is a fresh `chat` over three messages: the original question, the
-  model's first answer as an `assistant` turn, then your framing as a `user` turn." This reuses the
-  multi-turn `messages` list from L02.
+  be captured before it can be critiqued; forgetting to `await` (`achat` returns a coroutine, not a
+  reply).
+- **Unblockers:** "The critique is a fresh `await client.achat(...)` over three messages: the
+  original question, the model's first answer as an `assistant` turn, then your framing as a `user`
+  turn — so `critique` is `async def` and you call it with `await`." This reuses the multi-turn
+  `messages` list from L02.
 - **Time:** ~8 min.
 - **Note:** needs `ANTHROPIC_API_KEY`. The first answer is *often* the wrong $0.10 — that's the setup
   for the sycophancy demo, so don't pick a question the model nails.
@@ -114,8 +116,8 @@ Times are rough and assume a semi-technical student with basic Python who comple
 
 - **Common gotchas:** running the neutral critique once, seeing it catch the error, and concluding
   "self-critique works"; the point is the *distribution* — run it several times.
-- **Unblockers:** "Call `critique(first, 'Review your answer above. Is it correct?')` a few times.
-  Note how often it agrees with a wrong answer — that agreement is sycophancy."
+- **Unblockers:** "Call `await critique(first, 'Review your answer above. Is it correct?')` a few
+  times. Note how often it agrees with a wrong answer — that agreement is sycophancy."
 - **Time:** ~5 min.
 - **Key point:** a same-model, same-context critic has no new information to disagree with.
 

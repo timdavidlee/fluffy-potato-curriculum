@@ -1009,7 +1009,7 @@ table.ledger td.warn-cell { color: var(--coral); }
         <div style="flex:1; max-width:840px;">
             <ul class="points reveal" style="max-width:840px;">
                 <li class="point">L13 already lives on the self-hosted <b>Langfuse</b> you met in L12: you uploaded the <code>l13-agent-evals</code> <b>dataset</b>, launched <b>experiments</b> (Sonnet vs Haiku), read the <b>run comparison</b>, and turned on a <b>managed LLM-as-judge</b>.</li>
-                <li class="point"><code>evaluate()</code> / <code>compare()</code> in <code>common/evals.py</code> are the readable <b>concept sketch</b> underneath &mdash; not the runner. The items, scores, and runs you clicked through <b>are</b> the <code>EvalCase</code> / <code>EvalResult</code> / run structure you already wrote.</li>
+                <li class="point"><code>aevaluate()</code> / <code>compare()</code> in <code>common/evals.py</code> are the readable <b>concept sketch</b> underneath &mdash; not the runner. The items, scores, and runs you clicked through <b>are</b> the <code>EvalCase</code> / <code>EvalResult</code> / run structure you already wrote.</li>
                 <li class="point">A later at-scale eval lesson doesn't introduce the platform &mdash; it <b>deepens what you run on it</b>.</li>
             </ul>
         </div>
@@ -1039,7 +1039,7 @@ table.ledger td.warn-cell { color: var(--coral); }
                     <text x="316" y="413" text-anchor="middle" class="edge-label" fill="var(--ink-dim)" font-size="19">EvalResult</text>
                     <rect x="402" y="380" width="180" height="52" rx="9" fill="none" stroke="var(--ink-faint)" stroke-width="2" stroke-dasharray="7 6"/>
                     <text x="492" y="413" text-anchor="middle" class="edge-label" fill="var(--ink-dim)" font-size="19">a run</text>
-                    <text x="50" y="492" class="edge-label" fill="var(--ink-dim)" font-size="18">common/evals.py &mdash; Scorer &middot; evaluate() / compare()</text>
+                    <text x="50" y="492" class="edge-label" fill="var(--ink-dim)" font-size="18">common/evals.py &mdash; Scorer &middot; aevaluate() / compare()</text>
                     <text x="50" y="518" class="edge-label" fill="var(--ink-faint)" font-size="17">readable concept sketch, not the runner</text>
                 </svg>
             </div>

@@ -2,7 +2,7 @@
 
 ```yaml
 title: "Directed graphs: sequential chaining — wire several nodes into a fixed pipeline"
-keywords: langgraph, StateGraph, workflow, dag, node, edge, state, reducer, prompt chaining, per-node model, mixed models, control flow as data, determinism, ChatAnthropic, graph.stream
+keywords: langgraph, StateGraph, workflow, dag, node, edge, state, reducer, prompt chaining, per-node model, mixed models, control flow as data, determinism, ChatAnthropic, graph.astream
 estimated duration: 55
 ```
 
@@ -67,7 +67,7 @@ estimated duration: 55
 
 - Every graph in this lesson is built with the same `StateGraph` recipe. Get this shape into
   muscle memory:
-- diagram: a flow `StateGraph(State) → add_node ×N → set_entry_point → add_edge → compile() → invoke(input)`
+- diagram: a flow `StateGraph(State) → add_node ×N → set_entry_point → add_edge → compile() → await ainvoke(input)`
   — **cyan** step boxes joined by ink-faint arrows, with `add_edge` the emphasized cyan step (edges
   *between* nodes are the one new piece of wiring vs. L03).
 
@@ -80,8 +80,8 @@ builder.add_node("draft", draft)
 builder.set_entry_point("parse")         # 3. where execution starts
 builder.add_edge("parse", "draft")       # 4. wire edges
 builder.add_edge("draft", END)
-app = builder.compile()                  # 5. compile to a runnable
-result = app.invoke({"ticket": "..."})   #    invoke on an input
+app = builder.compile()                        # 5. compile to a runnable
+result = await app.ainvoke({"ticket": "..."})  #    await it on an input
 ```
 
 - You built exactly this recipe in L03 with **one** node and one edge straight to `END`. Here
@@ -96,9 +96,9 @@ result = app.invoke({"ticket": "..."})   #    invoke on an input
   L03; what's new here is that *several* nodes now share one state object.
 
 ```python
-def parse(state: TicketState) -> dict[str, object]:
+async def parse(state: TicketState) -> dict[str, object]:
     """Extract structured fields from the raw ticket (a light step → Haiku)."""
-    reply = haiku.invoke(f"Extract the customer's issue from: {state['ticket']}")
+    reply = await haiku.ainvoke(f"Extract the customer's issue from: {state['ticket']}")
     return {"parsed": reply.content}        # only the field this node changed
 ```
 
@@ -128,7 +128,7 @@ def parse(state: TicketState) -> dict[str, object]:
 - **In state:** data that flows between nodes — the extracted fields, intermediate drafts.
 - **Not in state:** the model client and configuration. Those are **dependencies you wire in at
   build time**, not data that flows. You construct a `ChatAnthropic` client once and close over it
-  in the node — you don't thread it through `invoke`.
+  in the node — you don't thread it through `ainvoke`.
 
 ### slide 2.5 Edge, entry point, END, DAG
 
@@ -211,11 +211,11 @@ def parse(state: TicketState) -> dict[str, object]:
   flow buried in code) vs. the motif chain rendered as a **cyan** graph diagram (control flow as
   inspectable data) — captioned "same logic; the graph is data you can inspect."
 
-### slide 5.2 Watch it run — `graph.stream`, the same tool from L03
+### slide 5.2 Watch it run — `graph.astream`, the same tool from L03
 
-- Run the workflow with `app.stream({...}, stream_mode="updates")` instead of `invoke`: you get
-  **one chunk per node, in the order they fire** — `{"parse": {...}}` → `{"draft": {...}}` →
-  `{"policy_check": {...}}`.
+- Run the workflow with `async for` over `app.astream({...}, stream_mode="updates")` instead of
+  `ainvoke`: you get **one chunk per node, in the order they fire** — `{"parse": {...}}` →
+  `{"draft": {...}}` → `{"policy_check": {...}}`.
 - That output is the **path made visible**: it confirms the route was developer-determined. It's
   the same built-in call you used in [L03](../L03/objectives.md) — nothing new to set up.
 - Routing this same run to **Langfuse** for a structured, comparable trace is
@@ -270,7 +270,7 @@ def parse(state: TicketState) -> dict[str, object]:
 ### slide 7.1 One more primitive, then the workflow-vs-agent close
 
 - Everything you built here — `StateGraph`, nodes, fixed edges, typed state, reducers,
-  compile/invoke — carries into [L05](../L05/objectives.md) **unchanged**. L05 adds exactly one
+  compile/ainvoke — carries into [L05](../L05/objectives.md) **unchanged**. L05 adds exactly one
   new primitive: the **conditional edge**, a routing function chosen at runtime instead of a fixed
   `A → B`.
 - L05 is also where the full **workflow vs. agent** contrast closes out, once you've seen both a

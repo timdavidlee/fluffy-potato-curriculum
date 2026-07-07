@@ -25,9 +25,10 @@ Times are rough and assume a semi-technical student with basic Python who comple
 ## L0705_lab problem 1 — Send the first turn and find the tool call
 
 - **Common gotchas:** invoking the bare `model` instead of `model_with_tools` (so the model just
-  answers in text and `.tool_calls` is empty); expecting the reply to *be* the tool call rather than
+  answers in text and `.tool_calls` is empty); forgetting to `await` (`ainvoke` returns a coroutine,
+  not an `AIMessage`); expecting the reply to *be* the tool call rather than
   reading it off `.tool_calls`; treating `call["args"]` as a JSON string (it is already a parsed dict).
-- **Unblockers:** "Build `messages = [HumanMessage(PROMPT)]`, then `first = model_with_tools.invoke(messages)`,
+- **Unblockers:** "Build `messages = [HumanMessage(PROMPT)]`, then `first = await model_with_tools.ainvoke(messages)`,
   then `call = first.tool_calls[0]`." If `.tool_calls` is empty, the prompt may be too easy —
   `PROMPT` is large multiplication on purpose.
 - **Time:** ~7 min.
@@ -51,7 +52,7 @@ Times are rough and assume a semi-technical student with basic Python who comple
   hand instead of using `ToolMessage`; omitting `tool_call_id`, or using a different id than the one
   the model emitted; invoking the bare `model` on the second call (drops the tool definition).
 - **Unblockers:** "`messages.append(first)`, then `messages.append(ToolMessage(content=result,
-  tool_call_id=call['id']))`, then `final = model_with_tools.invoke(messages)` and read
+  tool_call_id=call['id']))`, then `final = await model_with_tools.ainvoke(messages)` and read
   `final.content`." Final answer should be **43,123,800** (6,150 × 7,012).
 - **Time:** ~10 min.
 

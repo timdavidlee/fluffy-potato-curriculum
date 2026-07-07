@@ -2,7 +2,7 @@
 
 Covers both labs in this lesson: **L1203** (read traces, locate failures) and **L1205**
 (instrument and compare traces). Both labs are **pure Python, offline — no API key needed**;
-they drive the shared `agent_graph.run` with a scripted `FakeModel`, so every trace is
+they drive the shared `agent_graph.arun` (awaited in the setup cell) with a scripted `FakeModel`, so every trace is
 deterministic. If a student's trace looks different from the solution, suspect an edited setup
 cell, not "the model did something else" — there is no live model here.
 

@@ -23,9 +23,10 @@ state goes in, state comes out."*
 - **COMMON GOTCHAS:** (1) returning the whole state (`return state`) or the bare string instead of an
   update dict — reinforce "return only the field you changed: `{"summary": ...}`." (2) Returning the
   `reply` object rather than `reply.content` — remind them a node returns plain data, and `.content`
-  is the text off the response.
-- **UNBLOCKERS:** the body is three lines — build a prompt string, `sonnet.invoke(prompt)`, return
-  `{"summary": str(reply.content)}`.
+  is the text off the response. (3) Forgetting to `await` (`ainvoke` returns a coroutine, not a
+  reply) or writing a plain `def` — the node is `async def`.
+- **UNBLOCKERS:** the body is three lines — build a prompt string, `await sonnet.ainvoke(prompt)`,
+  return `{"summary": str(reply.content)}` (inside an `async def`).
 - **TIME:** ~5 min. Longest problem.
 
 ## L0304_lab problem 3 (wire, compile, render)
@@ -39,18 +40,19 @@ state goes in, state comes out."*
 
 ## L0304_lab problem 4 (invoke and inspect)
 
-- **COMMON GOTCHAS:** expecting `invoke()` to return just the summary. It returns the *whole state* —
-  that is the teachable moment ("input intact, output added"). Pass the input as a dict:
-  `{"raw_text": ...}`, not a bare string.
-- **UNBLOCKERS:** `result = summarize_app.invoke({"raw_text": TICKETS["billing"]})`, then print both
-  `result["raw_text"]` and `result["summary"]`.
+- **COMMON GOTCHAS:** expecting `ainvoke()` to return just the summary. It returns the *whole state*
+  — that is the teachable moment ("input intact, output added"). Pass the input as a dict:
+  `{"raw_text": ...}`, not a bare string. And it must be awaited — a bare `summarize_app.ainvoke(...)`
+  hands back a coroutine, not the state (a notebook cell can `await` at top level).
+- **UNBLOCKERS:** `result = await summarize_app.ainvoke({"raw_text": TICKETS["billing"]})`, then
+  print both `result["raw_text"]` and `result["summary"]`.
 - **TIME:** ~3 min.
 
 ## L0304_lab problem 5 (written)
 
 - **COMMON GOTCHAS:** answers that say "the node changes too." Redirect to the interface point: the
-  node only calls `.invoke(prompt).content`; both `StubChat` and `ChatAnthropic` expose that, so the
-  node is untouched. Only the client-construction line changes.
+  node only calls `await .ainvoke(prompt)` and reads `.content`; both `StubChat` and `ChatAnthropic`
+  expose that, so the node is untouched. Only the client-construction line changes.
 - **STRETCH (early finishers):** have them actually swap `StubChat(SONNET)` for a real
   `ChatAnthropic(model=SONNET, api_key=require_anthropic_key())` (if a key is available) and confirm
   the node code runs unchanged — the cleanest possible proof of the point.

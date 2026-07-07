@@ -37,7 +37,7 @@ estimated duration: 75
 
 | Lesson | What it built | What L10 reuses |
 | --- | --- | --- |
-| [L04](../L04/objectives.md) | a directed `StateGraph`: typed state, `add_node`, `add_edge`, `compile`, `invoke` | the same primitives — now with a cycle |
+| [L04](../L04/objectives.md) | a directed `StateGraph`: typed state, `add_node`, `add_edge`, `compile`, `ainvoke` | the same primitives — now with a cycle |
 | [L05](../L05/objectives.md) | the **conditional edge**: `add_conditional_edges` + a routing function | `route` *is* an L05 conditional edge; termination is one of its branches |
 | [L07](../L07/L0701_intro.md) | one tool-call round-trip; `.bind_tools()` + `.tool_calls` + `ToolMessage` | the exact interface, now repeated inside the cycle |
 | [L08](../L08/objectives.md) | tool design; what a tool *returns* on failure | the error-as-data idea, now carried back by the graph |
@@ -107,8 +107,9 @@ estimated duration: 75
 
 ### slide 2.3 The `agent` node
 
-- text: the `agent` node is just a plain function, `state → {"messages": [reply]}`. Its body is a
-  single line you already know from L07: `model.bind_tools(tools).invoke(state["messages"])`.
+- text: the `agent` node is just a plain `async` function, `state → {"messages": [reply]}`. Its body
+  is a single line you already know from L07:
+  `await model.bind_tools(tools).ainvoke(state["messages"])`.
 - text: it returns the model's one `AIMessage` (maybe carrying `.tool_calls`) wrapped in the `messages`
   key, and the reducer appends it. Notice the model is **not** aware of the graph at all — from where
   it sits, every visit to the `agent` node is one independent round-trip. The loop lives in the edges.
@@ -136,12 +137,12 @@ estimated duration: 75
 - text: `route(state)` returns `"tools"` when the last message has `.tool_calls`, and `END`
   otherwise. Wire it with `add_conditional_edges("agent", route, {"tools": "tools", END: END})`, then
   `add_edge("tools", "agent")` — the **back-edge**. Set the entry point to `agent`, `compile()`, and
-  you're ready to `invoke(...)`.
+  you're ready to `await` an `ainvoke(...)`.
 - text: you write `route` by hand here in L10. In L11 you'll meet LangGraph's prebuilt
   **`tools_condition`** — the *same* "has tool calls? → tools : → end" function, just packaged. Writing
   it by hand first is what makes that prebuilt land later as "oh, that's the thing I already wrote."
-- text: watch the cycle turn with `graph.stream(task, stream_mode="updates")` — the same
-  run-inspection call you've used since L03, now emitting one chunk per node:
+- text: watch the cycle turn with `async for` over `graph.astream(task, stream_mode="updates")` —
+  the same run-inspection call you've used since L03, now emitting one chunk per node:
   `{"agent": …}` → `{"tools": …}` → `{"agent": …}` … Try naming each moment control crosses the
   back-edge. This stream is also your on-ramp to L12 tracing — the same run, routed to a structured
   tracer later.
@@ -169,7 +170,7 @@ estimated duration: 75
 | Condition | Fires when | In L10 |
 | --- | --- | --- |
 | **Natural termination** | the `agent` node returns an `AIMessage` with **no `.tool_calls`**, so `route` returns `END`. The happy path — the only condition that means "the model thinks it's done." | rely on `route` |
-| **Recursion limit** | the graph took more steps than `recursion_limit` allows and raises `GraphRecursionError`. Forces a halt even if the model still wants tools. Set it via `invoke(..., {"recursion_limit": N})`. | rely on the built-in |
+| **Recursion limit** | the graph took more steps than `recursion_limit` allows and raises `GraphRecursionError`. Forces a halt even if the model still wants tools. Set it via `ainvoke(..., {"recursion_limit": N})`. | rely on the built-in |
 | **Token budget** | cumulative input+output tokens (or cost) crosses a threshold. | sketch as custom routing |
 | **Loop detection** | the model calls the *same tool with the same arguments* repeatedly without progress. Needs the call *history*, not just a counter. | sketch as custom routing |
 
@@ -186,7 +187,7 @@ estimated duration: 75
 - text: **hitting the cap is always a signal worth investigating.** Either the task genuinely needs a
   higher cap, or the agent is misbehaving (so fix the prompt, the tools, or the model). Treat a
   `GraphRecursionError` as an alert, not noise.
-- text: `recursion_limit` lives on `invoke`, not in the graph shape — the *same* compiled graph runs
+- text: `recursion_limit` lives on `ainvoke`, not in the graph shape — the *same* compiled graph runs
   with any cap. It counts **super-steps** (node visits), so an agent that calls one tool per turn burns
   roughly two steps (`agent`, `tools`) per cycle.
 - diagram: a runaway trace — cycles 1..3 each showing a `lookup(args=…)` chip with identical args,
@@ -252,10 +253,10 @@ estimated duration: 75
   `ToolNode(tools, handle_tool_errors=True)`. A tool that raises inside the node becomes a
   `ToolMessage(status="error")` fed back through the back-edge, and the model decides what to do next.
 - text: compare that to `handle_tool_errors=False`: now the exception **escapes the node and kills the
-  whole `invoke`.** One buggy tool crashes the agent. Flipping that single argument is the beat to watch
+  whole `ainvoke`.** One buggy tool crashes the agent. Flipping that single argument is the beat to watch
   in the failure demo — one word, and it's crash vs. recover.
 - diagram: contrast two-up, the 2.1 graph small twice — left `False`: a coral raise arrow escaping
-  the `tools` node, a coral X through the whole invoke; right `True`: the raise converted to a
+  the `tools` node, a coral X through the whole ainvoke; right `True`: the raise converted to a
   `ToolMessage(status="error")` pill riding the back-edge in cyan (recovery is the happy path; the
   error pill may carry a thin coral tag).
 - text: with it on, a buggy tool **degrades into a message** instead of crashing the agent. The model
@@ -330,8 +331,8 @@ estimated duration: 75
 
 | Gotcha | Cure | Where you saw it |
 | --- | --- | --- |
-| **No termination guard (infinite loop)** — a cycle with no cap and no `END` branch runs forever on one confused turn | every agent gets an iteration cap on `invoke`; **hitting it is a signal to investigate** (hard task → raise it; misbehaving → fix prompt/tools/model), never noise to swallow | section 3 — `recursion_limit` caught the runaway; natural termination is `route` returning `END` |
-| **Not handling tool failures** — a raised exception escapes `ToolNode` and crashes the whole `invoke` | `ToolNode(handle_tool_errors=True)` turns the raise into a `ToolMessage(status="error")` the back-edge hands back — and don't dump tracebacks at the model | section 4 (slides 4.2–4.3) |
+| **No termination guard (infinite loop)** — a cycle with no cap and no `END` branch runs forever on one confused turn | every agent gets an iteration cap on `ainvoke`; **hitting it is a signal to investigate** (hard task → raise it; misbehaving → fix prompt/tools/model), never noise to swallow | section 3 — `recursion_limit` caught the runaway; natural termination is `route` returning `END` |
+| **Not handling tool failures** — a raised exception escapes `ToolNode` and crashes the whole `ainvoke` | `ToolNode(handle_tool_errors=True)` turns the raise into a `ToolMessage(status="error")` the back-edge hands back — and don't dump tracebacks at the model | section 4 (slides 4.2–4.3) |
 | **Unbounded context growth** — `add_messages` **appends every turn**, so the history plus re-sent tool schemas inflate cost and drift toward the window limit | watch cumulative tokens across turns; trimming / summarizing the history is **L19** (context management, full course) — name it, don't build it here | slide 2.2 (the `add_messages` reducer) |
 
 - text: the first two are crashes and runaways you can *see*; **#3 is silent** — it's the same

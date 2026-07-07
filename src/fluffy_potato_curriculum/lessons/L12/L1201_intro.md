@@ -13,7 +13,7 @@ estimated duration: 10
 
 ## Where this lesson sits
 
-In [L10](../L10/L1001_intro.md) you built an agent from nothing: a **cyclic `StateGraph`** — an `agent` node that calls the model, a `route` conditional edge, a prebuilt `ToolNode` that runs any tool the model asks for, and a `tools → agent` back-edge that feeds the result back and cycles until the model stops — `run(...)` returning a `RunResult` with the `final_text`, the number of `iterations` (its `agent`-node visits), and *why* it stopped (`termination`: `"natural"` or `"max_steps"`). That graph already *did* something on every run. But unless you were watching the streamed chunks live, that "something" vanished the moment the run ended.
+In [L10](../L10/L1001_intro.md) you built an agent from nothing: a **cyclic `StateGraph`** — an `agent` node that calls the model, a `route` conditional edge, a prebuilt `ToolNode` that runs any tool the model asks for, and a `tools → agent` back-edge that feeds the result back and cycles until the model stops — `await arun(...)` returning a `RunResult` with the `final_text`, the number of `iterations` (its `agent`-node visits), and *why* it stopped (`termination`: `"natural"` or `"max_steps"`). That graph already *did* something on every run. But unless you were watching the streamed chunks live, that "something" vanished the moment the run ended.
 
 L12 is the turning point where the agent stops being only something you *build* and becomes something you *observe*. This lesson is titled for the whole inventory of what a run leaves behind — but its **center of gravity is tracing**, because the trace is the artifact next lesson (evaluation) consumes.
 
@@ -66,7 +66,7 @@ You build the trace **by hand first** — instrument the L10 graph, read the spa
 
 ## A note on the code you'll see
 
-The L10 graph and tools now live as a shared, reusable reference in `fluffy_potato_curriculum.common` — `common/agent_graph.py` (`build_agent()` compiles the L10 ReAct graph; `run()`/`trace_graph()` stream it into a `RunResult`), `common/tools.py` (`calculator`, `lookup`, `flaky_fetch`), and `common/tracing.py` (`TraceEvent`). (`common/agent_loop.py` — the same `RunResult`/`TraceEvent` contract produced by a plain `while` loop — is kept alongside as a by-hand reference, but the graph is what L10 teaches and what L12 traces.) L12 is the first lesson that *imports* them instead of hand-building them, because this lesson is about *observing* the graph, not re-deriving it. The labs drive that graph with a scripted `FakeModel` so they run deterministically with no API key.
+The L10 graph and tools now live as a shared, reusable reference in `fluffy_potato_curriculum.common` — `common/agent_graph.py` (`build_agent()` compiles the L10 ReAct graph; `arun()`/`atrace_graph()` — the awaitable twins of `run()`/`trace_graph()`, and the ones this lesson `await`s — stream it into a `RunResult`), `common/tools.py` (`calculator`, `lookup`, `flaky_fetch`), and `common/tracing.py` (`TraceEvent`). (`common/agent_loop.py` — the same `RunResult`/`TraceEvent` contract produced by a plain `while` loop — is kept alongside as a by-hand reference, but the graph is what L10 teaches and what L12 traces.) L12 is the first lesson that *imports* them instead of hand-building them, because this lesson is about *observing* the graph, not re-deriving it. The labs drive that graph with a scripted `FakeModel` so they run deterministically with no API key.
 
 ## The takeaway
 

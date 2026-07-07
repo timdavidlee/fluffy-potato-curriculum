@@ -55,6 +55,8 @@ COMMON GOTCHAS:
   is deterministic; the *point* is watching `context_tokens` jump on turn 2, not testing selection.
 - Reading `context_tokens` as one number instead of a per-turn list. It has two entries here: before
   the load (catalog only) and after (body in window).
+- Forgetting to `await` — `run_skill_loader` is `async def` (it awaits `agent.ainvoke` inside), so a
+  bare call returns a coroutine, not a `JitResult`. Call it as `await run_skill_loader(...)` in the cell.
 
 TIME: ~5 min.
 

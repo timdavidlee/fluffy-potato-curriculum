@@ -45,7 +45,7 @@ a pipeline you can inspect as data.** Here it is said a few ways:
 
 ## Vocabulary this lesson lands
 
-Building on L03's vocabulary (graph, node, state, entry point/END, compile/invoke, pure function
+Building on L03's vocabulary (graph, node, state, entry point/END, compile/ainvoke, pure function
 over state), here's what you're adding in L04:
 
 - **Edge** — a fixed transition, `A → B`, taken every time: `add_edge("parse", "draft")`.
@@ -65,9 +65,14 @@ Since [L03](../L03/objectives.md), you've been calling the native LangChain **`C
 client from your nodes, not the hand-rolled `potato_llm` seam from L01–L02 — no new departure here,
 just more of it.
 
-L04's demo also shows you how to **watch a workflow run**: `graph.stream(stream_mode="updates")` —
+L04's demo also shows you how to **watch a workflow run**: `graph.astream(stream_mode="updates")` —
 the same built-in call you used in L03 — prints one update per node, in the order they fire, which
-confirms the path was developer-determined. Routing that same run to **Langfuse** for a structured,
+confirms the path was developer-determined.
+
+> Framework calls come in sync/async twins — `.invoke()` has `.ainvoke()`, `.stream()` has
+> `.astream()`. The course defaults to the async ones, so you `await` your graph and model calls
+> (a notebook cell can `await` at top level). *Why* async is the default is the K05 prework's
+> "why async for agents." Routing that same run to **Langfuse** for a structured,
 comparable trace (reading a trace, comparing runs, diagnosing failures) is **L12's** job, still
 several lessons away — nothing in L04 depends on tracing being set up.
 
