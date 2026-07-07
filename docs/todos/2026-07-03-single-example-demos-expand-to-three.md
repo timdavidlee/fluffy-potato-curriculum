@@ -1,5 +1,13 @@
 # 2026-07-03 — Expand single-example demos/labs to ≥3 examples for variety
 
+**Status: DONE (swept 2026-07-06).** Full-course audit (all built `L<NN>`/`K<NN>` notebooks,
+including L03/L05/L23, which had been built since this note was written) found the materials
+already carry 3+ varied examples almost everywhere — variety lives inline, across adjacent
+contrast cells, or as provided multi-case data, matching this note's own skip rules. Two real
+hits, both fixed: **L0403_lecture** §5 now runs all three `TICKETS` through the chain (path
+identical, content varies), and **L0404_lab** Problem 4 (`_solutions` + `_empty`) now loops the
+three tickets instead of invoking billing once. Touched notebooks re-executed clean; gate green.
+
 **Goal:** sweep every notebook demo and lab under
 `src/fluffy_potato_curriculum/lessons/L<NN>/` for cells that illustrate a concept with a
 **single example** (one prompt, one input string, one document, one tool call) and expand them to
