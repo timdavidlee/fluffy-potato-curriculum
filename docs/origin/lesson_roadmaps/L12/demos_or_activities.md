@@ -170,7 +170,7 @@ The teacher should have, before the first demo starts:
 **What to highlight:**
 
 - **Instrumentation is a wrapper, not a rewrite.** The span comes from the streamed `{node: update}` chunk, *outside* the graph — there's no way for it to change how the graph decides things. Pre-empt *"tracing changes what my agent does"*: it shouldn't; consuming a compiled graph's stream is read-only with respect to its decisions.
-- The `run_type` values (`llm` / `tool` / `chain`) and token `usage` are chosen to match OpenTelemetry/Langfuse shape on purpose — Demo 6 shows the same spans rendered in the real tool, and L11's LangGraph traces land in the same Langfuse with the same vocabulary. The recognition *is* the payoff.
+- The `run_type` values (`llm` / `tool` / `chain`) and token `usage` are chosen to match OpenTelemetry/Langfuse shape on purpose — Demo 6 shows the same spans rendered in the real tool, and the LangGraph agent students built in L11 can land its auto-emitted traces in the same Langfuse with the same vocabulary. The recognition *is* the payoff.
 - The `trace` field is what L13 consumes. Frame L12 as "produce the record," L13 as "judge the record" — say the pair out loud.
 
 **If the demo misbehaves:**
@@ -220,13 +220,13 @@ The teacher should have, before the first demo starts:
 2. **Map the vocabulary explicitly**, pointing at the UI: a Langfuse **trace** = one run (shares the `trace_id`); a Langfuse **observation** = one span; an `llm` span renders as a **GENERATION** (carrying model, token `usage`, cost); a `tool`/`chain` span renders as a **SPAN**. Say it as a translation: *"the `run_type` field you set in Demo 4 is the thing that decides GENERATION vs SPAN here."*
 3. **Re-do objective 2** in the UI: filter to a failing run, expand the offending observation, read its `inputs`/`error`. Same reading as Demo 3, now point-and-click.
 4. **Re-do objective 4** in the UI: open two runs of the same task side by side and compare token usage, latency, and the span timeline. Same comparison as Demo 5, now visual.
-5. Close the arc: *"You built the minimal version by hand first, so none of this is mysterious — the timeline, the token counts, the errors are the exact `TraceEvent` fields you emitted. And when L11's LangGraph agent lands its traces in this same Langfuse, they'll look familiar, not new."*
+5. Close the arc: *"You built the minimal version by hand first, so none of this is mysterious — the timeline, the token counts, the errors are the exact `TraceEvent` fields you emitted. And the LangGraph agent you built in L11 can land its auto-emitted traces in this same Langfuse — they'll look familiar, not new."*
 
 **What to highlight:**
 
 - **You build the trace by hand, then meet the real tool.** Learning to emit and read a trace by hand first is *why* the dashboard reads as obvious instead of magic. Concept-first, then tooled — the spine of the whole lesson, paid off in the last demo.
 - The export is *additive*. A student without the Langfuse instance configured still completed objectives 1–4 on the in-memory / `.to_jsonl()` trace. Langfuse is the "now see it in the real tool" payoff, not a hard dependency — say this so the keyless/offline path doesn't feel second-class.
-- The same Langfuse instance returns in L11 (LangGraph traces) and has a datasets/experiments feature L13 name-drops for eval. This is the cohort's one shared observability home.
+- The same Langfuse instance can also receive the auto-emitted traces of the LangGraph agent students built in L11, and has a datasets/experiments feature L13 name-drops for eval. This is the cohort's one shared observability home.
 
 **If the demo misbehaves:**
 
