@@ -2,8 +2,8 @@
 
 ```yaml
 title: "Workflow vs. agent: the line is a single back-edge"
-keywords: workflow, agent, back-edge, cycle, dag, langgraph, when to use which, control, predictability, cost, latency, bridge to l12, building effective agents
-estimated duration: 12
+keywords: workflow, agent, back-edge, cycle, dag, langgraph, types of loops, retry loop, evaluator-optimizer, when to use which, control, predictability, cost, latency, bridge to l12, building effective agents
+estimated duration: 14
 ```
 
 > **Lesson:** L05. **Roadmap:** Demo 4 in [demos_or_activities.md](../../../../docs/origin/lesson_roadmaps/L05/demos_or_activities.md).
@@ -78,6 +78,27 @@ estimated duration: 12
   a *label into state*, **you** own the conditional edge, no cycle anywhere); right, 2.1's agent
   shape with the **dashed cyan back-edge** (the model's own decision picks the edge, *and* it
   loops). Caption: a conditional edge alone isn't an agent — it takes both.
+
+### slide 2.4 Loops aren't only for agents — three back-edges, one axis
+
+- The agent's tool loop is the only cycle this course *builds* (L10/L11) — but it's not the only
+  reason a graph ever loops back to an earlier node. Two loop shapes you'll meet in real
+  workflows:
+  - **Retry / self-correction:** `generate → validate`, and `validate` routes **back** to
+    `generate` until a pass flag is set — or an attempt counter in state runs out.
+  - **Evaluator–optimizer:** `draft → critique`, routing back to redraft until the critique's
+    score clears a bar. Same shape, aimed at quality instead of errors.
+- Ask the decider question for each: who decides whether to go around again? **A check you
+  wrote** — a flag, a counter, a score bar. Loops and all, these are **still workflows.**
+- So the honest version of L04's "a workflow never loops back": a workflow *can* loop back — but
+  **you** authored its exit condition. It's an agent only when the routing function reads the
+  **model's own decision** to keep going. The back-edge is necessary, not sufficient.
+- diagram: three small cycles in a row, same node shapes as the deck motif — `generate ⇄ validate`
+  with a **solid cyan** back-edge labeled "exit: your pass flag / attempt counter";
+  `draft ⇄ critique` with a **solid cyan** back-edge labeled "exit: your score bar"; and 2.1's
+  agent shape with the **dashed cyan** back-edge labeled "exit: the model stops asking for tools."
+  Solid = you own the loop today; dashed = the one L11 draws. Caption: same edge three times,
+  three deciders — only the third is an agent.
 
 ## section 3. When to use which
 

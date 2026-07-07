@@ -3,6 +3,16 @@
 **Date:** 2026-07-03
 **Status:** open — candidate additions to the L10 (Cyclic graphs: the ReAct agent loop) roadmap, proposed but **not** yet written into `docs/origin/lesson_roadmaps/L10/`. Pick by value vs. the "keep notebooks short" budget — L10 already has 4 objectives + 2 optional extensions, so anything added should either replace weight or be clearly optional.
 
+> **⚠️ Groomed 2026-07-06 — re-triage before applying.** The L10 roadmap and materials have been
+> substantially reworked since this list was written (LangChain migration, gotcha coda,
+> graph-trace repointing, diagram densification). Spot-checks against the current roadmap: the
+> **checkpointer** primitive now appears there via the optional `interrupt`/approval-gate
+> extension (adjacent to, but not the same as, the multi-turn-memory idea below), and the
+> `add_messages`-appends beat is taught — but the **id-based-upsert nuance (#4)**, the
+> **system-prompt beat (#1)**, **state-beyond-messages (#2)**, and the **`tools_condition` /
+> `MessagesState` reveals (#3)** are still absent (zero grep hits). Re-read the current
+> `docs/origin/lesson_roadmaps/L10/` before folding anything in.
+
 ## Already handled (don't re-do)
 - **`graph.stream` as the "watch the loop" tool** — DONE on `feat/graph-stream-thread`: threaded L03 → L04 → L05 → L10 with a consistent `stream_mode="updates"`.
 - **The hand-built → `create_agent` mapping table** — moved to L11 (see the sibling `...-l11-create-agent-mapping...` todo), since it belongs at the prebuilt reveal.

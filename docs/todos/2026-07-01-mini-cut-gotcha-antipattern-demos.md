@@ -1,6 +1,6 @@
 # 2026-07-01 — Gotcha + anti-pattern demos across the mini cut
 
-**Status: STAGE-1 DONE (2026-07-04).** All 10 in-scope roadmap `demos_or_activities.md` beats landed on branch `worktree-gotcha-antipattern-demos` (L23 was already the template). Each gotcha/anti-pattern beat now lives in the lesson's **roadmap**; carrying them into **stage-2 student materials** happens when each lesson's materials are (re)generated — not part of this pass.
+**Status: STAGE-1 DONE (2026-07-04).** All 10 in-scope roadmap `demos_or_activities.md` beats landed on branch `worktree-gotcha-antipattern-demos` (L23 was already the template). Each gotcha/anti-pattern beat now lives in the lesson's **roadmap**. **Stage-2 carry-over (groomed 2026-07-06): nearly done too** — it was audited and applied via [2026-07-04-1531-gotcha-beat-materials-audit.md](2026-07-04-1531-gotcha-beat-materials-audit.md) (codas landed in L01/L02/L04/L08/L10–L13 materials); only the **L22 §3 coda expansion** and the spun-off **L05 coda** remain open there.
 
 A cross-cutting initiative: every **mini-cut** lesson should teach its **failure modes** (gotchas +
 anti-patterns), not just the happy path. Right now this is uneven — [L23](../origin/lesson_roadmaps/L23/demos_or_activities.md)

@@ -1,5 +1,12 @@
 # Diagram-coverage review — the 5 unbuilt outlines (L1206, L1307, L2202, L2205, L2302)
 
+**Status: DONE (groomed 2026-07-06).** All five outlines were densified and their decks built +
+merged (`3b3b82c`; the [rollout todo](2026-07-05-1538-lecture-html-decks.md) is now 19/19). The one
+cross-branch follow-up this review filed — L1206 §5.2 / L12 `demos_or_activities.md:229`'s stale
+"returns in L11" phrasing — has since been fixed in `0611503` ("fix stale L11-after-L12 framing in
+tracing roadmap"). Nothing open; safe to delete. (The `.ipynb` composition-visual note for
+L2304/L2305 stays a notebook-pass item, same as the two prior reviews.)
+
 Point-in-time review (2026-07-06) of the five lecture outlines that still lack decks (per the
 [deck rollout todo](2026-07-05-1538-lecture-html-decks.md)) against the diagram guidance in
 [LECTURES.md](../origin/LECTURES.md) and
