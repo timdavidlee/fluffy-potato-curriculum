@@ -1,3 +1,9 @@
+## v0.31.0 (2026-07-07)
+
+### Feat
+
+- **lessons**: sync L2205 + L0505 decks to gotcha-coda outlines
+
 ## v0.30.0 (2026-07-07)
 
 ### Feat
