@@ -1,3 +1,9 @@
+## v0.29.2 (2026-07-07)
+
+### Refactor
+
+- **lessons**: convert L03-L23 notebooks to async-first calls (#135)
+
 ## v0.29.1 (2026-07-07)
 
 ### Fix

@@ -627,7 +627,7 @@ wheels = [
 
 [[package]]
 name = "fluffy-potato-curriculum"
-version = "0.29.1"
+version = "0.29.2"
 source = { editable = "." }
 dependencies = [
     { name = "anthropic", extra = ["mcp"] },

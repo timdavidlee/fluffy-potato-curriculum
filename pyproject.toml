@@ -1,6 +1,6 @@
 [project]
 name = "fluffy-potato-curriculum"
-version = "0.29.1"
+version = "0.29.2"
 description = "Python curriculum: code + materials"
 readme = "README.md"
 authors = [
@@ -94,7 +94,7 @@ asyncio_mode = "auto"
 
 [tool.commitizen]
 name = "cz_conventional_commits"
-version = "0.29.1"
+version = "0.29.2"
 version_files = ["pyproject.toml:^version"]
 tag_format = "v$version"
 # Create annotated (not lightweight) tags so CI's `git push --follow-tags`
