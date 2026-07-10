@@ -1,3 +1,9 @@
+## v0.34.0 (2026-07-10)
+
+### Feat
+
+- **L50**: add expense-policy check as third core agent tool
+
 ## v0.33.0 (2026-07-07)
 
 ### Feat
