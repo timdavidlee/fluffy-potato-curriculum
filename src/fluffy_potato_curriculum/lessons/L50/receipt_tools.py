@@ -19,12 +19,19 @@ proctor knows it works because this copy is covered by
 ``tests/lessons/L50/test_receipt_tools.py``. Keep the two in sync.
 
 ``check_expense_policy`` is the second **core** tool the agent runs. Unlike
-``find_matching_record`` (which the walkthrough writes live), it is *provided* here
-pre-built — students register it rather than author it, so the live tool-design
-workout stays a single tool while the agent still makes a genuine three-way tool
-decision (match → total → check the cap). It is warranted for the same L08 reason:
-per-category spending caps are company policy *data*, not something the model should
-recall from memory.
+``find_matching_record`` (a deterministic lookup the walkthrough writes live), it is
+*provided* here pre-built — students register it rather than author it, so the live
+tool-design workout stays a single tool while the agent still makes a genuine three-way
+tool decision (match → total → check the policy). It is the lesson's one **LLM-in-the-loop
+tool**: the policy is *free-form prose* (``data/expense_policy.md``), so instead of a cap
+lookup the tool spins up a single ``model.invoke`` that reads the policy, judges the
+expense, and cites the rule it applied — deliberately the "expensive" way where a dict
+lookup would do, because real policy is guidance to interpret, not a table. Build it with
+:func:`make_check_expense_policy`, handing it the model it should consult: the offline
+:class:`ScriptedPolicyModel` for a reproducible keyless run (the module-level
+``check_expense_policy`` is pre-wired to it), or live Sonnet in class for a genuine read —
+the same live/offline seam :class:`~fluffy_potato_curriculum.common.fake_model.FakeModel`
+gives the agent's own brain.
 
 ``check_reimbursement`` is the deliberately-scoped-out **stretch** tool (Segment 6 /
 the student bonus): it is real and tested, but it is *not* wired into the core agent —
@@ -35,10 +42,12 @@ from __future__ import annotations
 
 import json
 import re
-from collections.abc import Mapping
+from collections.abc import Callable, Mapping
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, cast
+from typing import Any, Protocol, cast
+
+from langchain_core.messages import AIMessage, BaseMessage, HumanMessage, SystemMessage
 
 _DATA_DIR = Path(__file__).parent / "data"
 
@@ -70,19 +79,12 @@ BANK_TRANSACTIONS: list[dict[str, Any]] = _load("bank_transactions.json")
 """The bank side of the ledger — used only by the stretch ``check_reimbursement`` tool."""
 
 
-def _load_policy() -> dict[str, float]:
-    """Read the per-category spending caps into a ``category -> cap`` lookup.
+POLICY_TEXT: str = (_DATA_DIR / "expense_policy.md").read_text(encoding="utf-8")
+"""The company's expense policy as free-form prose — the guidance the LLM read interprets.
 
-    Example output:
-        {"meals": 50.0, "travel": 75.0, "lodging": 250.0, "supplies": 150.0}
-    """
-    text = (_DATA_DIR / "expense_policy.json").read_text(encoding="utf-8")
-    raw: dict[str, Any] = json.loads(text)
-    return {str(category): float(cap) for category, cap in raw.items()}
-
-
-EXPENSE_POLICY: dict[str, float] = _load_policy()
-"""The company's per-category spending caps — the data ``check_expense_policy`` judges against."""
+This is *not* a cap table: it's the paragraphs ``check_expense_policy`` hands to a model
+so the model (not a dict lookup) decides whether an expense is within policy and quotes
+the rule it relied on."""
 
 
 @dataclass(frozen=True)
@@ -236,41 +238,176 @@ def find_matching_record(receipt: str) -> str:
     )
 
 
-def check_expense_policy(category: str, amount: float) -> str:
-    """Is an expense within its category's spending cap? (The second core tool.)
+class PolicyModel(Protocol):
+    """The slice of a chat model ``check_expense_policy`` consults: a message list in, a reply out.
 
-    A deterministic policy check the model should *not* do from memory: per-category
-    caps are company policy data, not general knowledge. Call it after a receipt
-    matches a record — the matched record carries both ``category`` and ``amount``.
-
-    Returns a JSON string, one of two shapes:
-
-    - a judged expense (``within_policy`` false adds ``over_by``)::
-
-        {"category": "lodging", "amount": 268.4, "cap": 250.0,
-         "within_policy": false, "over_by": 18.4}
-
-    - a category with no policy on file — a graceful "can't judge this" signal,
-      never a crash::
-
-        {"within_policy": null, "reason": "no spending policy for category 'gifts'"}
+    A real LangChain chat model (Sonnet via ``init_chat_model``) and the offline
+    :class:`ScriptedPolicyModel` below both satisfy this — the same live/offline seam
+    :class:`~fluffy_potato_curriculum.common.fake_model.FakeModel` gives the agent loop.
+    The ``messages`` parameter is positional-only so a real runnable (whose first arg is
+    ``input``) and a scripted stand-in (``messages``) both match structurally.
     """
-    key = category.strip().lower()
-    cap = EXPENSE_POLICY.get(key)
-    if cap is None:
-        return json.dumps(
-            {"within_policy": None, "reason": f"no spending policy for category {category!r}"}
-        )
-    within = amount <= cap + _AMOUNT_TOLERANCE
-    result: dict[str, Any] = {
-        "category": key,
-        "amount": amount,
-        "cap": cap,
-        "within_policy": within,
+
+    def invoke(self, messages: list[BaseMessage], /) -> BaseMessage: ...
+
+
+_POLICY_SYSTEM = (
+    "You are an expense-policy reviewer. Read the company policy below and decide "
+    "whether a single expense is within policy. Quote the specific rule you applied.\n\n"
+    f"{POLICY_TEXT}\n\n"
+    'Reply with ONLY a JSON object of the form: {"within_policy": <true|false|null>, '
+    '"citation": "<the rule you applied, quoted from the policy>", '
+    '"reason": "<one short sentence>"}. Use null for within_policy when the policy '
+    "gives no clear guidance for this category."
+)
+
+
+def _policy_messages(category: str, amount: float) -> list[BaseMessage]:
+    """Build the two-message prompt the policy model reads: the policy, then the expense."""
+    human = f"Expense to evaluate:\n- category: {category}\n- amount: {amount:.2f}"
+    return [SystemMessage(content=_POLICY_SYSTEM), HumanMessage(content=human)]
+
+
+_JSON_OBJECT_RE = re.compile(r"\{.*\}", re.DOTALL)
+
+
+def _reply_text(reply: BaseMessage) -> str:
+    """The reply's text, coerced to ``str`` (message content can be a list of blocks)."""
+    content = reply.content
+    return content if isinstance(content, str) else str(content)
+
+
+def _parse_verdict(reply_text: str) -> dict[str, Any]:
+    """Pull the JSON verdict out of the model's reply; a bad reply becomes a value, not a crash.
+
+    The same prompt-only-JSON + defensive-parse pattern L02 taught: the model is *asked*
+    for JSON but we never trust it blindly — an unreadable reply resolves to a graceful
+    ``within_policy: null`` value the agent can report, instead of raising into the loop.
+
+    Example input:
+        '{"within_policy": false, "citation": "Hotels ... $250", "reason": "over cap"}'
+    Example output:
+        {"within_policy": False, "citation": "Hotels ... $250", "reason": "over cap"}
+    """
+    match = _JSON_OBJECT_RE.search(reply_text)
+    if match is not None:
+        try:
+            parsed: Any = json.loads(match.group(0))
+        except json.JSONDecodeError:
+            parsed = None
+        if isinstance(parsed, dict) and "within_policy" in parsed:
+            return cast("dict[str, Any]", parsed)
+    return {
+        "within_policy": None,
+        "reason": "could not read a policy verdict from the model's reply",
     }
-    if not within:
-        result["over_by"] = round(amount - cap, 2)
-    return json.dumps(result)
+
+
+def make_check_expense_policy(model: PolicyModel) -> Callable[[str, float], str]:
+    """Build the policy-check tool, wired to the model it should consult.
+
+    Unlike ``find_matching_record`` (a deterministic lookup), the policy is *free-form
+    prose*, so this tool does a single LLM read to interpret it — deliberately the
+    "expensive" call where a cap table would be a dict lookup. Hand it the offline
+    :class:`ScriptedPolicyModel` for a reproducible keyless run, or live Sonnet in class
+    for a genuine read; the tool body is identical, only the model changes.
+    """
+
+    def check_expense_policy(category: str, amount: float) -> str:
+        """Is an expense within company policy? Reads the policy prose and cites the rule.
+
+        Call this after a receipt matches a record — the matched record carries both
+        ``category`` and ``amount``. This does **not** apply a fixed cap table: it hands
+        the free-form expense policy to a model, which interprets it and quotes the rule
+        it relied on.
+
+        Returns a JSON string, one of two shapes:
+
+        - a judged expense::
+
+            {"within_policy": false,
+             "citation": "Hotels are reimbursed up to $250 per night, taxes included.",
+             "reason": "268.40 is over the $250 nightly lodging limit — flag for approval."}
+
+        - or, when the policy gives no clear guidance (or the reply can't be read), a
+          graceful "can't judge this" value, never a crash::
+
+            {"within_policy": null, "reason": "..."}
+        """
+        reply = model.invoke(_policy_messages(category, amount))
+        return json.dumps(_parse_verdict(_reply_text(reply)))
+
+    return check_expense_policy
+
+
+# The offline stand-in for the model the policy tool consults. The tool always does a
+# real ``model.invoke``; offline we point it here so a keyless restart-run-all stays
+# deterministic. This approximates the judgement a policy-reading model *would* reach
+# with a small cap table read from the same prose — it stands in for an interpretation,
+# it is not one. In class you swap it for live Sonnet (see make_check_expense_policy).
+_OFFLINE_CAPS: dict[str, tuple[float, str]] = {
+    "meals": (50.0, "Individual meals while travelling are reimbursed up to $50 per person."),
+    "travel": (75.0, "Taxis, rideshares, and transit are reimbursed up to $75 per trip."),
+    "lodging": (250.0, "Hotels are reimbursed up to $250 per night, taxes included."),
+    "supplies": (150.0, "Office and project supplies are reimbursed up to $150 per purchase."),
+}
+
+_EXPENSE_RE = re.compile(
+    r"category:\s*(?P<category>.+)\n-\s*amount:\s*(?P<amount>[0-9.]+)", re.IGNORECASE
+)
+
+
+def _offline_verdict(category: str, amount: float) -> dict[str, Any]:
+    """The verdict the offline stand-in returns — a cap-table approximation of a read."""
+    entry = _OFFLINE_CAPS.get(category.strip().lower())
+    if entry is None:
+        return {
+            "within_policy": None,
+            "reason": f"the policy gives no clear guidance for category {category!r}; "
+            "send it for manual review.",
+        }
+    cap, citation = entry
+    within = amount <= cap + _AMOUNT_TOLERANCE
+    reason = (
+        f"{amount:.2f} is within the ${cap:.0f} {category} limit."
+        if within
+        else f"{amount:.2f} is over the ${cap:.0f} {category} limit — flag for approval."
+    )
+    return {"within_policy": within, "citation": citation, "reason": reason}
+
+
+@dataclass
+class ScriptedPolicyModel:
+    """Deterministic offline stand-in for the model the policy tool consults.
+
+    Mirrors :class:`~fluffy_potato_curriculum.common.fake_model.FakeModel`'s role for the
+    agent's brain: the tool always calls ``model.invoke``, but offline this scripted judge
+    reads the expense out of the prompt and returns the verdict a policy-reading model
+    *would* reach (approximated by a cap table), so a keyless run is reproducible. Swap it
+    for live Sonnet in class to get a genuine read of the prose.
+    """
+
+    def invoke(self, messages: list[BaseMessage], /) -> AIMessage:
+        human = messages[-1].content if messages else ""
+        text = human if isinstance(human, str) else str(human)
+        match = _EXPENSE_RE.search(text)
+        if match is None:
+            verdict: dict[str, Any] = {
+                "within_policy": None,
+                "reason": "could not read the expense from the prompt",
+            }
+        else:
+            verdict = _offline_verdict(
+                match.group("category").strip(), float(match.group("amount"))
+            )
+        return AIMessage(content=json.dumps(verdict))
+
+
+check_expense_policy = make_check_expense_policy(ScriptedPolicyModel())
+"""The provided policy tool, pre-wired to the offline stand-in so ``import`` is drop-in
+and the walkthrough runs reproducibly with no key. Rebuild it with
+``make_check_expense_policy(live_model)`` to have a real model read the prose — see the
+gated live cell in the L50 notebook."""
 
 
 def check_reimbursement(expense_id: str) -> str:

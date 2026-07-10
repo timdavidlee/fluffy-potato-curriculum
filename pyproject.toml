@@ -86,7 +86,14 @@ venv = ".venv"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-addopts = "-ra --strict-markers --strict-config"
+# `integration` tests hit a live LLM API, so they are deselected from the default run
+# (`-m "not integration"`) to keep `uv run pytest` offline and deterministic, per
+# .claude/rules/pytest.md. Opt in with `uv run pytest -m integration` (needs an API key;
+# they skip cleanly without one). The CLI `-m` overrides this default expression.
+addopts = "-ra --strict-markers --strict-config -m 'not integration'"
+markers = [
+    "integration: exercises a live external API (a real LLM call); needs an API key and is deselected from the default run — opt in with `-m integration`.",
+]
 # The async-seam tests are plain `async def test_*` with no per-test marker;
 # pytest-asyncio's auto mode collects them, preserving the marker-free style the
 # rest of the suite keeps under --strict-markers.

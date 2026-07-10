@@ -41,10 +41,10 @@ estimated duration: 15
 
 ### slide 2.2 More tools make it a real decision
 
-- text: give the agent three tools — `find_matching_record`, the reused **`calculator`** (total the line items, check the variance), and a pre-built **`check_expense_policy`** (is the amount under its category cap?). Now it must **choose** which to reach for, and when.
+- text: give the agent three tools — `find_matching_record`, the reused **`calculator`** (total the line items, check the variance), and a pre-built **`check_expense_policy`** (an **LLM read** of the free-form policy prose that judges the expense and cites the rule). Now it must **choose** which to reach for, and when.
 - text: that choice is the point. A one-tool agent has no decision to observe; a multi-tool agent leaves a **trajectory** — and a trajectory is the only thing worth tracing and, later, worth evaluating.
 - text: `find_matching_record` is the only tool you *write*; `calculator` and `check_expense_policy` are provided/reused. The authoring budget stays at one — the agent's toolset does not.
-- diagram: a **flow** — a receipt funnels into a junction ("agent picks") that branches to three **cyan** boxes: "`find_matching_record`: normalize → match", "`calculator`: sum line items → variance", and "`check_expense_policy`: amount → within cap?". Arrows from all three converge on "reconciled?". All tools cyan (all legitimate); the branch the agent takes is the emphasis — it's exactly what the trace records.
+- diagram: a **flow** — a receipt funnels into a junction ("agent picks") that branches to three **cyan** boxes: "`find_matching_record`: normalize → match", "`calculator`: sum line items → variance", and "`check_expense_policy`: reads policy → cites rule". Arrows from all three converge on "reconciled?". All tools cyan (all legitimate); the branch the agent takes is the emphasis — it's exactly what the trace records.
 
 [↑ Back to top](#l50-the-receipt-reconciliation-problem)
 

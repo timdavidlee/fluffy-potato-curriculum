@@ -104,9 +104,12 @@ COMMON GOTCHAS:
   (mirrors `common.tools.TOOLS`). Two of the three come free: the reused `calculator` from
   `common/tools.py`, and `check_expense_policy` **imported pre-built from `receipt_tools.py`**.
 - `check_expense_policy` is a **second core tool but not a second live-coding task** — it's provided,
-  not authored. Frame it in one line (per-category spending caps are policy *data*, so it's warranted
-  by the same L08 test) and move on; the point is that the agent now makes a real three-way tool
-  choice, not that students write it.
+  not authored. Frame it in one line: the policy is **free-form prose** (`data/expense_policy.md`), so
+  instead of a cap lookup this tool does a **single LLM read** that interprets the prose and cites the
+  rule — the lesson's one *LLM-in-the-loop* tool, warranted by the same L08 test (a model shouldn't
+  recall *your* company's policy from memory). Offline it runs on a **scripted policy judge** so the
+  walkthrough stays reproducible/keyless; the gated cell in Section 2 flips it to live Sonnet. The
+  point is that the agent now makes a real three-way tool choice, not that students write it.
 
 UNBLOCKERS:
 - "The *authoring* budget is one tool. The agent runs three, but the only one you write is
