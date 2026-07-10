@@ -51,13 +51,13 @@ agent = create_agent(model, [calculator, lookup, flaky_fetch], system_prompt=...
 
 [↑ Back to top](#from-loop-to-graph-draw-what-create_agent-wraps)
 
-## section 2. Recall L04: the line between a workflow and an agent
+## section 2. Recall L03: the line between a workflow and an agent
 
 ### slide 2.1 A workflow is acyclic; you drive it
 
-- In [L04](../L04/objectives.md)/[L05](../L05/objectives.md) you wired a **workflow** — a directed
+- In [L03](../L03/objectives.md)/[L05](../L05/objectives.md) you wired a **workflow** — a directed
   *acyclic* graph. *You* owned the path; the model never decided what ran next.
-- diagram: L04's DAG — `start → step A → step B → end`, straight arrows, no loop back, every
+- diagram: L03's DAG — `start → step A → step B → end`, straight arrows, no loop back, every
   chain edge drawn **cyan** ("the developer owns every edge" — it's the cyan dropping to ink-faint
   in 2.2 that makes the back-edge read as the change). Caption: *"the developer owns every edge."*
 

@@ -14,11 +14,11 @@
 
 | Shape | Owning lesson(s) | Who decides the path | The one-line tell |
 | --- | --- | --- | --- |
-| **Linear node-DAG** | [L04](../lesson_roadmaps/L04/objectives.md) — sequential chaining | Developer wires a **fixed** forward path | The task is a *known, unbranching* sequence: step N's output feeds step N+1, every run takes the same route |
+| **Linear node-DAG** | [L03](../lesson_roadmaps/L03/objectives.md) — sequential chaining (Movement 2) | Developer wires a **fixed** forward path | The task is a *known, unbranching* sequence: step N's output feeds step N+1, every run takes the same route |
 | **Conditional DAG** | [L05](../lesson_roadmaps/L05/objectives.md) — routing & branching | Developer wires branches; a **routing function** reads state | The set of paths is *known ahead of time*, but *which* one runs depends on a classification / lookup / user choice |
 | **Free-form shallow agent** | [L10](../lesson_roadmaps/L10/objectives.md) loop + [L11](../lesson_roadmaps/L11/objectives.md) `create_agent` | The **model** decides which tool, in what order, and when to stop | The steps *can't be known in advance* — the query is open-ended and needs the cyclic loop |
 
-**Domains already spent by the demos — pick something else for a project.** L04/L05 both run the
+**Domains already spent by the demos — pick something else for a project.** L03/L05 both run the
 **support-ticket** domain (parse → draft → policy-check; then classify → billing/technical/general
 → converge). L10/L11 run **`calculator` + `lookup` + `flaky_fetch`** on an arithmetic-puzzle task.
 The ideas below deliberately use *contrasting* domains so a project isn't a re-skin of a demo. (A
@@ -39,7 +39,7 @@ habit honest at this level.
 
 ---
 
-## 1. Linear node-DAG demonstrators (L04)
+## 1. Linear node-DAG demonstrators (L03)
 
 **What makes a good one:** a task that genuinely decomposes into a *fixed chain* of focused steps —
 extract → transform → generate → check — where splitting one mega-prompt into small typed nodes buys
@@ -69,7 +69,7 @@ Sonnet for the heavy generate node). **Anti-pattern to avoid:** a task with a re
 - **Problem:** extract the line items from a messy receipt/invoice and reconcile them against the stated total, flagging any discrepancy.
 - **Node chain:** `parse receipt text` → `extract line items` (qty · description · unit price · amount) → `compute subtotal + tax + total` (plain Python) → `reconcile vs. stated total` → `format flag report`.
 - **Dataset:** ~20 committed plain-text receipts/invoices with varied layouts, a few carrying a planted arithmetic error or a dropped line. Fully offline and immediately legible.
-- **Why linear:** fixed extract → compute → check sequence — and the reason it replaces the old research-abstract idea: **correctness is objectively checkable**. A student reads the receipt, confirms the extracted items, and the totals either reconcile or they don't. That deterministic ground truth makes it the best home in this section for L04's optional "evaluate the workflow" beat.
+- **Why linear:** fixed extract → compute → check sequence — and the reason it replaces the old research-abstract idea: **correctness is objectively checkable**. A student reads the receipt, confirms the extracted items, and the totals either reconcile or they don't. That deterministic ground truth makes it the best home in this section for L03's optional "evaluate the workflow" beat.
 
 <!-- *NEED INPUT*: which one to promote to a full brief. Recommendation: 1a (website-log traffic report) as the flagship linear brief — relatable, obviously a fixed chain, and directly verifiable against the raw log — with 1b (product reviews) as the low-friction lab example since its dataset is trivial to source. 1d (receipt reconciliation) is the pick when you want an objectively-gradable output for the eval beat. -->
 
@@ -140,8 +140,8 @@ not a router.
 tools to call, in what order, how many times, and when to stop — and where a fixed chain or router
 *couldn't* pre-wire the answer because it depends on intermediate results. The "dataset" here is
 **canned tool-backed data + a bank of tasks/questions**. **Anti-pattern to avoid:** a task with one
-obvious tool-call sequence — if you can draw the DAG ahead of time, it's an L04/L05 workflow, and
-reaching for an agent just adds cost and unpredictability (the exact failure mode L04/L05 warn about).
+obvious tool-call sequence — if you can draw the DAG ahead of time, it's an L03/L05 workflow, and
+reaching for an agent just adds cost and unpredictability (the exact failure mode L03/L05 warn about).
 
 ### 3a. Health-plan coverage research agent (overlapping plans)  ⭐ recommended
 - **Problem:** answer "is _X_ covered?" (and "is _X_ or _Y_ covered?") for a member enrolled in several overlapping plans — a **general/medical** plan, a **vision** plan, and a **dental** plan — where the same procedure can live under different plans and be covered by one but excluded by another.
@@ -159,7 +159,7 @@ reaching for an agent just adds cost and unpredictability (the exact failure mod
 - **Problem:** decide whether a customer can return an order and for how much, then draft the reply.
 - **Toolset:** `lookup_order(id)`, `check_return_window(order)`, `calc_refund(order, reason)`, `search_policy(query)`.
 - **Dataset:** an orders CSV (~30 rows) + a short returns-policy doc.
-- **Why an agent:** eligibility depends on facts the model discovers mid-run (order date, item condition, policy edge cases), so tool order varies per case. **Pedagogical bonus:** it's the *same support domain* L04/L05 wired as a workflow — running it as a model-driven agent makes the "workflow vs. agent" contrast concrete on one dataset (see triptych note below).
+- **Why an agent:** eligibility depends on facts the model discovers mid-run (order date, item condition, policy edge cases), so tool order varies per case. **Pedagogical bonus:** it's the *same support domain* L03/L05 wired as a workflow — running it as a model-driven agent makes the "workflow vs. agent" contrast concrete on one dataset (see triptych note below).
 
 ### 3d. Personal flight-booking agent
 - **Problem:** the user gives a destination and a *fuzzy* timeframe ("a long weekend in early March, from the Bay Area"); the agent explores options and returns a short list of booking possibilities with trade-offs (price, non-stop vs. multi-hop, total duration, departure time).
@@ -167,7 +167,7 @@ reaching for an agent just adds cost and unpredictability (the exact failure mod
 - **Dataset:** a committed flights fixture — a schedule table of routes × dates × flights (price, stop count, legs, times), plus an airports table (city → codes). Sized so multiple dates *and* multiple nearby airports exist, and so some non-stops are pricey enough that a connection is worth surfacing. Fully offline; verify-by-eye ("cheapest non-stop on the 12th is $X" is checkable in the fixture).
 - **Why an agent:** the **fuzzy timeframe is what forces the loop** — the agent decides how many dates to probe, whether to try nearby airports, and whether to fall back to multi-hop when non-stops are unavailable or expensive, then decides when the shortlist is good enough to stop. The number and order of searches can't be pre-wired. **Honest caveat (and a good teaching beat):** if you *fix* the window to an explicit date list and a single airport pair and just "return the cheapest," this collapses into an L05 fan-out, not an agent — keep the timeframe genuinely open-ended so the model owns the search. It's also the best "watch the back-edge fire many times" demonstrator in the set, which pairs naturally with L10's `recursion_limit`/termination beat (cap the probing).
 
-<!-- *NEED INPUT*: which one(s) to promote. Recommendation: 3a (health-plan coverage research) and 3b (transaction drill-down) are the two strongest "you cannot pre-wire this" demonstrators — pick one as the flagship agent brief. 3c is the pick if you want the L04→L05→L10 arc to land on a single shared domain. -->
+<!-- *NEED INPUT*: which one(s) to promote. Recommendation: 3a (health-plan coverage research) and 3b (transaction drill-down) are the two strongest "you cannot pre-wire this" demonstrators — pick one as the flagship agent brief. 3c is the pick if you want the L03→L05→L10 arc to land on a single shared domain. -->
 
 ---
 
@@ -177,11 +177,11 @@ reaching for an agent just adds cost and unpredictability (the exact failure mod
   can carry a linear brief (draft-a-reply pipeline), a conditional brief (triage router), *and* an
   agent brief (3c returns agent) on one committed orders+policy fixture. That lets a project or a
   lesson thread show, on identical data, "developer wires the flow → developer wires the branches →
-  model drives the flow" — the exact arc L04 Demo 4 and L05 Demo 4 set up. Trade-off: less domain
+  model drives the flow" — the exact arc L03 Demo 4 and L05 Demo 4 set up. Trade-off: less domain
   variety; upside: the shape contrast is unmistakable.
 - **Per-node model mixing** (Haiku light / Sonnet heavy) is a free win for every linear and
   conditional idea — the classify/extract/format nodes are Haiku, the generate/judge nodes are
-  Sonnet. Call it out in the brief; it's L04/L05's per-node binding objective on real data.
+  Sonnet. Call it out in the brief; it's L03/L05's per-node binding objective on real data.
 - **Every idea should carry a tiny eval set** — the L13 "evaluate everything you build" habit. The
   linear and conditional ideas are trivially evaluable (same input → same path); the agent ideas
   eval on final-answer correctness plus tool-call trace shape.

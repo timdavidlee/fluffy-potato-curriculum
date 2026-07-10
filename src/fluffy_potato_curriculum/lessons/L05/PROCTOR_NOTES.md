@@ -32,7 +32,7 @@ TIME: 6–10 min. STRETCH: ask why `classify` is on the *cheap* model — it onl
 COMMON GOTCHAS:
 - Three near-identical functions invite copy-paste bugs (e.g. the `technical` node returning
   `"steps": ["billing"]`). Then problem 4's path prints the wrong branch name — a good catch.
-- Same `.content` / partial-update reminders as L04's L0404 problem 2.
+- Same `.content` / partial-update reminders as L03's L0306 problem 2.
 
 UNBLOCKERS: A factory (`make_branch`) is fine if they prefer it (the demo uses one) — but three
 explicit functions are clearer and equally correct.
@@ -59,7 +59,7 @@ nudge toward validating model output, an L02/L13 theme.)
 ## L0504_lab problem 4 — Run and prove determinism
 
 COMMON GOTCHAS:
-- Same `steps: []` seeding gotcha as L04's L0404 problem 4.
+- Same `steps: []` seeding gotcha as L03's L0306 problem 4.
 - Expecting the *reply text* to prove determinism — it's the **path** (`out["steps"]`) that's the
   invariant. The two-invocation equality check is the proof.
 

@@ -49,7 +49,7 @@ anti-patterns** that make a skill system worse than the pile of prompts it repla
 ## The runtime: discovery becomes a tool
 
 In L22 the agent's skill catalog (every skill's name + description) sat in the **system prompt** —
-always-on. L23 sharpens that. The runtime is still your L11/L04 `create_agent` shallow agent, but
+always-on. L23 sharpens that. The runtime is still your L11/L03 `create_agent` shallow agent, but
 now it carries **two skill-loading tools**:
 
 - **`list_skills()`** — returns every registered skill's `{name, description}` (**discovery**).

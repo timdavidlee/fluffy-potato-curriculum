@@ -4,7 +4,7 @@
 >
 > **Audience for this file:** the teacher running L11. Every demo below is *teacher-driven, no student participation*. Student-driven exercises live in the L11 labs (separate file, stage 2).
 >
-> **Anchor model: Claude Sonnet 4.6 — a *single* model throughout.** Unlike [L04](../L04/objectives.md) (which mixed Haiku/Sonnet per node to show the mechanism), L11 holds the model fixed so **`create_agent` is the only new thing on screen** versus the L10 hand-rolled loop. Model-power trade-offs are L14's job (full course; dropped in the mini cut). The agent uses the **native LangChain `ChatAnthropic`** client (continuing the framework-client departure begun in L04, *not* the `potato_llm` seam).
+> **Anchor model: Claude Sonnet 4.6 — a *single* model throughout.** Unlike [L03](../L03/objectives.md) (which mixed Haiku/Sonnet per node to show the mechanism), L11 holds the model fixed so **`create_agent` is the only new thing on screen** versus the L10 hand-rolled loop. Model-power trade-offs are L14's job (full course; dropped in the mini cut). The agent uses the **native LangChain `ChatAnthropic`** client (continuing the framework-client departure begun in L03, *not* the `potato_llm` seam).
 
 ## How to read this file
 
@@ -18,33 +18,33 @@ Each demo is a self-contained block with:
 
 The demos match the three objectives from [objectives.md](objectives.md). Demo 1 *draws* the shallow agent as a lightweight graph and maps each piece to its L10 equivalent (objective 1). Demo 2 *builds* the agent in one line with `create_agent` and runs it to behavioral equivalence with L10 (objective 2). Demo 3 names `create_agent`'s config surface and the boundary where you'd drop to an explicit graph — the L15 door (objective 3). The optional demo points forward to L15. They build on each other — Demos 2–3 reuse the same `create_agent` agent and the shared `common/tools.py` tools. Run them in order on first delivery.
 
-> **The spine of L11: it's the same loop, in one line.** L11 introduces no new *control flow* — model → tool → model until termination is exactly the L10 loop. What changes is that **`create_agent` writes the loop for you**. Open with L10's Demo 4 framing students already saw — *"every framework you'll see is a fancier version of the loop you wrote"* — and L04's framing — *"you built the acyclic workflow; here's the **back-edge** that makes it an agent."* Reinforce the primitives from L04; do **not** re-derive the hand-rolled loop from scratch (that's L10, assumed solid here), and do **not** hand-assemble a `StateGraph` (that's L15).
+> **The spine of L11: it's the same loop, in one line.** L11 introduces no new *control flow* — model → tool → model until termination is exactly the L10 loop. What changes is that **`create_agent` writes the loop for you**. Open with L10's Demo 4 framing students already saw — *"every framework you'll see is a fancier version of the loop you wrote"* — and L03's framing — *"you built the acyclic workflow; here's the **back-edge** that makes it an agent."* Reinforce the primitives from L03; do **not** re-derive the hand-rolled loop from scratch (that's L10, assumed solid here), and do **not** hand-assemble a `StateGraph` (that's L15).
 
 ## Pre-flight (once, at the top of the lesson)
 
 The teacher should have, before the first demo starts:
 
-- **`create_agent` + the native LangChain Claude client ready** — `from langchain.agents import create_agent` and `from langchain_anthropic import ChatAnthropic`. `langgraph` (`>=1.2.4`) and `langchain-anthropic` (`>=1.4.4`) are already project dependencies (added via `uv add`); no install during class. The key loads through `common/config.py` as before — only the *client* is the framework's. <!-- *NEED INPUT*: confirm the exact Sonnet 4.6 model id string passed to ChatAnthropic, read from common/config.py rather than hard-coded in cells. Mirrors the same open item in L04's demos. -->
+- **`create_agent` + the native LangChain Claude client ready** — `from langchain.agents import create_agent` and `from langchain_anthropic import ChatAnthropic`. `langgraph` (`>=1.2.4`) and `langchain-anthropic` (`>=1.4.4`) are already project dependencies (added via `uv add`); no install during class. The key loads through `common/config.py` as before — only the *client* is the framework's. <!-- *NEED INPUT*: confirm the exact Sonnet 4.6 model id string passed to ChatAnthropic, read from common/config.py rather than hard-coded in cells. Mirrors the same open item in L03's demos. -->
 - **The shared tools imported, not rebuilt:** `from fluffy_potato_curriculum.common.tools import calculator, lookup, flaky_fetch`. Rebuilding the *same* agent students already know (L10) as a one-liner is the whole point — new tools would dilute it. (LangChain wraps plain Python tools, so the same `common/tools.py` functions bind straight into `create_agent`.)
 - **The L10 hand-rolled loop visible in scrollback** (or its `common/agent_loop.py` reference copy) as the side-by-side the whole lesson maps against — `agent_loop.run(...)` → `RunResult(final_text, iterations, termination)`.
 - **The two canonical L10 tasks ready:** the **chaining task** (*"the population of the city whose name is the answer to `17**2 - 1`"* → `calculator` then `lookup`, natural termination) and the **`flaky_fetch` failure task** (walk the four URL behaviors, exercise tool-failure handling).
-- **A lightweight graph diagram of what `create_agent` wraps** — an `agent` node, a `tools` node, a back-edge, and a conditional exit — as a slide or whiteboard sketch. This is a *picture*, not a build; `compiled_agent.get_graph().draw_mermaid_png()` on the `create_agent` result can generate it if the render path works. <!-- *NEED INPUT*: confirm the diagram render path works in the demo environment; a hand-drawn slide / Mermaid-text / ASCII fallback is fine. Mirrors L04's demos. -->
+- **A lightweight graph diagram of what `create_agent` wraps** — an `agent` node, a `tools` node, a back-edge, and a conditional exit — as a slide or whiteboard sketch. This is a *picture*, not a build; `compiled_agent.get_graph().draw_mermaid_png()` on the `create_agent` result can generate it if the render path works. <!-- *NEED INPUT*: confirm the diagram render path works in the demo environment; a hand-drawn slide / Mermaid-text / ASCII fallback is fine. Mirrors L03's demos. -->
 - **A completed `create_agent` snippet in a sibling file** to paste if live-coding falls behind.
 
 > Why rebuild a *known* agent: L11 is about seeing `create_agent` as **the L10 loop, packaged** — not new capabilities. Reusing L10's tools and tasks means the only new thing on screen is the one-liner — so when the rebuild issues the same tool sequence and terminates naturally, the framework reads as *conveniences over a familiar skeleton*, exactly the lesson's pedagogical bet.
 
 ## Demo 1 — From loop to graph: draw what `create_agent` wraps (Objective 1)
 
-**Goal:** before any code, *draw* the shallow-agent graph and map every piece back to its L10 equivalent. Land the headline — **it's the same model→tool→model loop, and `create_agent` is the one call that gives it to you** — and recall L04's framing that the line between a workflow and an agent is a single **back-edge**. Be explicit that this diagram is a *mental model*; building it by hand is L15, not today.
+**Goal:** before any code, *draw* the shallow-agent graph and map every piece back to its L10 equivalent. Land the headline — **it's the same model→tool→model loop, and `create_agent` is the one call that gives it to you** — and recall L03's framing that the line between a workflow and an agent is a single **back-edge**. Be explicit that this diagram is a *mental model*; building it by hand is L15, not today.
 
 **Pre-flight:**
 
 - A whiteboard / slide with the L10 loop pseudocode on the left, empty graph space on the right.
-- L04's acyclic workflow diagram available for the callback.
+- L03's acyclic workflow diagram available for the callback.
 
 **Live script:**
 
-1. Recall L04 in one line: *"you wired an **acyclic** workflow — the developer owned the path. An agent adds one thing: a **back-edge** that hands the path to the model."* Put L04's DAG up, then draw the cycle.
+1. Recall L03 in one line: *"you wired an **acyclic** workflow — the developer owned the path. An agent adds one thing: a **back-edge** that hands the path to the model."* Put L03's DAG up, then draw the cycle.
 2. Draw the shallow-agent graph piece by piece, naming each and its L10 twin:
    - an **`agent`** (model-call) node — the L10 "call the model" step;
    - a **`tools`** node — the L10 "run every tool call, append a matching `ToolMessage`" step;
@@ -157,15 +157,15 @@ Don't teach any pattern here — L11 owns *`create_agent` and the shallow-agent 
 
 - **Per-demo time:** Demo 1 is 10–15 minutes (diagram + L10 mapping, no build). Demo 2 is the core, 20–30 minutes (the `create_agent` call + two equivalence runs + reading the messages + the freebies list). Demo 3 is 10–15 (config surface + the L15 boundary). Optional close is 5. Total ~45–65 minutes plus discussion — fits the **~60–90 minute** lecture pinned in [objectives.md](objectives.md). This is shorter than the old node-by-node lesson because the hand-assembled `StateGraph` build moved to L15.
 - **Live-coding budget:** only Demo 2's `create_agent` call needs live typing, and it's a few lines. Demo 1 is a diagram; Demo 3 is a prompt swap plus discussion. Do **not** hand-assemble a `StateGraph` in any demo — that's L15.
-- **Single model, on purpose:** L11 holds the model at Sonnet 4.6 so the only variable vs. L10 is who writes the loop. Resist mixing models here — that was L04's mechanism demo; the *which-model* decision is L14's.
+- **Single model, on purpose:** L11 holds the model at Sonnet 4.6 so the only variable vs. L10 is who writes the loop. Resist mixing models here — that was L03's mechanism demo; the *which-model* decision is L14's.
 - **Variance budget:** the agent loop is non-deterministic — budget a re-run wherever a specific tool sequence matters. L11 confirms equivalence by eyeball; the *repeatable* check (an eval set) is L13, which comes after.
 - **The audience watches, doesn't participate.** Resist "what tools should we pass here?" as a group question — that's a lab pattern. Hands-on `create_agent` building is for the L11 labs.
 
 ## Open authoring questions
 
-Most of L11's big decisions are pinned in [objectives.md](objectives.md) (`create_agent`-first with the hand-assembled `StateGraph` deferred to L15; native `ChatAnthropic` not the seam; single anchor model Sonnet 4.6 with model-power deferred to L14; `langgraph` + `langchain-anthropic` deps already added; reuse `common/tools.py` and the two canonical L10 tasks; no eval/Langfuse carry-over, since L12/L13 now follow; persistence/checkpointing out of scope as a forward pointer to L17/L18/L19; the intentional L04↔L11 primitives overlap). The remaining open items are stage-2 mechanics:
+Most of L11's big decisions are pinned in [objectives.md](objectives.md) (`create_agent`-first with the hand-assembled `StateGraph` deferred to L15; native `ChatAnthropic` not the seam; single anchor model Sonnet 4.6 with model-power deferred to L14; `langgraph` + `langchain-anthropic` deps already added; reuse `common/tools.py` and the two canonical L10 tasks; no eval/Langfuse carry-over, since L12/L13 now follow; persistence/checkpointing out of scope as a forward pointer to L17/L18/L19; the intentional L03↔L11 primitives overlap). The remaining open items are stage-2 mechanics:
 
-- <!-- *NEED INPUT*: the exact Sonnet 4.6 model id string passed to ChatAnthropic, read from common/config.py. Mirrors L04's demos. -->
-- <!-- *NEED INPUT*: confirm the graph-diagram render path (draw_mermaid_png vs Mermaid text vs ASCII) works in the demo environment for a create_agent result. Mirrors L04's demos. -->
-- <!-- *NEED INPUT*: are the demos run in a projected Jupyter notebook, a slide-embedded REPL, or a demo-runner script? Mirrors the same open question in L10's and L04's demos. -->
+- <!-- *NEED INPUT*: the exact Sonnet 4.6 model id string passed to ChatAnthropic, read from common/config.py. Mirrors L03's demos. -->
+- <!-- *NEED INPUT*: confirm the graph-diagram render path (draw_mermaid_png vs Mermaid text vs ASCII) works in the demo environment for a create_agent result. Mirrors L03's demos. -->
+- <!-- *NEED INPUT*: are the demos run in a projected Jupyter notebook, a slide-embedded REPL, or a demo-runner script? Mirrors the same open question in L10's and L03's demos. -->
 - <!-- *NEED INPUT*: include the optional L15 forward-pointer in the lecture or hold it for L15's opener? Recommendation: a 60-second close. -->

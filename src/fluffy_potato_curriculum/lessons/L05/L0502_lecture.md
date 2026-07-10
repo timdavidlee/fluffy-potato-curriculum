@@ -12,19 +12,19 @@ estimated duration: 45
 > the L05 lab (L0504), and the workflow-vs-agent close is
 > [L0505_lecture.md](L0505_lecture.md).
 > **Anchor model: Claude Sonnet 4.6** (branch nodes), **Claude Haiku 4.5** (classifier) — the same
-> mixed-model mechanism from [L04](../L04/objectives.md).
+> mixed-model mechanism from [L03](../L03/objectives.md).
 
 ## section 1. The one new primitive
 
 ### slide 1.1 Fixed edge vs. conditional edge
 
-- In [L04](../L04/objectives.md) you only used **fixed** edges: `add_edge("parse", "draft")`,
+- In [L03](../L03/objectives.md) you only used **fixed** edges: `add_edge("parse", "draft")`,
   taken every time, no exceptions.
 - Now you're adding the **conditional edge**: a **routing function** reads state at runtime and
   returns the *name* of the next node, wired with `add_conditional_edges("classify", route,
   {...})`.
 - diagram: two edge types side by side — on the left a solid **fixed** edge `A → B` (taken every
-  time, tagged "L04"); on the right a dashed **conditional** edge where one `classify` node forks to
+  time, tagged "L03"); on the right a dashed **conditional** edge where one `classify` node forks to
   three schematic branches that reconverge to `END`, tagged "new: a routing function picks the
   branch at runtime."
 
@@ -59,7 +59,7 @@ builder.add_conditional_edges("classify", route,
   down one of several specialized branches that converge to an exit.
 - Example: a ticket gets classified **billing / technical / general**; each branch has its own
   focused prompt; all three converge to `END`.
-- Per-node models, reused from L04: `classify` only needs to emit a label, so run it on the
+- Per-node models, reused from L03: `classify` only needs to emit a label, so run it on the
   **cheap, fast model** (Haiku 4.5); the branches do the real reasoning, so run those on the
   **capable model** (Sonnet 4.6). This is the *mechanism* of mixed-model design — you'll get the
   full decision framework in **[L14](../L14/objectives.md)**.
@@ -148,7 +148,7 @@ builder.add_conditional_edges("classify", route,
   matter how many branches it has.
 - You'll get the full workflow-vs-agent recap and close — what carries into L11, what precisely
   changes, and when to reach for which — in [L0505_lecture.md](L0505_lecture.md).
-- diagram: a triptych of tiny graphs — L04's chain, this lesson's model-classified router, and
+- diagram: a triptych of tiny graphs — L03's chain, this lesson's model-classified router, and
   the user-input router — all drawn **cyan** and all acyclic ("still workflows, however many
   branches"); floating beside them, one unattached **dashed ink-faint** back-edge tagged
   "→ L0505 / L11" — the only piece you haven't drawn yet. Dashed faint = deferred; nothing here

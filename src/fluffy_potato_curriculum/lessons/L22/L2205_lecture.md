@@ -171,7 +171,7 @@ estimated duration: 22
 - **A tool is *called*, a skill is *read*, the system prompt is *always seen* — and "where should
   this capability live?" is answered by *when* it needs to be in context.**
 - That single question ties together everything you built this course: prompts (L02), tools
-  (L07/L08), the agent loop (L10), and its LangGraph form (L04/L11).
+  (L07/L08), the agent loop (L10), and its LangGraph form (L03/L11).
 - diagram: motif bookend — the three-homes row one last time, each home with a small context-cost
   bar beneath showing *when* it's in context: the system prompt a full-width always-on bar
   (ink-faint, "always seen"), the tool a full-width schema bar (ink-faint, "schema every call") —

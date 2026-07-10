@@ -34,7 +34,7 @@ The teacher should have, before the first demo starts:
 
 ## Demo 1 — The agent graph, wired node by node (Objective 1)
 
-**Goal:** build the ReAct agent as a `StateGraph` in front of the class. Land the framing from [objectives.md](objectives.md): *"an agent is a graph with a cycle."* Show the back-edge as the one new primitive over L04/L05.
+**Goal:** build the ReAct agent as a `StateGraph` in front of the class. Land the framing from [objectives.md](objectives.md): *"an agent is a graph with a cycle."* Show the back-edge as the one new primitive over L03/L05.
 
 **Pre-flight:**
 
@@ -44,9 +44,9 @@ The teacher should have, before the first demo starts:
 
 **Live script:**
 
-1. Draw the graph on the whiteboard before typing: three boxes — `agent`, `tools`, `END` — with a **conditional edge** out of `agent` (`route`: has `.tool_calls`? → `tools` : → `END`) and a plain **back-edge** `tools → agent`. Say out loud: "L04 gave us nodes and edges; L05 gave us the conditional edge; the only new thing is *this edge points backward*."
+1. Draw the graph on the whiteboard before typing: three boxes — `agent`, `tools`, `END` — with a **conditional edge** out of `agent` (`route`: has `.tool_calls`? → `tools` : → `END`) and a plain **back-edge** `tools → agent`. Say out loud: "L03 gave us nodes and edges; L05 gave us the conditional edge; the only new thing is *this edge points backward*."
 2. Live-code it:
-   - The **state**: a `TypedDict` with `messages: Annotated[list, add_messages]`. Pause on `add_messages` — "this reducer *appends*; in L04 returning a key overwrote it. That's why the conversation grows every turn."
+   - The **state**: a `TypedDict` with `messages: Annotated[list, add_messages]`. Pause on `add_messages` — "this reducer *appends*; in L03 returning a key overwrote it. That's why the conversation grows every turn."
    - The **agent node**: `def agent_node(state): return {"messages": [model.bind_tools(tools).invoke(state["messages"])]}`.
    - The **route function**: return `"tools"` if the last message has `.tool_calls`, else `END`.
    - The **wiring**: `StateGraph(State)`, `add_node("agent", ...)`, `add_node("tools", ToolNode(tools))`, `set_entry_point("agent")`, `add_conditional_edges("agent", route, {"tools": "tools", END: END})`, `add_edge("tools", "agent")`, `compile()`. **Do not set a `recursion_limit` yet** — that's Demo 2's punchline.
@@ -55,7 +55,7 @@ The teacher should have, before the first demo starts:
 
 **What to highlight:**
 
-- The **back-edge** is the whole idea. Remove it (make `tools` go to `END`) and you're back to an L04 pipeline that can't react to its tools.
+- The **back-edge** is the whole idea. Remove it (make `tools` go to `END`) and you're back to an L03 pipeline that can't react to its tools.
 - **`ToolNode` maintains the message-history invariant for you.** After an `AIMessage` with `.tool_calls`, every call must be answered by a matching `ToolMessage` (by `tool_call_id`) before the next model call. In a hand loop that's the #1 bug; the prebuilt node does it. Say what the invariant *is* so they can debug it later — don't let it stay hidden.
 - The model is *not* aware of the graph. From its perspective every agent-node visit is one round-trip. The loop lives entirely in the edges.
 - The same graph will run MCP-exposed tools from L09 unchanged — only the tool objects handed to `ToolNode` differ.

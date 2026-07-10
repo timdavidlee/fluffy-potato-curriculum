@@ -2,7 +2,7 @@
 
 ```yaml
 title: "L50: the receipt-reconciliation problem"
-keywords: receipt reconciliation, cross-format normalization, tool-vs-model, warranted tool, three-tool decision, expense policy, graceful failure, no confident match, runaway loop, regression case, scorer, vertical slice
+keywords: receipt reconciliation, cross-format normalization, tool-vs-model, warranted tool, three-tool decision, expense policy, LLM-in-the-loop tool, model call inside a tool, graceful failure, no confident match, runaway loop, regression case, scorer, vertical slice
 estimated duration: 15
 ```
 
@@ -43,8 +43,13 @@ estimated duration: 15
 
 - text: give the agent three tools — `find_matching_record`, the reused **`calculator`** (total the line items, check the variance), and a pre-built **`check_expense_policy`** (an **LLM read** of the free-form policy prose that judges the expense and cites the rule). Now it must **choose** which to reach for, and when.
 - text: that choice is the point. A one-tool agent has no decision to observe; a multi-tool agent leaves a **trajectory** — and a trajectory is the only thing worth tracing and, later, worth evaluating.
-- text: `find_matching_record` is the only tool you *write*; `calculator` and `check_expense_policy` are provided/reused. The authoring budget stays at one — the agent's toolset does not.
 - diagram: a **flow** — a receipt funnels into a junction ("agent picks") that branches to three **cyan** boxes: "`find_matching_record`: normalize → match", "`calculator`: sum line items → variance", and "`check_expense_policy`: reads policy → cites rule". Arrows from all three converge on "reconciled?". All tools cyan (all legitimate); the branch the agent takes is the emphasis — it's exactly what the trace records.
+
+### slide 2.3 A tool can itself be a model call
+
+- text: usually a tool is pure **mechanism** — `find_matching_record`, the one tool you *write*, normalizes and looks up: same input → same row, **no model inside it**. That's the tidy side of the L08 line you drew a slide ago.
+- text: `check_expense_policy` is **provided**, and it's a different animal: company policy is **free-form prose** (`data/expense_policy.md`), not a cap table — so the tool's *body* does a single **`model.invoke`** that reads the policy and cites the rule. The tool **is** a model call — policy is guidance to **interpret**, not a row to match. (Offline it swaps in a scripted judge — the same live/offline seam the agent's own brain uses.)
+- diagram: a two-panel **contrast** echoing 2.1's mechanism/judgement split. Left, **cyan** `find_matching_record` with a `--ink-faint` dashed inner box "normalize → `(vendor, amount)` → look up" and the note "no model inside." Right, **cyan** `check_expense_policy` whose inner box is itself a bright **cyan** model call — "reads `expense_policy.md` → `model.invoke` → judges + cites the rule" — tagged in **coral** "the cost: a model call where a lookup would do." Both are cyan tools the agent calls the same way; the point is the model living *inside* the right-hand tool.
 
 [↑ Back to top](#l50-the-receipt-reconciliation-problem)
 

@@ -8,7 +8,7 @@ estimated duration: 14
 
 > **Lesson:** L05. **Roadmap:** Demo 4 in [demos_or_activities.md](../../../../docs/origin/lesson_roadmaps/L05/demos_or_activities.md).
 > This is the closing lecture — mostly **diagram + discussion**, no live build. It recaps the
-> compiled workflows from L04's and this lesson's demos ([L04's Demo 1](../L04/L0403_lecture.ipynb)
+> compiled workflows from L03's and this lesson's demos ([L03's chaining demo](../L03/L0305_lecture.ipynb)
 > / [this lesson's Demo](L0503_lecture.ipynb)) and *names* the one change that makes an agent.
 > Building the agent is **L11's** job.
 > **Anchor:** the workflow-vs-agent contrast, stated verbatim so it carries into L11.
@@ -17,12 +17,12 @@ estimated duration: 14
 
 ### slide 1.1 Everything you built was acyclic
 
-- Across [L04](../L04/objectives.md)'s and this lesson's demos and labs you built three graphs — a
-  prompt chain (L04), a model-classified router (L05), and a user-input router (L05). **Every one
+- Across [L03](../L03/objectives.md)'s and this lesson's demos and labs you built three graphs — a
+  prompt chain (L03), a model-classified router (L05), and a user-input router (L05). **Every one
   was a DAG**: trace any path with your finger and every arrow goes forward; it always reaches
   `END`.
-- diagram: L04's chain `parse → draft → policy_check → END` with a finger-trace arrow showing
-  "forward only, always terminates." Render it to **visually match the L04 deck's chain** (same
+- diagram: L03's chain `parse → draft → policy_check → END` with a finger-trace arrow showing
+  "forward only, always terminates." Render it to **visually match the L03 deck's chain** (same
   node shapes, cyan forward edges, `END` in ink-faint) — a cross-lesson motif, so students
   recognize the exact graph they built.
 - The model did real work *inside* the nodes (parse, classify, draft), but **you wired every
@@ -30,7 +30,7 @@ estimated duration: 14
 
 ### slide 1.2 The primitives you now own
 
-- table: the L04 + L05 primitives — and the note that **L11 reuses every one of them unchanged.**
+- table: the L03 + L05 primitives — and the note that **L11 reuses every one of them unchanged.**
 
 | Primitive | What it is | Reused in L11? |
 | --- | --- | --- |
@@ -63,7 +63,7 @@ estimated duration: 14
   — only there the `while`/`if` was plain Python, and in L11 it's a graph edge.
 - diagram: side by side — L10's `while` loop pseudocode and L11's cyclic graph — captioned "same
   loop, now expressed as a graph."
-- So L11 isn't a new world for you: it's **L04/L05's primitives + L10's loop**, written as one
+- So L11 isn't a new world for you: it's **L03/L05's primitives + L10's loop**, written as one
   back-edge.
 
 ### slide 2.3 A conditional edge is still not "the model is an agent" by itself
@@ -90,7 +90,7 @@ estimated duration: 14
     score clears a bar. Same shape, aimed at quality instead of errors.
 - Ask the decider question for each: who decides whether to go around again? **A check you
   wrote** — a flag, a counter, a score bar. Loops and all, these are **still workflows.**
-- So the honest version of L04's "a workflow never loops back": a workflow *can* loop back — but
+- So the honest version of L03's "a workflow never loops back": a workflow *can* loop back — but
   **you** authored its exit condition. It's an agent only when the routing function reads the
   **model's own decision** to keep going. The back-edge is necessary, not sufficient.
 - diagram: three small cycles in a row, same node shapes as the deck motif — `generate ⇄ validate`

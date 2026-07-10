@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>L04 — Directed graphs: sequential chaining</title>
+<title>L03 · Movement 2 — Sequential chaining: wire several nodes into a fixed pipeline</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500;1,9..144,600&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -520,7 +520,7 @@ table.ledger td.warn-cell { color: var(--coral); }
 .save-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
 /* ===========================================
-   L0402 DIAGRAM HELPERS (appended per-deck)
+   L0304 DIAGRAM HELPERS (appended per-deck)
    Small classes reused by this deck's built visuals.
    =========================================== */
 /* a graph node box */
@@ -613,7 +613,7 @@ pre.code code .kw { color: var(--ink); font-weight: 600; }  /* keyword-ish empha
 }
 
 /* ===========================================
-   L0402 MOTIF HELPERS (appended — outline densify pass)
+   L0304 MOTIF HELPERS (appended — outline densify pass)
    The parse → draft → policy_check chain recurs across the
    deck; these small classes support its per-slide variants.
    =========================================== */
@@ -652,12 +652,12 @@ pre.code.faint code, pre.code.faint code .kw { color: var(--ink-dim); font-weigh
 <!-- 01 — COVER                                                   -->
 <!-- ============================================================ -->
 <section class="slide slide-cover active">
-    <div class="eyebrow reveal">L04 &middot; Workflows &middot; 55 min</div>
-    <h1 class="reveal">Directed graphs: <span class="it">sequential</span> chaining</h1>
+    <div class="eyebrow reveal">L03 &middot; Workflows &middot; 30 min</div>
+    <h1 class="reveal">Sequential <span class="it">chaining</span>: wire several nodes into a fixed pipeline</h1>
     <div class="claim reveal"><b>In a workflow, the model lives inside the nodes; you own the edges.</b> Wire several typed nodes into a fixed, acyclic pipeline &mdash; a workflow, not an agent.</div>
     <div class="meta-row reveal">
-        <span>Lesson &mdash; <b>L04</b></span>
-        <span>55 min</span>
+        <span>Lesson &mdash; <b>L03</b> &middot; Movement 2</span>
+        <span>30 min</span>
         <span>anchor &mdash; <b>Sonnet 4.6</b> heavy nodes &middot; <b>Haiku 4.5</b> light nodes</span>
     </div>
     <div class="cover-diagram reveal">
@@ -694,14 +694,14 @@ pre.code.faint code, pre.code.faint code .kw { color: var(--ink-dim); font-weigh
         </svg>
     </div>
     <div class="chrome-page">01 / 26</div>
-    <div class="chrome-nav">L04 &middot; sequential chaining</div>
+    <div class="chrome-nav">L03 &middot; sequential chaining</div>
 </section>
 
 <!-- ============================================================ -->
 <!-- 02 — SECTION 1 DIVIDER                                        -->
 <!-- ============================================================ -->
 <section class="slide slide-chapter">
-    <div class="chrome-tag reveal">L04 &middot; <b>WORKFLOWS</b></div>
+    <div class="chrome-tag reveal">L03 &middot; <b>WORKFLOWS</b></div>
     <div class="chapter-ghost reveal">01</div>
     <div class="chapter-eyebrow reveal">Section 1</div>
     <div class="chapter-title reveal">The lesson in <span style="color:var(--cyan); font-style:normal;">one claim</span></div>
@@ -713,20 +713,20 @@ pre.code.faint code, pre.code.faint code .kw { color: var(--ink-dim); font-weigh
 <!-- 03 — SLIDE 1.1                                                -->
 <!-- ============================================================ -->
 <section class="slide">
-    <div class="chrome-tag">L04 &middot; <b>WORKFLOWS</b></div>
+    <div class="chrome-tag">L03 &middot; <b>WORKFLOWS</b></div>
     <div class="topbar reveal">
         <div class="eyebrow">Slide 1.1</div>
         <h2 class="headline">One node becomes several, <span class="it">wired in order</span></h2>
     </div>
     <div class="body-area">
         <ul class="points reveal">
-            <li class="point">In <b>L03</b> you built a <code>StateGraph</code> at its smallest: one typed node. Now you wire <b>several</b> such nodes into a fixed sequence &mdash; a <b>workflow</b>, not an agent.</li>
+            <li class="point">Earlier in this lesson you built a <code>StateGraph</code> at its smallest: one typed node. Now you wire <b>several</b> such nodes into a fixed sequence &mdash; a <b>workflow</b>, not an agent.</li>
             <li class="point">Your control flow becomes a <b>graph</b>: explicit nodes wired by edges <i>you</i> lay out. The model lives <b>inside</b> the nodes; it never decides what runs next.</li>
             <li class="point"><b>L05</b> adds a <b>conditional</b> edge on these same primitives; <b>L11</b> later adds exactly one more thing &mdash; a back-edge &mdash; to make an agent.</li>
         </ul>
         <div class="diagram-frame reveal" style="gap:44px; margin-top:34px;">
             <div style="text-align:center;">
-                <div class="gnode dim" style="padding:22px 34px;">node<div class="sub">L03 &mdash; one box</div></div>
+                <div class="gnode dim" style="padding:22px 34px;">node<div class="sub">Movement 1 &mdash; one box</div></div>
             </div>
             <div class="garrow cyan">&rarr;</div>
             <div style="display:flex; align-items:center; gap:16px;">
@@ -739,7 +739,7 @@ pre.code.faint code, pre.code.faint code .kw { color: var(--ink-dim); font-weigh
                 <div class="gnode dim" style="font-size:22px;">END</div>
             </div>
         </div>
-        <div class="diagram-caption reveal">One node (L03) &rarr; several wired in order (L04). This chain is the lesson's <b>motif</b> &mdash; every diagram from here re-draws it with one thing changed.</div>
+        <div class="diagram-caption reveal">One node &rarr; several wired in order. This chain is the lesson's <b>motif</b> &mdash; every diagram from here re-draws it with one thing changed.</div>
     </div>
     <div class="chrome-page">03 / 26</div>
     <div class="chrome-nav">&larr; &rarr; navigate</div>
@@ -749,14 +749,14 @@ pre.code.faint code, pre.code.faint code .kw { color: var(--ink-dim); font-weigh
 <!-- 04 — SLIDE 1.2                                                -->
 <!-- ============================================================ -->
 <section class="slide">
-    <div class="chrome-tag">L04 &middot; <b>WORKFLOWS</b></div>
+    <div class="chrome-tag">L03 &middot; <b>WORKFLOWS</b></div>
     <div class="topbar reveal">
         <div class="eyebrow">Slide 1.2</div>
         <h2 class="headline">Workflow vs. agent &mdash; <span class="it">the headline distinction</span></h2>
     </div>
     <div class="body-area">
         <table class="ledger reveal">
-            <thead><tr><th></th><th>Workflow (L04&ndash;L05)</th><th>Agent (L11)</th></tr></thead>
+            <thead><tr><th></th><th>Workflow (L03/L05)</th><th>Agent (L11)</th></tr></thead>
             <tbody>
                 <tr><td class="tag">Who owns the path?</td><td>the <b>developer</b> &mdash; fixed logic</td><td class="warn-cell">the <b>model</b> decides</td></tr>
                 <tr><td class="tag">Graph shape</td><td><b>acyclic</b> (DAG) &mdash; always reaches <code>END</code></td><td class="warn-cell"><b>cyclic</b> &mdash; loops model &rarr; tools &rarr; model</td></tr>
@@ -814,7 +814,7 @@ pre.code.faint code, pre.code.faint code .kw { color: var(--ink-dim); font-weigh
 <!-- 05 — SLIDE 1.3                                                -->
 <!-- ============================================================ -->
 <section class="slide">
-    <div class="chrome-tag">L04 &middot; <b>WORKFLOWS</b></div>
+    <div class="chrome-tag">L03 &middot; <b>WORKFLOWS</b></div>
     <div class="topbar reveal">
         <div class="eyebrow">Slide 1.3</div>
         <h2 class="headline">The sentence to <span class="it">carry through</span> the lesson</h2>
@@ -861,7 +861,7 @@ pre.code.faint code, pre.code.faint code .kw { color: var(--ink-dim); font-weigh
                 </defs>
             </svg>
         </div>
-        <div class="diagram-caption reveal" style="margin-top:2px;">Every edge in L04 is <b>fixed</b> &mdash; <code>A &rarr; B</code>, always. Nothing to branch on yet; that arrives in L05.</div>
+        <div class="diagram-caption reveal" style="margin-top:2px;">Every edge in this lesson is <b>fixed</b> &mdash; <code>A &rarr; B</code>, always. Nothing to branch on yet; that arrives in L05.</div>
     </div>
     <div class="chrome-page">05 / 26</div>
     <div class="chrome-nav">&larr; &rarr; navigate</div>
@@ -871,11 +871,11 @@ pre.code.faint code, pre.code.faint code .kw { color: var(--ink-dim); font-weigh
 <!-- 06 — SECTION 2 DIVIDER                                        -->
 <!-- ============================================================ -->
 <section class="slide slide-chapter">
-    <div class="chrome-tag reveal">L04 &middot; <b>WORKFLOWS</b></div>
+    <div class="chrome-tag reveal">L03 &middot; <b>WORKFLOWS</b></div>
     <div class="chapter-ghost reveal">02</div>
     <div class="chapter-eyebrow reveal">Section 2</div>
     <div class="chapter-title reveal">The StateGraph <span style="color:var(--cyan); font-style:normal;">primitives</span></div>
-    <div class="chapter-sub reveal">Vocabulary, continued from L03: the five-line build, nodes, state and reducers, edges, entry point, END, and the DAG.</div>
+    <div class="chapter-sub reveal">Vocabulary, continued from Movement 1: the five-line build, nodes, state and reducers, edges, entry point, END, and the DAG.</div>
     <div class="chrome-page">06 / 26</div>
 </section>
 
@@ -883,7 +883,7 @@ pre.code.faint code, pre.code.faint code .kw { color: var(--ink-dim); font-weigh
 <!-- 07 — SLIDE 2.1                                                -->
 <!-- ============================================================ -->
 <section class="slide">
-    <div class="chrome-tag">L04 &middot; <b>WORKFLOWS</b></div>
+    <div class="chrome-tag">L03 &middot; <b>WORKFLOWS</b></div>
     <div class="topbar reveal">
         <div class="eyebrow">Slide 2.1</div>
         <h2 class="headline">The <span class="it">five-line</span> build</h2>
@@ -912,7 +912,7 @@ builder.add_edge(<span class="p">"parse"</span>, <span class="p">"draft"</span>)
 builder.add_edge(<span class="p">"draft"</span>, END)
 app = builder.compile()                        <span class="c"># 5. compile to runnable</span>
 result = <span class="kw">await</span> app.ainvoke({<span class="p">"ticket"</span>: <span class="p">"..."</span>})  <span class="c">#    await it on input</span></code></pre>
-        <div class="diagram-caption reveal" style="margin-top:14px;">Same recipe as L03 &mdash; but with <b>several</b> nodes and edges <i>between</i> them. New wiring, no new primitive.</div>
+        <div class="diagram-caption reveal" style="margin-top:14px;">Same recipe as earlier this lesson &mdash; but with <b>several</b> nodes and edges <i>between</i> them. New wiring, no new primitive.</div>
     </div>
     <div class="chrome-page">07 / 26</div>
     <div class="chrome-nav">&larr; &rarr; navigate</div>
@@ -922,7 +922,7 @@ result = <span class="kw">await</span> app.ainvoke({<span class="p">"ticket"</sp
 <!-- 08 — SLIDE 2.2                                                -->
 <!-- ============================================================ -->
 <section class="slide">
-    <div class="chrome-tag">L04 &middot; <b>WORKFLOWS</b></div>
+    <div class="chrome-tag">L03 &middot; <b>WORKFLOWS</b></div>
     <div class="topbar reveal">
         <div class="eyebrow">Slide 2.2</div>
         <h2 class="headline">Node &mdash; a typed function that <span class="it">returns an update</span></h2>
@@ -970,7 +970,7 @@ result = <span class="kw">await</span> app.ainvoke({<span class="p">"ticket"</sp
 <!-- 09 — SLIDE 2.3                                                -->
 <!-- ============================================================ -->
 <section class="slide">
-    <div class="chrome-tag">L04 &middot; <b>WORKFLOWS</b></div>
+    <div class="chrome-tag">L03 &middot; <b>WORKFLOWS</b></div>
     <div class="topbar reveal">
         <div class="eyebrow">Slide 2.3</div>
         <h2 class="headline">State &amp; reducer &mdash; <span class="it">the data that flows</span></h2>
@@ -978,7 +978,7 @@ result = <span class="kw">await</span> app.ainvoke({<span class="p">"ticket"</sp
     <div class="body-area">
         <ul class="points reveal">
             <li class="point"><b>State</b> is a typed object (a <code>TypedDict</code>) threaded through every node in turn.</li>
-            <li class="point">A <b>reducer</b> merges each update into state, <i>per field</i>: the default <b>overwrites</b>; an <code>Annotated[list, add]</code> field <b>appends</b> &mdash; your first genuinely new primitive in L04.</li>
+            <li class="point">A <b>reducer</b> merges each update into state, <i>per field</i>: the default <b>overwrites</b>; an <code>Annotated[list, add]</code> field <b>appends</b> &mdash; your first genuinely new primitive in Movement 2.</li>
             <li class="point">Same machinery <b>L11</b> reuses for an agent's <i>message history</i> &mdash; met here first.</li>
         </ul>
         <div class="diagram-frame reveal" style="gap:10px; margin-top:26px; justify-content:flex-start;">
@@ -1016,7 +1016,7 @@ result = <span class="kw">await</span> app.ainvoke({<span class="p">"ticket"</sp
 <!-- 10 — SLIDE 2.4                                                -->
 <!-- ============================================================ -->
 <section class="slide">
-    <div class="chrome-tag">L04 &middot; <b>WORKFLOWS</b></div>
+    <div class="chrome-tag">L03 &middot; <b>WORKFLOWS</b></div>
     <div class="topbar reveal">
         <div class="eyebrow">Slide 2.4</div>
         <h2 class="headline">What belongs in state &mdash; <span class="it">and what doesn't</span></h2>
@@ -1036,7 +1036,7 @@ result = <span class="kw">await</span> app.ainvoke({<span class="p">"ticket"</sp
 <!-- 11 — SLIDE 2.5                                                -->
 <!-- ============================================================ -->
 <section class="slide">
-    <div class="chrome-tag">L04 &middot; <b>WORKFLOWS</b></div>
+    <div class="chrome-tag">L03 &middot; <b>WORKFLOWS</b></div>
     <div class="topbar reveal">
         <div class="eyebrow">Slide 2.5</div>
         <h2 class="headline">Edge, entry point, <span class="it">END, DAG</span></h2>
@@ -1087,7 +1087,7 @@ result = <span class="kw">await</span> app.ainvoke({<span class="p">"ticket"</sp
 <!-- 12 — SECTION 3 DIVIDER                                        -->
 <!-- ============================================================ -->
 <section class="slide slide-chapter">
-    <div class="chrome-tag reveal">L04 &middot; <b>WORKFLOWS</b></div>
+    <div class="chrome-tag reveal">L03 &middot; <b>WORKFLOWS</b></div>
     <div class="chapter-ghost reveal">03</div>
     <div class="chapter-eyebrow reveal">Section 3</div>
     <div class="chapter-title reveal">The pattern &mdash; <span style="color:var(--cyan); font-style:normal;">prompt chaining</span></div>
@@ -1099,7 +1099,7 @@ result = <span class="kw">await</span> app.ainvoke({<span class="p">"ticket"</sp
 <!-- 13 — SLIDE 3.1                                                -->
 <!-- ============================================================ -->
 <section class="slide">
-    <div class="chrome-tag">L04 &middot; <b>WORKFLOWS</b></div>
+    <div class="chrome-tag">L03 &middot; <b>WORKFLOWS</b></div>
     <div class="topbar reveal">
         <div class="eyebrow">Slide 3.1</div>
         <h2 class="headline">Decompose a task into a <span class="it">fixed sequence</span></h2>
@@ -1128,7 +1128,7 @@ result = <span class="kw">await</span> app.ainvoke({<span class="p">"ticket"</sp
 <!-- 14 — SLIDE 3.2                                                -->
 <!-- ============================================================ -->
 <section class="slide">
-    <div class="chrome-tag">L04 &middot; <b>WORKFLOWS</b></div>
+    <div class="chrome-tag">L03 &middot; <b>WORKFLOWS</b></div>
     <div class="topbar reveal">
         <div class="eyebrow">Slide 3.2</div>
         <h2 class="headline">Why decompose instead of <span class="it">one big prompt?</span></h2>
@@ -1168,7 +1168,7 @@ result = <span class="kw">await</span> app.ainvoke({<span class="p">"ticket"</sp
 <!-- 15 — SECTION 4 DIVIDER                                        -->
 <!-- ============================================================ -->
 <section class="slide slide-chapter">
-    <div class="chrome-tag reveal">L04 &middot; <b>WORKFLOWS</b></div>
+    <div class="chrome-tag reveal">L03 &middot; <b>WORKFLOWS</b></div>
     <div class="chapter-ghost reveal">04</div>
     <div class="chapter-eyebrow reveal">Section 4</div>
     <div class="chapter-title reveal">Each node can bind <span style="color:var(--cyan); font-style:normal;">its own model</span></div>
@@ -1180,7 +1180,7 @@ result = <span class="kw">await</span> app.ainvoke({<span class="p">"ticket"</sp
 <!-- 16 — SLIDE 4.1                                                -->
 <!-- ============================================================ -->
 <section class="slide">
-    <div class="chrome-tag">L04 &middot; <b>WORKFLOWS</b></div>
+    <div class="chrome-tag">L03 &middot; <b>WORKFLOWS</b></div>
     <div class="topbar reveal">
         <div class="eyebrow">Slide 4.1</div>
         <h2 class="headline">The mechanism: a node is an <span class="it">independent call</span></h2>
@@ -1220,7 +1220,7 @@ result = <span class="kw">await</span> app.ainvoke({<span class="p">"ticket"</sp
 <!-- 17 — SLIDE 4.2                                                -->
 <!-- ============================================================ -->
 <section class="slide">
-    <div class="chrome-tag">L04 &middot; <b>WORKFLOWS</b></div>
+    <div class="chrome-tag">L03 &middot; <b>WORKFLOWS</b></div>
     <div class="topbar reveal">
         <div class="eyebrow">Slide 4.2</div>
         <h2 class="headline">Mechanism here; the <span class="it">decision framework</span> is L14's</h2>
@@ -1240,7 +1240,7 @@ result = <span class="kw">await</span> app.ainvoke({<span class="p">"ticket"</sp
 <!-- 18 — SECTION 5 DIVIDER                                        -->
 <!-- ============================================================ -->
 <section class="slide slide-chapter">
-    <div class="chrome-tag reveal">L04 &middot; <b>WORKFLOWS</b></div>
+    <div class="chrome-tag reveal">L03 &middot; <b>WORKFLOWS</b></div>
     <div class="chapter-ghost reveal">05</div>
     <div class="chapter-eyebrow reveal">Section 5</div>
     <div class="chapter-title reveal">Why a graph: control flow <span style="color:var(--cyan); font-style:normal;">as data</span></div>
@@ -1252,7 +1252,7 @@ result = <span class="kw">await</span> app.ainvoke({<span class="p">"ticket"</sp
 <!-- 19 — SLIDE 5.1                                                -->
 <!-- ============================================================ -->
 <section class="slide">
-    <div class="chrome-tag">L04 &middot; <b>WORKFLOWS</b></div>
+    <div class="chrome-tag">L03 &middot; <b>WORKFLOWS</b></div>
     <div class="topbar reveal">
         <div class="eyebrow">Slide 5.1</div>
         <h2 class="headline">A graph turns control flow into <span class="it">inspectable data</span></h2>
@@ -1289,17 +1289,17 @@ ok = policy(draft)
 <!-- 20 — SLIDE 5.2                                                -->
 <!-- ============================================================ -->
 <section class="slide">
-    <div class="chrome-tag">L04 &middot; <b>WORKFLOWS</b></div>
+    <div class="chrome-tag">L03 &middot; <b>WORKFLOWS</b></div>
     <div class="topbar reveal">
         <div class="eyebrow">Slide 5.2</div>
-        <h2 class="headline">Watch it run &mdash; <span class="it">graph.astream</span>, the same tool from L03</h2>
+        <h2 class="headline">Watch it run &mdash; <span class="it">graph.astream</span>, the same tool from Movement 1</h2>
     </div>
     <div class="body-area" style="display:flex; align-items:center; gap:56px;">
         <div style="flex:1; min-width:0;">
             <ul class="points reveal" style="max-width:none;">
                 <li class="point">Run with <code>stream_mode="updates"</code> instead of <code>ainvoke</code>: <b>one chunk per node, in the order they fire</b>.</li>
-                <li class="point">That output is the <b>path made visible</b> &mdash; it confirms the route was developer-determined. Same built-in call you used in <b>L03</b>; nothing new to set up.</li>
-                <li class="point">Routing this same run to <b>Langfuse</b> for a structured, comparable trace is <b>L12's</b> job, several lessons away. Nothing in L04 depends on tracing.</li>
+                <li class="point">That output is the <b>path made visible</b> &mdash; it confirms the route was developer-determined. Same built-in call you used on the single node in <b>Movement 1</b>; nothing new to set up.</li>
+                <li class="point">Routing this same run to <b>Langfuse</b> for a structured, comparable trace is <b>L12's</b> job, several lessons away. Nothing here depends on tracing.</li>
             </ul>
         </div>
         <div class="diagram-frame reveal" style="width:620px; flex-shrink:0;">
@@ -1319,7 +1319,7 @@ ok = policy(draft)
 <!-- 21 — SLIDE 5.3                                                -->
 <!-- ============================================================ -->
 <section class="slide">
-    <div class="chrome-tag">L04 &middot; <b>WORKFLOWS</b></div>
+    <div class="chrome-tag">L03 &middot; <b>WORKFLOWS</b></div>
     <div class="topbar reveal">
         <div class="eyebrow">Slide 5.3</div>
         <h2 class="headline">Determinism is a feature, <span class="it">not a limitation</span></h2>
@@ -1367,7 +1367,7 @@ ok = policy(draft)
 <!-- 22 — SECTION 6 DIVIDER                                        -->
 <!-- ============================================================ -->
 <section class="slide slide-chapter">
-    <div class="chrome-tag reveal">L04 &middot; <b>WORKFLOWS</b></div>
+    <div class="chrome-tag reveal">L03 &middot; <b>WORKFLOWS</b></div>
     <div class="chapter-ghost reveal">06</div>
     <div class="chapter-eyebrow reveal">Section 6</div>
     <div class="chapter-title reveal">Two DAG gotchas, <span style="color:var(--cyan); font-style:normal;">named</span></div>
@@ -1379,7 +1379,7 @@ ok = policy(draft)
 <!-- 23 — SLIDE 6.1                                                -->
 <!-- ============================================================ -->
 <section class="slide">
-    <div class="chrome-tag">L04 &middot; <b>WORKFLOWS</b></div>
+    <div class="chrome-tag">L03 &middot; <b>WORKFLOWS</b></div>
     <div class="topbar reveal">
         <div class="eyebrow">Slide 6.1</div>
         <h2 class="headline">The two pitfalls to catch when you <span class="it">wire your own</span></h2>
@@ -1396,7 +1396,7 @@ ok = policy(draft)
                 <tr>
                     <td class="tag warn-cell">Wrong model per node</td>
                     <td>cheap model to parse / extract, capable for reasoning &mdash; per-node <code>ChatAnthropic(model=...)</code> (&sect;4); the <i>which-model</i> framework is L14.</td>
-                    <td>&sect;4 + the L0403 demo</td>
+                    <td>&sect;4 + the L0305 demo</td>
                 </tr>
             </tbody>
         </table>
@@ -1452,7 +1452,7 @@ ok = policy(draft)
 <!-- 24 — SECTION 7 DIVIDER                                        -->
 <!-- ============================================================ -->
 <section class="slide slide-chapter">
-    <div class="chrome-tag reveal">L04 &middot; <b>WORKFLOWS</b></div>
+    <div class="chrome-tag reveal">L03 &middot; <b>WORKFLOWS</b></div>
     <div class="chapter-ghost reveal">07</div>
     <div class="chapter-eyebrow reveal">Section 7</div>
     <div class="chapter-title reveal">Bridge to <span style="color:var(--cyan); font-style:normal;">L05</span></div>
@@ -1464,7 +1464,7 @@ ok = policy(draft)
 <!-- 25 — SLIDE 7.1                                                -->
 <!-- ============================================================ -->
 <section class="slide">
-    <div class="chrome-tag">L04 &middot; <b>WORKFLOWS</b></div>
+    <div class="chrome-tag">L03 &middot; <b>WORKFLOWS</b></div>
     <div class="topbar reveal">
         <div class="eyebrow">Slide 7.1</div>
         <h2 class="headline">One more primitive, then the <span class="it">workflow-vs-agent</span> close</h2>
@@ -1511,7 +1511,7 @@ ok = policy(draft)
 <!-- 26 — CLOSING                                                  -->
 <!-- ============================================================ -->
 <section class="slide slide-closing">
-    <div class="chrome-tag reveal">L04 &middot; <b>WORKFLOWS</b></div>
+    <div class="chrome-tag reveal">L03 &middot; <b>WORKFLOWS</b></div>
     <div class="closing-statement reveal">In a workflow, the model lives inside the nodes; <span class="k">you own the edges</span> &mdash; a fixed, acyclic chain that takes the same path every time.</div>
     <div class="closing-grid reveal">
         <div class="col">
@@ -1520,11 +1520,11 @@ ok = policy(draft)
         </div>
         <div class="col">
             <div class="label">Practice</div>
-            <div class="val"><b>L0404 lab</b> wire your own parse&rarr;draft&rarr;check chain<br><b>Mix models</b> Haiku + Sonnet per node</div>
+            <div class="val"><b>L0306 lab</b> wire your own parse&rarr;draft&rarr;check chain<br><b>Mix models</b> Haiku + Sonnet per node</div>
         </div>
         <div class="col">
             <div class="label">Companions</div>
-            <div class="val">Live demo <b>L0403</b> prompt chaining<br>Reducers &amp; state reused in <b>L11</b></div>
+            <div class="val">Live demo <b>L0305</b> prompt chaining<br>Reducers &amp; state reused in <b>L11</b></div>
         </div>
     </div>
     <div class="chrome-page">26 / 26</div>
@@ -1679,7 +1679,7 @@ class InlineEditor {
     save() {
         try {
             const html = document.getElementById('deckStage').innerHTML;
-            localStorage.setItem('l0402-deck-content', html);
+            localStorage.setItem('l0304-deck-content', html);
             this.showToast();
         } catch (err) {
             console.warn('Could not save deck content', err);
@@ -1688,7 +1688,7 @@ class InlineEditor {
 
     restore() {
         try {
-            const saved = localStorage.getItem('l0402-deck-content');
+            const saved = localStorage.getItem('l0304-deck-content');
             if (saved) document.getElementById('deckStage').innerHTML = saved;
         } catch (err) {
             console.warn('Could not restore deck content', err);

@@ -61,7 +61,7 @@ class AgentState(TypedDict):
     """The agent's state: one growing message list.
 
     The ``add_messages`` reducer **appends** each node's messages to the running
-    conversation (in the L04 DAGs a returned key *overwrote* it) — that append is
+    conversation (in the L03 sequential DAGs a returned key *overwrote* it) — that append is
     why the history grows turn by turn, and it is the invariant every node upholds.
     """
 

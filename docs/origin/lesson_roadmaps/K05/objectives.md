@@ -81,7 +81,7 @@ By the end of K05, a student should be able to:
 
 6. **State the `invoke` / `ainvoke` default and where it points.** Concretely: articulate the
    course-wide rule — **wherever a framework object exposes both a sync `.invoke()` and an async
-   `.ainvoke()` (LangChain/LangGraph, first met around L03/L04), or a provider SDK offers a sync
+   `.ainvoke()` (LangChain/LangGraph, first met around L03), or a provider SDK offers a sync
    vs. async client (Anthropic/OpenAI), the course defaults to the async variant** — and know that
    the *reason* is the "why async for agents" explainer in this unit. The student won't write this
    code yet; they need to recognize the pattern and the pointer when a later lesson uses it.

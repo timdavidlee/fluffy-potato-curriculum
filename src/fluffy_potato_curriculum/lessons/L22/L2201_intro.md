@@ -28,7 +28,7 @@ whole agent stack: prompting and structured output ([L02](../L02/L0201_intro.md)
 they are, how they're wired, and what they cost ([L07](../L07/L0701_intro.md),
 [L08](../L08/L0801_intro.md)); the hand-rolled model → tool → model loop
 ([L10](../L10/L1001_intro.md)); and that same loop drawn as a LangGraph graph
-([L04](../L04/L0401_intro.md), [L11](../L11/L1101_intro.md)).
+([L03](../L03/L0301_intro.md), [L11](../L11/L1101_intro.md)).
 
 All of that shares one nagging, unsolved problem: **everything the agent might need has to sit in
 the context window all the time.** Every tool's schema is re-sent on every request (L07's "tools

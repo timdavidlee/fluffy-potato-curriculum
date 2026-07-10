@@ -4,7 +4,7 @@
 
 # Mini course — wrap-up
 
-> The closing recap for the **mini cut** (14 lessons + the L50 project capstone). Read after the L50 agent mini-project walkthrough.
+> The closing recap for the **mini cut** (13 lessons + the L50 project capstone). Read after the L50 agent mini-project walkthrough.
 > Track definition: [SYLLABUS.md](SYLLABUS.md) · [tracks.toml](tracks.toml). Rationale: [CURRICULUM_PRD.md](../../../docs/origin/CURRICULUM_PRD.md) ("Condensed Mini Lesson Plan").
 
 ## 1. What this course was
@@ -13,7 +13,7 @@
 
 ## 2. What you built (the arc)
 
-*The through-line as a sequence, in mini teaching order: L01 → L02 → L03 → L04 → L05 → L06 → L07 → L08 → L10 → L11 → L12 → L13 → L22 → L23 → L50. One line per lesson — what it added to the stack. End on the mental picture: tokens → prompts → graphs (node → sequence → branch) → chain-of-thought → tools → hand-rolled loop → shallow agent → tracing → eval → skills → skill systems → a project that ties it all together (L50).*
+*The through-line as a sequence, in mini teaching order: L01 → L02 → L03 → L05 → L06 → L07 → L08 → L10 → L11 → L12 → L13 → L22 → L23 → L50. One line per lesson — what it added to the stack. End on the mental picture: tokens → prompts → graphs (node → sequence → branch) → chain-of-thought → tools → hand-rolled loop → shallow agent → tracing → eval → skills → skill systems → a project that ties it all together (L50). Note L03 now spans "node → sequence" (the former L03+L04, merged); "branch" is L05.*
 
 <!-- *NEED INPUT*: per-lesson recap granularity — one line each (11 bullets), or grouped into ~4 phases (foundations / tools / agent+observability / skills)? Recommendation: grouped phases with the lesson numbers in each, so the arc reads as a story, not a table. -->
 

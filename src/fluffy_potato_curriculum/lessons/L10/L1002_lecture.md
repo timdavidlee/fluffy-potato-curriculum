@@ -18,14 +18,14 @@ estimated duration: 75
 
 ### slide 1.1 An agent is a graph with a cycle
 
-- The graphs you built in [L04](../L04/objectives.md)/[L05](../L05/objectives.md) flowed **forward
+- The graphs you built in [L03](../L03/objectives.md)/[L05](../L05/objectives.md) flowed **forward
   and stopped** — a DAG, where no node ever ran twice and *you* owned every edge.
 - An **agent** takes those same primitives — typed state, nodes, a conditional edge — and adds exactly
   **one** new thing: a **back-edge** from the tool node to the model node. That single edge hands the
   model the decision of what runs next.
-- diagram: two-up — left the L04/L05 forward chain, nodes and edges ink-faint, captioned "you own
+- diagram: two-up — left the L03/L05 forward chain, nodes and edges ink-faint, captioned "you own
   every edge"; right the same graph with exactly one added arc, the **back-edge**, the ONLY cyan
-  element on the slide ("the one new thing") — no coral anywhere. Motif debut: match L04's chain
+  element on the slide ("the one new thing") — no coral anywhere. Motif debut: match L03's chain
   rendering and L0505 2.3's two-up; this picture pre-echoes 2.1.
 - Here's the one line to hold onto: **the back-edge is the cycle, and the cycle is the agent.**
   Everything in this lecture is just a closer look at that one edge — how it loops, when it *stops*
@@ -37,7 +37,7 @@ estimated duration: 75
 
 | Lesson | What it built | What L10 reuses |
 | --- | --- | --- |
-| [L04](../L04/objectives.md) | a directed `StateGraph`: typed state, `add_node`, `add_edge`, `compile`, `ainvoke` | the same primitives — now with a cycle |
+| [L03](../L03/objectives.md) | a directed `StateGraph`: typed state, `add_node`, `add_edge`, `compile`, `ainvoke` | the same primitives — now with a cycle |
 | [L05](../L05/objectives.md) | the **conditional edge**: `add_conditional_edges` + a routing function | `route` *is* an L05 conditional edge; termination is one of its branches |
 | [L07](../L07/L0701_intro.md) | one tool-call round-trip; `.bind_tools()` + `.tool_calls` + `ToolMessage` | the exact interface, now repeated inside the cycle |
 | [L08](../L08/objectives.md) | tool design; what a tool *returns* on failure | the error-as-data idea, now carried back by the graph |
@@ -94,11 +94,11 @@ estimated duration: 75
 ### slide 2.2 The state: the `add_messages` reducer
 
 - text: the agent's state is a `TypedDict` with a single field — `messages: Annotated[list, add_messages]`.
-- text: back in L04, returning a state key **overwrote** it. The `add_messages` **reducer** flips that:
+- text: back in L03, returning a state key **overwrote** it. The `add_messages` **reducer** flips that:
   each node's returned `messages` get **appended** to the running conversation instead of substituted.
   That's *why* the conversation grows every turn — the `agent` node adds one `AIMessage`, and the
   `tools` node adds one `ToolMessage` per call.
-- diagram: two-up — left "L04 default": a state key whose old value is struck through in coral
+- diagram: two-up — left "L03 default": a state key whose old value is struck through in coral
   ("overwritten, lost"); right "L10": a message pill-stack growing downward, existing pills
   ink-faint, the newly appended pill cyan. Reuses the L02/L07 message-pill-stack motif.
 - text: `add_messages` also pairs messages by id, so the history stays well-formed as it accumulates.
@@ -313,7 +313,7 @@ estimated duration: 75
 
 | "I think..." | Actually |
 | --- | --- |
-| "a graph can't loop — L04/L05 were all forward" | a conditional edge can point *back*; the agent is a graph whose `route` sends control to an earlier node until the model stops asking |
+| "a graph can't loop — L03/L05 were all forward" | a conditional edge can point *back*; the agent is a graph whose `route` sends control to an earlier node until the model stops asking |
 | "the loop ends when the answer is right" | it ends when `route` returns `END` or `recursion_limit` fires; *correctness* is a downstream concern (L12 traces, L13 eval) |
 | "`ToolNode` is magic / a black box" | it's the L07 `.tool_calls` → run → append-`ToolMessage` step, prebuilt — open it up so you can debug it |
 | "I should retry every failed tool call" | usually not — a `404` is not a `503`; default to surfacing the error and letting the model decide |

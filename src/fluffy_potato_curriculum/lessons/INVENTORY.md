@@ -29,8 +29,7 @@ pad ~20–30% for a real class clock.
 | --- | -------------------------------------------- | :---: | :----: | :-------: | :--: | --------: |
 | L01 | LLM and token basics                         |   1   |   1    |     6     |  3   |   2 h 45 m |
 | L02 | Prompting fundamentals                       |   1   |   1    |     4     |  4   |   2 h 35 m |
-| L03 | Single-node operations                       |   1   |   1    |     1     |  1   |     50 m |
-| L04 | Directed graphs: sequential chaining         |   1   |   1    |     1     |  1   |     50 m |
+| L03 | Directed graphs: from one node to a sequential chain |   1   |   1    |     3     |  1   |   1 h 20 m |
 | L05 | Conditional graphs: routing & branching      |   1   |   2    |     1     |  1   |   1 h 05 m |
 | L06 | Teaching an LLM to think via prompting       |   1   |   1    |     4     |  4   |   2 h 35 m |
 | L07 | Tool calling: how it works                   |   1   |   1    |     4     |  3   |   2 h 15 m |
@@ -42,7 +41,7 @@ pad ~20–30% for a real class clock.
 | L22 | Skills: just-in-time capabilities for agents |   1   |   2    |     1     |  2   |   1 h 25 m |
 | L23 | Skill patterns & composition                 |   —   |   —    |     —     |  —   | not built yet |
 
-**Built mini lessons (13): ≈ 23.5 hours of content time.**
+**Built mini lessons (12): ≈ 23.2 hours of content time.**
 
 ## Notes
 
@@ -53,5 +52,7 @@ pad ~20–30% for a real class clock.
   *planned* clock including breaks, setup, discussion, and buffer; the ~23.5 h
   here is bottom-up content-only work, so the two are consistent (the gap is the
   pad).
-- The lesson sizes are uneven by design: L03–L05 (the graph ramp) are short
-  single-lab lessons, while L01/L02/L06/L08 are the heavy multi-demo lessons.
+- The lesson sizes are uneven by design: L05 (conditional graphs) is a short
+  single-lab lesson, while L03 — after the 2026-07-09 merge of single-node +
+  sequential chaining — carries three demos and a lab; L01/L02/L06/L08 remain
+  the heavy multi-demo lessons.

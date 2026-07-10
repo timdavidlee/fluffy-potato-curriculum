@@ -101,38 +101,46 @@ Lessons are taught in numeric order (`L01` first). Each row links to that
 lesson's `objectives.md` once it exists.
 
 **Ordering note — orchestration before tools.** After prompting fundamentals (L02),
-the course teaches the graph/orchestration model early as a three-lesson ramp —
-**L03 single-node → L04 sequential graphs → L05 conditional graphs** — using plain
+the course teaches the graph/orchestration model early as a two-lesson ramp —
+**L03 (single node → sequential chain) → L05 conditional graphs** — using plain
 LLM calls only (no tools yet). Only then does it return to **L06 chain-of-thought**
-and **L07 tool calling**. The through-line: *you wire the graph (L03–L05); the model
+and **L07 tool calling**. The through-line: *you wire the graph (L03, L05); the model
 drives the loop (from L10, the agent loop)* — deterministic developer-controlled
 branching is taught first, model-driven control comes later. Two consequences worth
-tracking: (a) the graph model is now **continuous from L03 onward** — L03–L05 build
+tracking: (a) the graph model is **continuous from L03 onward** — L03 and L05 build
 forward graphs in LangGraph (`StateGraph`, nodes, edges, conditional edges), and L10
 reuses those exact primitives to build the **ReAct agent as a *cyclic* graph**, adding
 the one thing the earlier graphs lacked: a **back-edge** from the tool node to the agent
 node. So "mechanics before the framework" is satisfied *within* the graph model — L10
 wires the agent node-by-node by hand, and L11 immediately reveals the prebuilt `create_agent`
-as "that same graph, packaged"; (b) the workflow-vs-agent contrast opens at L04
+as "that same graph, packaged"; (b) the workflow-vs-agent contrast opens at L03
 (forward, developer-driven) and closes at L10–L11 (the loop, model-driven), with L10 as the
 hinge where the graph first gains a cycle.
+
+> **Merge note (2026-07-09).** The former **L03 "Single-node operations"** and **L04
+> "Directed graphs: sequential chaining"** are now a **single lesson at L03** —
+> *"Directed graphs: from one node to a sequential chain."* Single-node-in-isolation was
+> too thin to stand alone (its payoff only arrives when a second node is wired), so the
+> node is now built and *immediately* chained in one lesson. The **`L04` slot is a reserved
+> gap** — the downstream lessons were **not** renumbered (consistent with the existing gaps
+> at L14+ and L50). Read "L03" wherever older notes say "the sequential-chaining lesson (L04)."
 
 | #   | Lesson title                                          | Subgoals                                                                                                  |
 | --- | ----------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
 | L01 | LLM and token basics                                  | tokenize a string; reason about context windows; explain temperature and sampling; estimate cost <!-- also carries a mechanistic model-scale beat (a local GPT-2 124M→355M→774M ladder sharpening the next-token distribution) — taught as a foreshadow of L14 (choosing models & providers), not a separately assessed subgoal --> |
 | L02 | Prompting fundamentals                                | use system/user/assistant roles; request structured output; use few-shot examples deliberately; recognize and prompt for the common single-step task shapes (extraction, classification, ranking, constrained generation, summarization) |
-| L03 | Single-node operations                                | wrap a single LLM call as a reusable node with explicit typed input/output state; treat a node as a pure function over shared state (state in → state out); run and inspect one node in isolation; understand *why* an explicit step is the unit you orchestrate <!-- new lesson — needs a roadmap authored under lesson_roadmaps/L03/ --> |
-| L04 | Directed graphs: sequential chaining                  | model a multi-step task as a directed acyclic graph of explicit nodes; wire fixed edges and shared state; build a deterministic prompt-chaining workflow where the developer controls the path (no model-driven looping); contrast a workflow (you wire the flow) with an agent (the model drives the flow, introduced at L11) <!-- seeded from the former L11 workflows lesson (deterministic-DAG half) --> |
+| L03 | Directed graphs: from one node to a sequential chain  | wrap a single LLM call as a reusable, typed node — a pure function over shared state (state in → state out); run and inspect one node in isolation; then wire several such nodes into a directed acyclic graph with fixed edges and shared state; build a deterministic prompt-chaining workflow where the developer controls the path (no model-driven looping); contrast a workflow (you wire the flow) with an agent (the model drives the flow, introduced at L11) <!-- merged 2026-07-09 from the former L03 (single-node) + L04 (sequential chaining); roadmap at lesson_roadmaps/L03/ --> |
+| ~~L04~~ | *reserved gap — merged into L03*                  | The former "Directed graphs: sequential chaining" was merged into L03 on 2026-07-09; the slot is intentionally left empty rather than renumbering L05+ (matches the L14+/L50 gaps). |
 | L05 | Conditional graphs: routing & branching               | add conditional edges that branch on a model classification *or on direct user input*; build a router/switch with fixed, developer-controlled branches; reason about deterministic branching now vs. model-driven control later (the agent loop, L10/L11) <!-- new lesson — split out from the former L11 workflows lesson (routing half); needs a roadmap authored under lesson_roadmaps/L05/ --> |
 | L06 | Teaching an LLM to think via prompting                | write a chain-of-thought prompt; use a scratchpad / `<thinking>` block; apply self-critique; recognize when explicit reasoning helps vs. hurts |
 | L07 | Tool calling: how it works                            | wire a single tool to a model call; trace one tool-call round-trip; describe the tool-call protocol       |
 | L08 | Designing good tools                                  | decide when a tool is needed vs. model-alone; name and schema-design a tool; handle tool errors           |
 | L09 | MCP: packaging tools as a portable contract           | describe the problem MCP solves (portable tool contract across clients); connect to an existing MCP server from a client; expose a simple tool as an MCP server; decide when MCP is worth the overhead vs. an inline tool |
-| L10 | Cyclic graphs: the ReAct agent loop                   | build a ReAct agent as a cyclic `StateGraph` (agent node → conditional back-edge → prebuilt `ToolNode`), reusing the L04/L05 graph primitives plus the new back-edge; reason about termination (`recursion_limit`, natural `END`); handle tool failures (`ToolNode(handle_tool_errors=True)`) |
+| L10 | Cyclic graphs: the ReAct agent loop                   | build a ReAct agent as a cyclic `StateGraph` (agent node → conditional back-edge → prebuilt `ToolNode`), reusing the L03/L05 graph primitives plus the new back-edge; reason about termination (`recursion_limit`, natural `END`); handle tool failures (`ToolNode(handle_tool_errors=True)`) |
 | L11 | Shallow agents in LangGraph                           | build a shallow agent with LangChain's `create_agent` — the one-line equivalent of the L10 agent graph; run it on the L10 tasks and confirm behavioral equivalence; recognize what `create_agent` wraps (the same agent-node/tool-node/back-edge graph students built by hand) without re-wiring it, deferring the deeper `StateGraph` internals to L15 |
 | L12 | What an agent generates: state, logs, traces & extracts | inventory what an agent run produces and split it across two planes — *observability* (state, logs, traces: what the agent did, for you to debug/eval) vs *data* (extracts / new records: what the agent made, persisted to a DB or S3); read a trace of an agent run (model calls, tool calls, intermediate state); locate where a failure occurred from the trace alone; instrument an agent to emit useful traces; compare two traces of the same task to spot what changed; keep hard data out of the trace and the trace out of the datastore |
 | L13 | Evaluation: first pass                                | build a minimal eval set for a tool-calling agent and run it as a Langfuse **dataset + experiment** (on the same self-hosted Langfuse used for tracing in L12); design eval cases that target failure modes already seen in traces from L12; compare two experiments of the same task in Langfuse to flag regressions; reason about eval cost (sample size, model calls) and the scorer cost/judgment spectrum, ending on Langfuse's **managed LLM-as-judge**; establish the practice that every later lesson will carry forward |
-| L14 | Choosing models & providers for the task              | survey the major model providers and where each is differentially strong (vision/OCR, long-context, reasoning/planning, cheap high-throughput execution); match a task or agent step to an appropriate provider *and* power tier — not just a size class within one provider; design a mixed-model, mixed-provider agent (e.g. a vision model for OCR, a strong reasoner for planning, a small fast model for routing/execution), binding different models to different nodes of the graphs from L03–L05; weigh capability against latency, cost, and context length; estimate cost and latency budgets for a multi-step, multi-model agent |
+| L14 | Choosing models & providers for the task              | survey the major model providers and where each is differentially strong (vision/OCR, long-context, reasoning/planning, cheap high-throughput execution); match a task or agent step to an appropriate provider *and* power tier — not just a size class within one provider; design a mixed-model, mixed-provider agent (e.g. a vision model for OCR, a strong reasoner for planning, a small fast model for routing/execution), binding different models to different nodes of the graphs from L03/L05; weigh capability against latency, cost, and context length; estimate cost and latency budgets for a multi-step, multi-model agent |
 | L15 | LangGraph design patterns                             | name common patterns (ReAct, plan-and-execute, supervisor, hierarchical, state-machine routing) and their distinguishing features; match a use case to an appropriate pattern; describe trade-offs (latency, control, complexity) |
 | L16 | Agent middleware and conditional tools                | explain agent middleware as hooks around the agent loop (before/after model, request/response modification) that change behavior without rewriting the graph; apply a middleware to inspect, log, or guard a step; implement conditional (dynamic) tool exposure — gate which tools the model sees based on state, role, or prior steps; reason about when middleware is the right seam vs. editing graph nodes directly <!-- *NEED INPUT*: placed after L15 patterns so students see ReAct/supervisor first; move to immediately after L11 (shallow agents) if you'd rather teach middleware before patterns --> |
 | L17 | Human-in-the-loop and approval gates                  | identify steps that warrant human approval (irreversible side effects, high-stakes decisions, low-confidence tool calls); implement an interrupt/resume pattern in LangGraph; design an approval UX (what to surface, what to ask, safe default); reason about the cost of blocking the agent on a human (latency, throughput, attention) |
@@ -181,9 +189,11 @@ past the ~20 hr floor. They make "compose skills into a system" the mini cut's l
 lesson; the mini course then **closes with the L50 agent mini-project walkthrough** — a hands-on,
 end-to-end build that consolidates the five objectives (see the master plan above for why it is
 numbered L50 and its walkthrough format).
-The early graph ramp (L03 single-node → L04 sequential → L05 conditional) is kept whole: it now
-precedes tools and the agent loop, so every later mini lesson builds on the node/graph model and
-none of the three can be dropped without breaking what follows. Chain-of-thought prompting (L06)
+The early graph ramp (L03 *from one node to a sequential chain* → L05 conditional) is kept whole: it
+now precedes tools and the agent loop, so every later mini lesson builds on the node/graph model and
+neither lesson can be dropped without breaking what follows. (Before the 2026-07-09 merge this ramp
+was three lessons — single-node, sequential, conditional; the first two are now one lesson at L03.)
+Chain-of-thought prompting (L06)
 is kept by explicit request: it gives the `<thinking>` channel a real home (see the assistant
 message-channels thread below) and reinforces "deciding to call a tool is a reasoning step" right
 before L07 — this is why the mini grew from 11 to 14 lessons.
@@ -192,8 +202,7 @@ before L07 — this is why the mini grew from 11 to 14 lessons.
 | --- | --------------------------------------- | ---------------------------------------------------------------------------- |
 | L01 | LLM and token basics                    | Non-negotiable foundation — every later lesson assumes it                    |
 | L02 | Prompting fundamentals                  | Non-negotiable foundation                                                    |
-| L03 | Single-node operations                  | The orchestration unit — a node is one LLM call you wire; every graph builds on it |
-| L04 | Directed graphs: sequential chaining    | Deterministic prompt-chaining before the model-driven loop                   |
+| L03 | Directed graphs: from one node to a sequential chain | The orchestration unit — a node is one LLM call you wire — then wired into a deterministic prompt-chaining workflow; every graph builds on it |
 | L05 | Conditional graphs: routing & branching | Developer-controlled branching before the agent drives control               |
 | L06 | Teaching an LLM to think via prompting  | Kept by request; owns the `<thinking>` channel and frames tool-calling as reasoning before L07 |
 | L07 | Tool calling: how it works              | Covers the *tool design* objective — mechanics half                          |

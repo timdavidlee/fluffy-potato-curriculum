@@ -4,7 +4,7 @@
 > Folder conventions: [docs/origin/CLAUDE.md](../../CLAUDE.md).
 > Preceding lesson: [L10 Hand-rolled agent loop](../L10/objectives.md). Following lesson: [L12 What an agent generates: state, logs, traces & extracts](../L12/objectives.md).
 >
-> Conceptually L11 is the **payoff beat right after the hand-rolled loop**: in L10 students wrote the model → tool → model loop by hand; L11 shows the batteries-included one-liner — LangChain's **`create_agent`** — that produces *the same loop* in a single call. It also **closes the workflow-vs-agent arc opened by the early graph block** ([L04 sequential chaining](../L04/objectives.md) + [L05 conditional routing](../L05/objectives.md)): those lessons wired *acyclic*, developer-owned graphs (workflows); an agent adds the one thing that turns a graph into an agent — a **cycle** plus model-driven control (the model decides what runs next by emitting tool calls). `create_agent` hands you that cyclic, model-driven agent prebuilt.
+> Conceptually L11 is the **payoff beat right after the hand-rolled loop**: in L10 students wrote the model → tool → model loop by hand; L11 shows the batteries-included one-liner — LangChain's **`create_agent`** — that produces *the same loop* in a single call. It also **closes the workflow-vs-agent arc opened by the early graph block** ([L03 sequential chaining](../L03/objectives.md) + [L05 conditional routing](../L05/objectives.md)): those lessons wired *acyclic*, developer-owned graphs (workflows); an agent adds the one thing that turns a graph into an agent — a **cycle** plus model-driven control (the model decides what runs next by emitting tool calls). `create_agent` hands you that cyclic, model-driven agent prebuilt.
 
 ## Where this lesson sits
 
@@ -35,7 +35,7 @@ By the end of L11, a student should be able to:
 
 1. **Recognize a shallow agent as the L10 loop, and `create_agent` as its one-liner.** Concretely:
    - State the definition of a *shallow* agent (one model, one tool set, one decision point) and that it is exactly the model → tool → model loop from L10.
-   - Read a *lightweight* graph diagram of what `create_agent` wraps and name each piece against its L10 twin: an **`agent`** (model-call) step, a **`tools`** step, a **back-edge** from tools back to the model, and a decision point that either calls a tool or finishes. Point at the back-edge and say *"that cycle is the agent."* (Recall [L04](../L04/objectives.md)'s framing: a workflow is acyclic and developer-driven; the back-edge that hands the path to the model is what makes it an agent.)
+   - Read a *lightweight* graph diagram of what `create_agent` wraps and name each piece against its L10 twin: an **`agent`** (model-call) step, a **`tools`** step, a **back-edge** from tools back to the model, and a decision point that either calls a tool or finishes. Point at the back-edge and say *"that cycle is the agent."* (Recall [L03](../L03/objectives.md)'s framing: a workflow is acyclic and developer-driven; the back-edge that hands the path to the model is what makes it an agent.)
    - Articulate that this diagram is a *mental model*, not something you build in L11 — assembling that graph node-by-node is L15's job. Here the point is only to see that `create_agent` is not magic: it is the loop you already wrote, packaged.
 
 2. **Build and run a shallow agent with `create_agent`.** Concretely:
@@ -56,7 +56,7 @@ Define these explicitly and reuse them verbatim through the labs and into L15:
 - **Shallow agent** — a single tool-calling loop (one model, one tool set, one decision point). Explicitly *not* a deep agent (planning / memory / reflection — L18).
 - **`create_agent`** — LangChain's one-call constructor (`from langchain.agents import create_agent`) that returns a runnable shallow agent from a model + tools (+ prompt). The framework's replacement for L10's hand-written `while` loop, routing, and message bookkeeping.
 - **Agent step / tool step** — the two units of work inside the agent: call the model, then run any tools it asked for. The names of the nodes in the graph `create_agent` wraps.
-- **Back-edge / the cycle** — the transition from the tool step back to the model step; the single thing that turns L04/L05's acyclic *workflow* into an *agent*.
+- **Back-edge / the cycle** — the transition from the tool step back to the model step; the single thing that turns L03/L05's acyclic *workflow* into an *agent*.
 - **Recursion / step limit** — the framework's cap on how many loop turns run, the analogue of L10's `max_steps`; hitting it is still a signal worth investigating.
 
 ## Main points the lecture should land

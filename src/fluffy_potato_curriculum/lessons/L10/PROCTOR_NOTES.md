@@ -21,14 +21,14 @@ Times are rough and assume a semi-technical student with basic Python who comple
 > coroutine object (or a LangGraph error about the sync path) instead of a state dict — see the K05
 > prework for the why.
 >
-> **New in L10 vs. L04/L05: the back-edge.** Students have built forward-only graphs (L04 `StateGraph`,
+> **New in L10 vs. L03/L05: the back-edge.** Students have built forward-only graphs (L03 `StateGraph`,
 > L05 conditional edge). The one new primitive is `add_edge("tools", "agent")` — the edge that loops
 > back and makes the graph a **cycle**. If a student is shaky on the L05 conditional edge or the L07
 > single tool round-trip, redirect there first; the agent is just a conditional edge that loops.
 >
 > **Two `add_messages` gotchas to pre-empt (they bite the whole cohort):**
 > 1. The state's `messages` field **must** use `Annotated[list, add_messages]`. Without the reducer,
->    each node *overwrites* the list (L04 behavior) and the conversation never accumulates — the graph
+>    each node *overwrites* the list (L03 behavior) and the conversation never accumulates — the graph
 >    breaks in confusing ways.
 > 2. `add_messages` de-duplicates messages **by id**. That is why the L1004 runaway scripts *distinct*
 >    `lookup` turns (`r0`, `r1`, …): repeating the *same* `AIMessage` object would be de-duped and the
@@ -53,7 +53,7 @@ Times are rough and assume a semi-technical student with basic Python who comple
 ## L1004_lab problem 2 — Wire the graph: `build_agent`
 
 - **Common gotchas:** **(the big one)** forgetting the **back-edge** `add_edge("tools", "agent")` — the
-  graph then runs `agent → tools` once and stops, an L04 pipeline, not an agent. Other gotchas:
+  graph then runs `agent → tools` once and stops, an L03 pipeline, not an agent. Other gotchas:
   returning the reply from `agent_node` as a bare `AIMessage` instead of `{"messages": [reply]}` (the
   node must return a state update dict); forgetting the `await` on `.ainvoke(...)` inside `agent_node`
   (the node then returns a coroutine, not an `AIMessage`); passing the tools dict/among nodes wrong —

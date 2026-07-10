@@ -561,7 +561,7 @@ table.ledger td.warn-cell { color: var(--coral); }
             <path d="M 460 308 C 520 372, 555 392, 580 432" fill="none" stroke="var(--coral)" stroke-width="3" marker-end="url(#cov-co)"/>
         </svg>
     </div>
-    <div class="chrome-page">01 / 15</div>
+    <div class="chrome-page">01 / 16</div>
     <div class="chrome-nav">L5002 &middot; lecture deck</div>
 </section>
 
@@ -574,7 +574,7 @@ table.ledger td.warn-cell { color: var(--coral); }
     <div class="chapter-eyebrow reveal">Section 1</div>
     <div class="chapter-title reveal">The problem: does this receipt <span style="color:var(--cyan); font-style:normal;">match the ledger?</span></div>
     <div class="chapter-sub reveal">One receipt, a small ledger, one question &mdash; and, when nothing lines up, say so instead of guessing.</div>
-    <div class="chrome-page">02 / 15</div>
+    <div class="chrome-page">02 / 16</div>
 </section>
 
 <!-- ============================================================ -->
@@ -617,7 +617,7 @@ table.ledger td.warn-cell { color: var(--coral); }
         </div>
         <div class="diagram-caption reveal">Both ends are legitimate &mdash; <span style="color:var(--coral);">&ldquo;no confident match&rdquo;</span> is a <i>correct</i> answer here, not a failure.</div>
     </div>
-    <div class="chrome-page">03 / 15</div>
+    <div class="chrome-page">03 / 16</div>
     <div class="chrome-nav">&larr; &rarr; navigate</div>
 </section>
 
@@ -642,7 +642,7 @@ table.ledger td.warn-cell { color: var(--coral); }
         </table>
         <div class="diagram-caption reveal">Normalizing those into one comparable <code>(vendor, amount)</code> is the real work &mdash; and it's what decides where the tool goes in section 2.</div>
     </div>
-    <div class="chrome-page">04 / 15</div>
+    <div class="chrome-page">04 / 16</div>
     <div class="chrome-nav">&larr; &rarr; navigate</div>
 </section>
 
@@ -655,7 +655,7 @@ table.ledger td.warn-cell { color: var(--coral); }
     <div class="chapter-eyebrow reveal">Section 2</div>
     <div class="chapter-title reveal">How to think about <span style="color:var(--cyan); font-style:normal;">the tools</span></div>
     <div class="chapter-sub reveal">Draw the line yourself: the tool does the brittle normalize-and-match; the model does the judgement around it.</div>
-    <div class="chrome-page">05 / 15</div>
+    <div class="chrome-page">05 / 16</div>
 </section>
 
 <!-- ============================================================ -->
@@ -690,7 +690,7 @@ table.ledger td.warn-cell { color: var(--coral); }
         </div>
         <div class="diagram-caption reveal">The point is the <b style="color:var(--ink);">line</b> between them, not either box alone &mdash; mechanism on one side, judgement on the other.</div>
     </div>
-    <div class="chrome-page">06 / 15</div>
+    <div class="chrome-page">06 / 16</div>
     <div class="chrome-nav">&larr; &rarr; navigate</div>
 </section>
 
@@ -744,12 +744,50 @@ table.ledger td.warn-cell { color: var(--coral); }
         </div>
         <div class="diagram-caption reveal">Three <span style="color:var(--cyan);">cyan</span> tools, one junction &mdash; the branch the agent takes (match, total, check the policy) is exactly what the trace records.</div>
     </div>
-    <div class="chrome-page">07 / 15</div>
+    <div class="chrome-page">07 / 16</div>
     <div class="chrome-nav">&larr; &rarr; navigate</div>
 </section>
 
 <!-- ============================================================ -->
-<!-- 08 — SECTION 3 DIVIDER                                        -->
+<!-- 08 — SLIDE 2.3                                                -->
+<!-- ============================================================ -->
+<section class="slide">
+    <div class="chrome-tag">L50 &middot; <b>MINI-PROJECT</b></div>
+    <div class="topbar reveal">
+        <div class="eyebrow">Slide 2.3</div>
+        <h2 class="headline">A tool can itself be a <span class="it">model call</span></h2>
+    </div>
+    <div class="body-area">
+        <ul class="points reveal" style="max-width:1660px;">
+            <li class="point">Usually a tool is pure <b>mechanism</b>: <code>find_matching_record</code> &mdash; the one tool you <b>write</b> &mdash; normalizes and looks up, same input, same row, <b>no model inside it</b>. The tidy side of the L08 line you drew a slide ago.</li>
+            <li class="point"><code>check_expense_policy</code> is <b>provided</b>, and it's a different animal: company policy is <b>free-form prose</b> (<code>expense_policy.md</code>), not a cap table &mdash; so the tool's <i>body</i> does a single <code>model.invoke</code> that reads the policy and cites the rule. The tool <b>is</b> a model call &mdash; policy is guidance to <b>interpret</b>, not a row to match.</li>
+        </ul>
+        <div class="diagram-frame reveal" style="gap:0; margin-top:2px; align-items:stretch;">
+            <div style="flex:1; max-width:640px; border:2px solid var(--cyan); border-radius:12px; background:#12181a; padding:18px 32px;">
+                <div style="font-family:var(--font-body); font-size:23px; color:var(--cyan); font-weight:600;">find_matching_record</div>
+                <div style="font-size:15px; letter-spacing:0.11em; text-transform:uppercase; color:var(--ink-faint); margin:6px 0 16px;">a normal tool &mdash; pure mechanism</div>
+                <div style="border:2px dashed var(--ink-faint); border-radius:10px; padding:16px 20px; color:var(--ink-dim); font-size:21px; line-height:1.45;">normalize any shape<br>&rarr; <code style="background:rgba(255,255,255,0.04); padding:1px 7px; border-radius:3px; color:var(--ink-dim);">(vendor, amount)</code> &rarr; look up</div>
+                <div style="font-size:19px; color:var(--ink-dim); margin-top:14px;">same input &rarr; same row. <b style="color:var(--ink);">No model inside.</b></div>
+            </div>
+            <div style="width:52px;"></div>
+            <div style="flex:1; max-width:640px; border:2px solid var(--cyan); border-radius:12px; background:#12181a; padding:18px 32px;">
+                <div style="font-family:var(--font-body); font-size:23px; color:var(--cyan); font-weight:600;">check_expense_policy</div>
+                <div style="font-size:15px; letter-spacing:0.11em; text-transform:uppercase; color:var(--cyan); margin:6px 0 16px;">an LLM read &mdash; a model call inside</div>
+                <div style="border:2px solid var(--cyan); border-radius:10px; padding:16px 20px; background:rgba(82,232,200,0.07);">
+                    <div style="font-size:19px; color:var(--ink-dim);">reads <code style="background:rgba(82,232,200,0.10); padding:1px 7px; border-radius:3px; color:var(--cyan);">expense_policy.md</code> (prose)</div>
+                    <div style="font-size:22px; color:var(--cyan); margin-top:8px; font-weight:600;">&#9673;&nbsp; model.invoke &rarr; judges + cites the rule</div>
+                </div>
+                <div style="font-size:19px; color:var(--coral); margin-top:14px;">the cost: a model call where a lookup would do.</div>
+            </div>
+        </div>
+        <div class="diagram-caption reveal">Both are <span style="color:var(--cyan);">cyan</span> tools the agent calls the same way &mdash; but the one on the right spends a <b style="color:var(--ink);">model call</b> inside itself, deliberately, because policy is prose to read, not a table to look up.</div>
+    </div>
+    <div class="chrome-page">08 / 16</div>
+    <div class="chrome-nav">&larr; &rarr; navigate</div>
+</section>
+
+<!-- ============================================================ -->
+<!-- 09 — SECTION 3 DIVIDER                                        -->
 <!-- ============================================================ -->
 <section class="slide slide-chapter">
     <div class="chrome-tag reveal">L50 &middot; <b>MINI-PROJECT</b></div>
@@ -757,11 +795,11 @@ table.ledger td.warn-cell { color: var(--coral); }
     <div class="chapter-eyebrow reveal">Section 3</div>
     <div class="chapter-title reveal">How to think about <span style="color:var(--cyan); font-style:normal;">failure</span></div>
     <div class="chapter-sub reveal">Feed it a receipt OCR gave up on. Decide what <i>good</i> looks like before you run it &mdash; then turn what you see into a case that catches it.</div>
-    <div class="chrome-page">08 / 15</div>
+    <div class="chrome-page">09 / 16</div>
 </section>
 
 <!-- ============================================================ -->
-<!-- 09 — SLIDE 3.1                                                -->
+<!-- 10 — SLIDE 3.1                                                -->
 <!-- ============================================================ -->
 <section class="slide">
     <div class="chrome-tag">L50 &middot; <b>MINI-PROJECT</b></div>
@@ -804,12 +842,12 @@ table.ledger td.warn-cell { color: var(--coral); }
             <div class="diagram-caption" style="margin-top:14px; font-size:22px;">The same span repeating on the same bad input is the runaway signature &mdash; coral is earned here.</div>
         </div>
     </div>
-    <div class="chrome-page">09 / 15</div>
+    <div class="chrome-page">10 / 16</div>
     <div class="chrome-nav">&larr; &rarr; navigate</div>
 </section>
 
 <!-- ============================================================ -->
-<!-- 10 — SLIDE 3.2                                                -->
+<!-- 11 — SLIDE 3.2                                                -->
 <!-- ============================================================ -->
 <section class="slide">
     <div class="chrome-tag">L50 &middot; <b>MINI-PROJECT</b></div>
@@ -844,12 +882,12 @@ table.ledger td.warn-cell { color: var(--coral); }
         </div>
         <div class="diagram-caption reveal">A scorer that passes on the broken run catches nothing &mdash; the verdict attached to the runaway is what makes it a kept case.</div>
     </div>
-    <div class="chrome-page">10 / 15</div>
+    <div class="chrome-page">11 / 16</div>
     <div class="chrome-nav">&larr; &rarr; navigate</div>
 </section>
 
 <!-- ============================================================ -->
-<!-- 11 — SECTION 4 DIVIDER                                        -->
+<!-- 12 — SECTION 4 DIVIDER                                        -->
 <!-- ============================================================ -->
 <section class="slide slide-chapter">
     <div class="chrome-tag reveal">L50 &middot; <b>MINI-PROJECT</b></div>
@@ -857,11 +895,11 @@ table.ledger td.warn-cell { color: var(--coral); }
     <div class="chapter-eyebrow reveal">Section 4</div>
     <div class="chapter-title reveal">How to know <span style="color:var(--cyan); font-style:normal;">you're done</span></div>
     <div class="chapter-sub reveal">The agent is non-deterministic &mdash; one green run proves almost nothing. Traced, plus one case that would catch its regression.</div>
-    <div class="chrome-page">11 / 15</div>
+    <div class="chrome-page">12 / 16</div>
 </section>
 
 <!-- ============================================================ -->
-<!-- 12 — SLIDE 4.1                                                -->
+<!-- 13 — SLIDE 4.1                                                -->
 <!-- ============================================================ -->
 <section class="slide">
     <div class="chrome-tag">L50 &middot; <b>MINI-PROJECT</b></div>
@@ -891,12 +929,12 @@ table.ledger td.warn-cell { color: var(--coral); }
         </div>
         <div class="diagram-caption reveal">The contrast is the slide &mdash; cyan is the bar you're aiming the next 70 minutes at.</div>
     </div>
-    <div class="chrome-page">12 / 15</div>
+    <div class="chrome-page">13 / 16</div>
     <div class="chrome-nav">&larr; &rarr; navigate</div>
 </section>
 
 <!-- ============================================================ -->
-<!-- 13 — SECTION 5 DIVIDER                                        -->
+<!-- 14 — SECTION 5 DIVIDER                                        -->
 <!-- ============================================================ -->
 <section class="slide slide-chapter">
     <div class="chrome-tag reveal">L50 &middot; <b>MINI-PROJECT</b></div>
@@ -904,11 +942,11 @@ table.ledger td.warn-cell { color: var(--coral); }
     <div class="chapter-eyebrow reveal">Section 5</div>
     <div class="chapter-title reveal">You already own <span style="color:var(--cyan); font-style:normal;">every piece</span></div>
     <div class="chapter-sub reveal">None of this is new machinery &mdash; you import the loop, tracing, and evals. The only new code is one small tool.</div>
-    <div class="chrome-page">13 / 15</div>
+    <div class="chrome-page">14 / 16</div>
 </section>
 
 <!-- ============================================================ -->
-<!-- 14 — SLIDE 5.1                                                -->
+<!-- 15 — SLIDE 5.1                                                -->
 <!-- ============================================================ -->
 <section class="slide">
     <div class="chrome-tag">L50 &middot; <b>MINI-PROJECT</b></div>
@@ -952,12 +990,12 @@ table.ledger td.warn-cell { color: var(--coral); }
         </div>
         <div class="diagram-caption reveal">Four dim imports vs one bright new tool &mdash; that contrast is the whole slide.</div>
     </div>
-    <div class="chrome-page">14 / 15</div>
+    <div class="chrome-page">15 / 16</div>
     <div class="chrome-nav">&larr; &rarr; navigate</div>
 </section>
 
 <!-- ============================================================ -->
-<!-- 15 — CLOSING                                                  -->
+<!-- 16 — CLOSING                                                  -->
 <!-- ============================================================ -->
 <section class="slide slide-closing">
     <div class="chrome-tag reveal">L50 &middot; <b>MINI-PROJECT</b></div>
@@ -976,7 +1014,7 @@ table.ledger td.warn-cell { color: var(--coral); }
             <div class="val"><b>Traced + one eval case</b><br>fails on the bug, passes when fixed &mdash; the build itself is L5003</div>
         </div>
     </div>
-    <div class="chrome-page">15 / 15</div>
+    <div class="chrome-page">16 / 16</div>
 </section>
 
 </main>

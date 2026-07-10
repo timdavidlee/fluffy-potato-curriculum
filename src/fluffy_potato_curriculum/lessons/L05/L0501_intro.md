@@ -13,20 +13,20 @@ estimated duration: 10
 > ([L0503_lecture.ipynb](L0503_lecture.ipynb)), and the workflow-vs-agent wrap-up
 > ([L0505_lecture.md](L0505_lecture.md)). Hands-on practice is in the L05 lab (L0504).
 > **Anchor model: Claude Sonnet 4.6** for the branch nodes, **Claude Haiku 4.5** for the
-> classifier — the same mixed-model mechanism from [L04](../L04/objectives.md).
+> classifier — the same mixed-model mechanism from [L03](../L03/objectives.md).
 
 ## Where this lesson sits
 
-You're on the **third graph lesson**. In [L03](../L03/objectives.md) you wrapped a *single* LLM
-call as a typed node; in [L04](../L04/objectives.md) you wired **several** nodes into a fixed
+You're on the **second graph lesson**. In [L03](../L03/objectives.md) you wrapped a *single* LLM
+call as a typed node, then wired **several** nodes into a fixed
 sequence where you hard-coded what runs next. Here you add the one remaining primitive you need
 before you can talk about agents: the **conditional edge** — a transition chosen at *runtime* by a
 routing function that inspects state and returns the name of the next node. With L05 done, you've
-completed the **L03–L05 graph ramp**: single node → fixed sequence → runtime-chosen branch, all
+completed the **L03 & L05 graph ramp**: single node → fixed sequence → runtime-chosen branch, all
 still without tools ([L07](../L07/objectives.md)) and without an agent loop
 ([L10](../L10/objectives.md) / [L11](../L11/objectives.md)).
 
-You won't re-cover L04's sequential chaining here — you already know how to build a fixed-edge
+You won't re-cover L03's sequential chaining here — you already know how to build a fixed-edge
 `StateGraph`. This lesson's entire job is the one new primitive, the conditional edge, and what
 gets to decide it.
 
@@ -36,7 +36,7 @@ If you remember nothing else from this lesson, remember this: **a conditional ed
 model deciding.** Here it is said a few ways:
 
 1. A **conditional edge** — wired with `add_conditional_edges` — reads **state** and returns the
-   name of the next node, at runtime. L04 used only **fixed** edges (`A → B`, always); this is the
+   name of the next node, at runtime. L03 used only **fixed** edges (`A → B`, always); this is the
    second, runtime-chosen kind.
 2. The decider can be **derived data**, a **model classification label**, or **direct user
    input** — never whether the model asked for a tool. That last case is the agent, and you'll
@@ -51,7 +51,7 @@ model deciding.** Here it is said a few ways:
 
 ## Vocabulary you're picking up here
 
-You already have L03/L04's vocabulary (graph, node, state, edge, reducer, entry point/END, DAG,
+You already have L03's vocabulary (graph, node, state, edge, reducer, entry point/END, DAG,
 workflow vs. agent). Here's what you're adding:
 
 - **Conditional edge** — a runtime-chosen transition: a routing function reads **state** and
@@ -70,9 +70,9 @@ workflow vs. agent). Here's what you're adding:
 
 ## The client and tracing: nothing new yet
 
-Like in L03/L04, your nodes call the native LangChain **`ChatAnthropic`** — no new departure here.
+Like in L03, your nodes call the native LangChain **`ChatAnthropic`** — no new departure here.
 Tracing is still a forward reference: you'll get the full skill in **[L12](../L12/objectives.md)**.
 
-Here's the one sentence to leave this lesson with: **"L04 showed you a graph with no branches;
+Here's the one sentence to leave this lesson with: **"L03 showed you a graph with no branches;
 L05 showed you a graph with branches you own; L11 shows you a graph whose branches the model owns.
 Same primitives throughout — the only thing that ever changes is who decides."**
