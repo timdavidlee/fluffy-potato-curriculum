@@ -91,8 +91,11 @@ estimated duration: 9
   sequence.
 - If you understood today's one node, you already understand most of what L04 needs: it is mostly
   **wiring**, not new node design.
-- diagram: reuse the slide-1.1 node box — the same cyan `extract_node` box on the left, an arrow to
-  three chained copies of it (`extract → summarize → format`) joined by fixed cyan edges: the
-  slide-2.2 ghost row drawn solid — "one step now → several wired next."
+- diagram: two zones. Left, the single cyan `extract_node` box you built today (labeled "the one you
+  built today"). An arrow ("L04 multiplies it") into a dashed-cyan **L04 group** — "the same design,
+  wired into a sequence" — holding the chain `extract → summarize → format` as three cyan node boxes
+  joined by fixed edges. The `extract` box is annotated "↑ your `extract_node`, now step 1"; `summarize`
+  and `format` are tagged "new in L04." The point: today's node *is* the first link — the chain adds
+  siblings, not a different extract.
 
 > **You just wired one step — next lesson, you wire several of them together.**

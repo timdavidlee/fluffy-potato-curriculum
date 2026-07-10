@@ -954,28 +954,51 @@ table.ledger td.warn-cell { color: var(--coral); }
             <li class="point"><b>L04</b> is this idea <b>multiplied</b> &mdash; the same typed-state-in, state-update-out node design, several of them, wired with fixed edges into a sequence.</li>
             <li class="point">If you understood today's one node, you already understand most of what L04 needs: it is mostly <b>wiring</b>, not new node design.</li>
         </ul>
-        <div class="diagram-frame reveal" style="gap:16px; margin-top:48px;">
-            <div class="mo-node">
-                <div class="mo-name">extract_node</div>
-                <div class="mo-sub">typed state in &rarr;<br>state update out</div>
+        <div class="diagram-frame reveal" style="gap:0; margin-top:40px; align-items:stretch; justify-content:center;">
+            <!-- TODAY: the one node you built -->
+            <div style="display:flex; flex-direction:column; align-items:center; justify-content:center;">
+                <div class="mo-node" style="width:300px;">
+                    <div class="mo-name">extract_node</div>
+                    <div class="mo-sub">typed state in &rarr;<br>state update out</div>
+                </div>
+                <div style="font-size:19px; color:var(--ink-dim); font-style:italic; margin-top:14px;">the one you built today</div>
             </div>
-            <div class="dg-arrow">&rarr;</div>
-            <div class="mo-node">
-                <div class="mo-name">extract</div>
-                <div class="mo-sub">typed state in &rarr;<br>state update out</div>
+            <!-- CONNECTOR -->
+            <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; padding:0 28px 40px;">
+                <div class="dg-arrow">&rarr;</div>
+                <div style="font-size:18px; color:var(--ink-faint); margin-top:10px; max-width:150px; text-align:center;">L04 multiplies it</div>
             </div>
-            <div class="dg-arrow">&rarr;</div>
-            <div class="mo-node">
-                <div class="mo-name">summarize</div>
-                <div class="mo-sub">typed state in &rarr;<br>state update out</div>
-            </div>
-            <div class="dg-arrow">&rarr;</div>
-            <div class="mo-node">
-                <div class="mo-name">format</div>
-                <div class="mo-sub">typed state in &rarr;<br>state update out</div>
+            <!-- L04 GROUP: the same design, wired into a sequence -->
+            <div style="border:2px dashed var(--cyan); border-radius:14px; padding:18px 24px 22px; background:rgba(82,232,200,0.04);">
+                <div style="font-size:17px; letter-spacing:0.08em; text-transform:uppercase; color:var(--cyan); margin-bottom:16px; text-align:center;">L04 &middot; the same design, wired into a sequence</div>
+                <div style="display:flex; align-items:flex-start; justify-content:center; gap:10px;">
+                    <div style="display:flex; flex-direction:column; align-items:center;">
+                        <div class="mo-node" style="width:250px;">
+                            <div class="mo-name">extract</div>
+                            <div class="mo-sub">typed state in &rarr;<br>state update out</div>
+                        </div>
+                        <div style="font-size:18px; color:var(--ink); margin-top:10px; text-align:center;">&uarr; your <code style="color:var(--cyan);">extract_node</code>,<br>now step 1</div>
+                    </div>
+                    <div class="dg-arrow" style="margin-top:32px;">&rarr;</div>
+                    <div style="display:flex; flex-direction:column; align-items:center;">
+                        <div class="mo-node" style="width:250px;">
+                            <div class="mo-name">summarize</div>
+                            <div class="mo-sub">typed state in &rarr;<br>state update out</div>
+                        </div>
+                        <div style="font-size:18px; color:var(--ink-faint); margin-top:10px;">new in L04</div>
+                    </div>
+                    <div class="dg-arrow" style="margin-top:32px;">&rarr;</div>
+                    <div style="display:flex; flex-direction:column; align-items:center;">
+                        <div class="mo-node" style="width:250px;">
+                            <div class="mo-name">format</div>
+                            <div class="mo-sub">typed state in &rarr;<br>state update out</div>
+                        </div>
+                        <div style="font-size:18px; color:var(--ink-faint); margin-top:10px;">new in L04</div>
+                    </div>
+                </div>
             </div>
         </div>
-        <div class="diagram-caption reveal">One step now &rarr; several wired next: the slide-2.2 ghost row drawn solid, joined by fixed cyan edges.</div>
+        <div class="diagram-caption reveal">Same node, carried forward: today's <code>extract_node</code> becomes the <code>extract</code> step of the L04 chain &mdash; <code>summarize</code> and <code>format</code> are the new links, same design each.</div>
     </div>
     <div class="chrome-page">11 / 12</div>
     <div class="chrome-nav">&larr; &rarr; navigate</div>
