@@ -18,10 +18,17 @@ re-derives ``find_matching_record`` inline (the Segment 2 live-coding beat), but
 proctor knows it works because this copy is covered by
 ``tests/lessons/L50/test_receipt_tools.py``. Keep the two in sync.
 
+``check_expense_policy`` is the second **core** tool the agent runs. Unlike
+``find_matching_record`` (which the walkthrough writes live), it is *provided* here
+pre-built — students register it rather than author it, so the live tool-design
+workout stays a single tool while the agent still makes a genuine three-way tool
+decision (match → total → check the cap). It is warranted for the same L08 reason:
+per-category spending caps are company policy *data*, not something the model should
+recall from memory.
+
 ``check_reimbursement`` is the deliberately-scoped-out **stretch** tool (Segment 6 /
-the student bonus): it is real and tested, but it is *not* wired into the core
-one-new-tool agent — it is the "first thing you'd add next" hand-off, not part of the
-vertical slice.
+the student bonus): it is real and tested, but it is *not* wired into the core agent —
+it is the "first thing you'd add next" hand-off, not part of the vertical slice.
 """
 
 from __future__ import annotations
@@ -61,6 +68,21 @@ RECEIPTS: list[dict[str, Any]] = _load("receipts.json")
 
 BANK_TRANSACTIONS: list[dict[str, Any]] = _load("bank_transactions.json")
 """The bank side of the ledger — used only by the stretch ``check_reimbursement`` tool."""
+
+
+def _load_policy() -> dict[str, float]:
+    """Read the per-category spending caps into a ``category -> cap`` lookup.
+
+    Example output:
+        {"meals": 50.0, "travel": 75.0, "lodging": 250.0, "supplies": 150.0}
+    """
+    text = (_DATA_DIR / "expense_policy.json").read_text(encoding="utf-8")
+    raw: dict[str, Any] = json.loads(text)
+    return {str(category): float(cap) for category, cap in raw.items()}
+
+
+EXPENSE_POLICY: dict[str, float] = _load_policy()
+"""The company's per-category spending caps — the data ``check_expense_policy`` judges against."""
 
 
 @dataclass(frozen=True)
@@ -212,6 +234,43 @@ def find_matching_record(receipt: str) -> str:
             "normalized": normalized_view,
         }
     )
+
+
+def check_expense_policy(category: str, amount: float) -> str:
+    """Is an expense within its category's spending cap? (The second core tool.)
+
+    A deterministic policy check the model should *not* do from memory: per-category
+    caps are company policy data, not general knowledge. Call it after a receipt
+    matches a record — the matched record carries both ``category`` and ``amount``.
+
+    Returns a JSON string, one of two shapes:
+
+    - a judged expense (``within_policy`` false adds ``over_by``)::
+
+        {"category": "lodging", "amount": 268.4, "cap": 250.0,
+         "within_policy": false, "over_by": 18.4}
+
+    - a category with no policy on file — a graceful "can't judge this" signal,
+      never a crash::
+
+        {"within_policy": null, "reason": "no spending policy for category 'gifts'"}
+    """
+    key = category.strip().lower()
+    cap = EXPENSE_POLICY.get(key)
+    if cap is None:
+        return json.dumps(
+            {"within_policy": None, "reason": f"no spending policy for category {category!r}"}
+        )
+    within = amount <= cap + _AMOUNT_TOLERANCE
+    result: dict[str, Any] = {
+        "category": key,
+        "amount": amount,
+        "cap": cap,
+        "within_policy": within,
+    }
+    if not within:
+        result["over_by"] = round(amount - cap, 2)
+    return json.dumps(result)
 
 
 def check_reimbursement(expense_id: str) -> str:

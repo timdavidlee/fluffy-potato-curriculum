@@ -27,8 +27,8 @@ That constraint is the lesson. A capstone's skill isn't building something big a
 
 A **receipt-reconciliation** agent. It takes one receipt — which arrives in a different shape from every source (a cafe's tidy JSON, a rideshare's differently-named fields, a hotel's raw printed text) — and matches it against a small offline ledger of expense records, checking whether the amounts agree and flagging a receipt it can't confidently place.
 
-- The **one new tool** is `find_matching_record`: normalize a receipt from *any* of those formats to a common shape and look it up. It's genuinely warranted — reliable cross-format normalize-and-match is exactly what you don't want a model doing by eyeball — which is why there's something real to trace and eval.
-- The **reused tool** is `calculator` (straight from `common/tools.py`): total the line items and check the variance, so the agent has a real two-tool decision worth tracing.
+- The **one new tool you write** is `find_matching_record`: normalize a receipt from *any* of those formats to a common shape and look it up. It's genuinely warranted — reliable cross-format normalize-and-match is exactly what you don't want a model doing by eyeball — which is why there's something real to trace and eval.
+- The **two tools the agent also runs** are `calculator` (reused straight from `common/tools.py` — total the line items and check the variance) and a pre-built `check_expense_policy` (is the amount under its category cap?). You don't author these, but together they give the agent a real *three-tool* decision worth tracing. The authoring budget stays at one tool; the agent's toolset does not.
 - The **failure you'll find** is a malformed receipt — OCR gave up, no readable vendor. A good agent reports "no confident match" and stops; a naive one keeps retrying the matcher on the same bad input. You'll spot that runaway **in the trace**, then write the one eval case that catches it forever.
 
 ## The deliverable is a *finished* slice

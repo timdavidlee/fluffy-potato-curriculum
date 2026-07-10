@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>L50 capstone: assembling the mini-project</title>
+<title>L50: the receipt-reconciliation problem</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500;1,9..144,600&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -526,56 +526,55 @@ table.ledger td.warn-cell { color: var(--coral); }
 <main class="deck-stage" id="deckStage">
 
 <!-- ============================================================ -->
-<!-- 0 — COVER                                                    -->
+<!-- 01 — COVER                                                   -->
 <!-- ============================================================ -->
 <section class="slide slide-cover active">
     <div class="eyebrow reveal">L50 &middot; Agent mini-project &mdash; the mini-track capstone</div>
-    <h1 class="reveal">L50 capstone: <span class="it">assembling</span> the mini-project</h1>
-    <div class="claim reveal"><b>A capstone is a vertical slice &mdash; one narrow path all the way through the stack, from a fuzzy goal to an evaluated agent.</b> Nothing new is taught here; every idea is one you already own. Today you just assemble them.</div>
+    <h1 class="reveal">The receipt-<br>reconciliation<br><span class="it">problem</span></h1>
+    <div class="claim reveal"><b>One receipt, a small ledger, one question: which record is this &mdash; and do the amounts agree?</b> The real work is that the receipt never arrives in the ledger's shape &mdash; and that's what decides where the tool goes.</div>
     <div class="meta-row reveal">
         <span>anchor &mdash; <b>Claude Sonnet 4.6</b></span>
         <span>~15 min</span>
-        <span>vertical slice &middot; reuse &middot; one tool &middot; trace &middot; eval case</span>
+        <span>normalize &middot; match &middot; tool-vs-model &middot; graceful failure</span>
     </div>
     <div class="cover-diagram reveal">
         <svg viewBox="0 0 760 560" width="100%" height="100%">
             <defs>
                 <marker id="cov-cy" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="var(--cyan)"/></marker>
+                <marker id="cov-co" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="var(--coral)"/></marker>
             </defs>
-            <rect x="230" y="18"  width="300" height="60" rx="10" fill="#12181a" stroke="var(--cyan)" stroke-width="2.5"/>
-            <text x="380" y="56"  text-anchor="middle" class="node-label" font-size="24">fuzzy goal</text>
-            <rect x="230" y="118" width="300" height="60" rx="10" fill="#12181a" stroke="var(--cyan)" stroke-width="2.5"/>
-            <text x="380" y="156" text-anchor="middle" class="node-label" font-size="24">one tool</text>
-            <rect x="230" y="218" width="300" height="60" rx="10" fill="#12181a" stroke="var(--cyan)" stroke-width="2.5"/>
-            <text x="380" y="256" text-anchor="middle" class="node-label" font-size="24">shallow agent</text>
-            <rect x="230" y="318" width="300" height="60" rx="10" fill="#12181a" stroke="var(--cyan)" stroke-width="2.5"/>
-            <text x="380" y="356" text-anchor="middle" class="node-label" font-size="24">trace</text>
-            <rect x="230" y="418" width="300" height="60" rx="10" fill="#12181a" stroke="var(--cyan)" stroke-width="2.5"/>
-            <text x="380" y="456" text-anchor="middle" class="node-label" font-size="24">eval case</text>
-            <path d="M 380 78  L 380 118" stroke="var(--cyan)" stroke-width="3" marker-end="url(#cov-cy)"/>
-            <path d="M 380 178 L 380 218" stroke="var(--cyan)" stroke-width="3" marker-end="url(#cov-cy)"/>
-            <path d="M 380 278 L 380 318" stroke="var(--cyan)" stroke-width="3" marker-end="url(#cov-cy)"/>
-            <path d="M 380 378 L 380 418" stroke="var(--cyan)" stroke-width="3" marker-end="url(#cov-cy)"/>
-            <circle r="9" fill="var(--cyan)">
-                <animateMotion dur="3.2s" repeatCount="indefinite" path="M 380 78 L 380 418"/>
-            </circle>
-            <text x="380" y="528" text-anchor="middle" class="edge-label" fill="var(--cyan)" font-size="22">one narrow path &mdash; all the way through</text>
+            <rect x="250" y="20" width="260" height="76" rx="10" fill="#12181a" stroke="var(--cyan)" stroke-width="2.5"/>
+            <text x="380" y="54" text-anchor="middle" class="node-label" font-size="24">one receipt</text>
+            <text x="380" y="82" text-anchor="middle" class="edge-label" fill="var(--ink-dim)">some source shape</text>
+            <rect x="220" y="212" width="320" height="96" rx="12" fill="#12181a" stroke="var(--cyan)" stroke-width="2.5"/>
+            <text x="380" y="252" text-anchor="middle" class="node-label" font-size="23">match?</text>
+            <text x="380" y="284" text-anchor="middle" class="edge-label" fill="var(--ink-dim)">same record? amounts agree?</text>
+            <path d="M 380 96 L 380 212" stroke="var(--cyan)" stroke-width="3" marker-end="url(#cov-cy)"/>
+            <circle r="9" fill="var(--cyan)"><animateMotion dur="2.6s" repeatCount="indefinite" path="M 380 96 L 380 206"/></circle>
+            <rect x="30" y="432" width="300" height="98" rx="10" fill="#12181a" stroke="var(--cyan)" stroke-width="2.5"/>
+            <text x="180" y="474" text-anchor="middle" class="node-label" font-size="23">matched</text>
+            <text x="180" y="504" text-anchor="middle" class="edge-label" fill="var(--ink-dim)">reconciled</text>
+            <rect x="430" y="432" width="300" height="98" rx="10" fill="#12181a" stroke="var(--coral)" stroke-width="2.5"/>
+            <text x="580" y="474" text-anchor="middle" class="node-label" font-size="22">no confident match</text>
+            <text x="580" y="504" text-anchor="middle" class="edge-label" fill="var(--ink-dim)">a correct answer too</text>
+            <path d="M 300 308 C 240 372, 210 392, 185 432" fill="none" stroke="var(--cyan)" stroke-width="3" marker-end="url(#cov-cy)"/>
+            <path d="M 460 308 C 520 372, 555 392, 580 432" fill="none" stroke="var(--coral)" stroke-width="3" marker-end="url(#cov-co)"/>
         </svg>
     </div>
-    <div class="chrome-page">01 / 18</div>
+    <div class="chrome-page">01 / 15</div>
     <div class="chrome-nav">L5002 &middot; lecture deck</div>
 </section>
 
 <!-- ============================================================ -->
-<!-- 1 — SECTION DIVIDER                                          -->
+<!-- 02 — SECTION 1 DIVIDER                                        -->
 <!-- ============================================================ -->
 <section class="slide slide-chapter">
     <div class="chrome-tag reveal">L50 &middot; <b>MINI-PROJECT</b></div>
     <div class="chapter-ghost reveal">01</div>
     <div class="chapter-eyebrow reveal">Section 1</div>
-    <div class="chapter-title reveal">What a capstone <span style="color:var(--cyan); font-style:normal;">actually is</span></div>
-    <div class="chapter-sub reveal">A vertical slice, not a product &mdash; thin and complete beats wide and half-wired, and finishing the slice <i>is</i> the skill.</div>
-    <div class="chrome-page">02 / 18</div>
+    <div class="chapter-title reveal">The problem: does this receipt <span style="color:var(--cyan); font-style:normal;">match the ledger?</span></div>
+    <div class="chapter-sub reveal">One receipt, a small ledger, one question &mdash; and, when nothing lines up, say so instead of guessing.</div>
+    <div class="chrome-page">02 / 15</div>
 </section>
 
 <!-- ============================================================ -->
@@ -585,84 +584,65 @@ table.ledger td.warn-cell { color: var(--coral); }
     <div class="chrome-tag">L50 &middot; <b>MINI-PROJECT</b></div>
     <div class="topbar reveal">
         <div class="eyebrow">Slide 1.1</div>
-        <h2 class="headline">A vertical slice, <span class="it">not a product</span></h2>
+        <h2 class="headline">Reconciliation, <span class="it">stated plainly</span></h2>
     </div>
     <div class="body-area">
         <ul class="points reveal" style="max-width:1660px;">
-            <li class="point">A capstone is a <b>vertical slice</b> &mdash; one narrow path that goes <b>all the way through</b> the stack, from a fuzzy goal to an evaluated agent.</li>
-            <li class="point">The opposite of a wide feature that touches many things but only reaches halfway. <b>Thin and complete beats wide and half-wired.</b></li>
+            <li class="point">You have <b>one receipt</b> and a small <b>ledger</b> of records the company already booked. The question the agent answers: <b>which record is this receipt, and do the amounts agree?</b></li>
+            <li class="point">That sounds like a lookup &mdash; and the matching part is. The hard part is that the receipt <b>almost never arrives in the ledger's shape</b>. When nothing lines up, the right answer is to say so, not guess.</li>
         </ul>
-        <div class="diagram-frame reveal" style="gap:90px; margin-top:32px; align-items:stretch;">
-            <div style="display:flex; flex-direction:column; align-items:center; gap:12px;">
-                <div style="font-size:18px; letter-spacing:0.12em; text-transform:uppercase; color:var(--cyan);">complete slice</div>
-                <div style="display:flex; flex-direction:column; gap:8px; width:270px; height:300px;">
-                    <div style="flex:1; border:2px solid var(--cyan); border-radius:8px; background:#12181a; display:flex; align-items:center; justify-content:center; font-size:22px; color:var(--ink);">goal</div>
-                    <div style="flex:1; border:2px solid var(--cyan); border-radius:8px; background:#12181a; display:flex; align-items:center; justify-content:center; font-size:22px; color:var(--ink);">tool</div>
-                    <div style="flex:1; border:2px solid var(--cyan); border-radius:8px; background:#12181a; display:flex; align-items:center; justify-content:center; font-size:22px; color:var(--ink);">agent</div>
-                    <div style="flex:1; border:2px solid var(--cyan); border-radius:8px; background:#12181a; display:flex; align-items:center; justify-content:center; font-size:22px; color:var(--ink);">trace</div>
-                    <div style="flex:1; border:2px solid var(--cyan); border-radius:8px; background:#12181a; display:flex; align-items:center; justify-content:center; font-size:22px; color:var(--ink);">eval</div>
-                </div>
-                <div style="font-size:19px; color:var(--cyan);">&darr; reaches the bottom</div>
-            </div>
-            <div style="display:flex; flex-direction:column; align-items:center; gap:12px;">
-                <div style="font-size:18px; letter-spacing:0.12em; text-transform:uppercase; color:var(--ink-faint);">wide, half-wired</div>
-                <div style="width:720px; height:300px; display:flex; flex-direction:column;">
-                    <div style="display:flex; gap:14px;">
-                        <div style="flex:1; border:2px solid var(--ink-faint); border-radius:8px; background:transparent; padding:16px 0; text-align:center; font-size:18px; color:var(--ink-dim);">feature</div>
-                        <div style="flex:1; border:2px solid var(--ink-faint); border-radius:8px; background:transparent; padding:16px 0; text-align:center; font-size:18px; color:var(--ink-dim);">feature</div>
-                        <div style="flex:1; border:2px solid var(--ink-faint); border-radius:8px; background:transparent; padding:16px 0; text-align:center; font-size:18px; color:var(--ink-dim);">feature</div>
-                        <div style="flex:1; border:2px solid var(--ink-faint); border-radius:8px; background:transparent; padding:16px 0; text-align:center; font-size:18px; color:var(--ink-dim);">feature</div>
-                        <div style="flex:1; border:2px solid var(--ink-faint); border-radius:8px; background:transparent; padding:16px 0; text-align:center; font-size:18px; color:var(--ink-dim);">feature</div>
-                    </div>
-                    <div style="margin-top:26px; border-top:2px dashed var(--coral); padding-top:12px; text-align:center; font-size:20px; color:var(--coral);">never traced, never evaluated</div>
-                    <div style="flex:1; display:flex; align-items:center; justify-content:center; font-size:19px; color:var(--ink-faint); font-style:italic;">&hellip; stops halfway down</div>
-                </div>
-            </div>
+        <div class="diagram-frame reveal" style="margin-top:30px;">
+            <svg viewBox="0 0 1560 360" width="1560" height="360">
+                <defs>
+                    <marker id="s11-cy" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="var(--cyan)"/></marker>
+                    <marker id="s11-co" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="var(--coral)"/></marker>
+                </defs>
+                <rect x="20" y="132" width="250" height="96" rx="10" fill="#12181a" stroke="var(--cyan)" stroke-width="2.5"/>
+                <text x="145" y="174" text-anchor="middle" class="node-label" font-size="24">one receipt</text>
+                <text x="145" y="204" text-anchor="middle" class="edge-label" fill="var(--ink-dim)">some source shape</text>
+                <path d="M 270 180 L 560 180" stroke="var(--cyan)" stroke-width="3" marker-end="url(#s11-cy)"/>
+                <circle r="9" fill="var(--cyan)"><animateMotion dur="2.6s" repeatCount="indefinite" path="M 270 180 L 545 180"/></circle>
+                <rect x="560" y="110" width="440" height="140" rx="12" fill="#12181a" stroke="var(--cyan)" stroke-width="2.5"/>
+                <text x="780" y="170" text-anchor="middle" class="node-label" font-size="26">match against ledger</text>
+                <text x="780" y="206" text-anchor="middle" class="edge-label" fill="var(--ink-dim)">same record? amounts agree?</text>
+                <path d="M 1000 150 C 1090 100, 1130 92, 1200 90" fill="none" stroke="var(--cyan)" stroke-width="3.5" marker-end="url(#s11-cy)"/>
+                <path d="M 1000 210 C 1090 260, 1130 268, 1200 270" fill="none" stroke="var(--coral)" stroke-width="3.5" marker-end="url(#s11-co)"/>
+                <rect x="1200" y="40" width="340" height="100" rx="10" fill="#12181a" stroke="var(--cyan)" stroke-width="2.5"/>
+                <text x="1370" y="82" text-anchor="middle" class="node-label" font-size="24">matched</text>
+                <text x="1370" y="112" text-anchor="middle" class="edge-label" fill="var(--ink-dim)">reconciled</text>
+                <rect x="1200" y="220" width="340" height="100" rx="10" fill="#12181a" stroke="var(--coral)" stroke-width="2.5"/>
+                <text x="1370" y="262" text-anchor="middle" class="node-label" font-size="23">no confident match</text>
+                <text x="1370" y="292" text-anchor="middle" class="edge-label" fill="var(--ink-dim)">a correct answer too</text>
+            </svg>
         </div>
-        <div class="diagram-caption reveal">The cyan slice is the point; the wide-but-shallow build is the failure &mdash; it stops at a <span style="color:var(--coral);">coral</span> line it never crosses.</div>
+        <div class="diagram-caption reveal">Both ends are legitimate &mdash; <span style="color:var(--coral);">&ldquo;no confident match&rdquo;</span> is a <i>correct</i> answer here, not a failure.</div>
     </div>
-    <div class="chrome-page">03 / 18</div>
+    <div class="chrome-page">03 / 15</div>
     <div class="chrome-nav">&larr; &rarr; navigate</div>
 </section>
 
 <!-- ============================================================ -->
-<!-- 2 — CONTENT: points + callout                               -->
+<!-- 04 — SLIDE 1.2                                                -->
 <!-- ============================================================ -->
 <section class="slide">
     <div class="chrome-tag">L50 &middot; <b>MINI-PROJECT</b></div>
     <div class="topbar reveal">
         <div class="eyebrow">Slide 1.2</div>
-        <h2 class="headline">Scope creep is <span class="it">this lesson's failure mode</span></h2>
+        <h2 class="headline">One expense, <span class="it">three receipt shapes</span></h2>
     </div>
     <div class="body-area">
-        <ul class="points reveal" style="max-width:1660px;">
-            <li class="point">The capstone skill isn't building something big &mdash; it's <b>finishing a thin slice, then stopping.</b></li>
-            <li class="point">Naming the non-goals out loud <b>is</b> the skill. A mini-project is defined as much by what it <b>refuses</b> to do as by what it does.</li>
-        </ul>
-        <div class="reveal" style="margin-top:30px;">
-            <div style="display:flex; align-items:center; gap:18px; border:2px solid var(--cyan); border-radius:12px; background:rgba(82,232,200,0.05); padding:20px 28px;">
-                <div style="font-size:18px; letter-spacing:0.1em; text-transform:uppercase; color:var(--cyan); white-space:nowrap;">done &check;</div>
-                <div style="display:flex; gap:16px; flex:1;">
-                    <div style="flex:1; text-align:center; border:1.5px solid var(--cyan); border-radius:8px; background:#12181a; padding:12px 0; font-size:21px; color:var(--ink);">&check; one task</div>
-                    <div style="flex:1; text-align:center; border:1.5px solid var(--cyan); border-radius:8px; background:#12181a; padding:12px 0; font-size:21px; color:var(--ink);">&check; one new tool</div>
-                    <div style="flex:1; text-align:center; border:1.5px solid var(--cyan); border-radius:8px; background:#12181a; padding:12px 0; font-size:21px; color:var(--ink);">&check; one trace</div>
-                    <div style="flex:1; text-align:center; border:1.5px solid var(--cyan); border-radius:8px; background:#12181a; padding:12px 0; font-size:21px; color:var(--ink);">&check; one eval case</div>
-                </div>
-            </div>
-        </div>
-        <div class="reveal" style="margin-top:26px; border:2px dashed var(--ink-faint); border-radius:12px; background:transparent; padding:18px 28px;">
-            <div style="display:flex; align-items:center; gap:22px;">
-                <div style="font-size:19px; color:var(--ink-faint); white-space:nowrap;">non-goals &rarr;<br>v2 / your own project</div>
-                <div style="display:flex; gap:16px; flex:1;">
-                    <div style="flex:1; text-align:center; border:2px solid var(--coral); border-radius:8px; background:#12181a; padding:12px 14px; font-size:20px; color:var(--coral);">multi-receipt batches</div>
-                    <div style="flex:1; text-align:center; border:2px solid var(--coral); border-radius:8px; background:#12181a; padding:12px 14px; font-size:20px; color:var(--coral);">live bank API</div>
-                    <div style="flex:1; text-align:center; border:2px solid var(--coral); border-radius:8px; background:#12181a; padding:12px 14px; font-size:20px; color:var(--coral);">planning / memory / subagents</div>
-                </div>
-            </div>
-        </div>
-        <div class="diagram-caption reveal">The restraint is <span style="color:var(--cyan);">cyan</span>; the parked scope is <span style="color:var(--coral);">coral</span>, deliberately pulled off the done-line and set aside.</div>
+        <div class="lede reveal" style="margin-top:0; max-width:1560px;">The same three facts &mdash; <b>who, how much, what shape</b> &mdash; wear a different name (or no name) in every source. That's the reading you don't want a model doing by eyeball on money.</div>
+        <table class="ledger reveal" style="margin-top:26px;">
+            <thead><tr><th>Source</th><th>vendor lives in</th><th>amount lives in</th><th>shape</th></tr></thead>
+            <tbody>
+                <tr><td class="tag">Cafe POS</td><td><code>merchant</code></td><td><code>total</code></td><td>JSON object</td></tr>
+                <tr><td class="tag">Rideshare</td><td><code>company</code></td><td><code>amount_charged</code></td><td>JSON, renamed fields</td></tr>
+                <tr><td class="tag">Hotel folio</td><td>first text line</td><td>the &ldquo;Amount due:&rdquo; line</td><td>raw text, no fields</td></tr>
+            </tbody>
+        </table>
+        <div class="diagram-caption reveal">Normalizing those into one comparable <code>(vendor, amount)</code> is the real work &mdash; and it's what decides where the tool goes in section 2.</div>
     </div>
-    <div class="chrome-page">04 / 18</div>
+    <div class="chrome-page">04 / 15</div>
     <div class="chrome-nav">&larr; &rarr; navigate</div>
 </section>
 
@@ -673,9 +653,9 @@ table.ledger td.warn-cell { color: var(--coral); }
     <div class="chrome-tag reveal">L50 &middot; <b>MINI-PROJECT</b></div>
     <div class="chapter-ghost reveal">02</div>
     <div class="chapter-eyebrow reveal">Section 2</div>
-    <div class="chapter-title reveal">Nothing new &mdash; <span style="color:var(--cyan); font-style:normal;">it's assembly</span></div>
-    <div class="chapter-sub reveal">You built each piece already, one at a time. Today you drive the whole chain yourself &mdash; and the only new code is one small tool.</div>
-    <div class="chrome-page">05 / 18</div>
+    <div class="chapter-title reveal">How to think about <span style="color:var(--cyan); font-style:normal;">the tools</span></div>
+    <div class="chapter-sub reveal">Draw the line yourself: the tool does the brittle normalize-and-match; the model does the judgement around it.</div>
+    <div class="chrome-page">05 / 15</div>
 </section>
 
 <!-- ============================================================ -->
@@ -685,89 +665,86 @@ table.ledger td.warn-cell { color: var(--coral); }
     <div class="chrome-tag">L50 &middot; <b>MINI-PROJECT</b></div>
     <div class="topbar reveal">
         <div class="eyebrow">Slide 2.1</div>
-        <h2 class="headline">The five-objective arc, <span class="it">one motion</span></h2>
+        <h2 class="headline">Where does the tool go? <span class="it">Apply the L08 test</span></h2>
     </div>
     <div class="body-area">
         <ul class="points reveal" style="max-width:1660px;">
-            <li class="point">You built each of these one at a time, on a task the course handed you. <b>Today you drive the whole chain yourself</b> &mdash; in order, on a task that's <b>yours</b>.</li>
+            <li class="point">Ask the L08 question: <b>could the model do this reliably in its head?</b> For &ldquo;normalize a hotel folio's raw text and match it to a ledger row,&rdquo; the honest answer is <b>no</b> &mdash; and that &ldquo;no&rdquo; is what <b>warrants</b> the tool.</li>
+            <li class="point">So the split is deliberate: the <b>tool</b> does the brittle normalize-and-match; the <b>model</b> decides <b>when</b> to match, total, or give up. Draw that line before you write a line of code.</li>
         </ul>
-        <div class="diagram-frame reveal" style="margin-top:34px;">
-            <svg viewBox="0 0 1640 300" width="1640" height="300">
-                <defs>
-                    <marker id="s21-cy" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="var(--cyan)"/></marker>
-                </defs>
-                <path d="M 30 110 L 1600 110" stroke="var(--cyan)" stroke-width="3.5" marker-end="url(#s21-cy)"/>
-                <circle r="9" fill="var(--cyan)"><animateMotion dur="3.6s" repeatCount="indefinite" path="M 30 110 L 1585 110"/></circle>
-                <rect x="32"   y="72" width="236" height="76" rx="38" fill="#12181a" stroke="var(--cyan)" stroke-width="2.5"/>
-                <text x="150"  y="120" text-anchor="middle" class="node-label" font-size="26">scope</text>
-                <text x="150"  y="208" text-anchor="middle" class="edge-label" fill="var(--ink-dim)">L08</text>
-                <rect x="352"  y="72" width="236" height="76" rx="38" fill="#12181a" stroke="var(--cyan)" stroke-width="2.5"/>
-                <text x="470"  y="120" text-anchor="middle" class="node-label" font-size="26">tool</text>
-                <text x="470"  y="208" text-anchor="middle" class="edge-label" fill="var(--ink-dim)">L07 / L08</text>
-                <rect x="672"  y="72" width="236" height="76" rx="38" fill="#12181a" stroke="var(--cyan)" stroke-width="2.5"/>
-                <text x="790"  y="120" text-anchor="middle" class="node-label" font-size="26">agent</text>
-                <text x="790"  y="208" text-anchor="middle" class="edge-label" fill="var(--ink-dim)">L10 / L11</text>
-                <rect x="992"  y="72" width="236" height="76" rx="38" fill="#12181a" stroke="var(--cyan)" stroke-width="2.5"/>
-                <text x="1110" y="120" text-anchor="middle" class="node-label" font-size="26">trace</text>
-                <text x="1110" y="208" text-anchor="middle" class="edge-label" fill="var(--ink-dim)">L12</text>
-                <rect x="1312" y="72" width="236" height="76" rx="38" fill="#12181a" stroke="var(--cyan)" stroke-width="2.5"/>
-                <text x="1430" y="120" text-anchor="middle" class="node-label" font-size="26">eval</text>
-                <text x="1430" y="208" text-anchor="middle" class="edge-label" fill="var(--ink-dim)">L13</text>
-                <text x="815" y="272" text-anchor="middle" class="edge-label" fill="var(--ink-dim)" font-size="21">one continuous arrow &mdash; the point is the connection, not any single pill</text>
-            </svg>
+        <div class="diagram-frame reveal" style="gap:0; margin-top:38px; align-items:stretch;">
+            <div style="flex:1; max-width:600px; border:2px solid var(--cyan); border-radius:12px; background:#12181a; padding:32px 38px;">
+                <div style="font-size:18px; letter-spacing:0.12em; text-transform:uppercase; color:var(--cyan); margin-bottom:18px;">the model &mdash; judgement</div>
+                <div style="font-family:var(--font-display); font-size:34px; color:var(--ink); line-height:1.25;">decides: match? total? give up?</div>
+                <div style="font-size:20px; color:var(--ink-dim); margin-top:20px;">the reasoning around the tool</div>
+            </div>
+            <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; gap:16px; padding:0 40px;">
+                <div style="font-size:16px; letter-spacing:0.1em; text-transform:uppercase; color:var(--ink-faint); white-space:nowrap; text-align:center;">the L08 line<br>drawn on this task</div>
+                <div style="width:0; border-left:2px dashed var(--ink-faint); height:200px;"></div>
+            </div>
+            <div style="flex:1; max-width:600px; border:2px solid var(--cyan); border-radius:12px; background:#12181a; padding:32px 38px;">
+                <div style="font-size:18px; letter-spacing:0.12em; text-transform:uppercase; color:var(--cyan); margin-bottom:18px;">the tool &mdash; mechanism</div>
+                <div style="font-family:var(--font-body); font-size:26px; color:var(--cyan); line-height:1.35;">normalize any shape<br>&rarr; <code style="background:rgba(82,232,200,0.08); padding:1px 7px; border-radius:3px;">(vendor, amount)</code><br>&rarr; look up</div>
+                <div style="font-size:20px; color:var(--ink-dim); margin-top:18px;">deterministic, brittle, warranted</div>
+            </div>
         </div>
-        <div class="diagram-caption reveal">Each pill is owned by a lesson you already did; today you run all five in order, on your own task. No coral &mdash; nothing here fails, it connects.</div>
+        <div class="diagram-caption reveal">The point is the <b style="color:var(--ink);">line</b> between them, not either box alone &mdash; mechanism on one side, judgement on the other.</div>
     </div>
-    <div class="chrome-page">06 / 18</div>
+    <div class="chrome-page">06 / 15</div>
     <div class="chrome-nav">&larr; &rarr; navigate</div>
 </section>
 
 <!-- ============================================================ -->
-<!-- 3 — CONTENT: ledger table                                   -->
+<!-- 07 — SLIDE 2.2                                                -->
 <!-- ============================================================ -->
 <section class="slide">
     <div class="chrome-tag">L50 &middot; <b>MINI-PROJECT</b></div>
     <div class="topbar reveal">
         <div class="eyebrow">Slide 2.2</div>
-        <h2 class="headline">Reuse over <span class="it">re-derive</span></h2>
+        <h2 class="headline">More tools make it a <span class="it">real decision</span></h2>
     </div>
     <div class="body-area">
         <ul class="points reveal" style="max-width:1660px;">
-            <li class="point">The loop, the tracing, the eval types all already live in the shared <code>common/</code> layer. You <b>import</b> them &mdash; you don't rebuild them.</li>
-            <li class="point">The <b>only</b> genuinely new code in the whole lesson is one small tool. <span class="warn">If you're re-implementing an agent loop or a trace emitter, stop</span> &mdash; and import it.</li>
+            <li class="point">Give the agent three tools: <code>find_matching_record</code>, the reused <code>calculator</code> (total the items, check the variance), and a pre-built <code>check_expense_policy</code> (is it under the cap?). Now it must <b>choose</b> which to reach for, and when.</li>
+            <li class="point">That choice is the point. A one-tool agent has no decision to observe; a multi-tool agent leaves a <b>trajectory</b> &mdash; and a trajectory is the only thing worth tracing and evaluating.</li>
         </ul>
-        <div class="diagram-frame reveal" style="margin-top:22px;">
-            <svg viewBox="0 0 1560 390" width="1560" height="390">
+        <div class="diagram-frame reveal" style="margin-top:26px;">
+            <svg viewBox="0 0 1560 372" width="1560" height="372">
                 <defs>
-                    <marker id="s22-cy" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="var(--cyan)"/></marker>
-                    <marker id="s22-nf" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="var(--ink-faint)"/></marker>
+                    <marker id="s22j-cy" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="var(--cyan)"/></marker>
+                    <marker id="s22j-nf" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="var(--ink-faint)"/></marker>
                 </defs>
-                <text x="230" y="18" text-anchor="middle" class="edge-label" fill="var(--ink-faint)" font-size="21">imported from common/</text>
-                <rect x="40" y="30"  width="380" height="56" rx="10" fill="transparent" stroke="var(--ink-faint)" stroke-width="2"/>
-                <text x="230" y="66"  text-anchor="middle" font-size="23" fill="var(--ink-dim)" font-family="var(--font-body)">agent_graph.run</text>
-                <rect x="40" y="98"  width="380" height="56" rx="10" fill="transparent" stroke="var(--ink-faint)" stroke-width="2"/>
-                <text x="230" y="134" text-anchor="middle" font-size="23" fill="var(--ink-dim)" font-family="var(--font-body)">tracing</text>
-                <rect x="40" y="166" width="380" height="56" rx="10" fill="transparent" stroke="var(--ink-faint)" stroke-width="2"/>
-                <text x="230" y="202" text-anchor="middle" font-size="23" fill="var(--ink-dim)" font-family="var(--font-body)">evals</text>
-                <rect x="40" y="234" width="380" height="56" rx="10" fill="transparent" stroke="var(--ink-faint)" stroke-width="2"/>
-                <text x="230" y="270" text-anchor="middle" font-size="23" fill="var(--ink-dim)" font-family="var(--font-body)">calculator</text>
-                <text x="230" y="316" text-anchor="middle" class="edge-label" fill="var(--cyan)" font-size="21">the only new code</text>
-                <rect x="40" y="326" width="380" height="58" rx="10" fill="#12181a" stroke="var(--cyan)" stroke-width="2.5"/>
-                <text x="230" y="363" text-anchor="middle" font-size="23" fill="var(--cyan)" font-family="var(--font-body)" font-weight="600">find_matching_record</text>
-                <path d="M 420 58  C 700 58,  900 165, 1150 165" fill="none" stroke="var(--ink-faint)" stroke-width="2.5" marker-end="url(#s22-nf)"/>
-                <path d="M 420 126 C 700 126, 900 185, 1150 185" fill="none" stroke="var(--ink-faint)" stroke-width="2.5" marker-end="url(#s22-nf)"/>
-                <path d="M 420 194 C 780 194, 920 205, 1150 205" fill="none" stroke="var(--ink-faint)" stroke-width="2.5" marker-end="url(#s22-nf)"/>
-                <path d="M 420 262 C 700 262, 900 225, 1150 225" fill="none" stroke="var(--ink-faint)" stroke-width="2.5" marker-end="url(#s22-nf)"/>
-                <path d="M 420 355 C 720 355, 900 245, 1150 245" fill="none" stroke="var(--cyan)" stroke-width="3.5" marker-end="url(#s22-cy)"/>
-                <circle r="8" fill="var(--cyan)"><animateMotion dur="3s" repeatCount="indefinite" path="M 420 355 C 720 355, 900 245, 1150 245"/></circle>
-                <rect x="1150" y="120" width="380" height="150" rx="12" fill="#12181a" stroke="var(--cyan)" stroke-width="2.5"/>
-                <text x="1340" y="200" text-anchor="middle" class="node-label" font-size="26">your mini-project</text>
-                <text x="1340" y="236" text-anchor="middle" class="edge-label" fill="var(--ink-dim)">one assembled slice</text>
+                <rect x="10" y="150" width="200" height="72" rx="10" fill="transparent" stroke="var(--ink-faint)" stroke-width="2"/>
+                <text x="110" y="182" text-anchor="middle" font-size="22" fill="var(--ink-dim)" font-family="var(--font-body)">one receipt</text>
+                <text x="110" y="206" text-anchor="middle" font-size="17" fill="var(--ink-faint)" font-family="var(--font-body)">any shape</text>
+                <path d="M 210 186 L 300 186" stroke="var(--ink-faint)" stroke-width="2.5" marker-end="url(#s22j-nf)"/>
+                <rect x="300" y="150" width="180" height="72" rx="10" fill="#12181a" stroke="var(--cyan)" stroke-width="2.5"/>
+                <text x="390" y="182" text-anchor="middle" class="node-label" font-size="22">agent picks</text>
+                <text x="390" y="208" text-anchor="middle" class="edge-label" fill="var(--ink-dim)">which tool?</text>
+                <path d="M 480 168 C 500 120, 516 70, 540 52" fill="none" stroke="var(--cyan)" stroke-width="3.5" marker-end="url(#s22j-cy)"/>
+                <path d="M 480 186 L 540 186" stroke="var(--cyan)" stroke-width="3.5" marker-end="url(#s22j-cy)"/>
+                <path d="M 480 204 C 500 252, 516 300, 540 320" fill="none" stroke="var(--cyan)" stroke-width="3.5" marker-end="url(#s22j-cy)"/>
+                <circle r="8" fill="var(--cyan)"><animateMotion dur="2.8s" repeatCount="indefinite" path="M 480 204 C 500 252, 516 300, 540 320"/></circle>
+                <rect x="540" y="12" width="400" height="80" rx="12" fill="#12181a" stroke="var(--cyan)" stroke-width="2.5"/>
+                <text x="740" y="46" text-anchor="middle" font-size="21" fill="var(--cyan)" font-family="var(--font-body)" font-weight="600">find_matching_record</text>
+                <text x="740" y="74" text-anchor="middle" font-size="17" fill="var(--ink-dim)" font-family="var(--font-body)">normalize &rarr; match</text>
+                <rect x="540" y="146" width="400" height="80" rx="12" fill="#12181a" stroke="var(--cyan)" stroke-width="2.5"/>
+                <text x="740" y="180" text-anchor="middle" font-size="21" fill="var(--cyan)" font-family="var(--font-body)" font-weight="600">calculator</text>
+                <text x="740" y="208" text-anchor="middle" font-size="17" fill="var(--ink-dim)" font-family="var(--font-body)">sum items &rarr; variance</text>
+                <rect x="540" y="280" width="400" height="80" rx="12" fill="#12181a" stroke="var(--cyan)" stroke-width="2.5"/>
+                <text x="740" y="314" text-anchor="middle" font-size="21" fill="var(--cyan)" font-family="var(--font-body)" font-weight="600">check_expense_policy</text>
+                <text x="740" y="342" text-anchor="middle" font-size="17" fill="var(--ink-dim)" font-family="var(--font-body)">amount &rarr; within cap?</text>
+                <path d="M 940 52 C 1040 100, 1090 130, 1180 160" fill="none" stroke="var(--cyan)" stroke-width="3" marker-end="url(#s22j-cy)"/>
+                <path d="M 940 186 L 1180 186" stroke="var(--cyan)" stroke-width="3" marker-end="url(#s22j-cy)"/>
+                <path d="M 940 320 C 1040 272, 1090 242, 1180 212" fill="none" stroke="var(--cyan)" stroke-width="3" marker-end="url(#s22j-cy)"/>
+                <rect x="1180" y="140" width="340" height="92" rx="12" fill="#12181a" stroke="var(--cyan)" stroke-width="2.5"/>
+                <text x="1350" y="180" text-anchor="middle" class="node-label" font-size="24">reconciled?</text>
+                <text x="1350" y="210" text-anchor="middle" class="edge-label" fill="var(--ink-dim)">match &middot; total &middot; policy</text>
             </svg>
         </div>
-        <div class="diagram-caption reveal">Four dim imports vs one bright new tool &mdash; that contrast is the whole slide.</div>
+        <div class="diagram-caption reveal">Three <span style="color:var(--cyan);">cyan</span> tools, one junction &mdash; the branch the agent takes (match, total, check the cap) is exactly what the trace records.</div>
     </div>
-    <div class="chrome-page">07 / 18</div>
+    <div class="chrome-page">07 / 15</div>
     <div class="chrome-nav">&larr; &rarr; navigate</div>
 </section>
 
@@ -778,9 +755,9 @@ table.ledger td.warn-cell { color: var(--coral); }
     <div class="chrome-tag reveal">L50 &middot; <b>MINI-PROJECT</b></div>
     <div class="chapter-ghost reveal">03</div>
     <div class="chapter-eyebrow reveal">Section 3</div>
-    <div class="chapter-title reveal">The slice we'll build: <span style="color:var(--cyan); font-style:normal;">receipt reconciliation</span></div>
-    <div class="chapter-sub reveal">A receipt arrives in a different shape from every source. Normalizing across those shapes is the real work &mdash; and exactly what a model shouldn't do by eyeball.</div>
-    <div class="chrome-page">08 / 18</div>
+    <div class="chapter-title reveal">How to think about <span style="color:var(--cyan); font-style:normal;">failure</span></div>
+    <div class="chapter-sub reveal">Feed it a receipt OCR gave up on. Decide what <i>good</i> looks like before you run it &mdash; then turn what you see into a case that catches it.</div>
+    <div class="chrome-page">08 / 15</div>
 </section>
 
 <!-- ============================================================ -->
@@ -790,105 +767,12 @@ table.ledger td.warn-cell { color: var(--coral); }
     <div class="chrome-tag">L50 &middot; <b>MINI-PROJECT</b></div>
     <div class="topbar reveal">
         <div class="eyebrow">Slide 3.1</div>
-        <h2 class="headline">One expense, <span class="it">three receipt shapes</span></h2>
-    </div>
-    <div class="body-area">
-        <div class="lede reveal" style="margin-top:0; max-width:1560px;">A receipt arrives in a different shape from every source. <b>Normalizing across those shapes is the real work</b> &mdash; and exactly what a model shouldn't do by eyeball.</div>
-        <table class="ledger reveal" style="margin-top:30px;">
-            <thead><tr><th>Source</th><th>vendor field</th><th>amount field</th><th>shape</th></tr></thead>
-            <tbody>
-                <tr><td class="tag">Cafe POS</td><td><code>merchant</code></td><td><code>total</code></td><td>JSON object</td></tr>
-                <tr><td class="tag">Rideshare</td><td><code>company</code></td><td><code>amount_charged</code></td><td>JSON, renamed</td></tr>
-                <tr><td class="tag">Hotel folio</td><td>first text line</td><td>&ldquo;Amount due:&rdquo; line</td><td>raw text</td></tr>
-            </tbody>
-        </table>
-        <div class="diagram-caption reveal">The same three fields &mdash; vendor, amount, and the wrapper &mdash; wearing a different name (or no name at all) per source.</div>
-    </div>
-    <div class="chrome-page">09 / 18</div>
-    <div class="chrome-nav">&larr; &rarr; navigate</div>
-</section>
-
-<!-- ============================================================ -->
-<!-- 4 — CONTENT: CSS block diagram                              -->
-<!-- ============================================================ -->
-<section class="slide">
-    <div class="chrome-tag">L50 &middot; <b>MINI-PROJECT</b></div>
-    <div class="topbar reveal">
-        <div class="eyebrow">Slide 3.2</div>
-        <h2 class="headline">The one tool, and a real <span class="it">two-tool decision</span></h2>
-    </div>
-    <div class="body-area">
-        <ul class="points reveal" style="max-width:1660px;">
-            <li class="point"><code>find_matching_record</code> normalizes any format to <code>(vendor, amount)</code> and looks it up &mdash; a <b>warranted</b> tool, because reliable cross-format matching is not eyeball work.</li>
-            <li class="point">Pairing it with the reused <code>calculator</code> (total the line items, check the variance) gives the agent a genuine <b>tool-selection decision</b> &mdash; which is what makes its trace worth reading.</li>
-        </ul>
-        <div class="diagram-frame reveal" style="margin-top:22px;">
-            <svg viewBox="0 0 1560 390" width="1560" height="390">
-                <defs>
-                    <marker id="s32-cy" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="var(--cyan)"/></marker>
-                    <marker id="s32-nf" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="var(--ink-faint)"/></marker>
-                </defs>
-                <rect x="20" y="20"  width="250" height="78" rx="10" fill="transparent" stroke="var(--ink-faint)" stroke-width="2"/>
-                <text x="145" y="54"  text-anchor="middle" font-size="22" fill="var(--ink-dim)" font-family="var(--font-body)">cafe</text>
-                <text x="145" y="80"  text-anchor="middle" font-size="18" fill="var(--ink-faint)" font-family="var(--font-body)">JSON object</text>
-                <rect x="20" y="156" width="250" height="78" rx="10" fill="transparent" stroke="var(--ink-faint)" stroke-width="2"/>
-                <text x="145" y="190" text-anchor="middle" font-size="22" fill="var(--ink-dim)" font-family="var(--font-body)">rideshare</text>
-                <text x="145" y="216" text-anchor="middle" font-size="18" fill="var(--ink-faint)" font-family="var(--font-body)">JSON, renamed</text>
-                <rect x="20" y="292" width="250" height="78" rx="10" fill="transparent" stroke="var(--ink-faint)" stroke-width="2"/>
-                <text x="145" y="326" text-anchor="middle" font-size="22" fill="var(--ink-dim)" font-family="var(--font-body)">folio</text>
-                <text x="145" y="352" text-anchor="middle" font-size="18" fill="var(--ink-faint)" font-family="var(--font-body)">raw text</text>
-                <path d="M 270 59  C 370 59,  400 110, 470 110" fill="none" stroke="var(--ink-faint)" stroke-width="2.5" marker-end="url(#s32-nf)"/>
-                <path d="M 270 195 C 370 195, 400 145, 470 140" fill="none" stroke="var(--ink-faint)" stroke-width="2.5" marker-end="url(#s32-nf)"/>
-                <path d="M 270 331 C 380 331, 400 175, 470 172" fill="none" stroke="var(--ink-faint)" stroke-width="2.5" marker-end="url(#s32-nf)"/>
-                <path d="M 270 195 C 380 195, 400 310, 470 312" fill="none" stroke="var(--ink-faint)" stroke-width="2.5" marker-end="url(#s32-nf)"/>
-                <rect x="470" y="70"  width="360" height="130" rx="12" fill="#12181a" stroke="var(--cyan)" stroke-width="2.5"/>
-                <text x="650" y="128" text-anchor="middle" font-size="24" fill="var(--cyan)" font-family="var(--font-body)" font-weight="600">find_matching_record</text>
-                <text x="650" y="162" text-anchor="middle" class="edge-label" fill="var(--ink-dim)">normalize &rarr; match</text>
-                <rect x="470" y="270" width="360" height="100" rx="12" fill="#12181a" stroke="var(--cyan)" stroke-width="2.5"/>
-                <text x="650" y="312" text-anchor="middle" font-size="24" fill="var(--cyan)" font-family="var(--font-body)" font-weight="600">calculator</text>
-                <text x="650" y="344" text-anchor="middle" class="edge-label" fill="var(--ink-dim)">sum items &rarr; variance</text>
-                <path d="M 830 135 C 960 135, 1030 135, 1150 135" fill="none" stroke="var(--cyan)" stroke-width="3.5" marker-end="url(#s32-cy)"/>
-                <circle r="8" fill="var(--cyan)"><animateMotion dur="2.8s" repeatCount="indefinite" path="M 830 135 C 960 135, 1030 135, 1150 135"/></circle>
-                <path d="M 830 320 C 960 320, 1030 321, 1150 322" fill="none" stroke="var(--cyan)" stroke-width="3.5" marker-end="url(#s32-cy)"/>
-                <rect x="1150" y="80"  width="380" height="110" rx="12" fill="#12181a" stroke="var(--cyan)" stroke-width="2.5"/>
-                <text x="1340" y="128" text-anchor="middle" class="node-label" font-size="24">matched ledger</text>
-                <text x="1340" y="160" text-anchor="middle" class="edge-label" fill="var(--ink-dim)">record</text>
-                <rect x="1150" y="275" width="380" height="95" rx="12" fill="#12181a" stroke="var(--cyan)" stroke-width="2.5"/>
-                <text x="1340" y="315" text-anchor="middle" class="node-label" font-size="24">variance check</text>
-                <text x="1340" y="347" text-anchor="middle" class="edge-label" fill="var(--ink-dim)">within tolerance?</text>
-            </svg>
-        </div>
-        <div class="diagram-caption reveal">Dim inputs, two <span style="color:var(--cyan);">cyan</span> tools &mdash; the choice between them is the decision worth tracing.</div>
-    </div>
-    <div class="chrome-page">10 / 18</div>
-    <div class="chrome-nav">&larr; &rarr; navigate</div>
-</section>
-
-<!-- ============================================================ -->
-<!-- 11 — SECTION 4 DIVIDER                                        -->
-<!-- ============================================================ -->
-<section class="slide slide-chapter">
-    <div class="chrome-tag reveal">L50 &middot; <b>MINI-PROJECT</b></div>
-    <div class="chapter-ghost reveal">04</div>
-    <div class="chapter-eyebrow reveal">Section 4</div>
-    <div class="chapter-title reveal">Find your <span style="color:var(--cyan); font-style:normal;">own failure</span></div>
-    <div class="chapter-sub reveal">Feed it a receipt where OCR gave up. This failure isn't planted by the course &mdash; it's on your task, in your trace, and you locate it by <i>reading</i> the trace.</div>
-    <div class="chrome-page">11 / 18</div>
-</section>
-
-<!-- ============================================================ -->
-<!-- 12 — SLIDE 4.1                                                -->
-<!-- ============================================================ -->
-<section class="slide">
-    <div class="chrome-tag">L50 &middot; <b>MINI-PROJECT</b></div>
-    <div class="topbar reveal">
-        <div class="eyebrow">Slide 4.1</div>
-        <h2 class="headline">The <span class="it">malformed receipt</span></h2>
+        <h2 class="headline">The receipt you <span class="it">can't place</span></h2>
     </div>
     <div class="body-area" style="display:flex; align-items:center; gap:56px;">
         <ul class="points reveal" style="max-width:780px;">
-            <li class="point">Feed it a receipt where OCR gave up &mdash; no readable vendor, an unparseable amount. A good agent returns <b>&ldquo;no confident match&rdquo;</b> and <b>stops</b>; a naive first cut <span class="warn">keeps retrying the matcher on the same bad input.</span></li>
-            <li class="point">This failure isn't planted by the course. It's on <b>your</b> task, in <b>your</b> trace &mdash; and you locate it by <b>reading the trace</b>, not by guessing.</li>
+            <li class="point">Feed it the hard case: a receipt where OCR gave up &mdash; no readable vendor, an unparseable amount. Reason about <b>good</b> first: a good agent returns <b>&ldquo;no confident match&rdquo;</b> and <b>stops</b>.</li>
+            <li class="point">The coral version is the naive first cut &mdash; it <span class="warn">re-calls the matcher on the same unreadable input, again and again</span>, to the step cap. Same bad input, same null, burning tokens.</li>
         </ul>
         <div class="reveal" style="flex-shrink:0; width:780px;">
             <div style="border:1px solid var(--cyan-rule); border-radius:10px; background:#0d1318; padding:24px 28px;">
@@ -920,27 +804,27 @@ table.ledger td.warn-cell { color: var(--coral); }
             <div class="diagram-caption" style="margin-top:14px; font-size:22px;">The same span repeating on the same bad input is the runaway signature &mdash; coral is earned here.</div>
         </div>
     </div>
-    <div class="chrome-page">12 / 18</div>
+    <div class="chrome-page">09 / 15</div>
     <div class="chrome-nav">&larr; &rarr; navigate</div>
 </section>
 
 <!-- ============================================================ -->
-<!-- 5 — CONTENT: SVG flow diagram                               -->
+<!-- 10 — SLIDE 3.2                                                -->
 <!-- ============================================================ -->
 <section class="slide">
     <div class="chrome-tag">L50 &middot; <b>MINI-PROJECT</b></div>
     <div class="topbar reveal">
-        <div class="eyebrow">Slide 4.2</div>
-        <h2 class="headline">A failure becomes a <span class="it">kept case</span></h2>
+        <div class="eyebrow">Slide 3.2</div>
+        <h2 class="headline">What a failure has to become: <span class="it">a kept case</span></h2>
     </div>
     <div class="body-area">
         <ul class="points reveal" style="max-width:1660px;">
-            <li class="point">The L13 loop, on your own agent &mdash; <b>trace a failure &rarr; write a case that catches it &rarr; keep it forever.</b></li>
-            <li class="point">A good scorer <b>fails when the bug is present and passes when it's fixed</b>. Read the trajectory: no repeated identical call, and a clean <code>natural</code> stop.</li>
+            <li class="point">Finding the failure isn't the finish line &mdash; <b>catching it forever</b> is. Turn the trace into one <code>EvalCase</code> plus a <code>Scorer</code>, and reason about what it must do: <b>fail when the bug is present, pass once it's fixed.</b></li>
+            <li class="point">Read the <b>trajectory</b>, not just the answer &mdash; &ldquo;no repeated identical matcher call&rdquo; and &ldquo;terminated <code>natural</code>, not <code>max_steps</code>.&rdquo; That's the L13 loop on your own agent: <b>trace &rarr; write a case &rarr; keep it.</b></li>
         </ul>
         <div class="reveal" style="display:flex; align-items:center; gap:40px; margin-top:26px;">
             <div style="flex-shrink:0; width:520px; border:1px solid var(--coral-dim); border-radius:10px; background:#0d1318; padding:20px 24px;">
-                <div style="font-size:18px; color:var(--coral); margin-bottom:16px;">buggy run &mdash; the runaway (from 4.1)</div>
+                <div style="font-size:18px; color:var(--coral); margin-bottom:16px;">buggy run &mdash; the runaway (from 3.1)</div>
                 <div style="display:flex; flex-direction:column; gap:10px;">
                     <div style="display:flex; align-items:center; gap:10px;"><span style="width:150px; font-size:15px; color:var(--coral); font-family:var(--font-body);">find_matching_record</span><div style="width:180px; height:18px; background:var(--coral); opacity:0.85; border-radius:4px;"></div></div>
                     <div style="display:flex; align-items:center; gap:10px;"><span style="width:150px; font-size:15px; color:var(--coral); font-family:var(--font-body);">find_matching_record</span><div style="width:180px; height:18px; background:var(--coral); opacity:0.85; border-radius:4px;"></div></div>
@@ -958,37 +842,37 @@ table.ledger td.warn-cell { color: var(--coral); }
                 <div style="border:2px solid var(--cyan); border-radius:8px; background:#12181a; padding:14px 24px; font-size:23px; color:var(--cyan);">fixed &rarr; True</div>
             </div>
         </div>
-        <div class="diagram-caption reveal">The scorer is the cyan point; the buggy run stays coral. A verdict attached to the runaway &mdash; that's the kept case.</div>
+        <div class="diagram-caption reveal">A scorer that passes on the broken run catches nothing &mdash; the verdict attached to the runaway is what makes it a kept case.</div>
     </div>
-    <div class="chrome-page">13 / 18</div>
+    <div class="chrome-page">10 / 15</div>
     <div class="chrome-nav">&larr; &rarr; navigate</div>
 </section>
 
 <!-- ============================================================ -->
-<!-- 14 — SECTION 5 DIVIDER                                        -->
+<!-- 11 — SECTION 4 DIVIDER                                        -->
 <!-- ============================================================ -->
 <section class="slide slide-chapter">
     <div class="chrome-tag reveal">L50 &middot; <b>MINI-PROJECT</b></div>
-    <div class="chapter-ghost reveal">05</div>
-    <div class="chapter-eyebrow reveal">Section 5</div>
-    <div class="chapter-title reveal">Done means traced <span style="color:var(--cyan); font-style:normal;">and evaluated</span></div>
-    <div class="chapter-sub reveal">One green run of a non-deterministic agent proves little. Traced + one case that would catch its regression is what makes a slice finished.</div>
-    <div class="chrome-page">14 / 18</div>
+    <div class="chapter-ghost reveal">04</div>
+    <div class="chapter-eyebrow reveal">Section 4</div>
+    <div class="chapter-title reveal">How to know <span style="color:var(--cyan); font-style:normal;">you're done</span></div>
+    <div class="chapter-sub reveal">The agent is non-deterministic &mdash; one green run proves almost nothing. Traced, plus one case that would catch its regression.</div>
+    <div class="chrome-page">11 / 15</div>
 </section>
 
 <!-- ============================================================ -->
-<!-- 15 — SLIDE 5.1                                                -->
+<!-- 12 — SLIDE 4.1                                                -->
 <!-- ============================================================ -->
 <section class="slide">
     <div class="chrome-tag">L50 &middot; <b>MINI-PROJECT</b></div>
     <div class="topbar reveal">
-        <div class="eyebrow">Slide 5.1</div>
+        <div class="eyebrow">Slide 4.1</div>
         <h2 class="headline">&ldquo;It ran once&rdquo; is <span class="it">not done</span></h2>
     </div>
     <div class="body-area">
         <ul class="points reveal" style="max-width:1660px;">
-            <li class="point">One green run of a non-deterministic agent proves little. The habit the whole mini course built &mdash; <b>trace before you guess, eval or it's vibes</b> &mdash; is what makes a slice <b>finished</b>.</li>
-            <li class="point">The one line to carry out: <b>the slice is done when it's traced and has one case that would catch its regression.</b></li>
+            <li class="point">The agent is non-deterministic &mdash; <b>one green run proves almost nothing</b>. So the bar isn't &ldquo;it produced an answer.&rdquo; The habit the whole mini course built: <b>trace before you guess, eval or it's vibes.</b></li>
+            <li class="point">The one sentence to carry into the build: <b>the slice is done when it's traced and has one case that would catch its regression.</b></li>
         </ul>
         <div class="diagram-frame reveal" style="gap:56px; margin-top:34px; align-items:stretch;">
             <div style="flex:1; max-width:660px; border:2px solid var(--ink-faint); border-radius:12px; background:transparent; padding:34px 36px; position:relative;">
@@ -1005,87 +889,94 @@ table.ledger td.warn-cell { color: var(--coral); }
                 <div style="position:absolute; top:28px; right:32px; border:2px solid var(--cyan); color:var(--cyan); border-radius:8px; padding:6px 18px; font-size:21px; font-weight:600;">&check; done</div>
             </div>
         </div>
-        <div class="diagram-caption reveal">The contrast is the slide &mdash; cyan is the bar you're aiming for.</div>
+        <div class="diagram-caption reveal">The contrast is the slide &mdash; cyan is the bar you're aiming the next 70 minutes at.</div>
     </div>
-    <div class="chrome-page">15 / 18</div>
+    <div class="chrome-page">12 / 15</div>
     <div class="chrome-nav">&larr; &rarr; navigate</div>
 </section>
 
 <!-- ============================================================ -->
-<!-- 6 — CLOSING                                                  -->
+<!-- 13 — SECTION 5 DIVIDER                                        -->
 <!-- ============================================================ -->
 <section class="slide slide-chapter">
     <div class="chrome-tag reveal">L50 &middot; <b>MINI-PROJECT</b></div>
-    <div class="chapter-ghost reveal">06</div>
-    <div class="chapter-eyebrow reveal">Section 6</div>
-    <div class="chapter-title reveal">This primes your <span style="color:var(--cyan); font-style:normal;">own project</span></div>
-    <div class="chapter-sub reveal">Today everyone builds the same agent, guided. The independent build is the end-of-week project &mdash; the same motion, wider and yours.</div>
-    <div class="chrome-page">16 / 18</div>
+    <div class="chapter-ghost reveal">05</div>
+    <div class="chapter-eyebrow reveal">Section 5</div>
+    <div class="chapter-title reveal">You already own <span style="color:var(--cyan); font-style:normal;">every piece</span></div>
+    <div class="chapter-sub reveal">None of this is new machinery &mdash; you import the loop, tracing, and evals. The only new code is one small tool.</div>
+    <div class="chrome-page">13 / 15</div>
 </section>
 
 <!-- ============================================================ -->
-<!-- 17 — SLIDE 6.1                                                -->
+<!-- 14 — SLIDE 5.1                                                -->
 <!-- ============================================================ -->
 <section class="slide">
     <div class="chrome-tag">L50 &middot; <b>MINI-PROJECT</b></div>
     <div class="topbar reveal">
-        <div class="eyebrow">Slide 6.1</div>
-        <h2 class="headline">A walkthrough now, <span class="it">your build next</span></h2>
+        <div class="eyebrow">Slide 5.1</div>
+        <h2 class="headline">One new tool; the rest is <span class="it">assembly</span></h2>
     </div>
     <div class="body-area">
         <ul class="points reveal" style="max-width:1660px;">
-            <li class="point">Today everyone builds the <b>same</b> agent, guided. The independent build is the <b>end-of-week project</b> &mdash; the same motion, wider and yours.</li>
-            <li class="point">The seam between them is the <b>first thing you'd add next</b> &mdash; a second tool (reimbursement detection), a harder receipt format, a tighter scorer.</li>
+            <li class="point">The loop, tracing, and eval types all live in <code>common/</code> &mdash; you <b>import</b> them. The only genuinely new code is one small tool, <code>find_matching_record</code>. <span class="warn">Re-implementing a loop or trace emitter? Stop &mdash; import it.</span></li>
+            <li class="point">The skill isn't building something big &mdash; it's pointing skills you already own at a problem you now understand, building the <b>thinnest slice all the way through</b>, then stopping.</li>
         </ul>
-        <div class="diagram-frame reveal" style="margin-top:34px;">
-            <svg viewBox="0 0 1560 380" width="1560" height="380">
+        <div class="diagram-frame reveal" style="margin-top:22px;">
+            <svg viewBox="0 0 1560 390" width="1560" height="390">
                 <defs>
-                    <marker id="s61-cy" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="var(--cyan)"/></marker>
-                    <marker id="s61-nf" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="var(--ink-faint)"/></marker>
+                    <marker id="s51-cy" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="var(--cyan)"/></marker>
+                    <marker id="s51-nf" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="var(--ink-faint)"/></marker>
                 </defs>
-                <rect x="30" y="52" width="620" height="90" rx="45" fill="#12181a" stroke="var(--cyan)" stroke-width="2.5"/>
-                <text x="340" y="92"  text-anchor="middle" class="node-label" font-size="24">L50 walkthrough</text>
-                <text x="340" y="122" text-anchor="middle" class="edge-label" fill="var(--ink-dim)">everyone builds the same, guided</text>
-                <path d="M 650 97 C 850 97, 980 150, 1150 178" fill="none" stroke="var(--cyan)" stroke-width="3.5" marker-end="url(#s61-cy)"/>
-                <circle r="8" fill="var(--cyan)"><animateMotion dur="3s" repeatCount="indefinite" path="M 650 97 C 850 97, 980 150, 1150 178"/></circle>
-                <rect x="30" y="238" width="620" height="90" rx="45" fill="transparent" stroke="var(--ink-faint)" stroke-width="2.5" stroke-dasharray="10 8"/>
-                <text x="340" y="278" text-anchor="middle" class="node-label" font-size="24" fill="var(--ink-dim)">end-of-week project</text>
-                <text x="340" y="308" text-anchor="middle" class="edge-label" fill="var(--ink-faint)">yours, wider</text>
-                <path d="M 650 283 C 850 283, 980 230, 1150 202" fill="none" stroke="var(--ink-faint)" stroke-width="3" stroke-dasharray="10 8" marker-end="url(#s61-nf)"/>
-                <rect x="1150" y="130" width="380" height="120" rx="12" fill="#12181a" stroke="var(--cyan)" stroke-width="2.5"/>
-                <text x="1340" y="182" text-anchor="middle" class="node-label" font-size="24">the shape of</text>
-                <text x="1340" y="214" text-anchor="middle" class="node-label" font-size="24">an agent</text>
-                <rect x="718" y="168" width="304" height="52" rx="26" fill="var(--cyan-faint)" stroke="var(--cyan)" stroke-width="2"/>
-                <text x="870" y="201" text-anchor="middle" font-size="20" font-weight="600" fill="var(--cyan)" font-family="var(--font-body)">first thing you'd add</text>
+                <text x="230" y="18" text-anchor="middle" class="edge-label" fill="var(--ink-faint)" font-size="21">imported from common/</text>
+                <rect x="40" y="30"  width="380" height="56" rx="10" fill="transparent" stroke="var(--ink-faint)" stroke-width="2"/>
+                <text x="230" y="66"  text-anchor="middle" font-size="23" fill="var(--ink-dim)" font-family="var(--font-body)">create_agent</text>
+                <rect x="40" y="98"  width="380" height="56" rx="10" fill="transparent" stroke="var(--ink-faint)" stroke-width="2"/>
+                <text x="230" y="134" text-anchor="middle" font-size="23" fill="var(--ink-dim)" font-family="var(--font-body)">tracing</text>
+                <rect x="40" y="166" width="380" height="56" rx="10" fill="transparent" stroke="var(--ink-faint)" stroke-width="2"/>
+                <text x="230" y="202" text-anchor="middle" font-size="23" fill="var(--ink-dim)" font-family="var(--font-body)">evals</text>
+                <rect x="40" y="234" width="380" height="56" rx="10" fill="transparent" stroke="var(--ink-faint)" stroke-width="2"/>
+                <text x="230" y="270" text-anchor="middle" font-size="23" fill="var(--ink-dim)" font-family="var(--font-body)">calculator</text>
+                <text x="230" y="316" text-anchor="middle" class="edge-label" fill="var(--cyan)" font-size="21">the only new code</text>
+                <rect x="40" y="326" width="380" height="58" rx="10" fill="#12181a" stroke="var(--cyan)" stroke-width="2.5"/>
+                <text x="230" y="363" text-anchor="middle" font-size="23" fill="var(--cyan)" font-family="var(--font-body)" font-weight="600">find_matching_record</text>
+                <path d="M 420 58  C 700 58,  900 165, 1150 165" fill="none" stroke="var(--ink-faint)" stroke-width="2.5" marker-end="url(#s51-nf)"/>
+                <path d="M 420 126 C 700 126, 900 185, 1150 185" fill="none" stroke="var(--ink-faint)" stroke-width="2.5" marker-end="url(#s51-nf)"/>
+                <path d="M 420 194 C 780 194, 920 205, 1150 205" fill="none" stroke="var(--ink-faint)" stroke-width="2.5" marker-end="url(#s51-nf)"/>
+                <path d="M 420 262 C 700 262, 900 225, 1150 225" fill="none" stroke="var(--ink-faint)" stroke-width="2.5" marker-end="url(#s51-nf)"/>
+                <path d="M 420 355 C 720 355, 900 245, 1150 245" fill="none" stroke="var(--cyan)" stroke-width="3.5" marker-end="url(#s51-cy)"/>
+                <circle r="8" fill="var(--cyan)"><animateMotion dur="3s" repeatCount="indefinite" path="M 420 355 C 720 355, 900 245, 1150 245"/></circle>
+                <rect x="1150" y="120" width="380" height="150" rx="12" fill="#12181a" stroke="var(--cyan)" stroke-width="2.5"/>
+                <text x="1340" y="200" text-anchor="middle" class="node-label" font-size="26">your mini-project</text>
+                <text x="1340" y="236" text-anchor="middle" class="edge-label" fill="var(--ink-dim)">one assembled slice</text>
             </svg>
         </div>
-        <div class="diagram-caption reveal">Dashed means <i>next</i>, not failed &mdash; the slice you just built is the template for the one you'll build alone.</div>
+        <div class="diagram-caption reveal">Four dim imports vs one bright new tool &mdash; that contrast is the whole slide.</div>
     </div>
-    <div class="chrome-page">17 / 18</div>
+    <div class="chrome-page">14 / 15</div>
     <div class="chrome-nav">&larr; &rarr; navigate</div>
 </section>
 
 <!-- ============================================================ -->
-<!-- 18 — CLOSING                                                  -->
+<!-- 15 — CLOSING                                                  -->
 <!-- ============================================================ -->
 <section class="slide slide-closing">
     <div class="chrome-tag reveal">L50 &middot; <b>MINI-PROJECT</b></div>
-    <div class="closing-statement reveal">A capstone is a finished <span class="k">vertical slice</span> &mdash; nothing new, just assembly. Done means <span class="k">traced</span>, with one case that would catch its regression.</div>
+    <div class="closing-statement reveal">The problem is <span class="k">cross-format matching</span>; the skill is pointing tools you already own at it &mdash; the thinnest slice all the way through, <span class="k">traced</span>, with one case that would catch its regression.</div>
     <div class="closing-grid reveal">
         <div class="col">
-            <div class="label">Capstone</div>
-            <div class="val"><b>A finished vertical slice</b><br>thin and complete, goal &rarr; tool &rarr; agent &rarr; trace &rarr; eval</div>
+            <div class="label">The problem</div>
+            <div class="val"><b>Cross-format reconciliation</b><br>normalize any receipt shape to <code style="color:var(--cyan);">(vendor, amount)</code>, match it &mdash; or say &ldquo;no confident match&rdquo;</div>
         </div>
         <div class="col">
-            <div class="label">Assembly</div>
-            <div class="val"><b>Nothing new</b><br>import the loop, tracing, evals from common/; the only new code is one small tool</div>
+            <div class="label">How to think</div>
+            <div class="val"><b>Tool does the brittle match</b><br>the model judges; three tools = a trajectory worth tracing</div>
         </div>
         <div class="col">
             <div class="label">Done =</div>
             <div class="val"><b>Traced + one eval case</b><br>fails on the bug, passes when fixed &mdash; the build itself is L5003</div>
         </div>
     </div>
-    <div class="chrome-page">18 / 18</div>
+    <div class="chrome-page">15 / 15</div>
 </section>
 
 </main>
