@@ -5,20 +5,46 @@ file" line: the walkthrough writes the tool live, but the proctor trusts it beca
 these cover the two behaviors the lesson leans on — a confident cross-format match,
 and a *graceful* miss on a malformed receipt (the failure Segment 4 traces and
 Segment 5 turns into an eval case).
+
+``check_expense_policy`` is the lesson's one **LLM-in-the-loop** tool. Its coverage is
+split by what each test is actually pinning:
+
+- The *seam* tests (``FakeModel``-driven) stay offline and default: they inject replies a
+  real model won't produce on purpose — a canned verdict that contradicts the policy (to
+  prove the tool trusts the model, not a hidden cap table) and an unparseable reply (to
+  prove the defensive parse). Those paths *can't* be exercised against a live model.
+- The *behavioral* tests — does it flag an over-cap expense, does it cite the rule, does an
+  uncovered category resolve to "send for review" — read the actual policy prose, so they
+  are ``@pytest.mark.integration`` tests that call **live Sonnet**. They are deselected from
+  the default run (see the ``integration`` marker in ``pyproject.toml``) and skip when no
+  ``ANTHROPIC_API_KEY`` is set; run them with ``uv run pytest -m integration``.
 """
 
 from __future__ import annotations
 
 import json
+from collections.abc import Callable
+from typing import cast
 
 import pytest
+from langchain.chat_models import init_chat_model
 
+from fluffy_potato_curriculum.common.config import get_settings
+from fluffy_potato_curriculum.common.fake_model import FakeModel, text_reply
 from fluffy_potato_curriculum.lessons.L50.receipt_tools import (
-    check_expense_policy,
+    PolicyModel,
     check_reimbursement,
     find_matching_record,
+    make_check_expense_policy,
     normalize_receipt,
     receipt_text,
+)
+
+# The behavioral policy tests below are live-only: without a key, an `-m integration` run
+# skips them cleanly rather than erroring on a missing key mid-call.
+_requires_live_model = pytest.mark.skipif(
+    get_settings().anthropic_api_key is None,
+    reason="live policy-check integration tests need ANTHROPIC_API_KEY (see .env.example)",
 )
 
 
@@ -76,26 +102,88 @@ def test_check_reimbursement_unknown_expense_is_null() -> None:
     assert result["reimbursed"] is None
 
 
+@pytest.fixture(scope="module")
+def live_policy_check() -> Callable[[str, float], str]:
+    """``check_expense_policy`` wired to live Sonnet — a genuine read of the policy prose,
+    the real call the offline ``ScriptedPolicyModel`` only approximated. Mirrors the gated
+    live cell in the L50 lecture (module-scoped so the model is built once per run)."""
+    model = init_chat_model(
+        "anthropic:claude-sonnet-4-6",
+        api_key=get_settings().anthropic_api_key,
+        max_tokens=256,
+    )
+    return make_check_expense_policy(cast(PolicyModel, model))
+
+
+@pytest.mark.integration
+@_requires_live_model
 @pytest.mark.parametrize(
-    ("category", "amount", "expected"),
+    ("category", "amount"),
     [
-        ("meals", 12.75, True),  # coffee: well under the 50.00 meals cap
-        ("travel", 41.20, True),  # taxi: under the 75.00 travel cap
-        ("lodging", 268.40, False),  # hotel: over the 250.00 lodging cap -> flagged
+        ("meals", 12.75),  # coffee: well within the $50 meals guidance
+        ("travel", 41.20),  # taxi: within the $75 travel guidance
     ],
 )
-def test_check_expense_policy_flags_over_cap(category: str, amount: float, expected: bool) -> None:
-    result = json.loads(check_expense_policy(category, amount))
-    assert result["within_policy"] is expected
+def test_check_expense_policy_approves_within_guidance(
+    live_policy_check: Callable[[str, float], str],
+    category: str,
+    amount: float,
+) -> None:
+    # A live model reading the actual policy prose approves an expense that is clearly
+    # under its category cap — the authentic read the mini-project's tool exists to do.
+    result = json.loads(live_policy_check(category, amount))
+    assert result["within_policy"] is True
 
 
-def test_check_expense_policy_reports_over_by_amount() -> None:
-    # An over-cap expense reports how far over it is, so the agent can say why it flagged.
-    result = json.loads(check_expense_policy("lodging", 268.40))
-    assert result["over_by"] == 18.40
+@pytest.mark.integration
+@_requires_live_model
+def test_check_expense_policy_does_not_approve_over_cap(
+    live_policy_check: Callable[[str, float], str],
+) -> None:
+    # An over-cap hotel ($268.40 vs the $250 nightly limit) is never silently approved.
+    # A live model may render "over policy" as a hard False *or* as a hedged None (the
+    # prose says such stays "should be flagged" / "need prior approval") — both mean "not
+    # approved", so we assert the property that matters rather than a brittle exact label.
+    result = json.loads(live_policy_check("lodging", 268.40))
+    assert result["within_policy"] in (False, None)
 
 
-def test_check_expense_policy_unknown_category_is_null() -> None:
-    # A category with no policy on file resolves to a value, never a crash.
-    result = json.loads(check_expense_policy("gifts", 10.00))
+@pytest.mark.integration
+@_requires_live_model
+def test_check_expense_policy_cites_the_applied_rule(
+    live_policy_check: Callable[[str, float], str],
+) -> None:
+    # The whole point of the LLM read: it names the rule it applied, not just a verdict.
+    # Uses the unambiguous meals case so the model returns a definite verdict (and thus a
+    # citation) — the over-cap hedge sometimes comes back as a bare None with no citation.
+    result = json.loads(live_policy_check("meals", 12.75))
+    assert "50" in (result.get("citation") or "")
+
+
+@pytest.mark.integration
+@_requires_live_model
+def test_check_expense_policy_uncovered_category_is_null(
+    live_policy_check: Callable[[str, float], str],
+) -> None:
+    # A category the policy prose genuinely does not cover resolves to a null verdict
+    # ("send for manual review"), not a crash. (The old offline test used "gifts", but the
+    # real policy *does* address gifts — a live read needs a truly-uncovered category.)
+    result = json.loads(live_policy_check("medical", 40.00))
+    assert result["within_policy"] is None
+
+
+def test_check_expense_policy_is_model_driven() -> None:
+    # Prove the verdict comes from the model's reply, not a hidden cap table: a canned
+    # model that flags a *within-guidance* meal must make the tool report over-policy.
+    verdict = '{"within_policy": false, "citation": "canned rule", "reason": "canned"}'
+    tool = make_check_expense_policy(FakeModel([text_reply(verdict)]))
+    result = json.loads(tool("meals", 12.75))
+    assert result["within_policy"] is False
+
+
+def test_check_expense_policy_graceful_on_unparseable_reply() -> None:
+    # A model reply with no readable JSON resolves to a null verdict, never an exception —
+    # the same defensive-parse contract find_matching_record has for a malformed receipt.
+    tool = make_check_expense_policy(FakeModel([text_reply("I'm honestly not sure here.")]))
+    result = json.loads(tool("lodging", 268.40))
     assert result["within_policy"] is None

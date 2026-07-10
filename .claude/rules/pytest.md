@@ -46,9 +46,19 @@ How tests are written and run in this repo. Config lives in
 
 ## LLM / network boundaries
 
-- This repo calls the Anthropic/OpenAI SDKs. **Never hit a live API in a test** — mock the
-  client or stub responses. Tests must be deterministic and offline.
+- This repo calls the Anthropic/OpenAI SDKs. **The default suite never hits a live API** —
+  mock the client or stub responses. `uv run pytest` must be deterministic and offline.
 - Put shared fakes (e.g. a canned LLM response) in a fixture, not inline per test.
+- **Live-API tests are the one sanctioned exception, and they are opt-in.** Mark any test
+  that makes a real model call `@pytest.mark.integration` (registered in `pyproject.toml`).
+  The default `addopts` carries `-m "not integration"`, so those tests are *deselected* from
+  `uv run pytest` and never run in the offline gate; run them deliberately with
+  `uv run pytest -m integration`. Guard each one with a `skipif` on the missing key (e.g.
+  `get_settings().anthropic_api_key is None`) so an opt-in run without credentials skips
+  cleanly instead of erroring. Reserve this for behavior only a live model can exercise —
+  seam and defensive-parse paths (which inject replies a real model won't produce) still
+  belong in the offline `FakeModel` set. Live assertions are inherently non-deterministic:
+  pin the robust property (an over-cap expense is *not approved*), not a brittle exact label.
 
 ## Before committing
 

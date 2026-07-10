@@ -705,7 +705,7 @@ table.ledger td.warn-cell { color: var(--coral); }
     </div>
     <div class="body-area">
         <ul class="points reveal" style="max-width:1660px;">
-            <li class="point">Give the agent three tools: <code>find_matching_record</code>, the reused <code>calculator</code> (total the items, check the variance), and a pre-built <code>check_expense_policy</code> (is it under the cap?). Now it must <b>choose</b> which to reach for, and when.</li>
+            <li class="point">Give the agent three tools: <code>find_matching_record</code>, the reused <code>calculator</code> (total the items, check the variance), and a pre-built <code>check_expense_policy</code> (an <b>LLM read</b> of the free-form policy that cites the rule). Now it must <b>choose</b> which to reach for, and when.</li>
             <li class="point">That choice is the point. A one-tool agent has no decision to observe; a multi-tool agent leaves a <b>trajectory</b> &mdash; and a trajectory is the only thing worth tracing and evaluating.</li>
         </ul>
         <div class="diagram-frame reveal" style="margin-top:26px;">
@@ -733,7 +733,7 @@ table.ledger td.warn-cell { color: var(--coral); }
                 <text x="740" y="208" text-anchor="middle" font-size="17" fill="var(--ink-dim)" font-family="var(--font-body)">sum items &rarr; variance</text>
                 <rect x="540" y="280" width="400" height="80" rx="12" fill="#12181a" stroke="var(--cyan)" stroke-width="2.5"/>
                 <text x="740" y="314" text-anchor="middle" font-size="21" fill="var(--cyan)" font-family="var(--font-body)" font-weight="600">check_expense_policy</text>
-                <text x="740" y="342" text-anchor="middle" font-size="17" fill="var(--ink-dim)" font-family="var(--font-body)">amount &rarr; within cap?</text>
+                <text x="740" y="342" text-anchor="middle" font-size="17" fill="var(--ink-dim)" font-family="var(--font-body)">reads policy &rarr; cites rule</text>
                 <path d="M 940 52 C 1040 100, 1090 130, 1180 160" fill="none" stroke="var(--cyan)" stroke-width="3" marker-end="url(#s22j-cy)"/>
                 <path d="M 940 186 L 1180 186" stroke="var(--cyan)" stroke-width="3" marker-end="url(#s22j-cy)"/>
                 <path d="M 940 320 C 1040 272, 1090 242, 1180 212" fill="none" stroke="var(--cyan)" stroke-width="3" marker-end="url(#s22j-cy)"/>
@@ -742,7 +742,7 @@ table.ledger td.warn-cell { color: var(--coral); }
                 <text x="1350" y="210" text-anchor="middle" class="edge-label" fill="var(--ink-dim)">match &middot; total &middot; policy</text>
             </svg>
         </div>
-        <div class="diagram-caption reveal">Three <span style="color:var(--cyan);">cyan</span> tools, one junction &mdash; the branch the agent takes (match, total, check the cap) is exactly what the trace records.</div>
+        <div class="diagram-caption reveal">Three <span style="color:var(--cyan);">cyan</span> tools, one junction &mdash; the branch the agent takes (match, total, check the policy) is exactly what the trace records.</div>
     </div>
     <div class="chrome-page">07 / 15</div>
     <div class="chrome-nav">&larr; &rarr; navigate</div>
