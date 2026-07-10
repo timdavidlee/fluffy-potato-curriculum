@@ -1,3 +1,9 @@
+## v0.34.1 (2026-07-10)
+
+### Refactor
+
+- **lessons**: merge L03 + L04 into one directed-graphs lesson
+
 ## v0.34.0 (2026-07-10)
 
 ### Feat
