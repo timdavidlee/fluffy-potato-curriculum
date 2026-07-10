@@ -1,98 +1,85 @@
-# L50 capstone: assembling the mini-project
+# L50: the receipt-reconciliation problem
 
 ```yaml
-title: "L50 capstone: assembling the mini-project"
-keywords: capstone, vertical slice, assembly, reuse, tool design, shallow agent, trace, eval case, regression, receipt reconciliation, hand-off
+title: "L50: the receipt-reconciliation problem"
+keywords: receipt reconciliation, cross-format normalization, tool-vs-model, warranted tool, three-tool decision, expense policy, graceful failure, no confident match, runaway loop, regression case, scorer, vertical slice
 estimated duration: 15
 ```
 
-> **Lesson:** L50 — Agent mini-project (mini-track capstone). This deck is the **framing** you read right before the build: what a capstone is, why it's all assembly, and the shape of the slice you're about to build together. The build itself is the guided notebook [L5003_lecture](L5003_lecture.ipynb).
-> **Colour key (as in every deck):** **cyan** = the point being made; **coral** = a failure or a cost. Nothing new is taught here — every idea is one you already own.
+> **Lesson:** L50 — Agent mini-project (mini-track capstone). This deck sets up the **problem you're about to build against**: what reconciliation is, why it's genuinely hard, and how to *reason* about the tool, the failure, and what "done" means — so the guided build [L5003_lecture](L5003_lecture.ipynb) is you executing a plan you already understand, not following steps blind.
+> **Colour key (as in every deck):** **cyan** = the point being made; **coral** = a failure or a cost. Nothing here is a new *concept* — it's a new *problem* to point your existing skills at.
 
-## section 1. What a capstone actually is
+## section 1. The problem: does this receipt match the ledger?
 
-### slide 1.1 A vertical slice, not a product
+### slide 1.1 Reconciliation, stated plainly
 
-- text: a capstone is a **vertical slice** — one narrow path that goes *all the way through* the stack, from a fuzzy goal to an evaluated agent.
-- text: it is the opposite of a wide feature that touches many things but only reaches halfway. Thin and complete beats wide and half-wired.
-- diagram: two builds side by side. Left, **cyan**, a single narrow column labeled "goal → tool → agent → trace → eval" reaching all the way to the bottom (a complete slice). Right, `--ink-faint`, a wide row of five feature boxes that stops halfway down with a **coral** dashed line "never traced, never evaluated". The cyan slice is the point; the wide-but-shallow build is the failure. **This thin-column-vs-wide-row contrast is the deck's opening motif.**
+- text: you have **one receipt** and a small **ledger** of expense records the company already booked. The question the agent answers: *which ledger record is this receipt, and do the amounts agree?* — and, when nothing lines up, say so instead of guessing.
+- text: that's the whole task. It sounds like a lookup, and the *matching* part is — the hard part is that the receipt almost never arrives in the ledger's shape.
+- diagram: a **flow** — one **cyan** receipt chip on the left, an arrow into a box "match → same record? amounts agree?", out to one of two ends: a **cyan** "matched, reconciled" record and a **coral** "no confident match". Both ends are legitimate outcomes; the coral one is a *correct* answer, not a failure. The two-outcome shape is the section-1 motif.
 
-### slide 1.2 Scope creep is *this* lesson's failure mode
+### slide 1.2 Why it's hard: one expense, three receipt shapes
 
-- text: the capstone skill isn't building something big — it's **finishing a thin slice, then stopping.**
-- text: naming the non-goals out loud *is* the skill. A mini-project is defined as much by what it refuses to do as by what it does.
-- diagram: a horizontal **cyan** "done" line with four checked boxes on it — "one task · one new tool · one trace · one eval case". Below it, a `--ink-faint` bin labeled "non-goals → v2 / your own project" holding **coral** cards ("multi-receipt batches", "live bank API", "planning / memory / subagents") pulled *off* the done-line. The restraint is cyan; the parked scope is coral, deliberately set aside.
+- text: the same three facts — **who**, **how much**, **what shape** — wear a different name (or no name) in every source. A human reads across them by eyeball; that's exactly the reading you don't want a *model* doing by eyeball on money.
+- text: normalizing those varied shapes into one comparable `(vendor, amount)` is the real work of the task. Hold onto that — it's what decides where the tool goes in section 2.
+- table: the same three fields, disguised per source.
 
-[↑ Back to top](#l50-capstone-assembling-the-mini-project)
-
-## section 2. Nothing new — it's assembly
-
-### slide 2.1 The five-objective arc, one motion
-
-- text: you built each of these one at a time, on a task the course handed you. Today you drive the whole chain yourself, in order, on a task that's *yours*.
-- diagram: a left-to-right **flow** of five **cyan** pills — "scope" → "tool" → "agent" → "trace" → "eval" — each pill tagged underneath with the lesson that owns it (`L08` · `L07/L08` · `L10/L11` · `L12` · `L13`). One continuous arrow runs through all five: the point is the *connection*, not any single pill. No coral — nothing here fails; it connects.
-
-### slide 2.2 Reuse over re-derive
-
-- text: the loop, the tracing, the eval types all already live in the shared `common/` layer. You **import** them — you don't rebuild them.
-- text: the *only* genuinely new code in the whole lesson is one small tool. If you're re-implementing an agent loop or a trace emitter, stop and import it.
-- diagram: a **block/contrast** picture. Four `--ink-faint` blocks stamped "imported from common/" — `agent_graph.run` · `tracing` · `evals` · `calculator` — flow into a build box. Beside them, a single **cyan** block "find_matching_record — the only new code" flows into the same box, standing out as the one fresh piece. The contrast (dim imports vs one bright new tool) is the whole slide.
-
-[↑ Back to top](#l50-capstone-assembling-the-mini-project)
-
-## section 3. The slice we'll build: receipt reconciliation
-
-### slide 3.1 One expense, three receipt shapes
-
-- text: a receipt arrives in a different shape from every source. Normalizing across those shapes is the real work — and exactly what a model shouldn't do by eyeball.
-- table: the same three fields, wearing a different name (or no name) per source.
-
-| Source | vendor field | amount field | shape |
+| Source | vendor lives in | amount lives in | shape |
 | --- | --- | --- | --- |
 | Cafe POS | `merchant` | `total` | JSON object |
-| Rideshare | `company` | `amount_charged` | JSON, renamed |
-| Hotel folio | first text line | "Amount due:" line | raw text |
+| Rideshare | `company` | `amount_charged` | JSON, renamed fields |
+| Hotel folio | first text line | the "Amount due:" line | raw text, no fields |
 
-### slide 3.2 The one tool, and a real two-tool decision
+[↑ Back to top](#l50-the-receipt-reconciliation-problem)
 
-- text: `find_matching_record` normalizes any format to `(vendor, amount)` and looks it up — a **warranted** tool, because reliable cross-format matching is not eyeball work.
-- text: pairing it with the reused `calculator` (total the line items, check the variance) gives the agent a genuine tool-selection decision — which is what makes its trace worth reading.
-- diagram: a **flow** — a stack of three differently-shaped receipt chips (cafe/rideshare/folio) funnel into one **cyan** box "find_matching_record: normalize → match", out to a matched ledger record. A second **cyan** box "calculator: sum line items → variance" branches off the same receipt. Both tools cyan (both are the point); the varied inputs `--ink-faint`. This normalize-and-match picture is the section-3 motif.
+## section 2. How to think about the tools
 
-[↑ Back to top](#l50-capstone-assembling-the-mini-project)
+### slide 2.1 Where does the tool go? Apply the L08 test
 
-## section 4. Find your *own* failure
+- text: ask the L08 question out loud — *could the model do this reliably in its head?* For "normalize a hotel folio's raw text and match it to a ledger row," the honest answer is **no**: it's fiddly, deterministic, and a wrong guess is a wrong reimbursement. That "no" is what **warrants** the tool.
+- text: so the split is deliberate: the **tool** does the brittle normalize-and-match; the **model** does the judgement around it — deciding *when* to match, *when* to total, and *when* to declare no match. Draw that line yourself before you write a line of code.
+- diagram: a **contrast** picture. On the model's side, a **cyan** brain labeled "decides: match? total? give up?" — judgement. On the tool's side, a **cyan** gear labeled "normalize any shape → `(vendor, amount)` → look up" — mechanism. A `--ink-faint` dashed seam between them labeled "the L08 line, drawn on *this* task". The point is the line, not either box alone.
 
-### slide 4.1 The malformed receipt
+### slide 2.2 More tools make it a real decision
 
-- text: feed it a receipt where OCR gave up — no readable vendor, an unparseable amount. A good agent returns "no confident match" and **stops**; a naive first cut keeps retrying the matcher on the same bad input.
-- text: this failure isn't planted by the course. It's on your task, in your trace — and you locate it by *reading the trace*, not by guessing.
-- diagram: a trace **waterfall** — a `chain` frame, then the *same* `find_matching_record` span repeating three times (each **coral**, each returning "match: null"), the run ending on a **coral** "max_steps" cap instead of a clean stop. The repetition is the runaway signature; coral is earned here because this is the actual failure. **This waterfall is re-drawn in 4.2.**
+- text: give the agent three tools — `find_matching_record`, the reused **`calculator`** (total the line items, check the variance), and a pre-built **`check_expense_policy`** (is the amount under its category cap?). Now it must **choose** which to reach for, and when.
+- text: that choice is the point. A one-tool agent has no decision to observe; a multi-tool agent leaves a **trajectory** — and a trajectory is the only thing worth tracing and, later, worth evaluating.
+- text: `find_matching_record` is the only tool you *write*; `calculator` and `check_expense_policy` are provided/reused. The authoring budget stays at one — the agent's toolset does not.
+- diagram: a **flow** — a receipt funnels into a junction ("agent picks") that branches to three **cyan** boxes: "`find_matching_record`: normalize → match", "`calculator`: sum line items → variance", and "`check_expense_policy`: amount → within cap?". Arrows from all three converge on "reconciled?". All tools cyan (all legitimate); the branch the agent takes is the emphasis — it's exactly what the trace records.
 
-### slide 4.2 A failure becomes a kept case
+[↑ Back to top](#l50-the-receipt-reconciliation-problem)
 
-- text: the L13 loop, on your own agent — **trace a failure → write a case that catches it → keep it forever.**
-- text: a good scorer *fails when the bug is present and passes when it's fixed*. Read the trajectory: no repeated identical call, and a clean `natural` stop.
-- diagram: 4.1's runaway waterfall (**coral**) on the left with one **cyan** scorer box reading its trajectory; an arrow to a small two-row result — "buggy → False" (coral) above "fixed → True" (**cyan**). The scorer is the cyan point; the buggy run stays coral. Second beat of the waterfall motif, now with a verdict attached.
+## section 3. How to think about failure
 
-[↑ Back to top](#l50-capstone-assembling-the-mini-project)
+### slide 3.1 The receipt you can't place
 
-## section 5. Done means traced *and* evaluated
+- text: now feed it the hard case: a receipt where OCR gave up — no readable vendor, an unparseable amount. Reason about what *good* looks like **before** you run it: a good agent returns **"no confident match" and stops.** Refusing to match is the right answer here.
+- text: the **coral** version is the naive first cut — it re-calls the matcher on the same unreadable input, again and again, and runs to the step cap. Same bad input, same null result, burning tokens. That's the failure this task hands you for free — no course-planted bug.
+- diagram: a trace **waterfall** — a `chain` frame, then the *same* `find_matching_record` span repeating three times (each **coral**, each returning "match: null"), the run ending on a **coral** "max_steps" cap instead of a clean stop. The repeated identical span is the runaway *signature* you learn to spot; coral is earned because this is the real failure. **This waterfall reappears in 3.2.**
 
-### slide 5.1 "It ran once" is not done
+### slide 3.2 What a failure has to become: a kept case
 
-- text: one green run of a non-deterministic agent proves little. The habit the whole mini course built — trace before you guess, eval or it's vibes — is what makes a slice *finished*.
-- text: the one line to carry out: **the slice is done when it's traced and has one case that would catch its regression.**
-- diagram: two agent cards. Left, `--ink-faint` "ran once — no trace, no eval", struck through with a **coral** "vibes" stamp. Right, **cyan** "traced + one kept eval case", badged "finished slice". The contrast is the slide; cyan is the bar you're aiming for.
+- text: finding the failure isn't the finish line — **catching it forever** is. Turn the trace into one `EvalCase` plus a `Scorer`, and reason about what that scorer must do: **fail when the bug is present, pass once it's fixed.** A scorer that passes on the broken run catches nothing.
+- text: read the *trajectory*, not just the answer — "no repeated identical matcher call" and "terminated `natural`, not `max_steps`". That's the L13 loop pointed at your own agent: **trace a failure → write a case that catches it → keep it.**
+- diagram: 3.1's runaway waterfall (**coral**) on the left, one **cyan** scorer box reading its trajectory, an arrow to a two-row verdict — "buggy run → False" (**coral**) above "fixed run → True" (**cyan**). The scorer is the cyan point; the buggy run stays coral. Second beat of the waterfall motif, now with a verdict attached.
 
-[↑ Back to top](#l50-capstone-assembling-the-mini-project)
+[↑ Back to top](#l50-the-receipt-reconciliation-problem)
 
-## section 6. This primes your own project
+## section 4. How to know you're done
 
-### slide 6.1 A walkthrough now, your build next
+### slide 4.1 "It ran once" is not done
 
-- text: today everyone builds the *same* agent, guided. The independent build is the end-of-week project — the same motion, wider and yours.
-- text: the seam between them is the **first thing you'd add next** — a second tool (reimbursement detection), a harder receipt format, a tighter scorer.
-- diagram: two lanes reconverging on "the shape of an agent". Top lane, solid **cyan**, "L50 walkthrough — everyone builds the same, guided". Bottom lane, **dashed** `--ink-faint`, "end-of-week project — yours, wider", with a small cyan "first thing you'd add" chip bridging the two. Dashed means *next*, not failed — explicitly no coral. The bookend of the deck: the slice you just built is the template for the one you'll build alone.
+- text: the agent is non-deterministic — one green run proves almost nothing. So the bar for *this* build isn't "it produced an answer." Reason about doneness the way the whole mini course taught you: **trace before you guess, eval or it's vibes.**
+- text: the one sentence to carry into the build: **the slice is done when it's traced *and* has one case that would catch its regression.** That's the target you're aiming the next 70 minutes at.
+- diagram: two agent cards. Left, `--ink-faint` "ran once — no trace, no eval", struck through with a **coral** "vibes" stamp. Right, **cyan** "traced + one kept eval case", badged "done". The contrast is the slide; cyan is the bar.
 
-[↑ Back to top](#l50-capstone-assembling-the-mini-project)
+[↑ Back to top](#l50-the-receipt-reconciliation-problem)
+
+## section 5. You already own every piece
+
+### slide 5.1 One new tool; the rest is assembly
+
+- text: none of this is new machinery. The loop, the tracing, the eval types all live in `common/` — you **import** them. The *only* genuinely new code is one small tool, `find_matching_record`. If you catch yourself re-implementing an agent loop or a trace emitter, stop and import it.
+- text: so the skill on display today isn't building something big — it's pointing skills you already have at a problem you now understand, building the **thinnest slice that goes all the way through**, and then *stopping*. The "first thing you'd add next" (a harder format, a tighter scorer, reimbursement detection) is the seam into your own [end-of-week project](../../../../docs/origin/PROJECT_BRIEF_DESIGN.md).
+- diagram: a **block/contrast** picture. Four `--ink-faint` blocks stamped "imported from `common/`" — `create_agent` · `tracing` · `evals` · `calculator` — flow into a build box. Beside them a single **cyan** block "`find_matching_record` — the only new code" flows into the same box, the one bright piece among the dim ones. The contrast *is* the slide: dim imports, one fresh tool.
+
+[↑ Back to top](#l50-the-receipt-reconciliation-problem)

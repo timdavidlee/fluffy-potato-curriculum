@@ -14,6 +14,7 @@ import json
 import pytest
 
 from fluffy_potato_curriculum.lessons.L50.receipt_tools import (
+    check_expense_policy,
     check_reimbursement,
     find_matching_record,
     normalize_receipt,
@@ -73,3 +74,28 @@ def test_check_reimbursement_detects_offsetting_credit(expense_id: str, expected
 def test_check_reimbursement_unknown_expense_is_null() -> None:
     result = json.loads(check_reimbursement("EXP-9999"))
     assert result["reimbursed"] is None
+
+
+@pytest.mark.parametrize(
+    ("category", "amount", "expected"),
+    [
+        ("meals", 12.75, True),  # coffee: well under the 50.00 meals cap
+        ("travel", 41.20, True),  # taxi: under the 75.00 travel cap
+        ("lodging", 268.40, False),  # hotel: over the 250.00 lodging cap -> flagged
+    ],
+)
+def test_check_expense_policy_flags_over_cap(category: str, amount: float, expected: bool) -> None:
+    result = json.loads(check_expense_policy(category, amount))
+    assert result["within_policy"] is expected
+
+
+def test_check_expense_policy_reports_over_by_amount() -> None:
+    # An over-cap expense reports how far over it is, so the agent can say why it flagged.
+    result = json.loads(check_expense_policy("lodging", 268.40))
+    assert result["over_by"] == 18.40
+
+
+def test_check_expense_policy_unknown_category_is_null() -> None:
+    # A category with no policy on file resolves to a value, never a crash.
+    result = json.loads(check_expense_policy("gifts", 10.00))
+    assert result["within_policy"] is None

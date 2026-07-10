@@ -62,7 +62,7 @@ Before Segment 1 starts, the proctor should have:
 
 1. Write `find_matching_record(receipt)` as a plain Python function: clear name, typed signature, a docstring that reads as the tool's contract, and explicit error handling for a malformed/unknown-format receipt (return a "no confident match" signal, don't raise into a loop). Narrate each L08 choice as you make it — normalizing the varied receipt formats to a common shape is the one place the course's tool-design lesson gets a fresh workout.
 2. Keep it **deterministic and offline** — it reads only the bundled records/receipts JSON/CSV; say why: a reproducible tool keeps the eval reproducible (the whole `common/` design stance).
-3. Register it alongside the reused `calculator` (to total the receipt's line items and compute the reconciliation variance against the matched record) so the agent has a *real tool-selection decision* to make — which makes the Segment 4 trace worth reading.
+3. Register it alongside two tools the agent runs but does not author: the reused `calculator` (total the line items, compute the reconciliation variance against the matched record) and the **provided** `check_expense_policy` (imported pre-built from `receipt_tools.py` — is the amount under its category cap?). Three tools give the agent a *real tool-selection decision* to make — which makes the Segment 4 trace worth reading. Frame the policy tool in one line (caps are policy *data*, warranted by the same L08 test); do **not** author it live — the writing budget stays one tool.
 
 **What to say out loud:**
 
@@ -73,13 +73,13 @@ Before Segment 1 starts, the proctor should have:
 
 ## Segment 3 — Assemble the shallow agent with `create_agent` (Objective 3)
 
-**Goal:** wire the new tool (+ the reused shared tool) into a **`create_agent`** shallow agent, run it on the task, read the `RunResult`, and confirm natural termination — the [L11](../L11/objectives.md) one-liner doing a job the student defined.
+**Goal:** wire the three tools (the new `find_matching_record` + the reused `calculator` + the provided `check_expense_policy`) into a **`create_agent`** shallow agent, run it on the task, read the `RunResult`, and confirm natural termination — the [L11](../L11/objectives.md) one-liner doing a job the student defined.
 
 **Pre-flight:** Segment 2's tool in hand; the `create_agent` import ready.
 
 **Live script:**
 
-1. One line: `agent = create_agent(model, tools=[new_tool, reused_tool])` (recall L11: "this is the L10 loop, packaged"). Run it on the task.
+1. One line: `agent = create_agent(model, tools=[find_matching_record, calculator, check_expense_policy])` (recall L11: "this is the L10 loop, packaged"). Run it on the task.
 2. Read the `RunResult` on screen — final text, iteration count, termination cause. Confirm it terminated `natural`, not at the step cap.
 3. Pick a `max_steps` deliberately *for this task* and say why — termination as a design choice ([L10](../L10/objectives.md), objective 2), not a magic default.
 
@@ -163,7 +163,7 @@ Left for students to do after class, on their own agent (the platform-heavy half
 Most of L50's framing is pinned in [objectives.md](objectives.md) (integrative-not-additive; reuse `common/` wholesale; one new tool only; find-your-own-failure; **core walkthrough = S1–S4 + a minimal S5, ~90 min, Sonnet-only; the Langfuse experiment/pass-rate/Haiku-A/B is a student bonus**; walkthrough format; hand off to the end-of-week project and `MINI_WRAPUP.md`). The remaining open items are shared with the sibling and are stage-2 mechanics:
 
 - **Decided (format, 2026-07-04):** a **single guided build notebook + `PROCTOR_NOTES.md`** (K-prework runbook spirit), **not** the default lecture + `_empty`/`_solutions` lab pair — the whole lesson is one continuous proctor-led build, and the independent lab is the separate [end-of-week project](../../PROJECT_BRIEF_DESIGN.md). Stage 2 follows the runbook shape here, not the default material set. (Full rationale in the [objectives.md](objectives.md) *Decided (format)* note.)
-- **Decided (mini-project domain, 2026-07-04):** a **receipt / expense-reconciliation helper** — normalize a receipt (varied source formats) and match it against an **offline records bundle** (JSON/CSV, no SQL). New tool `find_matching_record` + reused `calculator`; natural failure = a malformed/unknown-format receipt that must resolve to a graceful "no confident match"; **reimbursement detection** (`check_reimbursement`, offset an expense against a bank credit) is the Segment 6 stretch. Full spec — data bundle, tool signatures, failure, stretch — in the *Decided (mini-project domain)* note in [objectives.md](objectives.md); stage 2 builds to that.
+- **Decided (mini-project domain, 2026-07-04):** a **receipt / expense-reconciliation helper** — normalize a receipt (varied source formats) and match it against an **offline records bundle** (JSON/CSV, no SQL). Core agent = three tools: the authored `find_matching_record` + reused `calculator` + provided `check_expense_policy` (per-category spending cap check, imported pre-built — *authoring* budget stays one tool); natural failure = a malformed/unknown-format receipt that must resolve to a graceful "no confident match"; **reimbursement detection** (`check_reimbursement`, offset an expense against a bank credit) is the Segment 6 stretch. Full spec — data bundle, tool signatures, failure, stretch — in the *Decided (mini-project domain)* note in [objectives.md](objectives.md); stage 2 builds to that.
 - <!-- *NEED INPUT (stage-2 infra)*: the Langfuse config surface in `common/config.py` and the `require_langfuse()`-style guard — same item L12/L13 carry. -->
 - <!-- *NEED INPUT (stage-2)*: the exact import/API for "run the mini-track `create_agent` shallow agent and get a traced `RunResult`" so the walkthrough calls one stable symbol (pin the L11/L12 wiring). -->
 - <!-- *NEED INPUT (stage-2)*: whether the Segment 5 experiment is launched from the notebook via the Langfuse SDK or partly clicked in the UI on the projector — affects how the runner is shown live (same question L13 carries). -->

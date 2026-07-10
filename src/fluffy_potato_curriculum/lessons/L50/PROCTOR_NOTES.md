@@ -53,7 +53,9 @@ General gotchas:
 
 - Everything imports from `fluffy_potato_curriculum.common` — `agent_graph` (`await arun` →
   `RunResult`), `evals` (`EvalCase` / `EvalResult` / `tool_calls` / `tool_trajectory`), `tools`
-  (`calculator`), `fake_model`. The one lesson-local import is the tool in Section 2.
+  (`calculator`), `fake_model`. The lesson-local imports are `check_expense_policy` (Section 2) and
+  the stretch `check_reimbursement` (Section 6) from `receipt_tools.py`; `find_matching_record` is
+  written inline in Section 2, not imported.
 - The notebook is async-first: runs are `await arun(...)`. Jupyter allows top-level `await`; a plain
   `.py` port would need `asyncio.run`.
 - A **scorer is keyword-only**: `def scorer(*, run, example) -> EvalResult`. Dropping the `*` is the
@@ -88,7 +90,8 @@ stop.**
 
 ## Section 2 — Design the one new tool (~15 min)
 
-**Goal:** author `find_matching_record` live with the L07/L08 checklist — the *only* new code today.
+**Goal:** author `find_matching_record` live with the L07/L08 checklist — the *only* tool you write
+today (the agent's other two, `calculator` and `check_expense_policy`, are reused/provided).
 
 COMMON GOTCHAS:
 - This is the one segment with real live-coding. Keep it moving: the normalization is an **alias
@@ -97,27 +100,34 @@ COMMON GOTCHAS:
 - The **contract is graceful failure**: a malformed receipt returns `{"match": null, ...}`, it does
   **not** raise. That's the whole setup for Section 4 — narrate it as you write `_coerce_amount`
   returning `None` on `"amt": "??"`.
-- Registering the tool is a dict `{"name": fn}` — the exact shape `agent_graph` binds and dispatches
-  (mirrors `common.tools.TOOLS`). The reused `calculator` comes straight from `common/tools.py`.
+- Registering the tools is a dict `{"name": fn}` — the exact shape `agent_graph` binds and dispatches
+  (mirrors `common.tools.TOOLS`). Two of the three come free: the reused `calculator` from
+  `common/tools.py`, and `check_expense_policy` **imported pre-built from `receipt_tools.py`**.
+- `check_expense_policy` is a **second core tool but not a second live-coding task** — it's provided,
+  not authored. Frame it in one line (per-category spending caps are policy *data*, so it's warranted
+  by the same L08 test) and move on; the point is that the agent now makes a real three-way tool
+  choice, not that students write it.
 
 UNBLOCKERS:
-- "One new tool is the whole budget. If you're writing a second, that's your own project (Section 6)."
+- "The *authoring* budget is one tool. The agent runs three, but the only one you write is
+  `find_matching_record` — if you're *writing* a second, that's your own project (Section 6)."
 - If a student's inline copy drifts from the run, the tested reference is `receipt_tools.py` — the
-  smoke-test cell (`R-coffee … R-mystery`) is the fast check that it behaves.
+  smoke-test cells (`R-coffee … R-mystery`, and the meals/lodging policy check) are the fast check.
 
 **If it misbehaves:** if a live model later never calls the tool, that's a live L08 moment — tighten
 the name/description and rerun; don't paper over it.
 
 ## Section 3 — Assemble the shallow agent (~10 min)
 
-**Goal:** wire the tool (+ `calculator`) into `agent_graph.arun` and run the happy path; read the
-`RunResult`; confirm `natural` termination.
+**Goal:** wire the three tools (`find_matching_record` + `calculator` + `check_expense_policy`) into
+`agent_graph.arun` and run the happy path; read the `RunResult`; confirm `natural` termination.
 
 - **What to say:** *this is the same model→tool→model loop you hand-rolled in L10* — you're just not
   typing the loop. It's now doing work *you* scoped. See the framing note above for the
   `create_agent` question.
-- **`max_steps` is a design choice, not a default.** Reconciling one receipt is a couple of tool
-  calls, so a low cap is a cheap runaway guard — which is exactly what Section 4 exploits.
+- **`max_steps` is a design choice, not a default.** Reconciling one receipt is a few tool
+  calls (match → total → policy), so a low cap is a cheap runaway guard — which is exactly what
+  Section 4 exploits.
 - **The `FakeModel` is the point, not a limitation:** it scripts the *decisions* so the run is
   reproducible, but the *tools really run* and the *trace is real*. Say this out loud or students
   think the whole thing is faked.
