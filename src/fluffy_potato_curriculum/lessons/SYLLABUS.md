@@ -13,9 +13,9 @@ membership there, not by where it lives on disk.
   stack. The gate to start `L01` is K06's "does the stack come up?" check. See the design
   todo [`docs/todos/2026-07-03-2211-k-prework-track.md`](../../../docs/todos/2026-07-03-2211-k-prework-track.md).
 - **Full** — the master 25-lesson plan.
-- **Mini** — the condensed ~32 hr cut (14 lessons + the L50 project capstone): the
+- **Mini** — the condensed ~32 hr cut (13 lessons + the L50 project capstone): the
   five-objective core (tool design, when-to-use-a-tool, shallow LangGraph agent,
-  eval, tracing) plus the early graph ramp (L03–L05, foundational for everything
+  eval, tracing) plus the early graph ramp (L03 + L05, foundational for everything
   after), chain-of-thought prompting (L06), and Skills (L22) and skill patterns &
   composition (L23) by explicit request. It **closes with L50, the agent
   mini-project walkthrough** — a hands-on, end-to-end capstone build. Every mini
@@ -49,8 +49,7 @@ Prework order: K01 → K02 → K03 → K04 → K05 → K06.
 | --- | ------------------------------------------------------------- | :--: | :--: |
 | L01 | LLM and token basics                                          |  ✅  |  ✅  |
 | L02 | Prompting fundamentals                                        |  ✅  |  ✅  |
-| L03 | Single-node operations                                        |  ✅  |  ✅  |
-| L04 | Directed graphs: sequential chaining                          |  ✅  |  ✅  |
+| L03 | Directed graphs: from one node to a sequential chain          |  ✅  |  ✅  |
 | L05 | Conditional graphs: routing & branching                       |  ✅  |  ✅  |
 | L06 | Teaching an LLM to think via prompting                        |  ✅  |  ✅  |
 | L07 | Tool calling: how it works                                    |  ✅  |  ✅  |
@@ -78,7 +77,10 @@ L50 is the mini-track project capstone — a proctor-led, end-to-end walkthrough
 numbered L50 so it parks at the end with room to slot future lessons before it. Mini-only for now;
 see the PRD note on whether it also joins `full`.
 
-Mini teaching order: L01 → L02 → L03 → L04 → L05 → L06 → L07 → L08 → L10 → L11 → L12 → L13 → L22 → L23 → L50.
+Mini teaching order: L01 → L02 → L03 → L05 → L06 → L07 → L08 → L10 → L11 → L12 → L13 → L22 → L23 → L50.
+
+*(L04 is a reserved gap — the former "Directed graphs: sequential chaining" was merged into L03 on
+2026-07-09; downstream lessons were not renumbered.)*
 
 ## Course wrap-ups
 

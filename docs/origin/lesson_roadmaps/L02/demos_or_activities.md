@@ -181,7 +181,7 @@ A small multi-turn script for the second half of the demo: a 4-turn conversation
 3. **Ranking.** Run the ranking prompt. Show the model returning an ordered list of candidate ids. Run the validator: did it keep every candidate exactly once, or drop / duplicate one? Name the failure mode — *ranking silently mutates the candidate set unless you check for it.*
 4. **Constrained generation.** Run "exactly 5, ≤ 8 words each." Count the items and the words. When the count or length drifts (it will, some runs), show the validator catching it — *a constraint you don't check is a constraint the model is free to miss.*
 5. **Summarization / transformation.** Run the one-sentence summary for the named audience, then the register rewrite. Highlight the **system message** doing the work (audience / length / style = always-true policy → `system`). Name the failure mode — *summaries hallucinate additions and drift in length.*
-6. **Closing synthesis.** Put the five shapes side by side: same three levers, five output contracts. Say out loud: *"a hard task is usually a pipeline of these single steps — which is exactly what L03–L05 wire together, one step per node."*
+6. **Closing synthesis.** Put the five shapes side by side: same three levers, five output contracts. Say out loud: *"a hard task is usually a pipeline of these single steps — which is exactly what L03 & L05 wire together, one step per node."*
 
 **What to highlight:**
 

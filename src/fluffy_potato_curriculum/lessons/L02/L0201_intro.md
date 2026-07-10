@@ -74,7 +74,7 @@ name the shape — naming it tells you which lever to reach for and what to vali
 Every one of these is the *same three levers* aimed at a different **output contract** — and the
 contract is the thing you *validate*, not just the thing you ask for. Each is also one **node** in
 disguise: L03 takes exactly one of these shapes (extraction) and wraps it as a reusable graph node,
-and L03–L05 chain several into a pipeline.
+and L03 & L05 chain several into a pipeline.
 
 ## How L01 carries forward
 
@@ -98,18 +98,18 @@ This lesson stays narrow on purpose. You won't cover:
   JSON *by instruction only* and parse defensively. In production you'd reach for Anthropic's
   tool-use mechanism for stricter structure — you'll get there in L07, and the parsing discipline
   you build here still applies.
-- **Orchestration — chaining several single steps into a pipeline** — that's L03–L05. The task
+- **Orchestration — chaining several single steps into a pipeline** — that's L03 & L05. The task
   catalog above is the menu of what *one* call (one node) can do; wiring several together into a
-  graph is the next three lessons for you.
+  graph is the next two lessons for you.
 
 The one sentence to leave L02 with:
 
 > *You now know how to ask the model for what you want, in the shape you want — L06 is about making
 > it think harder before it answers.*
 
-Next up for you is [L03](../../../../docs/origin/lesson_roadmaps/L03/objectives.md) (single-node
-operations), which takes one task shape from the catalog — extraction — and wraps it as a reusable
-graph node.
+Next up for you is [L03](../../../../docs/origin/lesson_roadmaps/L03/objectives.md) (Directed
+graphs: from one node to a sequential chain), which takes one task shape from the catalog —
+extraction — and wraps it as a reusable graph node.
 
 Read next: the written reference lecture in [L0202_lecture.md](L0202_lecture.md), then the live demos
 (roles [L0203](L0203_lecture.ipynb), structured output [L0205](L0205_lecture.ipynb), few-shot

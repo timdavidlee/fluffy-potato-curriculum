@@ -49,11 +49,11 @@ estimated duration: 110
   reason about and when it helps.
 - **Not tool calling.** Forcing schema-conformant output via the tool-use protocol is L07. Here you
   ask for JSON *by instruction only* and parse defensively.
-- **Not orchestration.** Chaining several single-step tasks into a pipeline is L03–L05. Section 5's
+- **Not orchestration.** Chaining several single-step tasks into a pipeline is L03 & L05. Section 5's
   catalog is the menu of what *one* node can do; wiring nodes together comes with the graph ramp.
 - Resist broadening past these shapes for now — no reasoning, no tools, no multi-step control yet.
   Your job in L02 is the prompting toolkit and the single-step tasks it unlocks.
-- diagram: a scope fence — a solid "IN L02" box (roles · structured output · few-shot · the five single-step task shapes) beside a dashed "NOT YET" box whose three chips point to their lessons: chain-of-thought → L06, tool calling → L07, orchestration / pipelines → L03–L05.
+- diagram: a scope fence — a solid "IN L02" box (roles · structured output · few-shot · the five single-step task shapes) beside a dashed "NOT YET" box whose three chips point to their lessons: chain-of-thought → L06, tool calling → L07, orchestration / pipelines → L03 & L05.
 
 [↑ Back to top](#prompting-fundamentals-roles-structured-output-few-shot)
 
@@ -439,16 +439,16 @@ estimated duration: 110
   since you want the single most-likely, repeatable answer; higher only where generation genuinely
   wants variety.
 - **A hard task is usually a *pipeline* of these single steps** — extract, then classify, then
-  summarize. That's exactly the seam **L03–L05** pick up, where each step becomes one **node** in a
+  summarize. That's exactly the seam **L03 & L05** pick up, where each step becomes one **node** in a
   graph. L02 gives you the vocabulary of the single step; the graph ramp is where you wire several
   together.
-- diagram: a three-node pipeline — extract → classify → summarize, the output of each box feeding the next; label each box "= one node" and caption "a hard task is a pipeline of single steps — that seam is L03–L05."
+- diagram: a three-node pipeline — extract → classify → summarize, the output of each box feeding the next; label each box "= one node" and caption "a hard task is a pipeline of single steps — that seam is L03 & L05."
 
 ```text
   ┌─────────┐     ┌──────────┐     ┌───────────┐
   │ extract │ ──▶ │ classify │ ──▶ │ summarize │
   └─────────┘     └──────────┘     └───────────┘
-   each box = one single-step shape = one node (L03–L05 wires them together)
+   each box = one single-step shape = one node (L03 & L05 wire them together)
 ```
 
 [↑ Back to top](#prompting-fundamentals-roles-structured-output-few-shot)
@@ -511,15 +511,17 @@ estimated duration: 110
 ### slide 6.3 Where this goes next
 
 - **Immediate next lesson: [L03](../../../../docs/origin/lesson_roadmaps/L03/objectives.md)
-  (single-node operations).** You'll take one task shape from section 5 — **extraction** — and
+  (Directed graphs: from one node to a sequential chain).** You'll take one task shape from
+  section 5 — **extraction** — and
   wrap it as a reusable **graph node**: the same structured-output discipline, now living inside a
-  framework-managed function. L03–L05 then chain several single-step shapes into a graph.
+  framework-managed function. L03 & L05 then chain several single-step shapes into a graph.
 - **Later: L06 (reasoning).** The three levers are also what L06 builds chain-of-thought on —
   that hand-off is the next slide.
 - diagram: a forward roadmap arrow — L02 (single-step toolkit) → L03 (wrap extraction as a
-  reusable node) → L04–L05 (chain nodes into a graph) → L06 (reasoning on the same three levers);
+  reusable node, then chain nodes into a sequential graph) → L05 (routing & branching) → L06
+  (reasoning on the same three levers);
   mark L03 "immediate next." Colour: the L02 and L03 nodes cyan (where you are, and the immediate
-  next step); the L04–L06 stops dashed ink-faint (deferred, not yet); no coral.
+  next step); the L05–L06 stops dashed ink-faint (deferred, not yet); no coral.
 
 ### slide 6.4 What L06 does with this
 

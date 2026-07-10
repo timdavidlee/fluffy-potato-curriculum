@@ -610,7 +610,7 @@ table.ledger td.warn-cell { color: var(--coral); }
 <section class="slide slide-cover active">
     <div class="eyebrow reveal">Lesson 10 · Agent Arc</div>
     <h1 class="reveal">Cyclic Graphs:<br>the <span class="it">ReAct</span><br>Agent Loop</h1>
-    <div class="claim reveal"><b>The back-edge is the cycle, and the cycle is the agent.</b> One new edge, added to the same forward graph from L04&ndash;L05, hands the model the decision of what runs next.</div>
+    <div class="claim reveal"><b>The back-edge is the cycle, and the cycle is the agent.</b> One new edge, added to the same forward graph from L03 &amp; L05, hands the model the decision of what runs next.</div>
     <div class="meta-row reveal">
         <span>anchor &mdash; <b>claude sonnet 4.6</b></span>
         <span>StateGraph &middot; ToolNode &middot; route()</span>
@@ -658,7 +658,7 @@ table.ledger td.warn-cell { color: var(--coral); }
     <div class="body-area" style="display:flex; gap:60px; align-items:center;">
         <div style="flex:1; min-width:0;">
             <ul class="points reveal">
-                <li class="point">The <code>L04</code>/<code>L05</code> graphs flowed <b>forward and stopped</b> &mdash; a DAG, no node ever ran twice, and <b>you</b> owned every edge.</li>
+                <li class="point">The <code>L03</code>/<code>L05</code> graphs flowed <b>forward and stopped</b> &mdash; a DAG, no node ever ran twice, and <b>you</b> owned every edge.</li>
                 <li class="point">An <b>agent</b> takes the same primitives and adds exactly <b>one</b> new thing: a <b>back-edge</b> from the tool node to the model node.</li>
                 <li class="point">That single edge hands the <b>model</b> the decision of what runs next.</li>
             </ul>
@@ -670,8 +670,8 @@ table.ledger td.warn-cell { color: var(--coral); }
                     <marker id="s11-f" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="var(--ink-faint)"/></marker>
                     <marker id="s11-c" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="var(--cyan)"/></marker>
                 </defs>
-                <!-- top: the L04/L05 forward chain, all ink-faint -->
-                <text x="10" y="40" class="edge-label" fill="var(--ink-dim)">L04 / L05 &mdash; you own every edge</text>
+                <!-- top: the L03/L05 forward chain, all ink-faint -->
+                <text x="10" y="40" class="edge-label" fill="var(--ink-dim)">L03 / L05 &mdash; you own every edge</text>
                 <g>
                     <rect x="10" y="76" width="170" height="76" rx="12" fill="#12181a" stroke="var(--ink-faint)" stroke-width="2.5"/>
                     <text x="95" y="122" text-anchor="middle" class="node-label" font-size="24" fill="var(--ink-dim)">parse</text>
@@ -723,7 +723,7 @@ table.ledger td.warn-cell { color: var(--coral); }
         <table class="ledger">
             <thead><tr><th>Lesson</th><th>What it built</th><th>What L10 reuses</th></tr></thead>
             <tbody>
-                <tr><td class="tag">L04</td><td>directed <code>StateGraph</code>: <code>add_node</code>, <code>add_edge</code>, <code>compile</code></td><td>the same primitives &mdash; now with a cycle</td></tr>
+                <tr><td class="tag">L03</td><td>directed <code>StateGraph</code>: <code>add_node</code>, <code>add_edge</code>, <code>compile</code></td><td>the same primitives &mdash; now with a cycle</td></tr>
                 <tr><td class="tag">L05</td><td>the <b>conditional edge</b> + a routing function</td><td><code>route</code> <b>is</b> an L05 conditional edge</td></tr>
                 <tr><td class="tag">L07</td><td>one tool round-trip: <code>.bind_tools()</code>, <code>.tool_calls</code>, <code>ToolMessage</code></td><td>the same interface, repeated inside the cycle</td></tr>
                 <tr><td class="tag">L08</td><td>tool design; what a tool <b>returns</b> on failure</td><td>error-as-data, now carried back by the graph</td></tr>
@@ -822,13 +822,13 @@ table.ledger td.warn-cell { color: var(--coral); }
     <div class="body-area" style="display:flex; gap:60px; align-items:center;">
         <ul class="points reveal" style="flex:1; min-width:0;">
             <li class="point">The agent's state is a <code>TypedDict</code> with one field: <code>messages: Annotated[list, add_messages]</code>.</li>
-            <li class="point">In L04, returning a state key <b>overwrote</b> it. The <code>add_messages</code> <b>reducer</b> flips that: returned <code>messages</code> get <b>appended</b>, not substituted.</li>
+            <li class="point">In L03, returning a state key <b>overwrote</b> it. The <code>add_messages</code> <b>reducer</b> flips that: returned <code>messages</code> get <b>appended</b>, not substituted.</li>
             <li class="point">That's <i>why</i> the conversation grows every turn &mdash; <code>agent</code> adds one <code>AIMessage</code>, <code>tools</code> one <code>ToolMessage</code> per call.</li>
             <li class="point">It also pairs messages by id, so history stays well-formed &mdash; <span class="k">half of Rule 1</span>, with no bookkeeping from you.</li>
         </ul>
         <div class="reveal" style="display:flex; gap:44px; flex-shrink:0; align-items:flex-start;">
             <div>
-                <div class="dg-label">L04 default &mdash; overwrite</div>
+                <div class="dg-label">L03 default &mdash; overwrite</div>
                 <div style="display:flex; flex-direction:column; gap:14px;">
                     <div class="msg-pill" style="color:var(--ink-faint);">draft: &nbsp;&ldquo;v1 &hellip;&rdquo;</div>
                     <div class="msg-pill dead">draft: &nbsp;&ldquo;v1 &hellip;&rdquo;</div>
@@ -1475,7 +1475,7 @@ table.ledger td.warn-cell { color: var(--coral); }
         <table class="ledger">
             <thead><tr><th>&ldquo;I think&hellip;&rdquo;</th><th>Actually</th></tr></thead>
             <tbody>
-                <tr><td class="warn-cell">a graph can't loop &mdash; L04/L05 were all forward</td><td>a conditional edge can point <i>back</i>; <code>route</code> sends control to an earlier node until the model stops asking</td></tr>
+                <tr><td class="warn-cell">a graph can't loop &mdash; L03/L05 were all forward</td><td>a conditional edge can point <i>back</i>; <code>route</code> sends control to an earlier node until the model stops asking</td></tr>
                 <tr><td class="warn-cell">the loop ends when the answer is right</td><td>it ends when <code>route</code> returns <code>END</code> or <code>recursion_limit</code> fires &mdash; correctness is a downstream concern (L12/L13)</td></tr>
                 <tr><td class="warn-cell"><code>ToolNode</code> is magic / a black box</td><td>it's the L07 <code>.tool_calls</code> &rarr; run &rarr; append step, prebuilt</td></tr>
                 <tr><td class="warn-cell">I should retry every failed tool call</td><td>usually not &mdash; a <code>404</code> is not a <code>503</code></td></tr>

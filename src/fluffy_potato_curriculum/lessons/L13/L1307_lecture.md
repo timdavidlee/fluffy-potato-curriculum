@@ -2,7 +2,7 @@
 
 ```yaml
 title: "Carry the eval set forward"
-keywords: evaluation, practice, ratchet, carry forward, langgraph, L04, L11, LLM-as-judge, Langfuse dataset, experiment, run comparison
+keywords: evaluation, practice, ratchet, carry forward, langgraph, L03, L11, LLM-as-judge, Langfuse dataset, experiment, run comparison
 estimated duration: 8
 ```
 
@@ -28,10 +28,10 @@ estimated duration: 8
 
 ## section 2. The very next lessons
 
-### slide 2.1 L04 (workflows) — the cheapest place to start the habit
+### slide 2.1 L03 (workflows) — the cheapest place to start the habit
 
-- text: in the mini cut the next taught lesson is **[L04 (Explicit graphs & workflows / DAGs)](../../../../docs/origin/lesson_roadmaps/L04/objectives.md)**. A deterministic workflow is *trivially* evaluable — fixed path, known outputs — so it's the gentlest possible place to attach an eval set (a handful of cases, uploaded as a dataset) and feel the habit with almost no friction.
-- diagram: bridge — re-draw the L04 acyclic chain exactly as L04's own deck renders it (three **cyan** nodes joined by straight **cyan** edges, no back-edge: "developer owns the path"), with a **cyan** dataset chip ("a handful of cases, `upload_dataset`") feeding the entry node and a column of **cyan** checkmark chips off the END node ("fixed path, known outputs"). No coral anywhere — the point is zero friction; one **dashed ink-faint** annotation ties it back: "same dataset mechanics as this lesson".
+- text: in the mini cut the next taught lesson is **[L03 (Explicit graphs & workflows / DAGs)](../../../../docs/origin/lesson_roadmaps/L03/objectives.md)**. A deterministic workflow is *trivially* evaluable — fixed path, known outputs — so it's the gentlest possible place to attach an eval set (a handful of cases, uploaded as a dataset) and feel the habit with almost no friction.
+- diagram: bridge — re-draw the L03 acyclic chain exactly as L03's own deck renders it (three **cyan** nodes joined by straight **cyan** edges, no back-edge: "developer owns the path"), with a **cyan** dataset chip ("a handful of cases, `upload_dataset`") feeding the entry node and a column of **cyan** checkmark chips off the END node ("fixed path, known outputs"). No coral anywhere — the point is zero friction; one **dashed ink-faint** annotation ties it back: "same dataset mechanics as this lesson".
 
 ### slide 2.2 L11 (shallow agents) — the ratchet's headline demonstration
 

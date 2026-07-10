@@ -5,7 +5,7 @@
 
 ## Where this lesson sits
 
-L02 covered the mechanics of prompting — how to talk to a model with system/user/assistant roles, request structured output, and use few-shot examples. The early graph block (L03–L05) then took a detour into *orchestrating* LLM calls as workflows; L06 **returns to the prompting thread** and takes the next step: the *content* of those prompts. Specifically, we explore prompting techniques that let a model produce visibly better answers on harder problems by surfacing intermediate reasoning before committing to a final answer. (Reorder note: in this ordering CoT is deliberately taught *after* the graph block and immediately before tools — so "give the model space to think" lands right where tool-use makes it matter.)
+L02 covered the mechanics of prompting — how to talk to a model with system/user/assistant roles, request structured output, and use few-shot examples. The early graph block (L03 & L05) then took a detour into *orchestrating* LLM calls as workflows; L06 **returns to the prompting thread** and takes the next step: the *content* of those prompts. Specifically, we explore prompting techniques that let a model produce visibly better answers on harder problems by surfacing intermediate reasoning before committing to a final answer. (Reorder note: in this ordering CoT is deliberately taught *after* the graph block and immediately before tools — so "give the model space to think" lands right where tool-use makes it matter.)
 
 This is the last lesson before L07, where the model is given the ability to call tools. The mental models built here — "give the model space to think" — directly inform the tool-calling loop, since deciding *whether* to call a tool is itself a reasoning step.
 

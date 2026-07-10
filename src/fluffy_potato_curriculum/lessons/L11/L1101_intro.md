@@ -66,7 +66,7 @@ L10 loop, packaged.**
    node (call the model), a **`tools`** node (run what it asked for), a **back-edge** from `tools`
    back to `agent`, and a conditional exit out of `agent` (tool call → run tools; plain text →
    finish). That **back-edge is the cycle**, and *the cycle is the agent* — it is the one thing
-   that turned the acyclic workflows of [L04](../L04/objectives.md)/[L05](../L05/objectives.md)
+   that turned the acyclic workflows of [L03](../L03/objectives.md)/[L05](../L05/objectives.md)
    into an agent.
 3. **The framework gives you the boring parts for free.** The graph wiring (L10's `StateGraph` +
    `tools → agent` back-edge), the routing (L10's hand-written `route`, now the prebuilt

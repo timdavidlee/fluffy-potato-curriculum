@@ -44,7 +44,7 @@ class Settings(BaseSettings):
     # Self-hosted Langfuse (introduced in L12 for tracing; L13 reuses the same
     # instance for eval datasets, experiments, and scores). Optional at load time so
     # the object always builds. Two access patterns sit on top of these fields:
-    # `langfuse_configured()` for the opt-in tracing paths (L04/L05/L12) that run
+    # `langfuse_configured()` for the opt-in tracing paths (L03/L05/L12) that run
     # unchanged when the keys are absent, and `require_langfuse()` for L13, whose
     # notebooks *hard-require* a live instance (there is no offline eval fallback).
     langfuse_public_key: str | None = None
@@ -79,7 +79,7 @@ def require_langfuse() -> tuple[str, str, str]:
     experiments, and scores all live on the platform, with no offline fallback — so
     they call this at the top and fail fast with an actionable message when the
     cohort instance isn't configured. This is the hard-requirement sibling of
-    :func:`langfuse_configured` (which the opt-in L04/L05/L12 tracing paths use to
+    :func:`langfuse_configured` (which the opt-in L03/L05/L12 tracing paths use to
     *skip* Langfuse silently when it's absent).
     """
     settings = get_settings()

@@ -17,7 +17,7 @@ estimated duration: 10
 
 ## Where this lesson sits
 
-By L10 you have built graphs that flow **forward and stop**. [L04](../L04/objectives.md) wired a
+By L10 you have built graphs that flow **forward and stop**. [L03](../L03/objectives.md) wired a
 directed `StateGraph` — typed state, `add_node`, `add_edge`, `compile`, `ainvoke` — and
 [L05](../L05/objectives.md) added a **conditional edge** (`add_conditional_edges` + a routing
 function) so a graph can branch. You have also seen the *mechanics* of tool calling

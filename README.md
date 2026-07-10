@@ -43,33 +43,33 @@ Layout section of [CLAUDE.md](./CLAUDE.md) for the full list.
 Required prework (`K01`–`K06`, before `L01`): environment & tooling · keys & the config seam ·
 Jupyter workflow · types & pydantic · async concepts · Docker & the multi-container stack.
 
-The lesson arc (`L01`–`L25`):
+The lesson arc (`L01`–`L25`; `L04` is a reserved gap — the former "Directed graphs: sequential
+chaining" was merged into `L03` on 2026-07-09, and downstream lessons were not renumbered):
 
-1. LLM and token basics
-2. Prompting fundamentals
-3. Single-node operations
-4. Directed graphs: sequential chaining
-5. Conditional graphs: routing & branching
-6. Teaching an LLM to think via prompting
-7. Tool calling: how it works
-8. Designing good tools
-9. MCP: packaging tools as a portable contract
-10. Cyclic graphs: the ReAct agent loop
-11. Shallow agents in LangGraph
-12. What an agent generates: state, logs, traces & extracts
-13. Evaluation: first pass
-14. Choosing model power for the task
-15. LangGraph design patterns
-16. Agent middleware and conditional tools
-17. Human-in-the-loop and approval gates
-18. Deep agents vs. shallow agents
-19. Static system prompt vs. context management
-20. Embeddings and vector similarity
-21. RAG pipeline
-22. Skills: just-in-time capabilities for agents
-23. Skill patterns & composition
-24. Multi-agent / subagent architecture (stretch)
-25. Evaluation revisited
+- `L01` — LLM and token basics
+- `L02` — Prompting fundamentals
+- `L03` — Directed graphs: from one node to a sequential chain
+- `L05` — Conditional graphs: routing & branching
+- `L06` — Teaching an LLM to think via prompting
+- `L07` — Tool calling: how it works
+- `L08` — Designing good tools
+- `L09` — MCP: packaging tools as a portable contract
+- `L10` — Cyclic graphs: the ReAct agent loop
+- `L11` — Shallow agents in LangGraph
+- `L12` — What an agent generates: state, logs, traces & extracts
+- `L13` — Evaluation: first pass
+- `L14` — Choosing model power for the task
+- `L15` — LangGraph design patterns
+- `L16` — Agent middleware and conditional tools
+- `L17` — Human-in-the-loop and approval gates
+- `L18` — Deep agents vs. shallow agents
+- `L19` — Static system prompt vs. context management
+- `L20` — Embeddings and vector similarity
+- `L21` — RAG pipeline
+- `L22` — Skills: just-in-time capabilities for agents
+- `L23` — Skill patterns & composition
+- `L24` — Multi-agent / subagent architecture (stretch)
+- `L25` — Evaluation revisited
 
-The mini track is a 14-lesson subset closing with `L50` (agent mini-project walkthrough) — see
+The mini track is a 13-lesson subset closing with `L50` (agent mini-project walkthrough) — see
 the [Syllabus](src/fluffy_potato_curriculum/lessons/SYLLABUS.md).

@@ -8,7 +8,7 @@ shapes have a real, on-disk instance the lesson can read, run, and graph.
 They live **here, under the lesson**, not in the repo's live `.claude/skills/`
 registry — they are teaching examples, not part of the curriculum-authoring
 toolchain, and shouldn't be auto-loaded into real Claude Code sessions. L23's
-runtime (the L04/L11 LangGraph agent with `list_skills` / `load_skill`) points at
+runtime (the L03/L11 LangGraph agent with `list_skills` / `load_skill`) points at
 *this* directory alongside the real skills it reads.
 
 ## What's here

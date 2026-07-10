@@ -22,7 +22,7 @@ The demos follow the lesson's **concept-first, then design** spine and the objec
 ## Naming and tooling reconciliation (read before building any demo)
 
 - **Model handles.** Bind models with `init_chat_model("provider:model")` (keys through `common/config.py`, never hard-coded). The course's tier ladder for the running example is **Haiku 4.5 → Sonnet 4.6 → a higher-power tier**; the Claude-tier A/B (Demos 1, 3, 4) needs only `ANTHROPIC_API_KEY`. Cross-provider demos (2, 5) need a second provider key and are explicitly gated.
-- **The graph to bind onto.** Reuse a graph students built earlier rather than wiring a new one: an L05 router (a conditional graph, cheapest to reason about) as the warm-up, and/or the L10 ReAct agent (`common/agent_graph.build_agent(...)`) as the "mixed-model *agent*" the PRD targets. <!-- *NEED INPUT*: which graph the hands-on binds onto — an L04/L05 workflow vs the L10 agent (must match objective 3's decision in the sibling objectives.md). -->
+- **The graph to bind onto.** Reuse a graph students built earlier rather than wiring a new one: an L05 router (a conditional graph, cheapest to reason about) as the warm-up, and/or the L10 ReAct agent (`common/agent_graph.build_agent(...)`) as the "mixed-model *agent*" the PRD targets. <!-- *NEED INPUT*: which graph the hands-on binds onto — an L03/L05 workflow vs the L10 agent (must match objective 3's decision in the sibling objectives.md). -->
 - **The decision instrument.** To *choose* a model, reuse L13's eval set (`common/evals.py`, the `l13-agent-evals` dataset) and Langfuse experiments — L14 adds no new scoring machinery, it applies L13's to the model-selection question.
 - **Reproducibility stance (inherited from L12/L13).** *Reading/deciding* demos are clearest on fixed artifacts: pre-capture the eval-experiment results and the traces before class so pass rates and token counts are deterministic on the day. **Latency is the exception** — it is inherently live and variable, which is itself the lesson of Demo 4, so read latency off a real (optionally pre-captured) run and treat its exact numbers as illustrative.
 
@@ -116,10 +116,10 @@ The demos follow the lesson's **concept-first, then design** spine and the objec
 
 **Live script:**
 
-1. Recall the node model from L03–L05: *"A node is a function over state; the **model is a parameter of the node**. We've always passed the same one. Watch what happens when we don't."*
+1. Recall the node model from L03 & L05: *"A node is a function over state; the **model is a parameter of the node**. We've always passed the same one. Watch what happens when we don't."*
 2. Warm-up on the L05 router: bind the **routing/classification node to Haiku 4.5** (cheap, fast, high-throughput — the class it fits) and a **downstream reasoning node to Sonnet 4.6**. Run one input; show the cheap model routing and the strong model doing the hard step.
 3. Scale to the L10 agent: bind the small model where the work is mechanical (routing/execution) and the strong model where it's planning. Point at the `init_chat_model("provider:model")` call at each node — *"same node, different bound model; the graph didn't change."*
-4. Say it: *"This is the whole lesson made concrete — a mixed-model agent is a graph whose nodes bind different models. L03–L05 made the node the unit of orchestration precisely so this would be a parameter, not a rewrite."*
+4. Say it: *"This is the whole lesson made concrete — a mixed-model agent is a graph whose nodes bind different models. L03 & L05 made the node the unit of orchestration precisely so this would be a parameter, not a rewrite."*
 
 **What to highlight:**
 
@@ -189,5 +189,5 @@ The demos follow the lesson's **concept-first, then design** spine and the objec
 - **Decided (Claude-tier A/B is the cheap spine):** Demos 1, 3, 4 run on `ANTHROPIC_API_KEY` alone (Haiku 4.5 vs Sonnet 4.6). The cross-provider demos (2, 5) are gated and degrade to canned/screenshot, so a single-key or keyless run still teaches the whole lesson.
 - <!-- *NEED INPUT*: the exact "higher-power tier" model for the strong-reasoner node (the course pinned Sonnet 4.6 + Haiku 4.5 but never committed a top tier). Matches the same marker in objectives.md. -->
 - <!-- *NEED INPUT*: which second provider(s) the cohort has keys for, the exact Demo 2 capability-class artifact (vision image vs over-long document), and whether Demos 2/5 run live or ship canned. Matches the provider-keys marker in objectives.md. -->
-- <!-- *NEED INPUT*: which graph the hands-on binds onto — an L04/L05 workflow vs the L10 agent — kept identical to objective 3's marker in objectives.md so stage 2 sees one decision, not two. -->
+- <!-- *NEED INPUT*: which graph the hands-on binds onto — an L03/L05 workflow vs the L10 agent — kept identical to objective 3's marker in objectives.md so stage 2 sees one decision, not two. -->
 - <!-- *NEED INPUT*: overlap check with L25 (Evaluation revisited) once its roadmap exists — L14 uses eval to *choose* a model; L25 evaluates systems at scale. Keep the split so neither re-teaches the other. Matches objectives.md. -->

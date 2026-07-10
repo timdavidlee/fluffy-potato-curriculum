@@ -1,10 +1,12 @@
-# L03: Teacher-led demos — Single-node operations
+# L03: Teacher-led demos — Directed graphs: from one node to a sequential chain
 
 > Sibling docs: [objectives.md](objectives.md) (what the lesson aims for), parent design [CURRICULUM_PRD.md](../../CURRICULUM_PRD.md).
 >
-> **Audience for this file:** the teacher running L03. Every demo below is *teacher-driven, no student participation*. Student-driven exercises live in the L03 labs (separate file, stage 2).
+> **Audience for this file:** the teacher running L03. Every demo below is *teacher-driven, no student participation*. Student-driven exercises live in the L03 lab (separate file, stage 2).
 >
-> **Anchor model: Claude Sonnet 4.6**, and only Sonnet — L03 deliberately keeps the model constant so the *node* is the only new variable a student has to track. (No per-node model mixing here; that mechanism is [L04](../L04/objectives.md)'s.) **This is the course's first framework lesson:** the node calls the **native LangChain `ChatAnthropic`** client directly, *not* the hand-rolled `potato_llm` seam used in L01–L02. Call that departure out loud.
+> **Anchor model:** the **single-node movement** (primer + Demos 1–2) uses **Claude Sonnet 4.6, and only Sonnet** — keep the model constant so the *node* is the only new variable. The **chaining movement** (Demos 3–4) deliberately **mixes models per node** — **Haiku 4.5** for light nodes (parse/extract), **Sonnet 4.6** for heavy nodes (draft/policy-check) — because per-node binding is one of the chaining objectives, not an accident. **This is the course's first framework lesson:** nodes call the **native LangChain `ChatAnthropic`** client directly, *not* the hand-rolled `potato_llm` seam from L01–L02. Call that departure out loud — it's the single switch-over point.
+>
+> **Merged lesson (2026-07-09):** this file is the union of the former L03 (single-node) and L04 (sequential-chaining) demo scripts. The old L03 "Demo 3 — why wire a node at all?" is **dropped** — the chaining movement *is* the answer, so there is no standalone justification beat. Routing / conditional edges / user-input branching remain **[L05](../L05/demos_or_activities.md)**'s.
 
 ## How to read this file
 
@@ -16,21 +18,23 @@ Each demo is a self-contained block with:
 - **What to highlight** — the moment(s) where the teacher should slow down and say the takeaway out loud.
 - **If the demo misbehaves** — graceful fallback for when the model surprises you (it will).
 
-A short **framework primer** (a read/run-alone student notebook, *not* a teacher-driven demo) precedes the three demos below — it introduces LangChain's client and the LangChain-vs-LangGraph split so the demos can spend their time on the node, not on "what is `ChatAnthropic`." The demos themselves are ordered to match the four learning objectives from [objectives.md](objectives.md). Demo 1 wraps a single LLM call as a typed node (objectives 1 & 2); Demo 2 compiles, invokes, and inspects that same node in isolation (objective 3); Demo 3 is a short contrast-and-discussion beat, not a build, that lands *why* a node is the unit worth wiring (objective 4). They build on each other — Demo 2 reuses Demo 1's node and state unchanged, and Demo 3 reuses Demo 1's code as the "explicit node" side of its comparison. Run them in order.
+The lesson runs in **two movements**. A short **framework primer** (a read/run-alone student notebook) precedes everything. Then **Movement 1 — one node** (Demos 1–2): wrap a single LLM call as a typed node, then compile/invoke/inspect it in isolation. Then **Movement 2 — several nodes** (Demos 3–4): wire that *same* node into a fixed chain, and name the workflow-vs-agent line. They build on each other continuously — **Demo 3's chain reuses Demo 1's node unchanged as its first step** (`parse`), so the room literally watches one node become a pipeline. Run them in order.
 
-> **The spine of L03: one node, nothing wired to it.** L03 is the *first* LangGraph lesson and it deliberately stops at one node — no edges between nodes, no branching, no loop. Keep saying **"state goes in, state comes out"** and **"a node is one LLM call you wire."** The entire lesson is building toward the single sentence a student should leave with: *"you just wired one step — next lesson, you wire several of them together."*
+> **The spine of L03.** Movement 1: *"a node is one LLM call you wire — state goes in, state comes out."* Movement 2: *"several nodes, wired in a fixed order, is a workflow you can inspect as data — you own the edges; the model lives inside the nodes."* The bridge sentence to leave students with: *"you wired several steps into a fixed chain — next lesson, one of those edges gets to choose."* The single-node movement is honest that at one node the ceremony doesn't pay off — and then pays it off in the same lesson by wiring the chain. Do **not** relitigate "why bother with a node" as its own beat; the chain is the answer.
 
 ## Pre-flight (once, at the top of the lesson)
 
 The teacher should have, before the first demo starts:
 
 - **LangGraph + the native LangChain Claude client ready.** `from langgraph.graph import StateGraph, END` and `from langchain_anthropic import ChatAnthropic`. Both `langgraph` and `langchain-anthropic` are already project dependencies (added via `uv add`); no install during class. The API key still loads through `common/config.py` (`ChatAnthropic` reads `ANTHROPIC_API_KEY` from the same environment the config seam populates) — key handling is unchanged, only the *client* is the framework's now.
-- **One model client constructed and named:** `sonnet = ChatAnthropic(model="claude-sonnet-4-6-...")`. One client, used by the one node — keep it that simple. <!-- *NEED INPUT*: confirm exact model id string for the Sonnet 4.6 snapshot used by ChatAnthropic, read from common/config.py rather than hard-coded in cells. Mirrored from the equivalent open question in L04's demos. -->
-- **A small running-example dataset for the single node.** Decided running example: an **`extract` node** that pulls a handful of structured fields out of a short piece of raw text (reusing L02's structured-output-by-instruction discipline, now returned as a typed state update instead of a hand-parsed script variable). <!-- *NEED INPUT*: confirm the exact domain/text for the extract node — recommend reusing a support-ticket-style snippet so L04 (whose first node is also a `parse`/extract step over support tickets) can plausibly be read as "the next lesson takes this exact kind of node and adds two more." A different, unrelated domain is also fine if the intent is to keep L03 visually distinct from L04's running example. -->
-- **The one-node graph definition in a sibling file** to paste if live-coding falls behind.
-- LangGraph's own run/stream output ready to call (`stream()` on the compiled graph) — **not** Langfuse. Real trace tooling is [L12](../L12/objectives.md); name it as a forward pointer, don't reach for it.
+- **Model clients constructed and named.** For Movement 1: one client, `sonnet = ChatAnthropic(model="claude-sonnet-4-6-...")` — keep it that simple. For Movement 2, add `haiku = ChatAnthropic(model="claude-haiku-4-5-...")` for the light nodes; each node uses its own — that *is* the per-node-binding beat. <!-- *NEED INPUT*: confirm exact model id strings for the Sonnet 4.6 and Haiku 4.5 snapshots, read from common/config.py rather than hard-coded in cells. -->
+- **A small support-ticket dataset** for the running example (the decided domain). A handful of sample tickets for the `parse`/extract node, plus a short **policy snippet** the policy-check node checks a drafted reply against. <!-- *NEED INPUT*: confirm the exact sample tickets and the policy text — recommend 2–3 tickets and a 4–5 line refund/escalation policy. Stage 2 ships these as a small fixture. -->
+- **A graph-diagram renderer ready** for Movement 2 — LangGraph's `compiled_graph.get_graph().draw_mermaid_png()` (or the Mermaid text) — so "control flow as data" is *literally visible*. <!-- *NEED INPUT*: confirm the diagram render path works in the demo environment; the Mermaid-text / ASCII fallback is fine if the PNG path is awkward live. -->
+- **The one-node graph and the completed chain definitions in a sibling file** to paste if live-coding falls behind.
+- LangGraph's own run/stream output ready to call (`stream(stream_mode="updates")` on the compiled graph) — **not** Langfuse. Real trace tooling is [L12](../L12/objectives.md); name it as a forward pointer, don't reach for it.
+- **`common/evals.py` importable** for the optional eval-the-workflow beat (the L13 harness — reused, not rebuilt).
 
-> Why one node, one model, one dataset: L03's entire pedagogical job is to make "what is a node" land cleanly before any wiring exists. Every extra moving part (a second model, a second node, a tracing platform) borrows attention from that one idea and belongs to a later lesson instead.
+> Why one running example, grown from one node to a chain: the pedagogical job of Movement 1 is to make "what is a node" land cleanly; Movement 2 then shows the payoff *on the same node* by wiring it into a pipeline. Keeping the domain constant (support tickets throughout) means Movement 2 never spends attention on a fresh example — it spends it on the *wiring*.
 
 ## Framework primer — Meet LangChain & LangGraph (before Demo 1)
 
@@ -48,107 +52,180 @@ The teacher should have, before the first demo starts:
 **What to highlight:**
 
 - **Keep "framework" concrete** — scaffolding for a common job, not magic. The primer's whole job is to make "LangChain vs LangGraph" a clean two-box picture before Demo 1 fuses them inside a node.
-- **Reserve "harness."** Say plainly that the model-driven **agent loop** (often called a *harness*) is **L10–L11**, not now — L03–L05 are **workflows** you wire. Naming the boundary here keeps "harness" from leaking into the graph lessons.
+- **Reserve "harness."** Say plainly that the model-driven **agent loop** (often called a *harness*) is **L10–L11**, not now — L03 and L05 are **workflows** you wire. Naming the boundary here keeps "harness" from leaking into the graph lessons.
 
 **If it misbehaves:** the two live calls are tiny and gated on a key — with no key set the primer still runs (the calls skip) and the concepts stand on their own; run the calls later when a key is available.
 
-## Demo 1 — Wrapping one LLM call as a typed node (Objectives 1 & 2)
+---
+
+## Movement 1 — one node
+
+### Demo 1 — Wrapping one LLM call as a typed node (Objective 1)
 
 **Goal:** take a plain L01/L02-style model call and show, step by step, what changes when it becomes a **node**: a typed state schema appears, the function signature becomes state-in/state-out, and the model client switches from `potato_llm` to native `ChatAnthropic`. Land the **purity contract** — same relevant state in, same shape of update out, no hidden reads or side effects beyond the one LLM call.
 
 **Pre-flight:**
 
 - A short reminder cell showing the L01/L02-style call: a plain function that takes a string, builds a prompt, calls `potato_llm`, and returns a parsed dict. Keep this on screen as the "before."
-- The `extract` task's target fields and one sample input text ready to paste.
+- The `parse` task's target fields and one sample ticket ready to paste. **This is the node Movement 2 reuses as step 1 of the chain — name it `parse` (or the chain's first node's name) from the start** so the continuity is explicit.
 
 **Live script:**
 
-1. Put the "before" cell on screen: a bare function calling `potato_llm` and returning a dict. Ask nothing of the room — this is a recap, not a quiz — just point at it and say: "this is everything you know how to do already."
-2. Live-code the **typed state** schema: a `TypedDict` with an input field (e.g. `raw_text: str`) and the output fields the node will populate (e.g. `extracted_fields: dict`). Keep it to two or three fields — this is the smallest state that makes the point.
-3. Live-code the **node** as a plain typed function: `def extract_node(state: ExtractState) -> dict:`. Inside, build the same structured-output prompt from L02 (ask for a shape, e.g. JSON with named fields), but call it through **`ChatAnthropic`** instead of `potato_llm`. Say the departure out loud: *"the framework brings its own client — this is the first of a few you'll meet."*
-4. Parse the model's response defensively (the same discipline from L02 Demo 2 — `json.loads` first, a regex fallback second) and **return a state update**, not the raw model response: `return {"extracted_fields": parsed}`. Underline that the function returns *an update*, not "the answer."
-5. Put the "before" and "after" functions side by side. Walk the diff out loud: same underlying API call, same structured-output discipline from L02 — what changed is the *signature* (state in, state-update out) and the *client* (`ChatAnthropic`, not `potato_llm`).
+1. Put the "before" cell on screen: a bare function calling `potato_llm` and returning a dict. Point at it: "this is everything you already know how to do."
+2. Live-code the **typed state** schema: a `TypedDict` with an input field (e.g. `raw_text: str`) and the output field the node populates (e.g. `parsed_fields: dict`). Keep it to two or three fields — the smallest state that makes the point.
+3. Live-code the **node** as a plain typed function: `def parse_node(state: TicketState) -> dict:`. Inside, build the same structured-output prompt from L02, but call it through **`ChatAnthropic`** instead of `potato_llm`. Say the departure out loud: *"the framework brings its own client — this is the first of a few you'll meet."*
+4. Parse the response defensively (the L02 discipline — `json.loads` first, a regex fallback second) and **return a state update**, not the raw response: `return {"parsed_fields": parsed}`. Underline that the function returns *an update*, not "the answer."
+5. Put "before" and "after" side by side. Walk the diff: same underlying API call, same structured-output discipline — what changed is the *signature* (state in, state-update out) and the *client* (`ChatAnthropic`, not `potato_llm`).
 
 **What to highlight:**
 
-- **State goes in, state comes out.** The node doesn't hand back "the answer" the way L01–L02 code did — it hands back an *update* to a shared object. Say this is a small but real shift in mental model.
-- **The purity contract.** Given the same relevant state, the node does the same unit of work and returns the same *shape* of update. What's non-deterministic is the model's sampling, not the function's contract — the function doesn't secretly read a global, mutate something outside state, or depend on call order.
-- **This is the first framework lesson.** Name the client swap explicitly and don't let it pass silently: `potato_llm` was the course's own seam; `ChatAnthropic` is LangChain's. Both are still "just an API call" underneath.
-- **The node's job is narrow on purpose.** One node does one unit of work — here, extraction. Chaining several narrow steps together is next lesson's entire subject.
+- **State goes in, state comes out.** The node hands back an *update* to a shared object, not "the answer." A small but real shift in mental model from L01–L02.
+- **The purity contract.** Same relevant state in, same *shape* of update out. What's non-deterministic is the model's sampling, not the function's contract — no hidden globals, no side effects, no dependence on call order.
+- **This is the first framework lesson.** Name the client swap explicitly: `potato_llm` was the course's own seam; `ChatAnthropic` is LangChain's. Both are still "just an API call" underneath.
+- **The node's job is narrow on purpose.** One node does one unit of work — here, parsing/extraction. Chaining several narrow steps is Movement 2.
 
 **If the demo misbehaves:**
 
-- If the model's structured output comes back malformed on the sample input, that's a free bonus — run the L02-style defensive parser live and show it absorbing the failure. Don't treat it as a demo failure; it reinforces the L02 callback.
-- If a student asks "why does this need a `TypedDict` at all, a dict would work" — answer honestly: for *one* node it mostly would; the typed shape is the contract a *future* node (L04) will read without opening this node's source. The payoff isn't visible yet at one node.
+- If the structured output comes back malformed, that's a free bonus — run the L02 defensive parser live and show it absorbing the failure.
+- If a student asks "why a `TypedDict`, a dict would work" — answer honestly: for *one* node it mostly would; the typed shape is the contract the *next* node (Movement 2, minutes from now) reads without opening this node's source. The payoff is imminent, not hypothetical.
 
-## Demo 2 — Compile, invoke, and inspect one node in isolation (Objective 3)
+### Demo 2 — Compile, invoke, and inspect one node in isolation (Objective 2)
 
-**Goal:** take Demo 1's node and put it through the smallest possible `StateGraph`: one node, entry point, straight to `END`. Compile it, invoke it, and inspect the returned state. Use LangGraph's own stream output to "watch it run," and name — but do not use — real trace tooling as an L12 forward pointer.
+**Goal:** take Demo 1's node and put it through the smallest possible `StateGraph`: one node, entry point, straight to `END`. Compile, invoke, inspect the returned state. Use LangGraph's own stream output to "watch it run," and name — but do not use — real trace tooling as an L12 forward pointer.
 
 **Pre-flight:**
 
-- Demo 1's `extract_node` function and `ExtractState` schema, already defined and on screen.
-- Two or three sample input texts of varying difficulty (one clean, one with a missing/ambiguous field) to invoke against.
+- Demo 1's `parse_node` function and state schema, already defined and on screen.
+- Two or three sample tickets of varying difficulty (one clean, one with a missing/ambiguous field) to invoke against.
 
 **Live script:**
 
-1. Live-code the graph: `builder = StateGraph(ExtractState)`, `builder.add_node("extract", extract_node)`, `builder.set_entry_point("extract")`, `builder.add_edge("extract", END)`. Say out loud that there is exactly **one** node and **one** edge, and that edge goes straight to `END` — there is nothing to wire yet, on purpose.
+1. Live-code the graph: `builder = StateGraph(TicketState)`, `builder.add_node("parse", parse_node)`, `builder.set_entry_point("parse")`, `builder.add_edge("parse", END)`. Say out loud that there is exactly **one** node and **one** edge, straight to `END` — nothing to wire yet, on purpose.
 2. `graph = builder.compile()`. Note this turns the *declaration* into a *runnable* — nothing has executed yet.
-3. `graph.invoke({"raw_text": sample_1})`. Show the returned state on screen: the `raw_text` field is still there unchanged, and `extracted_fields` is now populated. Point at both — the input survived, the output appeared.
-4. Re-run with a second, harder sample text (missing or ambiguous field). Show the returned state again — reinforce that "state comes out" every time, even when the underlying extraction quality varies.
-5. Call `graph.stream({"raw_text": sample_1}, stream_mode="updates")` and watch the single step fire — one chunk, `{"extract": {...}}` (the node name → the state update it wrote). Say explicitly: *"this is LangGraph's own built-in way to watch a run, one update per node — for one node it's almost overkill, but it's the **same call, in the same mode, you'll reuse the rest of the course**: to watch several nodes fire in sequence (L04), which branch runs (L05), and the agent loop turn (L10) — before routing that same run to a real tracer in L12."*
-6. Forward-pointer, one line, do not demo it: *"Later, in L12, you'll route runs like this to a real tracing platform and read a structured trace — for now, the return value and the stream are all you need to answer 'did my node run, and what came back.'"*
+3. `graph.invoke({"raw_text": ticket_1})`. Show the returned state: `raw_text` still there unchanged, `parsed_fields` now populated. Point at both — the input survived, the output appeared.
+4. Re-run with a harder ticket (missing/ambiguous field). Show the returned state again — reinforce that "state comes out" every time, even when extraction quality varies.
+5. Call `graph.stream({"raw_text": ticket_1}, stream_mode="updates")` and watch the single step fire — one chunk, `{"parse": {...}}` (node name → the state update it wrote). Say: *"this is LangGraph's own way to watch a run, one update per node — for one node it's almost overkill, but it's the **same call you'll reuse minutes from now** to watch a whole chain fire in order, then a branch (L05), then the agent loop (L10)."*
+6. Forward-pointer, one line, do not demo: *"Later, in L12, you'll route runs like this to a real tracing platform — for now the return value and the stream answer 'did my node run, and what came back.'"*
 
 **What to highlight:**
 
-- **Compile then invoke is two separate steps.** Compiling declares the runnable; invoking runs it on a specific input. Worth saying plainly since students haven't seen this two-step shape before.
-- **The returned state has both the old and the new.** `invoke()` doesn't return "just the output" — it returns the whole state, input field intact, output field populated. This is the direct, hands-on version of "state comes out."
-- **More ceremony than just calling the function — and that's the point, not yet paid off.** Be honest: for one node, `graph.invoke(...)` is more setup than `extract_node_plain(sample_1)` would have been. The payoff is coming in L04, not here.
-- **This is not tracing.** `stream()` shows *that* the node ran; it is not a substitute for the structured, comparable traces L12 will teach. Naming the gap now makes L12 land as "now you get the real tool," not a redundant repeat.
+- **Compile then invoke is two separate steps.** Compiling declares the runnable; invoking runs it on an input.
+- **The returned state has both the old and the new.** `invoke()` returns the *whole* state — input intact, output populated. The hands-on version of "state comes out."
+- **More ceremony than calling the function — and that's the point, about to pay off.** Be honest: for one node, `graph.invoke(...)` is more setup than `parse_node_plain(ticket_1)`. Don't defend it in the abstract — the very next demo wires a second and third node onto this exact graph with no redesign, and *that's* the payoff.
+- **This is not tracing.** `stream()` shows *that* the node ran; it's not the structured, comparable traces L12 will teach.
 
 **If the demo misbehaves:**
 
-- If `stream()`'s single-step output feels anticlimactic (it will — there's only one step), lean into it: *"one node, one step in the stream — next lesson this same call shows three or four steps firing in order, and it'll look a lot more interesting."*
-- If a student asks to see the graph diagram rendered, it's fine to show it (`get_graph().draw_mermaid_png()` or the Mermaid text) as a curiosity, but don't build the lesson around it — a one-node diagram is nearly content-free. L04 is where the diagram earns its keep.
+- If `stream()`'s single-step output feels anticlimactic (it will), lean in: *"one node, one step — in the next demo this same call shows three steps firing in order, and it looks a lot more interesting."*
+- If a student asks to see the graph diagram, it's fine to show it as a curiosity, but a one-node diagram is nearly content-free — the diagram earns its keep in Movement 2.
 
-## Demo 3 — Why wire a node at all? (Objective 4)
+---
 
-**Goal:** a short contrast-and-discussion beat, not a build. Put Demo 1's clean node-based `extract_node` next to an equivalent "just write one long function" version that does extraction *and* a second, unrelated step inline. Use the comparison to land *why* an explicit, narrow step is the unit worth orchestrating — and close with the exact forward pointer to L04.
+## Movement 2 — several nodes
+
+### Demo 3 — Prompt chaining: wire the node into a workflow (Objectives 3 & 4)
+
+**Goal:** take Demo 1's `parse` node and wire it, unchanged, into a deterministic **prompt-chaining** workflow on `StateGraph` — then land the headline framing: **a graph turns control flow into inspectable data, the model lives inside the nodes, and the developer owns the edges.** An acyclic graph (no back-edge) is exactly what makes this a *workflow*, not an agent. **This demo is the payoff Demos 1–2 promised** — say so.
 
 **Pre-flight:**
 
-- Demo 1's `extract_node`, already on screen.
-- A second, pre-written function — call it `extract_and_summarize_inline` — that does the same extraction *and* then, in the same function body with intermediate variables, drafts a one-line summary from the extracted fields. No state schema, no typed return — just sequential Python.
+- Demo 1's `parse_node` and state schema, already on screen and compiled-in-isolation (Demo 2).
+- The support-ticket sample on the slide and a single ticket chosen to run end-to-end.
+- The pipeline shape on the board: **parse → draft → policy-check**, a fixed three-node chain — with `parse` circled as "the node you already built."
 
 **Live script:**
 
-1. Put both functions on screen side by side: `extract_node` (Demo 1's, one job, typed state in/out) and `extract_and_summarize_inline` (two jobs, one function, plain intermediate variables).
-2. Ask the room to imagine a very small, concrete change: *"the extraction prompt needs a fourth field."* Walk each version: in `extract_node`, the edit is contained to the node's own prompt and parser — the state schema and the function signature might need a field, but nothing about "what calls this" changes. In `extract_and_summarize_inline`, the same edit still works, but now imagine testing extraction *alone* — you can't easily run just that half without also running (and paying for) the summarize half.
-3. Name the concrete costs of the inline version out loud: harder to test one step alone, harder to swap the step's model or prompt without touching its neighbor, harder to see the shape of the pipeline at a glance (there is no diagram, no list of steps — just a function body).
-4. Name the concrete benefit the node version buys back: it can be **composed**, **reordered**, **tested in isolation** (Demo 2 just did this), and **swapped out**, in ways the inline version resists.
-5. Close with the exact forward pointer: *"L04 is this idea multiplied — the same typed-state-in, typed-state-out node design, several of them, wired with fixed edges into a sequence. If you understood today's one node, you already understand most of what L04 needs — it's mostly wiring, not new node design."* Say the bridge sentence from [objectives.md](objectives.md) verbatim: *"You just wired one step — next lesson, you wire several of them together."*
+1. Sketch the chain on the board: three boxes, two forward arrows, entry and `END`. Name it a **DAG** — every edge moves forward, none returns. Circle `parse`: "we built this in the last two demos; today we add two siblings."
+2. **Grow the typed state** to carry the new fields that flow between steps: the parsed fields (already there), the drafted reply, the policy verdict. Introduce the **reducer** idea here — the default overwrites; an `Annotated[list, add]` field appends — and note you didn't need one at a single node.
+3. Live-code the two **new nodes** as plain typed functions, each reading state and returning an update, and **bind a model per node**:
+   - `draft` — calls **Sonnet** (the heavy reasoning step) to write a reply from the parsed fields.
+   - `policy_check` — checks the draft against the policy snippet (a Sonnet call, or a plain Python check).
+   - Rebind `parse` to **Haiku** (a light step) — the same node, now with a cheaper model — to make per-node binding concrete.
+4. Wire it: `add_node` for `draft` and `policy_check`, `add_edge("parse","draft")`, `add_edge("draft","policy_check")`, `add_edge("policy_check", END)`, keep `set_entry_point("parse")`. **`compile()`**, then **`invoke()`** on the chosen ticket. Emphasize: **`parse_node`'s body did not change** — we only wired around it.
+5. **Render the compiled graph diagram** and put it next to the code — "this picture *is* the control flow, as data."
+6. Run it with `graph.stream(stream_mode="updates")`: one chunk per node, in order — `{"parse": {...}}` → `{"draft": {...}}` → `{"policy_check": {...}}`. Confirm the path was developer-determined, and point out each node's update reveals which model produced it. (Routing this same run to Langfuse is **L12** — forward-reference it.)
 
 **What to highlight:**
 
-- **This is a discussion, not a build.** No new code is written in this demo — the point is entirely in the comparison and the framing.
-- **Be honest about the break-even point.** For a single node, the ceremony from Demos 1–2 is not obviously worth it over a plain function — say so. The value shows up the moment there's a second step, which is exactly next lesson.
-- **Don't preview multi-node wiring mechanics.** It's fine to say "several of them, wired with fixed edges" as a *description*, but do not live-code two nodes or an edge here — that would pre-empt L04's own Demo 1, which builds exactly that from scratch.
+- **This is the payoff.** The `StateGraph` ceremony from Demos 1–2 just scaled to three nodes with *zero* redesign of the first — that is exactly the return on the setup cost that one node couldn't show.
+- **Control flow is now data.** Nodes and edges can be listed, drawn, streamed — unlike `if`/`while` in Python. Show the diagram and the `stream` output as proof.
+- **The model lives *inside* the nodes; the developer owns the edges.** The model does the smart per-step work; *what runs next* is decided by the edges *you* wired. Repeat this all through Movement 2.
+- **Each node can bind its own model.** Haiku on the light `parse` step, Sonnet on the heavy `draft` step — the `stream` output makes it tangible. This is the *mechanism* of mixed-model design; the *decision framework* (capability/latency/cost) is **[L14](../L14/objectives.md)**'s — name the link, don't re-teach it.
+- **Why decompose into three prompts instead of one mega-prompt?** Smaller focused prompts are more reliable and individually testable; the cost is more calls (the L01 trade). For a strictly linear chain the graph is near break-even — its bigger payoff shows with branching ([L05](../L05/objectives.md), next), visualization, shared state, and tracing.
 
 **If the demo misbehaves:**
 
-- If a student pushes back with "but I could just write good docstrings and keep my inline function organized" — that's a fair challenge, not a derail. Acknowledge it: discipline can get you partway there, but discipline isn't *enforced* by the language the way a typed state schema and a separate function are. Then return to the testability point (Demo 2 just ran the node alone) as the sharpest concrete difference.
+- If live-coding the builder falls behind, paste the completed graph and walk it node by node — but keep the **`stream` run and the diagram**, which is where "workflow" stops being abstract.
+- If a node's structured extraction is flaky, tighten its prompt (callback to L02 structured-output) — don't reach for tool calling, which is L11's.
+- If the `stream` output doesn't show distinct models per node, check each node constructed its own `ChatAnthropic(model=...)` rather than sharing one — that *is* the per-node-binding lesson surfacing as a bug.
+
+### Demo 4 — Workflow vs. agent: the line is a single back-edge (Objective 5)
+
+**Goal:** open the **workflow-vs-agent** contrast on the fixed chain you just built, and forward-point with precision: **everything here carries forward unchanged; [L05](../L05/objectives.md) adds one primitive (the conditional edge, still developer-owned), and L11 adds the one thing that makes an agent — a conditional edge that loops back to the model.** That single back-edge is the line. Do **not** build a router or an agent here — this demo is diagram + discussion.
+
+**Pre-flight:**
+
+- The compiled prompt-chaining workflow from Demo 3, with its rendered (acyclic) diagram.
+- A **sketch** (not a live build) of the L11 shallow-agent shape: an `agent` node, a `tools` node, and a conditional edge out of `agent` that loops back to `tools` or exits.
+
+**Live script:**
+
+1. Put the Demo 3 workflow diagram up: trace the path — `parse → draft → policy_check → END`, every arrow forward, always reaches `END`. Name it: **DAG, acyclic, developer-wired = workflow.**
+2. Draw **one new edge** on the L11 sketch: a conditional edge out of the model node that routes *back* into the loop (call a tool) or to `END` (finish). That back-edge hands the *model* control of the path.
+3. State the distinction verbatim (it reappears in L05 and L11): a **workflow** is a graph whose path is fixed or chosen by *developer logic* (acyclic, predictable, model inside nodes); an **agent** is a graph whose path is chosen by the *model*, via a **cycle** that loops model → tools → model until the model stops.
+4. Place the whole arc on the board so nothing is a surprise later: **L03** = a fixed chain, no branches (this lesson). **[L05](../L05/objectives.md)** = a graph with branches *you* own (a conditional edge whose routing function reads state you control — a computed value, a model *label*, or user input). **L11** = a graph with a branch the *model* owns, wired into a loop. *Same primitives the whole way; the only thing that changes is who decides the path.*
+5. Reason about **when to use which**: prefer a **workflow** when the task has a known shape — predictable, cheaper, lower-latency, far easier to test and trace; reach for an **agent** only when the steps can't be known in advance. Name the common failure mode: **reaching for an agent when a workflow would do**.
+
+**What to highlight:**
+
+- **The workflow→agent line is one back-edge — but routing comes first.** L05 and L11 both keep nodes, edges, typed state, reducers, compile/invoke, and `stream` *unchanged*. L05 adds only the conditional edge (still developer-owned); L11 adds only the cycle. This is the whole reason L03 comes first.
+- **Determinism is a feature, not a limitation.** Most production "AI features" are workflows, not agents. Choosing the simplest shape that solves the task — usually a workflow — *is* the engineering skill.
+- Do **not** build a router or the agent here. Routing is **[L05](../L05/objectives.md)**; the cycle is **L11**. L03 only *names* the back-edge and forward-points.
+
+**If the demo misbehaves:**
+
+- Mostly diagram + discussion, so little can flake. If a student insists "a model *inside* a node is already the model deciding," separate the two: a model doing work *inside* a node is not agency; agency is the model choosing the *path* (the back-edge), and nothing here has one.
+
+## Common pitfalls coda — naming L03's two gotchas
+
+**Shape note:** a short **"common pitfalls" coda**, not a new live demo — Movement 2 already *touches* both across Demos 3 and 4. Its job is to **name** them as portable gotchas, restate the cure in a line, and pin each back to where the room saw it. Budget ~5 minutes as a recap slide. (These are the two *sequential-DAG-native* gotchas; the routing gotchas — workflow-where-an-agent-is-needed, brittle-branch-conditions — belong to [L05's coda](../L05/demos_or_activities.md#common-pitfalls-coda--naming-l05s-three-gotchas).)
+
+**Live script (recap — point back, don't re-run):**
+
+1. **Model-driven looping sneaking into a "deterministic" DAG.** ❌ Believing the workflow is fully deterministic — the *path* is fixed, but each node's model output still varies (Demo 3), and quietly adding a back-edge turns your workflow into an agent (Demo 4) without you deciding to. **Cure:** keep it acyclic on purpose; if you need to loop on the model's output, you've crossed into [L10](../L10/objectives.md)/[L11](../L11/objectives.md) territory — name the crossing.
+2. **Wrong model per node (overpaying / underpowering).** ❌ Sonnet on the light `parse`/extract step, or Haiku on the hard `draft` reasoning. Point back at Demo 3's per-node binding. **Cure:** cheap model for parse/extract, capable model for reasoning — the *mechanism* is Demo 3; the *decision framework* is [L14](../L14/objectives.md) (full course).
+
+**What to highlight:**
+
+- Gotcha #1 is where the lesson's spine blurs: **confusing "the developer owns the path" (workflow) with "the model owns the path" (agent)** — a back-edge added by reflex turns a workflow into an agent without you deciding to. Keeping that line sharp is the whole lesson.
+- #2 points forward — the *mechanism* of per-node model mixing is Demo 3; the *decision framework* is [L14](../L14/objectives.md). Name the link, **don't re-teach it here.**
+
+## Optional demo — evaluate the workflow (carry L13 forward)
+
+If time allows, close by reinforcing L13's discipline on the cheapest possible target. A deterministic workflow is the *easiest* thing to evaluate — its **structure is fixed**, so you're only measuring a node's output, not chasing a moving control flow.
+
+1. Import the L13 harness from `common/evals.py` (reused, **not** rebuilt — recall it in one line; don't re-teach eval design).
+2. Write ~3–4 `EvalCase`s over a node in the chain — e.g. a ticket in and the expected fields out of `parse`, or a drafted reply in and the expected pass/fail out of `policy_check`. Run `evaluate(...)` and read the pass rate.
+3. Land two things: workflows are **trivially testable** (half the reason to prefer them), and L13's rule — *when you build or change something, you evaluate it* — applies to workflows as much as agents. The same eval habit carries onto [L05](../L05/objectives.md)'s router next lesson and the L11 agent after.
+
+Don't re-teach eval mechanics — that's L13. Just show the harness *pointing at a workflow* so the carry-forward habit stays visible.
+
+<!-- *NEED INPUT*: include this eval beat in the lecture, or hold it for the L03 lab? Recommendation: short optional closer. -->
 
 ## Pacing notes for the teacher
 
-- **Per-demo time:** Demo 1 is the longest (15–20 minutes, including the before/after walkthrough and the client-swap discussion). Demo 2 is short (10–12 minutes — compile/invoke/inspect is mechanically quick). Demo 3 is a discussion beat (8–10 minutes, no live-coding). Total ~35–42 minutes plus discussion, fitting a lesson noticeably shorter than L02 or L04. <!-- *NEED INPUT*: confirm against the lesson-time budget once duration is pinned in objectives.md's open questions (current estimate there is 40–55 minutes). -->
-- **Resist the urge to wire a second node "just to show what's coming."** It is tempting to tease L04 with a live two-node example — don't. L03's discipline is staying at one node; let L04 own that reveal on its own first day.
-- **Reinforce L01/L02 vocabulary at every opportunity.** Tokens, cost, structured-output-by-instruction, defensive parsing. Every demo should read as "the thing you already know, now inside a node" rather than a wholesale new topic.
-- **The audience watches, doesn't participate.** Resist "what field should we extract?" as a group question — that's a lab pattern. Hands-on node-building is for the L03 labs.
+- **Movement 1 (~30–35 min):** primer (≈12, read-alone) + Demo 1 (15–20, the before/after walkthrough and client-swap) + Demo 2 (10–12, compile/invoke/inspect is mechanically quick). Movement 1 is honest that the ceremony hasn't paid off yet — resist the urge to justify it in the abstract.
+- **Movement 2 (~30–45 min):** Demo 3 is the long one (18–25, live `StateGraph` build + diagram + trace, reusing the node) + Demo 4 (8–12, diagram + discussion) + coda (~5) + optional eval beat (5–8, the natural cut if long).
+- **Total ~1 h 45 m–2 h plus discussion.** This is a full lesson, not a short one — the merge traded two thin single-lab lessons for one that lands the node *and* its payoff. If it runs long, cut the optional eval beat to the lab.
+- **Reuse the node, don't rebuild it.** Demo 3 must wire Demo 1's `parse` node in *unchanged* — the "one node became a pipeline" continuity is the merged lesson's whole argument. Do **not** re-derive the `StateGraph` builder from scratch in Demo 3; extend Demo 2's graph.
+- **Determinism is the point, but the model inside nodes still varies:** a node's Claude call is non-deterministic even though the *path* is fixed. Budget a re-run where a node's output quality matters (the draft); the **path** stays stable — exactly the lesson.
+- **Reinforce L01/L02 vocabulary throughout.** Tokens, cost, structured-output-by-instruction, defensive parsing. Every node should read as "the thing you already know, now inside a node."
+- **The audience watches, doesn't participate.** Hands-on graph-building is for the L03 lab. (The user-input-vs-classifier decider comparison is L05's, not L03's.)
 
 ## Open authoring questions
 
-- <!-- *NEED INPUT*: confirm the exact domain/text for the extract node (see Pre-flight) — recommend reusing a support-ticket-style snippet so L04's first node plausibly continues from it, but a distinct domain is also acceptable. -->
-- <!-- *NEED INPUT*: confirm exact model id string for the Sonnet 4.6 snapshot used by ChatAnthropic, read from common/config.py rather than hard-coded in cells. Mirrored from the equivalent open question in L04's demos and in objectives.md. -->
-- <!-- *NEED INPUT*: estimated lecture duration — demo pacing above sums to ~35–42 minutes; confirm this reconciles with the 40–55 minute estimate left open in objectives.md, and with the course's per-lesson time budget generally. -->
-- <!-- *NEED INPUT*: are the demos run in a projected Jupyter notebook, a slide-embedded REPL, or a demo-runner script? Mirrors the same open question in L02's and L04's demos. -->
-- <!-- *NEED INPUT*: should Demo 2 show the one-node graph diagram render (draw_mermaid_png/Mermaid text) as a brief curiosity, or skip it entirely as content-free at one node? Mirrors the same open question left in objectives.md. -->
+- <!-- *NEED INPUT*: confirm the support-ticket domain end-to-end and the exact sample tickets + policy snippet (fixture). The `parse` node built in Demo 1 must be the literal first node of Demo 3's chain — that continuity is the merge's payoff. -->
+- <!-- *NEED INPUT*: exact model id strings for the Sonnet 4.6 and Haiku 4.5 snapshots, read from common/config.py rather than hard-coded in cells. -->
+- <!-- *NEED INPUT*: confirm the graph-diagram render path (draw_mermaid_png vs Mermaid text vs ASCII) works in the demo environment. -->
+- <!-- *NEED INPUT*: are the demos run in a projected Jupyter notebook, a slide-embedded REPL, or a demo-runner script? Mirrors the same open question in L02's demos. -->
+- <!-- *NEED INPUT*: include the optional eval-the-workflow beat in the lecture or hold it for the lab? -->

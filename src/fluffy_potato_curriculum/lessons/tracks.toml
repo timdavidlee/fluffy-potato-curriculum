@@ -37,21 +37,22 @@ full = ["K01", "K02", "K03", "K04", "K05", "K06"]
 [full]
 # Master lesson plan — all 25 lessons, taught in numeric order.
 order = [
-  "L01", "L02", "L03", "L04", "L05", "L06", "L07", "L08", "L09", "L10",
+  "L01", "L02", "L03", "L05", "L06", "L07", "L08", "L09", "L10",
   "L11", "L12", "L13", "L14", "L15", "L16", "L17", "L18", "L19", "L20",
   "L21", "L22", "L23", "L24", "L25",
 ]
+# L04 is a reserved gap (former sequential-chaining lesson merged into L03 on 2026-07-09).
 
 [mini]
 # Condensed ~32 hr cut: the five-objective core (tool design, when-to-use-a-tool,
-# shallow LangGraph agent, eval, tracing) plus the early graph ramp (L03–L05,
+# shallow LangGraph agent, eval, tracing) plus the early graph ramp (L03 + L05,
 # foundational for everything after), chain-of-thought prompting (L06), and
 # Skills (L22) and skill patterns & composition (L23) by explicit request.
 # Closes with L50, the agent mini-project walkthrough — a project-capstone build
 # (tool -> agent loop -> trace -> eval), parked at L50 so future lessons can slot
 # before it without renumbering. Mini-only for now (see EXCEPTION note up top).
 order = [
-  "L01", "L02", "L03", "L04", "L05", "L06", "L07", "L08", "L10", "L11",
+  "L01", "L02", "L03", "L05", "L06", "L07", "L08", "L10", "L11",
   "L12", "L13", "L22", "L23", "L50",
 ]
 
@@ -64,8 +65,8 @@ K05 = "Async concepts"
 K06 = "Docker & the multi-container stack"
 L01 = "LLM and token basics"
 L02 = "Prompting fundamentals"
-L03 = "Single-node operations"
-L04 = "Directed graphs: sequential chaining"
+L03 = "Directed graphs: from one node to a sequential chain"
+# L04 — reserved gap (merged into L03, 2026-07-09)
 L05 = "Conditional graphs: routing & branching"
 L06 = "Teaching an LLM to think via prompting"
 L07 = "Tool calling: how it works"

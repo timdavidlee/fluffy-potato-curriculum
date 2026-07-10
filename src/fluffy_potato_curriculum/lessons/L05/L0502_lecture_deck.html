@@ -640,7 +640,7 @@ pre.codeblock code .st { color: var(--ink-dim); }
     <div class="chapter-ghost reveal">01</div>
     <div class="chapter-eyebrow reveal">Section 1</div>
     <div class="chapter-title reveal">The one new <span style="color:var(--cyan); font-style:normal;">primitive</span></div>
-    <div class="chapter-sub reveal">L04 gave you fixed edges taken every time. L05 adds exactly one thing: the conditional edge, and a routing function that chooses at runtime.</div>
+    <div class="chapter-sub reveal">L03 gave you fixed edges taken every time. L05 adds exactly one thing: the conditional edge, and a routing function that chooses at runtime.</div>
     <div class="chrome-page">02 / 15</div>
 </section>
 
@@ -655,14 +655,14 @@ pre.codeblock code .st { color: var(--ink-dim); }
     </div>
     <div class="body-area">
         <ul class="points reveal">
-            <li class="point">In <b>L04</b> you only used <b>fixed</b> edges: <code>add_edge("parse", "draft")</code> &mdash; taken every time, no exceptions.</li>
+            <li class="point">In <b>L03</b> you only used <b>fixed</b> edges: <code>add_edge("parse", "draft")</code> &mdash; taken every time, no exceptions.</li>
             <li class="point">Now you add the <b>conditional edge</b>: a <b>routing function</b> reads state at runtime and returns the <i>name</i> of the next node.</li>
             <li class="point">Wired with <code>add_conditional_edges("classify", route, {...})</code>.</li>
         </ul>
         <div class="diagram-frame reveal" style="margin-top:26px; gap:120px; align-items:flex-start;">
             <!-- LEFT: fixed edge A -> B -->
             <svg viewBox="0 0 560 300" width="620" height="300">
-                <text x="20" y="34" class="edge-label" fill="var(--ink-faint)" style="text-transform:uppercase; letter-spacing:0.1em;">L04 &middot; fixed</text>
+                <text x="20" y="34" class="edge-label" fill="var(--ink-faint)" style="text-transform:uppercase; letter-spacing:0.1em;">L03 &middot; fixed</text>
                 <circle cx="120" cy="150" r="62" fill="#12181a" stroke="var(--cyan)" stroke-width="2.5"/>
                 <text x="120" y="159" text-anchor="middle" class="node-label">A</text>
                 <path d="M 184 150 L 396 150" stroke="var(--cyan)" stroke-width="3.5" marker-end="url(#f11c)"/>
@@ -1116,13 +1116,13 @@ builder.add_conditional_edges(<span class="st">"classify"</span>, route,
         </ul>
         <div class="diagram-frame reveal" style="margin-top:26px;">
             <svg viewBox="0 0 1660 320" width="1660" height="320">
-                <!-- 1: L04's chain -->
+                <!-- 1: L03's chain -->
                 <circle cx="70" cy="140" r="34" fill="#12181a" stroke="var(--cyan)" stroke-width="2.5"/>
                 <circle cx="200" cy="140" r="34" fill="#12181a" stroke="var(--cyan)" stroke-width="2.5"/>
                 <circle cx="330" cy="140" r="34" fill="#12181a" stroke="var(--cyan)" stroke-width="2.5"/>
                 <path d="M 104 140 L 158 140" fill="none" stroke="var(--cyan)" stroke-width="3" marker-end="url(#s42c)"/>
                 <path d="M 234 140 L 288 140" fill="none" stroke="var(--cyan)" stroke-width="3" marker-end="url(#s42c)"/>
-                <text x="200" y="272" text-anchor="middle" class="edge-label" fill="var(--ink-dim)" font-size="17" style="text-transform:uppercase; letter-spacing:0.1em;">L04 &middot; the chain</text>
+                <text x="200" y="272" text-anchor="middle" class="edge-label" fill="var(--ink-dim)" font-size="17" style="text-transform:uppercase; letter-spacing:0.1em;">L03 &middot; the chain</text>
                 <!-- 2: this lesson's model-classified router -->
                 <circle cx="500" cy="140" r="40" fill="#12181a" stroke="var(--cyan)" stroke-width="2.5"/>
                 <text x="500" y="146" text-anchor="middle" class="edge-label" font-size="15" fill="var(--ink)">classify</text>

@@ -258,13 +258,13 @@ async def run_cases(cases: list[str]) -> list[str]:
 3. What's it probably doing? *(I/O-bound work — likely awaiting a model or a tool per case — that
    yields at each `await`, which is exactly why it's async.)*
 
-**Why it matters:** every agent-arc lesson from L03/L04 onward is full of `async def` signatures
+**Why it matters:** every agent-arc lesson from L03 onward is full of `async def` signatures
 like this. You don't need to *write* them yet — you need to **read** them without flinching, which
 you now can.
 
 ## The one rule to carry forward: `.invoke()` vs `.ainvoke()`
 
-You'll soon meet framework objects (LangChain / LangGraph, around L03/L04) that expose **two** ways
+You'll soon meet framework objects (LangChain / LangGraph, around L03) that expose **two** ways
 to call them: a **sync** `.invoke()` and an **async** `.ainvoke()`. The provider SDKs
 (Anthropic / OpenAI) similarly offer a sync client and an async client. **This course defaults to
 the async variant** — `.ainvoke()`, the async client — everywhere it has the choice.
