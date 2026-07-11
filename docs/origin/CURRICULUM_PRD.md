@@ -61,15 +61,31 @@ Students should be familiar with basic programming of classes, functions, types,
 
 ## Course objectives
 
-The capabilities a student will have built by the end of the course. Each
-should be observable (something the student can *do*, not just *know about*)
-and should map to one or more lessons below.
+Two lenses on the course. The **student takeaways** are the handful of things every
+student walks away able to do — the spine the mini track and the L50 capstone hang on.
+The **core themes** are the content domains the course moves through to get there; each
+theme is touched by several lessons, and a lesson can serve more than one.
 
-- design a tool for an agent
-- understand when a tool is needed vs. relying on core model
-- design own "shallow agent" in langgraph
-- stretch: a multi-agent design in langgraph
-- understand the basics of agent evaluation and tracing
+### Student takeaways
+
+Each maps to one or more lessons below; each is observable (something the student can *do*).
+
+1. **Design a tool for an agent** — name it, schema its inputs/outputs, and handle its errors *(L07–L08)*
+2. **Build a directed LLM-powered pipeline** — a developer-wired workflow of typed nodes with fixed and conditional edges, where you control the path *(L03, L05)*
+3. **Build a customized free-form agent that drives its own tools** — the model-driven ReAct loop, wired by hand then recognized inside `create_agent` *(L10–L11)*
+4. **Understand how agents are measured and what they produce** — read the state, logs, traces, and extracts a run emits, and evaluate its quality *(L12–L13)*
+5. **Ship a hackathon project** — an end-to-end application combining an agent, a UI, and a provided database *(L50)*
+
+### Core themes
+
+The content domains the course moves through on the way to those takeaways.
+
+- **LLM foundations** — tokens, context windows, cost, and sampling; prompting with roles, structured output, and few-shot *(L01–L02)*
+- **Orchestration** — directed and conditional graphs, the cyclic agent loop, shallow agents, design patterns, human-in-the-loop gates, and multi-agent systems *(L03, L05, L10, L11, L15, L17, L24)*
+- **Tool ecosystem** — the tool-call protocol, designing good tools, and packaging them behind MCP *(L07–L09)*
+- **Agent instruction & guidance** — directing an agent through complex work via the prompt (chain-of-thought, self-critique), skills (packaged roadmaps and runbooks), and injected hints (middleware, conditional tools) *(L06, L16, L22–L23)*
+- **Agents and outside systems** — deep-agent memory and files, context management, embeddings, and RAG *(L18–L21)*
+- **Budgets, performance & resources** — cost and latency budgets, choosing models and providers, and measuring quality through tracing and evaluation *(L01, L12–L14, L25)*
 
 
 ## Prework track (`K<NN>`) — required before `L01`
@@ -153,7 +169,7 @@ hinge where the graph first gains a cycle.
 | L24 | Multi-agent / subagent architecture (stretch)         | design a supervisor + workers pattern; explain when subagents help vs. hurt                               |
 | L25 | Evaluation revisited                                  | extend the L13 eval discipline — on the same self-hosted Langfuse — to complex systems: evaluate a multi-step LangGraph agent (per-node vs. end-to-end metrics); evaluate retrieval quality for RAG (precision@k / recall@k); reason about LLM-as-judge — what it can and can't reliably score; evaluate a multi-agent system (subagent quality vs. orchestration quality); scale eval cost (sampling strategies, CI gating) |
 
-**Capstone — L50, agent mini-project walkthrough (mini track only, for now).** After the
+**Capstone — L50, tying it all together: mini project (mini track only, for now).** After the
 lesson arc there is a single **project-walkthrough capstone**: a proctor-led, end-to-end build
 of a small ("mini") tool-calling agent that consolidates the five course objectives at once —
 design a tool, wire the agent loop, trace it, and eval it. It is deliberately numbered **L50**,
@@ -177,9 +193,9 @@ The above table is a master list, this should always be a reduced version of the
 table.
 
 If the course had to be compressed to ~20 hours, this is the cut. It is
-anchored on the five course objectives (tool design, when-to-use-a-tool,
-shallow LangGraph agent, eval, tracing) and drops everything that doesn't
-directly serve them. The multi-agent stretch is the first thing out.
+anchored on the five student takeaways (tool design, directed pipeline,
+free-form agent, tracing & eval, hackathon capstone) and drops everything that
+doesn't directly serve them. The multi-agent stretch is the first thing out.
 
 **Kept (14 lessons + the L50 project capstone, ~32 hrs at the full-course per-lesson rate):**
 
@@ -213,7 +229,7 @@ before L07 — this is why the mini grew from 11 to 14 lessons.
 | L13 | Evaluation: first pass                  | Covers the *evaluation* objective; pairs with tracing                        |
 | L22 | Skills: just-in-time capabilities       | Added by request; depends on tools + prompting, which the mini course keeps  |
 | L23 | Skill patterns & composition            | Added by request; the composition capstone — compose skills into a system    |
-| L50 | Agent mini-project: end-to-end walkthrough | Project capstone (mini track only, for now) — a proctor-led walkthrough building one small tool-calling agent end-to-end (tool → agent loop → trace → eval), consolidating the five course objectives; walkthrough format, not lecture+lab |
+| L50 | Tying it all together: mini project     | Project capstone (mini track only, for now) — a proctor-led walkthrough building one small tool-calling agent end-to-end (tool → agent loop → trace → eval), consolidating the five course objectives; walkthrough format, not lecture+lab |
 
 **Cross-cutting thread — assistant message channels (narration / thinking / answer).**
 The three kinds of assistant output are all covered in the mini. Homes:
