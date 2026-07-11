@@ -71,5 +71,5 @@ chaining" was merged into `L03` on 2026-07-09, and downstream lessons were not r
 - `L24` — Multi-agent / subagent architecture (stretch)
 - `L25` — Evaluation revisited
 
-The mini track is a 13-lesson subset closing with `L50` (agent mini-project walkthrough) — see
+The mini track is a 13-lesson subset closing with `L50` (mini-project walkthrough) — see
 the [Syllabus](src/fluffy_potato_curriculum/lessons/SYLLABUS.md).

@@ -186,7 +186,7 @@ estimated duration: 22
   (sequential handoff and a shared sub-skill), the dependency graph that just-in-time loading runs
   across, and the **composition anti-patterns** — the system-scale sequel to §3's "wrong container"
   faults.
-- **Then the mini cut closes with L50 — the agent mini-project walkthrough** (an end-to-end build:
+- **Then the mini cut closes with L50 — the mini-project walkthrough** (an end-to-end build:
   tool → agent loop → trace → eval). So L22 is a capstone of *"where does a single capability live?"*,
   **not** the last mini lesson; the track's closing recap is [MINI_WRAPUP.md](../MINI_WRAPUP.md), owned by
   no single lesson. (Full mini sequence: [SYLLABUS.md](../SYLLABUS.md).)

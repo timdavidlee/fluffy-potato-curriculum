@@ -8,7 +8,7 @@
 # be a subset of `full` (every mini lesson is also a full lesson), and both
 # lists are in teaching order.
 #
-# EXCEPTION (for now): L50, the agent mini-project walkthrough capstone, is
+# EXCEPTION (for now): L50, the mini-project walkthrough capstone, is
 # registered on `mini` ONLY per request — it is intentionally NOT in `full` yet,
 # so it is the one lesson that breaks mini ⊆ full. See the `<need input>` note in
 # docs/origin/CURRICULUM_PRD.md (just below the master lesson-plan table): decide
@@ -44,11 +44,11 @@ order = [
 # L04 is a reserved gap (former sequential-chaining lesson merged into L03 on 2026-07-09).
 
 [mini]
-# Condensed ~32 hr cut: the five-objective core (tool design, when-to-use-a-tool,
-# shallow LangGraph agent, eval, tracing) plus the early graph ramp (L03 + L05,
-# foundational for everything after), chain-of-thought prompting (L06), and
-# Skills (L22) and skill patterns & composition (L23) by explicit request.
-# Closes with L50, the agent mini-project walkthrough — a project-capstone build
+# Condensed ~32 hr cut: the five-takeaway core (tool design, the directed pipeline
+# of L03 + L05, the free-form agent, tracing & eval, and the hackathon project) plus
+# chain-of-thought prompting (L06) and Skills (L22) and skill patterns &
+# composition (L23) by explicit request.
+# Closes with L50, the mini-project walkthrough — a project-capstone build
 # (tool -> agent loop -> trace -> eval), parked at L50 so future lessons can slot
 # before it without renumbering. Mini-only for now (see EXCEPTION note up top).
 order = [
@@ -88,4 +88,4 @@ L22 = "Skills: just-in-time capabilities for agents"
 L23 = "Skill patterns & composition"
 L24 = "Multi-agent / subagent architecture (stretch)"
 L25 = "Evaluation revisited"
-L50 = "Agent mini-project: end-to-end walkthrough"
+L50 = "Tying it all together: mini project"

@@ -1,10 +1,10 @@
-# L50: Agent mini-project — end-to-end walkthrough (mini-track capstone)
+# L50 · Tying it all together: mini project (mini-track capstone)
 
 > Parent design doc: [CURRICULUM_PRD.md](../../CURRICULUM_PRD.md) (lesson-plan note below the master table + the "Condensed Mini Lesson Plan" row).
 > Folder conventions: [docs/origin/CLAUDE.md](../../CLAUDE.md).
 > Position: **the last taught unit of the mini cut.** In mini teaching order the preceding lesson is [L23 Skill patterns & composition](../L23/objectives.md); there is no following lesson. L50 is numbered out at 50 on purpose — parked at the end with a gap (L26–L49) so future lessons can slot *before* it without renumbering (the same "park it out of the way" move the `K` prework uses). It is registered on the **mini track only, for now** (a deliberate, flagged exception to the otherwise-invariant mini ⊆ full — see the `<!-- *NEED INPUT* -->` in the PRD on whether to promote it to `full`).
 >
-> **This is not a standard proctor-led lecture+lab lesson.** L50 is a hands-on, end-to-end **walkthrough**: the proctor builds one small ("mini") tool-calling agent from a blank file to a traced, evaluated, working artifact, narrating each decision, while students follow along and rebuild it. It teaches **no new concept** — its whole job is to *assemble* the mini-cut's five-objective arc into one continuous build. **Realized format (decided):** a single guided build notebook + `PROCTOR_NOTES.md` (K-prework runbook shape), **not** a lecture+lab pair — see the *Decided (format)* note under Open authoring questions. The course's overall closing/retrospective framing is owned by [`MINI_WRAPUP.md`](../../../../src/fluffy_potato_curriculum/lessons/MINI_WRAPUP.md) (read *after* L50), not by this lesson.
+> **This is not a standard proctor-led lecture+lab lesson.** L50 is a hands-on, end-to-end **walkthrough**: the proctor builds one small ("mini") tool-calling agent from a blank file to a traced, evaluated, working artifact, narrating each decision, while students follow along and rebuild it. It teaches **no new concept** — its whole job is to *assemble* the mini cut's core build arc into one continuous build. **Realized format (decided):** a single guided build notebook + `PROCTOR_NOTES.md` (K-prework runbook shape), **not** a lecture+lab pair — see the *Decided (format)* note under Open authoring questions. The course's overall closing/retrospective framing is owned by [`MINI_WRAPUP.md`](../../../../src/fluffy_potato_curriculum/lessons/MINI_WRAPUP.md) (read *after* L50), not by this lesson.
 
 ## Where this lesson sits
 
@@ -39,7 +39,7 @@ If a student is shaky on any single step, the fix is to revisit *that* lesson's 
 By the end of L50, a student should be able to:
 
 1. **Scope a small agent from a fuzzy goal to a buildable spec — the "vertical slice."** Concretely:
-   - Turn a one-line goal ("an agent that helps with X") into a **minimal end-to-end slice**: one clear task, the *one* tool it needs, a definition of "done," and an explicit non-goal list (what this mini-agent deliberately will *not* do). Land the capstone habit: **build the thinnest thing that exercises all five objectives, then stop** — a mini-project is a vertical slice, not a product.
+   - Turn a one-line goal ("an agent that helps with X") into a **minimal end-to-end slice**: one clear task, the *one* tool it needs, a definition of "done," and an explicit non-goal list (what this mini-agent deliberately will *not* do). Land the capstone habit: **build the thinnest thing that exercises the whole build, then stop** — a mini-project is a vertical slice, not a product.
    - Apply the L08 *when-is-a-tool-warranted* test to the chosen task: does it need a tool at all, or is this model-alone? Choosing a task whose single tool is genuinely justified is part of the scoping skill.
    - Recognize scoping failure modes: too big to finish (no vertical slice), or too trivial to need a tool (nothing to trace or eval).
 
@@ -63,21 +63,21 @@ By the end of L50, a student should be able to:
    - <!-- *NEED INPUT (stage-2)*: confirm whether even the single case is emitted to Langfuse as one score via `emit_score` (one bridge call, cheap) or kept as a pure-Python `EvalResult` print in the core walkthrough, with the Langfuse write folded into the bonus. Recommendation: pure-Python single run in the core (no platform write), Langfuse dataset/experiment entirely in the bonus — keeps S5 minimal and platform-independent for the timed walkthrough. -->
 
 6. **Reflect on the whole slice and hand off to independent work.** Concretely:
-   - Narrate the finished artifact as one connected story — *goal → tool → agent → trace → eval* — and name, for their own agent, where each of the five mini-cut objectives shows up. This is the "you built the real thing" moment L50 exists to produce.
+   - Narrate the finished artifact as one connected story — *goal → tool → agent → trace → eval* — and name, for their own agent, where each build step shows up. This is the "you built the real thing" moment L50 exists to produce.
    - Identify the **first thing they would add next** (a second tool, a harder task, a tighter scorer) and recognize it as the seam between this guided walkthrough and the independent [end-of-week project](../../PROJECT_BRIEF_DESIGN.md) — so students leave L50 pointed at their own build, then read [`MINI_WRAPUP.md`](../../../../src/fluffy_potato_curriculum/lessons/MINI_WRAPUP.md) for the course-level retrospective.
 
 ## Vocabulary the walkthrough must establish
 
 L50 introduces almost no new terms — it **reuses** the vocabulary of L07/L08 (tool, schema, tool-vs-model), L10/L11 (the loop, shallow agent, `create_agent`, `RunResult`, termination), L12 (`TraceEvent`, trace, Langfuse, failure signature), and L13 (eval set, `EvalCase`, `Scorer`, `EvalResult`, Dataset, Experiment, score, regression, pass rate, outcome vs. trajectory). Assume all of these; do not redefine them. The handful of terms L50 *does* own:
 
-- **Mini-project** — the smallest agent that still exercises all five mini-cut objectives end to end: one task, one new tool, a running shallow agent, a trace, and an eval case. The unit L50 builds.
+- **Mini-project** — the smallest agent that still runs the whole build end to end: one task, one new tool, a running shallow agent, a trace, and an eval case. The unit L50 builds.
 - **Vertical slice** — a build that goes *all the way through* the stack on a *narrow* task (one path from goal to evaluated agent), rather than a broad feature that only reaches partway. The capstone's design discipline: thin and complete beats wide and half-wired.
 - **Capstone walkthrough** — the teacher-led, everyone-builds-the-same-thing format of this lesson (contrast with the student-driven end-of-week project). A guided assembly of prior skills, not a new concept.
 
 ## Main points the walkthrough should land
 
 - **Nothing here is new — that's the point.** L50 is the arc you already built, run once as a single motion. If a step feels unfamiliar, the fix is the lesson that owns it, not L50.
-- **Build the thinnest thing that touches all five objectives, then stop.** A mini-project is a vertical slice: one task, one tool, one trace, one eval case. Scope creep is the capstone's main failure mode.
+- **Build the thinnest thing that touches every build step, then stop.** A mini-project is a vertical slice: one task, one tool, one trace, one eval case. Scope creep is the capstone's main failure mode.
 - **The only fresh authoring is one small tool.** Everything else — the loop, tracing, eval — is imported from `common/`. Reuse over re-derive is the whole design stance of the shared layer, made visible.
 - **You find your *own* failure now.** In L12/L13 the course handed you failure modes to catch. Here the failure is on your task, in your trace — spotting it and turning it into a kept eval case is the capstone skill.
 - **A traced, evaluated agent is the deliverable — not just an agent that "worked once."** The habit the mini course has been building (trace before you guess; eval or it's vibes) is what makes this a *finished* slice rather than a demo that happened to pass.
@@ -94,7 +94,7 @@ L50 introduces almost no new terms — it **reuses** the vocabulary of L07/L08 (
 
 ## Bridge / capstone
 
-L50 **is** the mini cut's integrative capstone — the lesson where the five objectives stop being separate skills and become one build. It does not bridge *forward* to another lesson (there is none in the mini cut); its two hand-offs are:
+L50 **is** the mini cut's integrative capstone — the lesson where the mini cut's separate skills stop being separate and become one build. It does not bridge *forward* to another lesson (there is none in the mini cut); its two hand-offs are:
 
 - **To the student's own work** — the [end-of-week project](../../PROJECT_BRIEF_DESIGN.md): L50 is the shared worked example that makes the independent team build tractable. The last walkthrough beat (objective 6) is deliberately a pointer at "the first thing you'd add," which is where the project begins.
 - **To the course retrospective** — [`MINI_WRAPUP.md`](../../../../src/fluffy_potato_curriculum/lessons/MINI_WRAPUP.md), read immediately after L50, which owns the "here's the whole system you built, here's where to go next" framing at the course level (no lesson roadmap does).

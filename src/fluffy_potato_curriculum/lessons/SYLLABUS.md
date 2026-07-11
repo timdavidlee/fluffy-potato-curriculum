@@ -14,11 +14,11 @@ membership there, not by where it lives on disk.
   todo [`docs/todos/2026-07-03-2211-k-prework-track.md`](../../../docs/todos/2026-07-03-2211-k-prework-track.md).
 - **Full** — the master 25-lesson plan.
 - **Mini** — the condensed ~32 hr cut (13 lessons + the L50 project capstone): the
-  five-objective core (tool design, when-to-use-a-tool, shallow LangGraph agent,
-  eval, tracing) plus the early graph ramp (L03 + L05, foundational for everything
-  after), chain-of-thought prompting (L06), and Skills (L22) and skill patterns &
-  composition (L23) by explicit request. It **closes with L50, the agent
-  mini-project walkthrough** — a hands-on, end-to-end capstone build. Every mini
+  five-takeaway core (tool design, the directed pipeline of L03 + L05, the free-form
+  agent, tracing & eval, and the hackathon project) plus chain-of-thought prompting
+  (L06) and Skills (L22) and skill patterns & composition (L23) by explicit request. It
+  **closes with L50, the mini-project walkthrough** — a hands-on, end-to-end capstone
+  build. Every mini
   lesson is also a full lesson **except L50**, which is a mini-only capstone for now
   (a deliberate, flagged exception to mini ⊆ full — see the `<need input>` note in
   the PRD on whether to promote it to `full`).
@@ -71,7 +71,7 @@ Prework order: K01 → K02 → K03 → K04 → K05 → K06.
 | L23 | Skill patterns & composition                                  |  ✅  |  ✅  |
 | L24 | Multi-agent / subagent architecture (stretch)                 |      |  ✅  |
 | L25 | Evaluation revisited                                          |      |  ✅  |
-| L50 | Agent mini-project: end-to-end walkthrough (capstone)         |  ✅  |      |
+| L50 | Tying it all together: mini project (capstone)                |  ✅  |      |
 
 L50 is the mini-track project capstone — a proctor-led, end-to-end walkthrough (not lecture+lab),
 numbered L50 so it parks at the end with room to slot future lessons before it. Mini-only for now;

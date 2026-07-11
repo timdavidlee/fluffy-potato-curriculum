@@ -169,10 +169,10 @@ print(result["messages"][-1].content)
   an API. No ML background, no math required.
 - **Everyone starts level.** A gated **prework** track (K01–K06) gets your environment, keys, and
   the Docker stack working *before* L01, so the whole cohort begins from one baseline.
-- **Two ways to take it:** a focused **mini track** (14 lessons + the capstone, ~32 hours, anchored
-  on the five objectives) or the **full track** all the way to multi-agent systems and RAG.
+- **Two ways to take it:** a focused **mini track** (13 lessons + the capstone, ~32 hours, anchored
+  on the five student takeaways) or the **full track** all the way to multi-agent systems and RAG.
 - diagram: a branching SVG — a single cyan **prework gate** `K01–K06` on the left (tagged "everyone
-  starts here") feeding forward into two labeled tracks: `Mini · 14 lessons + capstone · ~32 hrs`
+  starts here") feeding forward into two labeled tracks: `Mini · 13 lessons + capstone · ~32 hrs`
   and `Full · through multi-agent + RAG`. Both branches in cyan. Caption: one on-ramp, two
   destinations.
 

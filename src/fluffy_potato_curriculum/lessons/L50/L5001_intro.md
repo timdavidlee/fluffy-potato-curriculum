@@ -6,7 +6,7 @@ keywords: capstone, mini-project, vertical slice, assembly, tool design, shallow
 estimated duration: 5
 ```
 
-> **Lesson:** L50 — Agent mini-project (mini-track capstone).
+> **Lesson:** L50 — Tying it all together: mini project (mini-track capstone).
 > **Roadmap:** [objectives.md](../../../../docs/origin/lesson_roadmaps/L50/objectives.md) · [demos_or_activities.md](../../../../docs/origin/lesson_roadmaps/L50/demos_or_activities.md)
 > **Read in order:** this intro → the framing deck [L5002_lecture](L5002_lecture.md) → the guided build [L5003_lecture](L5003_lecture.ipynb). Then read [MINI_WRAPUP](../MINI_WRAPUP.md) for the course-level wrap.
 > **Format:** this is a **walkthrough**, not a lecture+lab. The proctor builds one small agent live; you rebuild it alongside, cell by cell. There's no separate student lab here — the independent build is the [end-of-week project](../../../../docs/origin/PROJECT_BRIEF_DESIGN.md), which this warms you up for.
@@ -21,7 +21,7 @@ What you've **never** done is drive that whole arc yourself, in order, on a task
 
 L50 teaches **no new concept**. Its whole job is to *assemble* skills you already have. So keep one rule in mind the entire time: **if a step feels unfamiliar, the fix is the lesson that owns it, not this one.** You are not re-implementing the loop, the trace emitter, or the eval types — every one of them lives in the shared `common/` layer, and you'll import it. The *only* genuinely new code you'll write is **one small tool**.
 
-That constraint is the lesson. A capstone's skill isn't building something big and impressive — it's **finishing a thin slice**. You'll build the thinnest thing that still exercises all five objectives end to end — one task, one new tool, one running agent, one trace, one eval case — and then you'll **stop**. Scope creep is the failure mode of this exact lesson.
+That constraint is the lesson. A capstone's skill isn't building something big and impressive — it's **finishing a thin slice**. You'll build the thinnest thing that still runs the whole build end to end — one task, one new tool, one running agent, one trace, one eval case — and then you'll **stop**. Scope creep is the failure mode of this exact lesson.
 
 ## What you'll build
 
