@@ -6,7 +6,7 @@ keywords: receipt reconciliation, cross-format normalization, tool-vs-model, war
 estimated duration: 15
 ```
 
-> **Lesson:** L50 — Agent mini-project (mini-track capstone). This deck sets up the **problem you're about to build against**: what reconciliation is, why it's genuinely hard, and how to *reason* about the tool, the failure, and what "done" means — so the guided build [L5003_lecture](L5003_lecture.ipynb) is you executing a plan you already understand, not following steps blind.
+> **Lesson:** L50 — Tying it all together: mini project (mini-track capstone). This deck sets up the **problem you're about to build against**: what reconciliation is, why it's genuinely hard, and how to *reason* about the tool, the failure, and what "done" means — so the guided build [L5003_lecture](L5003_lecture.ipynb) is you executing a plan you already understand, not following steps blind.
 > **Colour key (as in every deck):** **cyan** = the point being made; **coral** = a failure or a cost. Nothing here is a new *concept* — it's a new *problem* to point your existing skills at.
 
 ## section 1. The problem: does this receipt match the ledger?

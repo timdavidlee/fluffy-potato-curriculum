@@ -68,13 +68,13 @@ theme is touched by several lessons, and a lesson can serve more than one.
 
 ### Student takeaways
 
-Each maps to one or more lessons below; each is observable (something the student can *do*).
+Each is observable (something the student can *do*). The first four map to lessons below; the fifth is the end-of-week hackathon project (the L50 capstone is its worked-example on-ramp).
 
 1. **Design a tool for an agent** — name it, schema its inputs/outputs, and handle its errors *(L07–L08)*
 2. **Build a directed LLM-powered pipeline** — a developer-wired workflow of typed nodes with fixed and conditional edges, where you control the path *(L03, L05)*
 3. **Build a customized free-form agent that drives its own tools** — the model-driven ReAct loop, wired by hand then recognized inside `create_agent` *(L10–L11)*
 4. **Understand how agents are measured and what they produce** — read the state, logs, traces, and extracts a run emits, and evaluate its quality *(L12–L13)*
-5. **Ship a hackathon project** — an end-to-end application combining an agent, a UI, and a provided database *(L50)*
+5. **Ship a hackathon project** — build an end-to-end application combining an agent, a UI, and a provided database, in a single-day team hackathon *(the end-of-week project; the L50 capstone is its worked-example on-ramp)*
 
 ### Core themes
 
@@ -171,7 +171,7 @@ hinge where the graph first gains a cycle.
 
 **Capstone — L50, tying it all together: mini project (mini track only, for now).** After the
 lesson arc there is a single **project-walkthrough capstone**: a proctor-led, end-to-end build
-of a small ("mini") tool-calling agent that consolidates the five course objectives at once —
+of a small ("mini") tool-calling agent that consolidates the mini cut's core build skills at once —
 design a tool, wire the agent loop, trace it, and eval it. It is deliberately numbered **L50**,
 not L26, so the capstone sits at the very end with a **gap left open** (L26–L49) to slot future
 lessons *before* it without renumbering — the same "park it out of the way" move the `K`-prefix
@@ -194,16 +194,16 @@ table.
 
 If the course had to be compressed to ~20 hours, this is the cut. It is
 anchored on the five student takeaways (tool design, directed pipeline,
-free-form agent, tracing & eval, hackathon capstone) and drops everything that
+free-form agent, tracing & eval, hackathon project) and drops everything that
 doesn't directly serve them. The multi-agent stretch is the first thing out.
 
-**Kept (14 lessons + the L50 project capstone, ~32 hrs at the full-course per-lesson rate):**
+**Kept (13 lessons + the L50 project capstone, ~32 hrs at the full-course per-lesson rate):**
 
 Skills (L22) and skill patterns & composition (L23) are included by explicit request on top of the
-five-objective core — the two kept lessons not anchored to a course objective; they push the cut
+five-takeaway core — the two kept lessons not anchored to a takeaway; they push the cut
 past the ~20 hr floor. They make "compose skills into a system" the mini cut's last *taught*
-lesson; the mini course then **closes with the L50 agent mini-project walkthrough** — a hands-on,
-end-to-end build that consolidates the five objectives (see the master plan above for why it is
+lesson; the mini course then **closes with the L50 mini-project walkthrough** — a hands-on,
+end-to-end build that consolidates the mini cut's core build skills (see the master plan above for why it is
 numbered L50 and its walkthrough format).
 The early graph ramp (L03 *from one node to a sequential chain* → L05 conditional) is kept whole: it
 now precedes tools and the agent loop, so every later mini lesson builds on the node/graph model and
@@ -212,7 +212,7 @@ was three lessons — single-node, sequential, conditional; the first two are no
 Chain-of-thought prompting (L06)
 is kept by explicit request: it gives the `<thinking>` channel a real home (see the assistant
 message-channels thread below) and reinforces "deciding to call a tool is a reasoning step" right
-before L07 — this is why the mini grew from 11 to 14 lessons.
+before L07 — this is why the mini grew from 10 to 13 lessons.
 
 | #   | Lesson title                            | Why it stays                                                                 |
 | --- | --------------------------------------- | ---------------------------------------------------------------------------- |
@@ -229,7 +229,7 @@ before L07 — this is why the mini grew from 11 to 14 lessons.
 | L13 | Evaluation: first pass                  | Covers the *evaluation* objective; pairs with tracing                        |
 | L22 | Skills: just-in-time capabilities       | Added by request; depends on tools + prompting, which the mini course keeps  |
 | L23 | Skill patterns & composition            | Added by request; the composition capstone — compose skills into a system    |
-| L50 | Tying it all together: mini project     | Project capstone (mini track only, for now) — a proctor-led walkthrough building one small tool-calling agent end-to-end (tool → agent loop → trace → eval), consolidating the five course objectives; walkthrough format, not lecture+lab |
+| L50 | Tying it all together: mini project     | Project capstone (mini track only, for now) — a proctor-led walkthrough building one small tool-calling agent end-to-end (tool → agent loop → trace → eval), consolidating the mini cut's core build skills; walkthrough format, not lecture+lab |
 
 **Cross-cutting thread — assistant message channels (narration / thinking / answer).**
 The three kinds of assistant output are all covered in the mini. Homes:

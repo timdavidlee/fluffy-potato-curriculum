@@ -1,4 +1,4 @@
-# L50 Proctor Notes — Agent mini-project walkthrough
+# L50 Proctor Notes — mini-project walkthrough
 
 **This lesson is a walkthrough, not a lecture+lab.** There are **no student labs** and no
 `_empty`/`_solutions` pair. You drive one guided-build notebook — [`L5003_lecture.ipynb`](L5003_lecture.ipynb) —
@@ -76,7 +76,7 @@ General gotchas:
 ## Section 1 — Scope the vertical slice (~10 min)
 
 **Goal:** turn a one-line goal into a buildable spec — one task, one tool, a "done" line, and an
-explicit non-goal list. Land **build the thinnest thing that exercises all five objectives, then
+explicit non-goal list. Land **build the thinnest thing that exercises the whole build, then
 stop.**
 
 - **What to say:** a capstone is a *vertical slice, not a product*. Naming the non-goals **is** the
@@ -188,7 +188,7 @@ machinery in L13; here it's the "try it yourself" on-ramp to the end-of-week pro
 **Goal:** narrate the finished artifact as one story and point every student at their own build.
 
 - Scroll top to bottom — *goal → tool → agent → trace → eval* — and name, on this concrete agent,
-  where each of the five objectives showed up (the notebook lists them).
+  where each build step showed up (the notebook lists them).
 - The **stretch tool** `check_reimbursement` is imported here (from `receipt_tools.py`) as the concrete
   "first thing you'd add next" — a *second* tool, deliberately kept out of the core slice. Run it only
   if the room is ahead of the clock; otherwise just name it. It seams into the end-of-week project.

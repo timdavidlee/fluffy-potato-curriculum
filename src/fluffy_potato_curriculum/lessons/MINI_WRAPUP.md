@@ -4,7 +4,7 @@
 
 # Mini course — wrap-up
 
-> The closing recap for the **mini cut** (13 lessons + the L50 project capstone). Read after the L50 agent mini-project walkthrough.
+> The closing recap for the **mini cut** (13 lessons + the L50 project capstone). Read after the L50 mini-project walkthrough.
 > Track definition: [SYLLABUS.md](SYLLABUS.md) · [tracks.toml](tracks.toml). Rationale: [CURRICULUM_PRD.md](../../../docs/origin/CURRICULUM_PRD.md) ("Condensed Mini Lesson Plan").
 
 ## 1. What this course was

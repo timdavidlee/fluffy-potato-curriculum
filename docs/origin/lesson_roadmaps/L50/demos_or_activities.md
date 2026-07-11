@@ -1,4 +1,4 @@
-# L50: Teacher-led walkthrough — Agent mini-project, end-to-end (mini-track capstone)
+# L50 · Teacher-led walkthrough — Tying it all together: mini project (mini-track capstone)
 
 > Sibling docs: [objectives.md](objectives.md) (what the capstone aims for), parent design [CURRICULUM_PRD.md](../../CURRICULUM_PRD.md).
 >
@@ -35,7 +35,7 @@ Before Segment 1 starts, the proctor should have:
 
 ## Segment 1 — Scope the vertical slice (Objective 1)
 
-**Goal:** turn a one-line goal into a buildable spec — one task, one tool, a "done" definition, and an explicit non-goal list. Land **build the thinnest thing that exercises all five objectives, then stop.**
+**Goal:** turn a one-line goal into a buildable spec — one task, one tool, a "done" definition, and an explicit non-goal list. Land **build the thinnest thing that exercises the whole build, then stop.**
 
 **Pre-flight:** the chosen domain on a slide as a single sentence ("an agent that helps a user do X").
 
@@ -139,7 +139,7 @@ Left for students to do after class, on their own agent (the platform-heavy half
 
 **Live script:**
 
-1. Scroll the notebook top to bottom — *goal → tool → agent → trace → eval* — and name, on this concrete agent, where each of the five mini-cut objectives showed up. This is the "you built the real thing, end to end" moment.
+1. Scroll the notebook top to bottom — *goal → tool → agent → trace → eval* — and name, on this concrete agent, where each build step showed up. This is the "you built the real thing, end to end" moment.
 2. Ask each student (rhetorically — this is still proctor-led) for the **first thing they'd add next** — the canonical example being **reimbursement detection** (`check_reimbursement`: offset a matched expense against a bank credit that already hit the account), the stretch tool deliberately left out of the core slice. Other candidates: a harder receipt format, a tighter scorer. Name that as the seam into the independent [end-of-week project](../../PROJECT_BRIEF_DESIGN.md).
 3. Point at [`MINI_WRAPUP.md`](../../../../src/fluffy_potato_curriculum/lessons/MINI_WRAPUP.md) as the next read — the course-level retrospective L50 deliberately does *not* try to be.
 

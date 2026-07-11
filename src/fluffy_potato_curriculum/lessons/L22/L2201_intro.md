@@ -23,7 +23,7 @@ estimated duration: 8
 In the mini cut this lesson is a **capstone** of the *"where does a capability live?"* question —
 though **not** the last mini lesson: the skills thread continues into
 **[L23: skill patterns & composition](../L23/L2301_intro.md)**, and the mini cut then closes with the
-**L50** agent mini-project. By now you have built the
+**L50** mini-project. By now you have built the
 whole agent stack: prompting and structured output ([L02](../L02/L0201_intro.md)); tools — what
 they are, how they're wired, and what they cost ([L07](../L07/L0701_intro.md),
 [L08](../L08/L0801_intro.md)); the hand-rolled model → tool → model loop
