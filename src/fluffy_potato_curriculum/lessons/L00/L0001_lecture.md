@@ -99,6 +99,41 @@ print(result["messages"][-1].content)
   model's self-chosen steps), the pane tagged "illustrative run." Caption: you wrote six lines; the
   model chose those three steps itself — that's the agent.
 
+### slide 1.5 The same six lines, grown up
+
+- You never *outgrow* `create_agent` — you just hand it more. Same one-line constructor, more
+  config: extra tools, a system prompt, skills it loads on demand, a guardrail around the loop.
+- Every new line here is a **lesson you'll take** — this slide is a map of the course, written as
+  one function call.
+- Nothing here is exotic. By the end you'll assemble this yourself, piece by piece, on the exact
+  agent from the last slide.
+
+```python
+from langchain.agents import create_agent
+from langchain.chat_models import init_chat_model
+from fluffy_potato_curriculum.common.tools import calculator, lookup, web_search
+from fluffy_potato_curriculum.common.skills import list_skills, load_skill  # L22–L23
+from fluffy_potato_curriculum.common.guards import budget_guard            # L16
+
+model = init_chat_model("anthropic:claude-sonnet-4-6")
+
+agent = create_agent(
+    model,
+    tools=[calculator, lookup, web_search,   # more tools — you design these  (L07–L08)
+           list_skills, load_skill],          # + skills it loads on demand    (L22–L23)
+    system_prompt=SKILL_CATALOG,             # who it is + the skill menu      (L02, L22)
+    middleware=[budget_guard],               # a guardrail around the loop     (L16)
+)
+```
+
+- diagram: a "grows into" pair. **Left:** the slide-1.4 six-line snippet, faint and small, tagged
+  a cyan `L11`. A cyan arrow labeled "grows into" crosses to the **right:** the expanded
+  `create_agent(...)` call, each added argument joined by a thin cyan leader line to a small lesson
+  chip — `tools → L07–08`, `list_skills/load_skill → L22–23`, `system_prompt → L02`,
+  `middleware → L16`. The constructor name `create_agent` is highlighted identically in both panes
+  to make the point that *it doesn't change*. Caption: same constructor, more config — every added
+  line is a lesson you'll take.
+
 ## section 2. What you'll learn & practice
 
 ### slide 2.1 Five things you'll be able to *do* — not just know about
