@@ -1,3 +1,9 @@
+## v0.36.0 (2026-07-11)
+
+### Feat
+
+- **L00**: add slide 1.5 growing create_agent into the course map
+
 ## v0.35.0 (2026-07-11)
 
 ### Feat
