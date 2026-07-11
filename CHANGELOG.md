@@ -1,3 +1,9 @@
+## v0.35.0 (2026-07-11)
+
+### Feat
+
+- **L00**: course-intro lecture + deck (#147)
+
 ## v0.34.1 (2026-07-10)
 
 ### Refactor
