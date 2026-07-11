@@ -619,7 +619,7 @@ table.ledger td.warn-cell { color: var(--coral); }
             </defs>
         </svg>
     </div>
-    <div class="chrome-page">01 / 15</div>
+    <div class="chrome-page">01 / 16</div>
     <div class="chrome-nav">L00 &middot; course intro</div>
 </section>
 
@@ -632,7 +632,7 @@ table.ledger td.warn-cell { color: var(--coral); }
     <div class="chapter-eyebrow reveal">Section 1</div>
     <div class="chapter-title reveal">Why agents, <span style="color:var(--cyan); font-style:normal;">and why you</span></div>
     <div class="chapter-sub reveal">You can prompt a chatbot. Building the agent underneath &mdash; the tools, the loop, the judgment &mdash; is the gap this course closes.</div>
-    <div class="chrome-page">02 / 15</div>
+    <div class="chrome-page">02 / 16</div>
 </section>
 
 <!-- ============================================================ -->
@@ -667,7 +667,7 @@ table.ledger td.warn-cell { color: var(--coral); }
             </div>
         </div>
     </div>
-    <div class="chrome-page">03 / 15</div>
+    <div class="chrome-page">03 / 16</div>
     <div class="chrome-nav">&larr; &rarr; navigate</div>
 </section>
 
@@ -706,7 +706,7 @@ table.ledger td.warn-cell { color: var(--coral); }
             </div>
         </div>
     </div>
-    <div class="chrome-page">04 / 15</div>
+    <div class="chrome-page">04 / 16</div>
     <div class="chrome-nav">&larr; &rarr; navigate</div>
 </section>
 
@@ -750,7 +750,7 @@ table.ledger td.warn-cell { color: var(--coral); }
             </div>
         </div>
     </div>
-    <div class="chrome-page">05 / 15</div>
+    <div class="chrome-page">05 / 16</div>
     <div class="chrome-nav">&larr; &rarr; navigate</div>
 </section>
 
@@ -790,7 +790,50 @@ print(result["messages"][-1].content)</div>
         </div>
         <div class="diagram-caption reveal" style="margin-top:26px;">You wrote six lines; the model chose those three steps itself &mdash; <b>that's the agent</b>. If it feels within reach, so is the course.</div>
     </div>
-    <div class="chrome-page">06 / 15</div>
+    <div class="chrome-page">06 / 16</div>
+    <div class="chrome-nav">&larr; &rarr; navigate</div>
+</section>
+
+<!-- ============================================================ -->
+<!-- SLIDE 1.5 — create_agent, grown up                          -->
+<!-- ============================================================ -->
+<section class="slide">
+    <div class="chrome-tag">L00 &middot; <b>COURSE INTRO</b></div>
+    <div class="topbar reveal">
+        <div class="eyebrow">Slide 1.5</div>
+        <h2 class="headline">The same six lines, <span class="it">grown up.</span></h2>
+    </div>
+    <div class="body-area">
+        <div class="lede reveal" style="margin-top:0; max-width:1640px;">You never <b>outgrow</b> that one-line constructor &mdash; you just hand it more. Same call, more config. And every new line is a <b>lesson you'll take</b>.</div>
+        <div class="reveal" style="display:flex; gap:44px; margin-top:30px; align-items:stretch;">
+            <div class="code-pane" style="flex:1.5;">from langchain.agents import create_agent
+from langchain.chat_models import init_chat_model
+from fluffy_potato_curriculum.common.tools import calculator, lookup, web_search
+from fluffy_potato_curriculum.common.skills import list_skills, load_skill
+from fluffy_potato_curriculum.common.guards import budget_guard
+
+model = init_chat_model("anthropic:claude-sonnet-4-6")
+
+<span class="hl">agent = create_agent(</span>
+    model,
+    tools=[calculator, lookup, web_search,<span class="cm">  # more tools &mdash; you design these</span>
+           list_skills, load_skill],<span class="cm">        # + skills it loads on demand</span>
+    system_prompt=SKILL_CATALOG,<span class="cm">           # who it is + the skill menu</span>
+    middleware=[budget_guard],<span class="cm">             # a guardrail around the loop</span>
+)</div>
+            <div style="flex:1; display:flex; flex-direction:column; justify-content:center;">
+                <div style="font-size:15px; letter-spacing:0.12em; text-transform:uppercase; color:var(--cyan-dim); margin-bottom:18px;">every new line &middot; a lesson</div>
+                <div style="display:flex; flex-direction:column; gap:14px;">
+                    <div class="chip" style="text-align:left; padding:14px 22px;"><div class="n" style="font-size:22px;">more tools</div><div class="r">L07&ndash;L08 &middot; you design them</div></div>
+                    <div class="chip" style="text-align:left; padding:14px 22px;"><div class="n" style="font-size:22px;">skills, loaded on demand</div><div class="r">L22&ndash;L23</div></div>
+                    <div class="chip" style="text-align:left; padding:14px 22px;"><div class="n" style="font-size:22px;">a system prompt</div><div class="r">L02</div></div>
+                    <div class="chip" style="text-align:left; padding:14px 22px;"><div class="n" style="font-size:22px;">a guardrail (middleware)</div><div class="r">L16</div></div>
+                </div>
+            </div>
+        </div>
+        <div class="diagram-caption reveal" style="margin-top:26px;">Same constructor as the last slide &mdash; <b>it never changes</b>. You just assemble this yourself, piece by piece, across the course.</div>
+    </div>
+    <div class="chrome-page">07 / 16</div>
     <div class="chrome-nav">&larr; &rarr; navigate</div>
 </section>
 
@@ -803,7 +846,7 @@ print(result["messages"][-1].content)</div>
     <div class="chapter-eyebrow reveal">Section 2</div>
     <div class="chapter-title reveal">What you'll <span style="color:var(--cyan); font-style:normal;">learn &amp; practice</span></div>
     <div class="chapter-sub reveal">Five takeaways, a shippable hackathon capstone, and the six themes that tie the whole course together.</div>
-    <div class="chrome-page">07 / 15</div>
+    <div class="chrome-page">08 / 16</div>
 </section>
 
 <!-- ============================================================ -->
@@ -830,7 +873,7 @@ print(result["messages"][-1].content)</div>
             </table>
         </div>
     </div>
-    <div class="chrome-page">08 / 15</div>
+    <div class="chrome-page">09 / 16</div>
     <div class="chrome-nav">&larr; &rarr; navigate</div>
 </section>
 
@@ -863,7 +906,7 @@ print(result["messages"][-1].content)</div>
         </div>
         <div class="diagram-caption reveal" style="text-align:center; width:100%; max-width:none;">The capstone is the whole course, shipped as one project.</div>
     </div>
-    <div class="chrome-page">09 / 15</div>
+    <div class="chrome-page">10 / 16</div>
     <div class="chrome-nav">&larr; &rarr; navigate</div>
 </section>
 
@@ -890,7 +933,7 @@ print(result["messages"][-1].content)</div>
         </div>
         <div class="diagram-caption reveal" style="text-align:center; width:100%; max-width:none;">Six themes tie the whole course together &mdash; not a pile of topics.</div>
     </div>
-    <div class="chrome-page">10 / 15</div>
+    <div class="chrome-page">11 / 16</div>
     <div class="chrome-nav">&larr; &rarr; navigate</div>
 </section>
 
@@ -903,7 +946,7 @@ print(result["messages"][-1].content)</div>
     <div class="chapter-eyebrow reveal">Section 3</div>
     <div class="chapter-title reveal">How you'll learn it &mdash; <span style="color:var(--cyan); font-style:normal;">and how to start</span></div>
     <div class="chapter-sub reveal">Real tools, real model calls, a cohort to build with &mdash; and a short on-ramp so everyone starts from the same baseline.</div>
-    <div class="chrome-page">11 / 15</div>
+    <div class="chrome-page">12 / 16</div>
 </section>
 
 <!-- ============================================================ -->
@@ -946,7 +989,7 @@ print(result["messages"][-1].content)</div>
         </div>
         <div class="diagram-caption reveal" style="margin-top:22px;">Real tools, real calls, cents not dollars &mdash; safe to experiment.</div>
     </div>
-    <div class="chrome-page">12 / 15</div>
+    <div class="chrome-page">13 / 16</div>
     <div class="chrome-nav">&larr; &rarr; navigate</div>
 </section>
 
@@ -985,7 +1028,7 @@ print(result["messages"][-1].content)</div>
             </div>
         </div>
     </div>
-    <div class="chrome-page">13 / 15</div>
+    <div class="chrome-page">14 / 16</div>
     <div class="chrome-nav">&larr; &rarr; navigate</div>
 </section>
 
@@ -1023,7 +1066,7 @@ print(result["messages"][-1].content)</div>
         </div>
         <div class="diagram-caption reveal" style="text-align:center; width:100%; max-width:none; margin-top:40px;">Same you &mdash; a much bigger toolbox.</div>
     </div>
-    <div class="chrome-page">14 / 15</div>
+    <div class="chrome-page">15 / 16</div>
     <div class="chrome-nav">&larr; &rarr; navigate</div>
 </section>
 
@@ -1047,7 +1090,7 @@ print(result["messages"][-1].content)</div>
             <div class="val">A laptop that runs <b>Docker</b><br>and an <b>API key</b><br>the prework sets both up</div>
         </div>
     </div>
-    <div class="chrome-page">15 / 15</div>
+    <div class="chrome-page">16 / 16</div>
 </section>
 
 </main>
